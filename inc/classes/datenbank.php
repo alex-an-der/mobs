@@ -25,9 +25,10 @@ class Datenbank {
         $stmt = $this->pdo->prepare($query);
         $success = $stmt->execute($arguments);
     
-        // Prüfen, ob die Abfrage ein SELECT ist
-        if (stripos(trim($query), 'SELECT') === 0) {
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);  // SELECT gibt Datensätze zurück
+        // Prüfen, ob die Abfrage ein SELECT oder SHOW ist
+
+        if (stripos(trim($query), 'SELECT') === 0 || stripos(trim($query), 'SHOW') === 0) {
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
         
         // UPDATE, INSERT, DELETE – Anzahl der betroffenen Zeilen zurückgeben
