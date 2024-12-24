@@ -1,7 +1,7 @@
 <?php
 $admin = 1;
 $tabelle = "sparten";
-
+$tabelle_upper = strtoupper($tabelle)
 ?>
 
 <!DOCTYPE html>
@@ -9,7 +9,7 @@ $tabelle = "sparten";
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Funktionäre bearbeiten</title>
+    <title><?=$tabelle_upper?> bearbeiten</title>
 
     <?php
     require_once(__DIR__ . "/../inc/include.php");
@@ -109,41 +109,105 @@ $tabelle = "sparten";
     </script>
 </head>
 <body>
+
+<?php
+// Manche Spalten sind per ID via Fremdschlüssel zu anderen Tabellen verknüpft. Die ID anzuzeigen (und zu bearbeiten) 
+// bringt dem Anwender wenig. Es muss daher der unbequeme Weg gegangen werden, die FK 8foreign keys) zu erkennen und
+// die Daten zu parsen, um den generischen Ansatz weiter verfolgen zu können. Die schema-Tabellen sind leider recht
+// unzuverlässig (eigene Erfahrung). Daher wird hier der CREATE TABLE-String der Tabelle ausgelesen und die Fremdschlüssel
+// per Regex ermittelt. Die Fremdschlüssel werden in einem Array gespeichert, um später die Anzeige zu verbessern.
+
+$createTable = $db->query("SHOW CREATE TABLE $tabelle;");
+$createTable = $createTable[0]['Create Table']; // Der eigentliche CREATE inkl. Fremdschlüssel
+$foreignKeys = []; // Array für Fremdschlüssel
+
+// Regex zur Erkennung von Fremdschlüsseln mit FK-Name
+$pattern = "/CONSTRAINT `([^`]+)` FOREIGN KEY \\(`([^`]+)`\\) REFERENCES `([^`]+)` \\(`([^`]+)`\\)/";
+
+// Suche nach allen Fremdschlüsseldefinitionen
+if (preg_match_all($pattern, $createTable, $matches, PREG_SET_ORDER)) {
+    foreach ($matches as $match) {
+        $FKname = $match[1];
+        $FKtabelle = $match[3];
+        $FKspalte = $match[4];
+
+        $darstellungspattern = constant($FKname);
+        if(!$darstellungspattern) db->log(__FILE__.":".__LINE__." - Die benötigte Konstante $FKname zur Darstelliung einer Fremdschlüsselverknüpfung wurde in config.php nicht gesetzt");
+        
+        // Hole die zugehörigen Daten jetzt in einem Rutsch aus der Datenbank
+        $FKdata_all = $db->query("SELECT * FROM $FKtabelle");
+        $FKdata = array();
+        foreach($FKdata_all as $row){
+            // DBI - die Daten, die in der Kostante verarbeitet werden, aus der DB holen.
+            // Vielleicht mit regex rausfiltern (Felder stehen immer zwischen ##...##  )
+            $FKdata[$row['id']] = "ANZEIGE";
+            
+        }
+
+
+
+        $foreignKeys[$match[2]] = [
+            'tabelle' => FKtabelle,
+            'spalte' => $FKspalte,
+            'FKname'  => $FKname,
+            'darstellungspattern' => constant($match[1]) // definiert in config.php
+        ];
+    }
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function renderTableHeaders($data) {
+    if (!empty($data)) {
+        foreach (array_keys($data[0]) as $header) {
+            if (strcasecmp($header, 'id') !== 0) {
+                echo '<th>' . htmlspecialchars($header) . '</th>';
+            }
+        }
+    }
+}
+
+function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
+    foreach ($data as $row) {
+        echo '<tr data-id="' . $row['id'] . '">';
+        foreach ($row as $key => $value) {
+            if (strcasecmp($key, 'id') !== 0) {
+                echo '<td data-field="' . $key . '">';
+                // Prüfen, ob es sich um eine Fremdschlüsselspalte handelt
+                if(isset($foreignKeys[$key])){
+                    $value = "FK";
+                }else{
+                    $value = $row[$key];
+                }
+
+                if ($admin) {
+                    echo '<input type="text" class="form-control" value="' . htmlspecialchars($value) . '"
+                          onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)"
+                          onfocus="clearCellColor(this)">';
+                } else {
+                    echo htmlspecialchars($value);
+                }
+                echo '</td>';
+            }
+        }
+        echo '</tr>';
+    }
+}
+?>
+
     <div class="container mt-4">
-        <h2><?=strtoupper($tabelle)?><h2>
+    <h2><?=$tabelle_upper?><h2>
         <table class="table table-striped table-bordered">
             <thead>
                 <tr>
-                    <?php if (!empty($data)): ?>
-                        <?php foreach (array_keys($data[0]) as $header): ?>
-                            <?php if (strcasecmp($header, 'id') !== 0): ?>
-                                <th><?= htmlspecialchars($header) ?></th>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+                    <?php renderTableHeaders($data); ?>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($data as $row): ?>
-                    <tr data-id="<?= $row['id'] ?>">
-                        <?php foreach ($row as $key => $value): ?>
-                            <?php if (strcasecmp($key, 'id') !== 0): ?>
-                                <td data-field="<?= $key ?>">
-                                    <?php if ($admin): ?>
-                                        <input type="text" class="form-control"
-                                               value="<?= htmlspecialchars($value) ?>"
-                                               onchange="updateField('<?= $tabelle ?>', '<?= $row['id'] ?>', '<?= $key ?>', this.value)"
-                                               onfocus="clearCellColor(this)">
-                                    <?php else: ?>
-                                        <?= htmlspecialchars($value) ?>
-                                    <?php endif; ?>
-                                </td>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-                    </tr>
-                <?php endforeach; ?>
+                <?php renderTableRows($data, $admin, $tabelle, $foreignKeys); ?>
             </tbody>
         </table>
     </div>
+
 </body>
 </html>

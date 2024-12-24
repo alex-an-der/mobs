@@ -6,8 +6,8 @@ define("DB_USER", "USER441127");
 define("DB_PASS", "BallBierBertha42");
 
 
-define("spartenleitung1_funktionaer","<Vorname> <Nachname> (<eMail>)");
-
+define("spartenleitung1_funktionaer","##Vorname## ##Nachname## (##eMail##)");
+define("spartenleitung2_funktionaer","Kurz gesagt: ##Vorname##");
 # Anzeige bei Spalten, die über Fremdschlüssel verknüpft sind
 # 1. Spalte ist immer die ID. Wieviele Spalten danach sollen im verknüpften Feld angezeigt werden?
 # Beispiel: Die Spalten dind ID | Vorname | Nachname | Ort | PLZ | Mail.
