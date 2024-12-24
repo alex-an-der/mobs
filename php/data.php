@@ -1,6 +1,7 @@
 <?php
 $admin = 1;
 $tabelle = "funktionaere";
+
 ?>
 
 <!DOCTYPE html>
@@ -89,10 +90,10 @@ $tabelle = "funktionaere";
 
                     if (input) {
                         if (dbRow[field] == input.value.trim()) {
-                            td.style.backgroundColor = 'lightgreen';  // Nur diese Zelle grün färben
+                            td.style.backgroundColor = 'lightgreen';
                         } else {
                             td.style.backgroundColor = 'lightcoral';
-                            input.value = dbRow[field];  // DB-Wert bei Fehler übernehmen
+                            input.value = dbRow[field];
                         }
                     }
                 }
@@ -102,7 +103,7 @@ $tabelle = "funktionaere";
         function clearCellColor(input) {
             const td = input.closest('td');
             if (td) {
-                td.style.backgroundColor = '';  // Zellenfarbe beim Klick entfernen
+                td.style.backgroundColor = '';
             }
         }
     </script>
@@ -114,7 +115,9 @@ $tabelle = "funktionaere";
                 <tr>
                     <?php if (!empty($data)): ?>
                         <?php foreach (array_keys($data[0]) as $header): ?>
-                            <th><?= htmlspecialchars($header) ?></th>
+                            <?php if (strcasecmp($header, 'id') !== 0): ?>
+                                <th><?= htmlspecialchars($header) ?></th>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </tr>
@@ -123,16 +126,18 @@ $tabelle = "funktionaere";
                 <?php foreach ($data as $row): ?>
                     <tr data-id="<?= $row['id'] ?>">
                         <?php foreach ($row as $key => $value): ?>
-                            <td data-field="<?= $key ?>">
-                                <?php if ($admin && strcasecmp($key, 'id') !== 0): ?>
-                                    <input type="text" class="form-control"
-                                           value="<?= htmlspecialchars($value) ?>"
-                                           onchange="updateField('<?= $tabelle ?>', '<?= $row['id'] ?>', '<?= $key ?>', this.value)"
-                                           onfocus="clearCellColor(this)">
-                                <?php else: ?>
-                                    <?= htmlspecialchars($value) ?>
-                                <?php endif; ?>
-                            </td>
+                            <?php if (strcasecmp($key, 'id') !== 0): ?>
+                                <td data-field="<?= $key ?>">
+                                    <?php if ($admin): ?>
+                                        <input type="text" class="form-control"
+                                               value="<?= htmlspecialchars($value) ?>"
+                                               onchange="updateField('<?= $tabelle ?>', '<?= $row['id'] ?>', '<?= $key ?>', this.value)"
+                                               onfocus="clearCellColor(this)">
+                                    <?php else: ?>
+                                        <?= htmlspecialchars($value) ?>
+                                    <?php endif; ?>
+                                </td>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                     </tr>
                 <?php endforeach; ?>
