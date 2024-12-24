@@ -36,9 +36,9 @@ $tabelle = "funktionaere";
                     try {
                         const response = JSON.parse(xhr.responseText);
                         if (response.status === "success") {
-                            checkRow(tabelle, id, field, value);  // Feld und Wert für Abgleich weitergeben
+                            checkRow(tabelle, id, field, value);
                         } else {
-                            alert("Fehler beim Update: " + response.message);
+                            alert("Fehler beim Update.");
                         }
                     } catch (e) {
                         alert("Fehler beim Verarbeiten der Serverantwort.");
@@ -50,7 +50,6 @@ $tabelle = "funktionaere";
 
             xhr.send(data);
         }
-
 
         function checkRow(tabelle, id, field, value) {
             const xhr = new XMLHttpRequest();
@@ -66,30 +65,20 @@ $tabelle = "funktionaere";
             });
 
             xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
-                    console.log("Antwort von ajax.php:", xhr.responseText);
-                    if (xhr.status === 200) {
-                        try {
-                            const response = JSON.parse(xhr.responseText);
-                            if (response.status === "success" && response.row) {
-                                updateRowColors(response.row, id, field);  // Feld weitergeben
-                            } else {
-                                alert("Fehler beim Abgleich der Zeile: " + response.message);
-                            }
-                        } catch (e) {
-                            alert("Fehler beim Verarbeiten der Serverantwort.");
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.status === "success" && response.row) {
+                            updateRowColors(response.row, id, field);
                         }
-                    } else {
-                        alert("Serverfehler beim Update.");
+                    } catch (e) {
+                        alert("Fehler beim Abgleich der Zeile.");
                     }
                 }
             };
 
             xhr.send(data);
         }
-
-
-
 
         function updateRowColors(dbRow, id, field) {
             const row = document.querySelector(`tr[data-id='${id}']`);
@@ -103,14 +92,19 @@ $tabelle = "funktionaere";
                             td.style.backgroundColor = 'lightgreen';  // Nur diese Zelle grün färben
                         } else {
                             td.style.backgroundColor = 'lightcoral';
-                            input.value = dbRow[field];  // Korrekturen aus der DB übernehmen
+                            input.value = dbRow[field];  // DB-Wert bei Fehler übernehmen
                         }
                     }
                 }
             }
         }
 
-
+        function clearCellColor(input) {
+            const td = input.closest('td');
+            if (td) {
+                td.style.backgroundColor = '';  // Zellenfarbe beim Klick entfernen
+            }
+        }
     </script>
 </head>
 <body>
@@ -133,7 +127,8 @@ $tabelle = "funktionaere";
                                 <?php if ($admin && strcasecmp($key, 'id') !== 0): ?>
                                     <input type="text" class="form-control"
                                            value="<?= htmlspecialchars($value) ?>"
-                                           onchange="updateField('<?= $tabelle ?>', '<?= $row['id'] ?>', '<?= $key ?>', this.value)">
+                                           onchange="updateField('<?= $tabelle ?>', '<?= $row['id'] ?>', '<?= $key ?>', this.value)"
+                                           onfocus="clearCellColor(this)">
                                 <?php else: ?>
                                     <?= htmlspecialchars($value) ?>
                                 <?php endif; ?>
