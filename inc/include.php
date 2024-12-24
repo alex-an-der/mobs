@@ -1,4 +1,5 @@
 <?php
+require_once(__DIR__."/../config/config.php");
 require_once(__DIR__."/classes/datenbank.php");
 $db = new Datenbank();
 require_once(__DIR__."/classes/array2table.php");

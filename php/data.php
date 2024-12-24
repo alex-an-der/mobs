@@ -1,6 +1,6 @@
 <?php
 $admin = 1;
-$tabelle = "funktionaere";
+$tabelle = "sparten";
 
 ?>
 
@@ -13,7 +13,7 @@ $tabelle = "funktionaere";
 
     <?php
     require_once(__DIR__ . "/../inc/include.php");
-
+    
     $data = $db->query("SELECT * FROM $tabelle");
     if (!$data) $db->log(__FILE__.":".__LINE__." - ". $db->error);
     ?>
@@ -110,6 +110,7 @@ $tabelle = "funktionaere";
 </head>
 <body>
     <div class="container mt-4">
+        <h2><?=strtoupper($tabelle)?><h2>
         <table class="table table-striped table-bordered">
             <thead>
                 <tr>

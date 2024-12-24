@@ -5,10 +5,10 @@ class Datenbank {
 
     public function __construct($sync = false){
 
-        $dbname = "db_441127_12"; 
-        $dbhost = "x96.lima-db.de";
-        $dbuser = "USER441127";
-        $dbpass = "BallBierBertha42";
+        $dbname = DB_NAME;
+        $dbhost = DB_HOST;
+        $dbuser = DB_USER;
+        $dbpass = DB_PASS;
     
         try {
             $dsn = "mysql:host=$dbhost;dbname=$dbname;charset=utf8";
