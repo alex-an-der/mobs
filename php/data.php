@@ -189,7 +189,8 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
 
                     // Erzeuge eine Select-Box für Fremdschlüssel-Felder, wenn Admin
                     if ($admin) {
-                        echo '<select class="form-control" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)">';
+                        echo '<select class="form-control" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value || \"NULL\"); clearCellColor(this)">';
+                        echo '<option value="NULL"' . (($value == "") ? ' selected' : '') . '>-- Keine Auswahl --</option>';
                         foreach ($foreignKeys[$key]['anzeige'] as $fk_value => $fk_display) {
                             $selected = ($fk_value == $value) ? 'selected' : '';
                             echo '<option value="' . htmlspecialchars($fk_value) . '" ' . $selected . '>' . htmlspecialchars($fk_display) . '</option>';
@@ -202,7 +203,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                     $value = $row[$key];
                     if ($admin) {
                         echo '<input data-fkIDkey="' . htmlspecialchars($data_fk_ID_key) . '" data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value) . '" type="text" class="form-control" value="' . htmlspecialchars($value) . '"
-                              onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)"
+                              onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value || \"NULL\"); clearCellColor(this)"
                               onfocus="clearCellColor(this)">';
                     } else {
                         echo htmlspecialchars($value);
@@ -214,6 +215,9 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         echo '</tr>';
     }
 }
+
+
+
 
 ?>
 
