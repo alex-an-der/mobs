@@ -127,31 +127,38 @@ $pattern = "/CONSTRAINT `([^`]+)` FOREIGN KEY \\(`([^`]+)`\\) REFERENCES `([^`]+
 // Suche nach allen Fremdschlüsseldefinitionen
 if (preg_match_all($pattern, $createTable, $matches, PREG_SET_ORDER)) {
     foreach ($matches as $match) {
+        
         $FKname = $match[1];
         $FKtabelle = $match[3];
         $FKspalte = $match[4];
-
+        $SRCspalte = $match[2];
+        
         $darstellungspattern = constant($FKname);
         if(!$darstellungspattern) db->log(__FILE__.":".__LINE__." - Die benötigte Konstante $FKname zur Darstelliung einer Fremdschlüsselverknüpfung wurde in config.php nicht gesetzt");
         
+        preg_match_all('/##(.*?)##/', $darstellungspattern, $matches);
+        
+        // Extrahierte Spalten in ein Array speichern
+        $anzuzeigendeSpaltenArray = $matches[1];
+            
         // Hole die zugehörigen Daten jetzt in einem Rutsch aus der Datenbank
         $FKdata_all = $db->query("SELECT * FROM $FKtabelle");
         $FKdata = array();
+
+        // gehe die verknüpfte Tabelle zeilenweise durch und hole die Werte gemäß des Anzeigepatterns
         foreach($FKdata_all as $row){
-            // DBI - die Daten, die in der Kostante verarbeitet werden, aus der DB holen.
-            // Vielleicht mit regex rausfiltern (Felder stehen immer zwischen ##...##  )
-            $FKdata[$row['id']] = "ANZEIGE";
+            $anzeige = $darstellungspattern; // Anzeige-Template
+            foreach($anzuzeigendeSpaltenArray as $anzuzeigendeSpalte){
+                $anzeige = str_replace("##$anzuzeigendeSpalte##", $row[$anzuzeigendeSpalte], $anzeige);
+            }
+            $FKdata[$row['id']] = $anzeige;
             
         }
-
-
-
-        $foreignKeys[$match[2]] = [
-            'tabelle' => FKtabelle,
-            'spalte' => $FKspalte,
-            'FKname'  => $FKname,
-            'darstellungspattern' => constant($match[1]) // definiert in config.php
-        ];
+    
+        $foreignKeys[$SRCspalte] = [
+            'FKspalte' => $FKspalte,
+            'anzeige' => $FKdata
+        ]; 
     }
 }
 
@@ -173,15 +180,19 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         foreach ($row as $key => $value) {
             if (strcasecmp($key, 'id') !== 0) {
                 echo '<td data-field="' . $key . '">';
-                // Prüfen, ob es sich um eine Fremdschlüsselspalte handelt
-                if(isset($foreignKeys[$key])){
-                    $value = "FK";
+                // Prüfen, ob es sich um eine Fremdschlüsselspalte handelt, wenn ja: vorbereitete Anzeige übernehmen.
+                $data_fk_ID_key = "";
+                $data_fk_ID_value = "";
+                if(isset($foreignKeys[$key])){ 
+                    $value = $foreignKeys[$key]['anzeige'][$value];
+                    $data_fk_ID_key = $foreignKeys[$key]['FKspalte'];
+                    $data_fk_ID_value = $value;
                 }else{
                     $value = $row[$key];
                 }
 
                 if ($admin) {
-                    echo '<input type="text" class="form-control" value="' . htmlspecialchars($value) . '"
+                    echo '<input data-fkIDkey="' . htmlspecialchars($data_fk_ID_key) . '" data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value) . '" type="text" class="form-control" value="' . htmlspecialchars($value) . '"
                           onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)"
                           onfocus="clearCellColor(this)">';
                 } else {
