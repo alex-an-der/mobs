@@ -1,7 +1,6 @@
 <?php
-ob_start();  // Startet die Ausgabe-Pufferung
+ob_start();  // Ausgabe-Pufferung starten
 require_once(__DIR__ . "/../inc/include.php");
-ob_end_clean();  // Löscht unerwünschte Ausgaben (z. B. HTML)
 
 $data = json_decode(file_get_contents('php://input'), true);
 
@@ -11,24 +10,29 @@ if ($data['action'] == 'update') {
     $value = $data['value'];
     $tabelle = $data['tabelle'];
 
-    // Update-Abfrage mit Backticks
+    // Update-Abfrage mit Platzhaltern
     $query = "UPDATE `$tabelle` SET `$field` = ? WHERE `id` = ?";
     $args = array($value, $id);
     $result = $db->query($query, $args);
 
-    // JSON-Antwort senden (Erfolg oder Fehler)
+    ob_end_clean();  // Puffer löschen, um saubere JSON-Antwort zu gewährleisten
     echo json_encode(["status" => $result ? "success" : "error"]);
 }
 
 if ($data['action'] == 'check') {
     $id = $data['id'];
+    $field = $data['field'];
+    $value = $data['value'];
     $tabelle = $data['tabelle'];
 
-    // Zeile aus der DB abfragen
+    // Zeile mit allen Spalten abrufen
     $query = "SELECT * FROM `$tabelle` WHERE `id` = ?";
     $args = array($id);
     $result = $db->query($query, $args);
 
+    ob_end_clean();  // Puffer löschen, um saubere JSON-Antwort zu gewährleisten
+
+    // Wenn die Zeile gefunden wurde
     if ($result && count($result) > 0) {
         echo json_encode(["status" => "success", "row" => $result[0]]);
     } else {

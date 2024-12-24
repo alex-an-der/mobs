@@ -36,7 +36,9 @@ $tabelle = "funktionaere";
                     try {
                         const response = JSON.parse(xhr.responseText);
                         if (response.status === "success") {
-                            checkRow(tabelle, id);
+                            if (response.status === "success") {
+                                checkRow(tabelle, id, field, value);  // Feld und Wert an check übergeben
+                            }
                         } else {
                             alert("Fehler beim Update: " + response.message);
                         }
@@ -51,33 +53,45 @@ $tabelle = "funktionaere";
             xhr.send(data);
         }
 
-        function checkRow(tabelle, id) {
-            const xhr = new XMLHttpRequest();
+        function checkRow(tabelle, id, field, value) {
+            const xhr = new XMLHttpRequest();  // XMLHttpRequest innerhalb der Funktion definieren
             xhr.open("POST", "ajax.php", true);
             xhr.setRequestHeader("Content-Type", "application/json");
 
+            // Die Daten, die an ajax.php gesendet werden
             const data = JSON.stringify({
                 action: 'check',
                 tabelle: tabelle,
-                id: id
+                id: id,
+                field: field,
+                value: value
             });
 
             xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    try {
-                        const response = JSON.parse(xhr.responseText);
-                        if (response.status === "success") {
-                            const dbRow = response.row;
-                            updateRowColors(dbRow, id);
+                if (xhr.readyState === 4) {
+                    console.log("Antwort von ajax.php:", xhr.responseText);  // Debugging: Rohantwort anzeigen
+                    if (xhr.status === 200) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.status === "success") {
+                                const dbRow = response.row;
+                                updateRowColors(dbRow, id);
+                            } else {
+                                alert("Fehler beim Abgleich der Zeile: " + response.message);
+                            }
+                        } catch (e) {
+                            alert("Fehler beim Verarbeiten der Serverantwort.");
                         }
-                    } catch (e) {
-                        alert("Fehler beim Abgleich der Zeile.");
+                    } else {
+                        alert("Serverfehler beim Update.");
                     }
                 }
             };
 
-            xhr.send(data);
+            xhr.send(data);  // Senden der Anfrage an ajax.php
         }
+
+
 
         function updateRowColors(dbRow, id) {
             const row = document.querySelector(`tr[data-id='${id}']`);
@@ -87,11 +101,12 @@ $tabelle = "funktionaere";
                     const input = td.querySelector('input');
 
                     if (input) {
+                        // Wenn der Feldwert nicht übereinstimmt, rot färben
                         if (dbRow[field] == input.value.trim()) {
                             td.style.backgroundColor = 'lightgreen';
                         } else {
                             td.style.backgroundColor = 'lightcoral';
-                            input.value = dbRow[field];
+                            input.value = dbRow[field];  // DB-Wert übernehmen
                         }
                     }
                 });
