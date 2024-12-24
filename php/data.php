@@ -184,19 +184,29 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                 $data_fk_ID_key = "";
                 $data_fk_ID_value = "";
                 if(isset($foreignKeys[$key])){ 
-                    $value = $foreignKeys[$key]['anzeige'][$value];
                     $data_fk_ID_key = $foreignKeys[$key]['FKspalte'];
                     $data_fk_ID_value = $value;
-                }else{
-                    $value = $row[$key];
-                }
 
-                if ($admin) {
-                    echo '<input data-fkIDkey="' . htmlspecialchars($data_fk_ID_key) . '" data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value) . '" type="text" class="form-control" value="' . htmlspecialchars($value) . '"
-                          onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)"
-                          onfocus="clearCellColor(this)">';
+                    // Erzeuge eine Select-Box für Fremdschlüssel-Felder, wenn Admin
+                    if ($admin) {
+                        echo '<select class="form-control" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)">';
+                        foreach ($foreignKeys[$key]['anzeige'] as $fk_value => $fk_display) {
+                            $selected = ($fk_value == $value) ? 'selected' : '';
+                            echo '<option value="' . htmlspecialchars($fk_value) . '" ' . $selected . '>' . htmlspecialchars($fk_display) . '</option>';
+                        }
+                        echo '</select>';
+                    } else {
+                        echo htmlspecialchars($foreignKeys[$key]['anzeige'][$value]);
+                    }
                 } else {
-                    echo htmlspecialchars($value);
+                    $value = $row[$key];
+                    if ($admin) {
+                        echo '<input data-fkIDkey="' . htmlspecialchars($data_fk_ID_key) . '" data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value) . '" type="text" class="form-control" value="' . htmlspecialchars($value) . '"
+                              onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)"
+                              onfocus="clearCellColor(this)">';
+                    } else {
+                        echo htmlspecialchars($value);
+                    }
                 }
                 echo '</td>';
             }
@@ -204,6 +214,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         echo '</tr>';
     }
 }
+
 ?>
 
     <div class="container mt-4">
