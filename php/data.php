@@ -1,6 +1,11 @@
 <?php
 $admin = 1;
-$tabelle = "sparten";
+if(isset($_GET['tab'])) {
+    $tabelle = $_GET['tab'];
+} else {
+    $tabelle = "";
+}
+
 $tabelle_upper = strtoupper($tabelle)
 ?>
 
@@ -9,13 +14,17 @@ $tabelle_upper = strtoupper($tabelle)
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?=$tabelle_upper?> bearbeiten</title>
+    <title><?=!empty($tabelle_upper) ? $tabelle_upper.' bearbeiten' : 'Tabelle ausw&auml;hlen'?></title>
 
     <?php
     require_once(__DIR__ . "/../inc/include.php");
     
-    $data = $db->query("SELECT * FROM $tabelle");
-    if (!$data) $db->log(__FILE__.":".__LINE__." - ". $db->error);
+    $data = [];
+    if (!empty($tabelle)) {
+        $data = $db->query("SELECT * FROM $tabelle");
+        if (!$data) $db->log(__FILE__.":".__LINE__." - ". $db->error);
+    }
+ 
     ?>
 
     <script>
@@ -130,9 +139,13 @@ $tabelle_upper = strtoupper($tabelle)
 // unzuverlässig (eigene Erfahrung). Daher wird hier der CREATE TABLE-String der Tabelle ausgelesen und die Fremdschlüssel
 // per Regex ermittelt. Die Fremdschlüssel werden in einem Array gespeichert, um später die Anzeige zu verbessern.
 
-$createTable = $db->query("SHOW CREATE TABLE $tabelle;");
+
 $createTable = $createTable[0]['Create Table']; // Der eigentliche CREATE inkl. Fremdschlüssel
 $foreignKeys = []; // Array für Fremdschlüssel
+if (!empty($tabelle)) {
+    $createTable = $db->query("SHOW CREATE TABLE $tabelle;");
+    $createTable = $createTable[0]['Create Table'];
+}
 
 // Regex zur Erkennung von Fremdschlüsseln mit FK-Name
 $pattern = "/CONSTRAINT `([^`]+)` FOREIGN KEY \\(`([^`]+)`\\) REFERENCES `([^`]+)` \\(`([^`]+)`\\)/";
@@ -177,6 +190,32 @@ if (preg_match_all($pattern, $createTable, $matches, PREG_SET_ORDER)) {
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function renderTableSelectBox($db) {
+    $selectedTable = isset($_GET['tab']) ? $_GET['tab'] : "";
+    $tables = $db->query("SELECT TABLE_NAME, TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME != 'log' ORDER BY TABLE_NAME");
+
+    echo '<p><form action="data.php" method="get">';
+    echo '<select name="tab" class="form-control" onchange="this.form.submit()">';
+
+    // Nur anzeigen, wenn keine Tabelle ausgewählt ist
+    if (empty($selectedTable)) {
+        echo '<option value="">-- Tabelle wählen --</option>';
+    }
+
+    foreach ($tables as $table) {
+        $tableName = htmlspecialchars($table['TABLE_NAME']);
+        $tableComment = htmlspecialchars($table['TABLE_COMMENT']);
+        $displayText = !empty($tableComment) ? "$tableComment" : $tableName;
+        $selected = ($tableName === $selectedTable) ? 'selected' : '';
+
+        echo '<option value="' . $tableName . '" ' . $selected . '>' . $displayText . '</option>';
+    }
+
+    echo '</select>';
+    echo '</form></p>';
+}
+
+
 function renderTableHeaders($data) {
     if (!empty($data)) {
         foreach (array_keys($data[0]) as $header) {
@@ -229,12 +268,14 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
 
 
 
-
-
 ?>
 
     <div class="container mt-4">
-    <h2><?=$tabelle_upper?><h2>
+    <!--h2><?=$tabelle_upper?><h2-->
+    <div class="container mt-4" style="font-size: 1.75rem; font-weight: bold;">
+        <?php renderTableSelectBox($db); ?>
+    </div>
+
         <table class="table table-striped table-bordered">
             <thead>
                 <tr>
@@ -242,7 +283,9 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                 </tr>
             </thead>
             <tbody>
-                <?php renderTableRows($data, $admin, $tabelle, $foreignKeys); ?>
+            <?php 
+                if (!empty($data)) renderTableRows($data, $admin, $tabelle, $foreignKeys);
+            ?>
             </tbody>
         </table>
     </div>
