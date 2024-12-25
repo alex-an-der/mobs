@@ -7,7 +7,7 @@ define("DB_PASS", "BallBierBertha42");
 
 # Anzeige bei Spalten, die über Fremdschlüssel verknüpft sind
 define("spartenleitung1_funktionaer","##Vorname## ##Nachname## (##eMail##)");
-define("spartenleitung2_funktionaer","Kurz gesagt: ##Vorname##");
+define("spartenleitung2_funktionaer","##Nachname##, ##Vorname##");
 
 # Welche Tabellen sollen nicht angezeigt werden?
 define("NOSHOWS", ["log", "yuser"]);

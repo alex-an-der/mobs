@@ -41,8 +41,6 @@ $tabelle_upper = strtoupper($tabelle)
     }
     ?>
 
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-
     <style>
         .form-control.border-0 {
             background-color:rgba(0,0,0,0) !important;
@@ -56,19 +54,12 @@ $tabelle_upper = strtoupper($tabelle)
         .error-cell {
             background-color: red !important;
         }
-        .toggle-btn {
+        .rowCheckbox {
             width: 100%;
             height: 100%;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-        .toggle-btn-header {
-            color: darkgrey !important;
         }
     </style>
 
@@ -204,7 +195,7 @@ $tabelle_upper = strtoupper($tabelle)
                 let bText = bCell.innerText.trim();
 
                 const aInput = aCell.querySelector('input, select');
-                const bInput = b.querySelector('input, select');
+                const bInput = bCell.querySelector('input, select');
 
                 if (aInput) aText = aInput.value.trim();
                 if (bInput) bText = bInput.value.trim();
@@ -309,34 +300,12 @@ $tabelle_upper = strtoupper($tabelle)
         }
 
         function toggleSelectAll(source) {
-            const buttons = document.querySelectorAll('.toggle-btn');
-            buttons.forEach(button => {
-                if (source.classList.contains('btn-outline-secondary')) {
-                    button.classList.add('btn-light');
-                    button.classList.remove('btn-outline-light');
-                } else {
-                    button.classList.remove('btn-light');
-                    button.classList.add('btn-outline-light');
-                }
-            });
-            source.classList.toggle('btn-outline-secondary');
-            source.classList.toggle('btn-secondary');
-        }
-
-        function toggleRowSelection(button) {
-            if (button.classList.contains('btn-outline-light')) {
-                button.classList.add('btn-light');
-                button.classList.remove('btn-outline-light');
-                button.innerText = 'X';
-            } else {
-                button.classList.remove('btn-light');
-                button.classList.add('btn-outline-light');
-                button.innerText = 'X';
-            }
+            const checkboxes = document.querySelectorAll('.rowCheckbox');
+            checkboxes.forEach(checkbox => checkbox.checked = source.checked);
         }
 
         function deleteSelectedRows(tabelle) {
-            const selectedIds = Array.from(document.querySelectorAll('.toggle-btn.btn-light')).map(btn => btn.getAttribute('data-id'));
+            const selectedIds = Array.from(document.querySelectorAll('.rowCheckbox:checked')).map(cb => cb.getAttribute('data-id'));
             if (selectedIds.length === 0) {
                 alert('Keine Zeilen ausgewählt.');
                 return;
@@ -487,7 +456,7 @@ function renderTableSelectBox($db) {
 
 function renderTableHeaders($data) {
     if (!empty($data)) {
-        echo '<th><button type="button" class="btn btn-outline-secondary btn-sm toggle-btn toggle-btn-header" id="selectAll" onclick="toggleSelectAll(this)">X</button></th>'; // Toggle button for selecting all rows
+        echo '<th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>'; // Checkbox for selecting all rows
         foreach (array_keys($data[0]) as $header) {
             if (strcasecmp($header, 'id') !== 0) {
                 echo '<th data-field="' . htmlspecialchars($header) . '">' . htmlspecialchars($header) . '</th>';
@@ -497,16 +466,9 @@ function renderTableHeaders($data) {
 }
 
 function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
-    global $db;
-    $columns = $db->query("SHOW COLUMNS FROM $tabelle");
-    $columnTypes = [];
-    foreach ($columns as $column) {
-        $columnTypes[$column['Field']] = $column['Type'];
-    }
-
     foreach ($data as $row) {
         echo '<tr data-id="' . $row['id'] . '">';
-        echo '<td><button type="button" class="btn btn-outline-light btn-sm toggle-btn" data-id="' . $row['id'] . '" onclick="toggleRowSelection(this)">X</button></td>'; // Toggle button for each row
+        echo '<td><input type="checkbox" class="rowCheckbox" data-id="' . $row['id'] . '"></td>'; // Checkbox for each row
         foreach ($row as $key => $value) {
             if (strcasecmp($key, 'id') !== 0) {
                 echo '<td data-field="' . $key . '">';
@@ -530,30 +492,10 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                     }
                 } else {
                     if ($admin) {
-                        $inputType = 'text';
-                        $columnType = $columnTypes[$key];
-                        if (strpos($columnType, 'int') !== false) {
-                            $inputType = 'number';
-                        } elseif (preg_match('/decimal\((\d+),(\d+)\)/', $columnType, $matches) || preg_match('/float\((\d+),(\d+)\)/', $columnType, $matches)) {
-                            $inputType = 'number';
-                            $decimalPlaces = (int)$matches[2];
-                            $value = number_format((float)$value, $decimalPlaces, '.', '');
-                        } elseif (strpos($columnType, 'date') !== false) {
-                            if (strpos($columnType, 'datetime') !== false) {
-                                $inputType = 'datetime-local';
-                                $value = str_replace(' ', 'T', $value);
-                            } else {
-                                $inputType = 'date';
-                            }
-                        }
-                        echo '<input data-fkIDkey="' . htmlspecialchars($data_fk_ID_key) . '" data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value) . '" type="' . $inputType . '" class="form-control border-0" style="background-color: inherit;" value="' . htmlspecialchars($value) . '"
+                        echo '<input data-fkIDkey="' . htmlspecialchars($data_fk_ID_key) . '" data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value) . '" type="text" class="form-control border-0" style="background-color: inherit;" value="' . htmlspecialchars($value) . '"
                               onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)"
                               onfocus="clearCellColor(this)">';
                     } else {
-                        if (preg_match('/decimal\((\d+),(\d+)\)/', $columnType, $matches) || preg_match('/float\((\d+),(\d+)\)/', $columnType, $matches)) {
-                            $decimalPlaces = (int)$matches[2];
-                            $value = number_format((float)$value, $decimalPlaces, '.', '');
-                        }
                         echo htmlspecialchars($value);
                     }
                 }

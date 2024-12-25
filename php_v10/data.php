@@ -534,10 +534,9 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                         $columnType = $columnTypes[$key];
                         if (strpos($columnType, 'int') !== false) {
                             $inputType = 'number';
-                        } elseif (preg_match('/decimal\((\d+),(\d+)\)/', $columnType, $matches) || preg_match('/float\((\d+),(\d+)\)/', $columnType, $matches)) {
+                        } elseif (strpos($columnType, 'decimal') !== false || strpos($columnType, 'float') !== false) {
                             $inputType = 'number';
-                            $decimalPlaces = (int)$matches[2];
-                            $value = number_format((float)$value, $decimalPlaces, '.', '');
+                            $value = number_format((float)$value, 2, '.', '');
                         } elseif (strpos($columnType, 'date') !== false) {
                             if (strpos($columnType, 'datetime') !== false) {
                                 $inputType = 'datetime-local';
@@ -550,9 +549,8 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                               onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)"
                               onfocus="clearCellColor(this)">';
                     } else {
-                        if (preg_match('/decimal\((\d+),(\d+)\)/', $columnType, $matches) || preg_match('/float\((\d+),(\d+)\)/', $columnType, $matches)) {
-                            $decimalPlaces = (int)$matches[2];
-                            $value = number_format((float)$value, $decimalPlaces, '.', '');
+                        if (strpos($columnType, 'decimal') !== false || strpos($columnType, 'float') !== false) {
+                            $value = number_format((float)$value, 2, '.', '');
                         }
                         echo htmlspecialchars($value);
                     }

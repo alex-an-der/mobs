@@ -204,7 +204,7 @@ $tabelle_upper = strtoupper($tabelle)
                 let bText = bCell.innerText.trim();
 
                 const aInput = aCell.querySelector('input, select');
-                const bInput = b.querySelector('input, select');
+                const bInput = bCell.querySelector('input, select');
 
                 if (aInput) aText = aInput.value.trim();
                 if (bInput) bText = bInput.value.trim();
@@ -497,13 +497,6 @@ function renderTableHeaders($data) {
 }
 
 function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
-    global $db;
-    $columns = $db->query("SHOW COLUMNS FROM $tabelle");
-    $columnTypes = [];
-    foreach ($columns as $column) {
-        $columnTypes[$column['Field']] = $column['Type'];
-    }
-
     foreach ($data as $row) {
         echo '<tr data-id="' . $row['id'] . '">';
         echo '<td><button type="button" class="btn btn-outline-light btn-sm toggle-btn" data-id="' . $row['id'] . '" onclick="toggleRowSelection(this)">X</button></td>'; // Toggle button for each row
@@ -530,30 +523,10 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                     }
                 } else {
                     if ($admin) {
-                        $inputType = 'text';
-                        $columnType = $columnTypes[$key];
-                        if (strpos($columnType, 'int') !== false) {
-                            $inputType = 'number';
-                        } elseif (preg_match('/decimal\((\d+),(\d+)\)/', $columnType, $matches) || preg_match('/float\((\d+),(\d+)\)/', $columnType, $matches)) {
-                            $inputType = 'number';
-                            $decimalPlaces = (int)$matches[2];
-                            $value = number_format((float)$value, $decimalPlaces, '.', '');
-                        } elseif (strpos($columnType, 'date') !== false) {
-                            if (strpos($columnType, 'datetime') !== false) {
-                                $inputType = 'datetime-local';
-                                $value = str_replace(' ', 'T', $value);
-                            } else {
-                                $inputType = 'date';
-                            }
-                        }
-                        echo '<input data-fkIDkey="' . htmlspecialchars($data_fk_ID_key) . '" data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value) . '" type="' . $inputType . '" class="form-control border-0" style="background-color: inherit;" value="' . htmlspecialchars($value) . '"
+                        echo '<input data-fkIDkey="' . htmlspecialchars($data_fk_ID_key) . '" data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value) . '" type="text" class="form-control border-0" style="background-color: inherit;" value="' . htmlspecialchars($value) . '"
                               onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)"
                               onfocus="clearCellColor(this)">';
                     } else {
-                        if (preg_match('/decimal\((\d+),(\d+)\)/', $columnType, $matches) || preg_match('/float\((\d+),(\d+)\)/', $columnType, $matches)) {
-                            $decimalPlaces = (int)$matches[2];
-                            $value = number_format((float)$value, $decimalPlaces, '.', '');
-                        }
                         echo htmlspecialchars($value);
                     }
                 }
