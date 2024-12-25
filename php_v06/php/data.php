@@ -21,24 +21,10 @@ $tabelle_upper = strtoupper($tabelle)
     
     $data = [];
     if (!empty($tabelle)) {
-        // Find the auto-increment column
-        $columns = $db->query("SHOW COLUMNS FROM $tabelle");
-        $autoIncrementColumn = null;
-        foreach ($columns as $column) {
-            if ($column['Extra'] === 'auto_increment') {
-                $autoIncrementColumn = $column['Field'];
-                break;
-            }
-        }
-
-        if ($autoIncrementColumn) {
-            $data = $db->query("SELECT * FROM $tabelle ORDER BY $autoIncrementColumn DESC");
-        } else {
-            $data = $db->query("SELECT * FROM $tabelle");
-        }
-
+        $data = $db->query("SELECT * FROM $tabelle");
         if (!$data) $db->log(__FILE__.":".__LINE__." - ". $db->error);
     }
+ 
     ?>
 
     <style>
@@ -47,12 +33,6 @@ $tabelle_upper = strtoupper($tabelle)
         }
         .form-control.border-0:focus {
             background-color:rgba(0,0,0,0) !important;
-        }
-        .highlight-new {
-            background-color: lightyellow !important;
-        }
-        .error-cell {
-            background-color: red !important;
         }
     </style>
 
@@ -77,21 +57,19 @@ $tabelle_upper = strtoupper($tabelle)
                         if (response.status === "success") {
                             checkRow(tabelle, id, field, value);
                         } else {
-                            markCellError(id, field);
-                            alert("Fehler beim Update. Stimmt das Datenformat?");
+                            alert("Fehler beim Update.");
                         }
                     } catch (e) {
-                        markCellError(id, field);
                         alert("Fehler beim Verarbeiten der Serverantwort.");
                     }
                 } else if (xhr.readyState === 4 && xhr.status !== 200) {
-                    markCellError(id, field);
-                    alert("Serverfehler beim Update. Stimmt das Datenformat?");
+                    alert("Serverfehler beim Update.");
                 }
             };
 
             xhr.send(data);
         }
+
 
         function checkRow(tabelle, id, field, value) {
             const xhr = new XMLHttpRequest();
@@ -158,21 +136,11 @@ $tabelle_upper = strtoupper($tabelle)
             }
         }
 
-        function markCellError(id, field) {
-            const row = document.querySelector(`tr[data-id='${id}']`);
-            if (row) {
-                const td = row.querySelector(`td[data-field='${field}']`);
-                if (td) {
-                    td.classList.add('error-cell');
-                }
-            }
-        }
 
         function clearCellColor(input) {
             const td = input.closest('td');
             if (td) {
                 td.style.backgroundColor = '';
-                td.classList.remove('error-cell');
             }
         }
 
@@ -221,10 +189,7 @@ $tabelle_upper = strtoupper($tabelle)
         }
 
         function filterTable() {
-            const filterInput = document.getElementById('tableFilter');
-            if (!filterInput) return;
-
-            const filterValue = filterInput.value.toLowerCase();
+            const filterValue = document.getElementById('tableFilter').value.toLowerCase();
             const rows = document.querySelectorAll('table tbody tr');
 
             rows.forEach(row => {
@@ -262,49 +227,10 @@ $tabelle_upper = strtoupper($tabelle)
             });
         }
 
-        function insertDefaultRecord(tabelle) {
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", "ajax.php", true);
-            xhr.setRequestHeader("Content-Type", "application/json");
-
-            const data = JSON.stringify({
-                action: 'insert_default',
-                tabelle: tabelle
-            });
-
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    try {
-                        const response = JSON.parse(xhr.responseText);
-                        if (response.status === "success") {
-                            location.reload(); // Reload the page to see the new record
-                        } else {
-                            alert("Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!");
-                        }
-                    } catch (e) {
-                        alert("Fehler beim Verarbeiten der Serverantwort.");
-                    }
-                } else if (xhr.readyState === 4 && xhr.status !== 200) {
-                    alert("Serverfehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!");
-                }
-            };
-
-            xhr.send(data);
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
             addSortEventListeners();
-            const filterInput = document.getElementById('tableFilter');
-            if (filterInput) {
-                filterInput.addEventListener('input', filterTable);
-                filterInput.value = ''; // Clear filter field on page load
-            }
-            const insertButton = document.getElementById('insertDefaultButton');
-            if (insertButton) {
-                insertButton.addEventListener('click', function() {
-                    insertDefaultRecord('<?=$tabelle?>');
-                });
-            }
+            document.getElementById('tableFilter').addEventListener('input', filterTable);
+            document.getElementById('tableFilter').value = ''; // Clear filter field on page load
         });
     </script>
 </head>
@@ -312,7 +238,7 @@ $tabelle_upper = strtoupper($tabelle)
  
 <?php
 // Manche Spalten sind per ID via Fremdschlüssel zu anderen Tabellen verknüpft. Die ID anzuzeigen (und zu bearbeiten) 
-// bringt dem Anwender wenig. Es muss daher der unbequeme Weg gegangen werden, die FK 8foreign keys) zu erkennen und
+// bringt dem Anwender wenig. Es muss daher der unbequeme Weg gegangen werden, die FK foreign keys) zu erkennen und
 // die Daten zu parsen, um den generischen Ansatz weiter verfolgen zu können. Die schema-Tabellen sind leider recht
 // unzuverlässig (eigene Erfahrung). Daher wird hier der CREATE TABLE-String der Tabelle ausgelesen und die Fremdschlüssel
 // per Regex ermittelt. Die Fremdschlüssel werden in einem Array gespeichert, um später die Anzeige zu verbessern.
@@ -338,7 +264,7 @@ if (preg_match_all($pattern, $createTable, $matches, PREG_SET_ORDER)) {
         $SRCspalte = $match[2];
         
         $darstellungspattern = constant($FKname);
-        if(!$darstellungspattern) $db->log(__FILE__.":".__LINE__." - Die benötigte Konstante $FKname zur Darstellung einer Fremdschlüsselverknüpfung wurde in config.php nicht gesetzt");
+        if(!$darstellungspattern) db->log(__FILE__.":".__LINE__." - Die benötigte Konstante $FKname zur Darstelliung einer Fremdschlüsselverknüpfung wurde in config.php nicht gesetzt");
         
         preg_match_all('/##(.*?)##/', $darstellungspattern, $matches);
         
@@ -372,7 +298,7 @@ function renderTableSelectBox($db) {
     $selectedTable = isset($_GET['tab']) ? $_GET['tab'] : "";
     $tables = $db->query("SELECT TABLE_NAME, TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() ORDER BY TABLE_NAME");
 
-    echo '<p><form action="data.php" method="get">';
+    echo '<p><form action="data.php" method=j"get">';
     echo '<select name="tab" class="form-control" onchange="this.form.submit()">';
 
     // Nur anzeigen, wenn keine Tabelle ausgewählt ist
@@ -420,7 +346,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                     $data_fk_ID_value = $value;
 
                     if ($admin) {
-                        echo '<select class="form-control border-0" style="background-color: inherit;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)">';
+                        echo '<select class="form-controlKlicke auf die Spaltenüberschriften, um danach zu sortieren border-0" style="background-color: inherit;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)">';
                         echo '<option value=""' . (empty($value) ? ' selected' : '') . '>---</option>';  // Leere Option
                         foreach ($foreignKeys[$key]['anzeige'] as $fk_value => $fk_display) {
                             $selected = ($fk_value == $value) ? 'selected' : '';
@@ -445,6 +371,9 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         echo '</tr>';
     }
 }
+
+
+
 ?>
 
     <div class="container mt-4">
@@ -457,25 +386,19 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         <p><input type="text" id="tableFilter" class="form-control" placeholder="Filter..."></p>
     </div>
 
-    <?php if (!empty($tabelle) && $admin): ?>
-    <div class="container mt-2">
-        <button id="insertDefaultButton" class="btn btn-primary mb-2">Neuen Datensatz einfügen</button>
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <?php renderTableHeaders($data); ?>
+                </tr>
+            </thead>
+            <tbody>
+            <?php 
+                if (!empty($data)) renderTableRows($data, $admin, $tabelle, $foreignKeys);
+            ?>
+            </tbody>
+        </table>
     </div>
-    <?php endif; ?>
-
-    <table class="table table-striped table-bordered">
-        <thead>
-            <tr>
-                <?php renderTableHeaders($data); ?>
-            </tr>
-        </thead>
-        <tbody>
-        <?php 
-            if (!empty($data)) renderTableRows($data, $admin, $tabelle, $foreignKeys);
-        ?>
-        </tbody>
-    </table>
-</div>
 
 </body>
 </html>

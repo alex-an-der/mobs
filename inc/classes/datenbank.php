@@ -36,10 +36,18 @@ class Datenbank {
     }
 
     public function log($eintrag) {
-        $query = "INSERT INTO log (eintrag) VALUES (:eintrag)";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':eintrag', $eintrag, PDO::PARAM_STR);
-        $stmt->execute();
+        try {
+            $query = "INSERT INTO log (eintrag) VALUES (:eintrag)";
+            $stmt = $this->pdo->prepare($query);
+            $stmt->bindParam(':eintrag', $eintrag, PDO::PARAM_STR);
+            $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Log error: " . $e->getMessage());
+        }
+    }
+
+    public function errorInfo() {
+        return $this->pdo->errorInfo();
     }
         
 

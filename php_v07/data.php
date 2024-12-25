@@ -58,9 +58,6 @@ $tabelle_upper = strtoupper($tabelle)
 
     <script>
         function updateField(tabelle, id, field, value) {
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", "ajax.php", true);
-            xhr.setRequestHeader("Content-Type", "application/json");
 
             const data = JSON.stringify({
                 action: 'update',
@@ -77,15 +74,12 @@ $tabelle_upper = strtoupper($tabelle)
                         if (response.status === "success") {
                             checkRow(tabelle, id, field, value);
                         } else {
-                            markCellError(id, field);
                             alert("Fehler beim Update. Stimmt das Datenformat?");
                         }
                     } catch (e) {
-                        markCellError(id, field);
                         alert("Fehler beim Verarbeiten der Serverantwort.");
                     }
                 } else if (xhr.readyState === 4 && xhr.status !== 200) {
-                    markCellError(id, field);
                     alert("Serverfehler beim Update. Stimmt das Datenformat?");
                 }
             };
@@ -158,21 +152,10 @@ $tabelle_upper = strtoupper($tabelle)
             }
         }
 
-        function markCellError(id, field) {
-            const row = document.querySelector(`tr[data-id='${id}']`);
-            if (row) {
-                const td = row.querySelector(`td[data-field='${field}']`);
-                if (td) {
-                    td.classList.add('error-cell');
-                }
-            }
-        }
-
         function clearCellColor(input) {
             const td = input.closest('td');
             if (td) {
                 td.style.backgroundColor = '';
-                td.classList.remove('error-cell');
             }
         }
 
