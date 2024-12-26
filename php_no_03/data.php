@@ -138,7 +138,7 @@ $tabelle_upper = strtoupper($tabelle)
             xhr.send(data);
         }
 
-        function updateRowColors(dbRow, id, field) {
+        function updateRowColors(dbRow, id, field) { 
             const row = document.querySelector(`tr[data-id='${id}']`);
             if (row) {
                 const td = row.querySelector(`td[data-field='${field}']`);
@@ -153,21 +153,33 @@ $tabelle_upper = strtoupper($tabelle)
                         const inputNumber = parseFloat(inputValue.replace(',', '.'));
                         const dbNumber = parseFloat(dbValue.replace(',', '.'));
 
-                        if ((!isNaN(inputNumber) && !isNaN(dbNumber) && inputNumber === dbNumber) || inputValue === dbValue) {
+                        if (dbValue === "" || dbRow[field] === null) {
+                            td.style.backgroundColor = 'yellow';
+                            td.setAttribute('data-validated', 'true');
+                        } else if ((!isNaN(inputNumber) && !isNaN(dbNumber) && inputNumber === dbNumber) || inputValue === dbValue) {
                             td.style.backgroundColor = 'lightgreen';
+                            td.setAttribute('data-validated', 'true');
                         } else {
                             td.style.backgroundColor = 'lightcoral';
-                            input.value = dbRow[field];
+                            td.setAttribute('data-validated', 'false');
+                            input.remove();
+                            td.innerText = dbRow[field] === null ? "" : dbRow[field];
                         }
                     }
 
                     if (select) {
                         const dbValue = dbRow[field] === null ? "" : dbRow[field];  // NULL wird zu ""
-                        if (dbValue == select.value) {
+                        if (dbValue === "" || dbRow[field] === null) {
+                            td.style.backgroundColor = 'yellow';
+                            td.setAttribute('data-validated', 'true');
+                        } else if (dbValue == select.value) {
                             td.style.backgroundColor = 'lightgreen';
+                            td.setAttribute('data-validated', 'true');
                         } else {
                             td.style.backgroundColor = 'lightcoral';
-                            select.value = dbValue;
+                            td.setAttribute('data-validated', 'false');
+                            select.remove();
+                            td.innerText = dbRow[field] === null ? "" : dbRow[field];
                         }
                     }
                 }
@@ -187,8 +199,13 @@ $tabelle_upper = strtoupper($tabelle)
         function clearCellColor(input) {
             const td = input.closest('td');
             if (td) {
-                td.style.backgroundColor = '';
-                td.classList.remove('error-cell');
+                
+                if (td.style.backgroundColor === 'lightcoral' && td.getAttribute('data-validated') === 'false') { 
+                    input.value = '';
+                } else {
+                    td.style.backgroundColor = '';
+                    td.classList.remove('error-cell');
+                }
             }
         }
 
@@ -394,6 +411,21 @@ $tabelle_upper = strtoupper($tabelle)
                     deleteSelectedRows('<?=$tabelle?>');
                 });
             }
+        });
+
+        function formatDecimal(input, decimalPlaces) {
+            let value = parseFloat(input.value.replace(',', '.'));
+            if (!isNaN(value)) {
+                input.value = value.toFixed(decimalPlaces).replace('.', ',');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('input[data-decimal-places]').forEach(input => {
+                input.addEventListener('change', function() {
+                    formatDecimal(this, this.getAttribute('data-decimal-places'));
+                });
+            });
         });
     </script>
 </head>

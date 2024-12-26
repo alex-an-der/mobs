@@ -537,7 +537,12 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                     if ($admin) {
                         $inputType = 'text';
                         $columnType = $columnTypes[$key];
-                        if (strpos($columnType, 'date') !== false) {
+                        if (strpos($columnType, 'int') !== false) {
+                            $inputType = 'number';
+                        } elseif (strpos($columnType, 'decimal') !== false || strpos($columnType, 'float') !== false) {
+                            $inputType = 'number';
+                            $value = number_format((float)$value, 2, '.', '');
+                        } elseif (strpos($columnType, 'date') !== false) {
                             if (strpos($columnType, 'datetime') !== false) {
                                 $inputType = 'datetime-local';
                                 $value = str_replace(' ', 'T', $value);

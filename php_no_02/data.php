@@ -395,6 +395,13 @@ $tabelle_upper = strtoupper($tabelle)
                 });
             }
         });
+
+        function formatAndUpdateField(tabelle, id, field, value, decimalPlaces) {
+            if (!isNaN(value) && value !== "") {
+                value = parseFloat(value).toFixed(decimalPlaces);
+            }
+            updateField(tabelle, id, field, value);
+        }
     </script>
 </head>
 <body>
@@ -426,14 +433,9 @@ if (preg_match_all($pattern, $createTable, $matches, PREG_SET_ORDER)) {
         $FKspalte = $match[4];
         $SRCspalte = $match[2];
         
-        $darstellungspattern = "";
-        if (defined($FKname)) {
-            $darstellungspattern = constant($FKname);
-        } else {
-            $db->log(__FILE__.":".__LINE__." - Die benötigte Konstante $FKname zur Darstellung einer Fremdschlüsselverknüpfung wurde in config.php nicht gesetzt.");
-            die("<br>&nbsp;&nbsp;&nbsp;&nbsp;<b>Konfigurationsfehler:</b> Die benötigte Konstante <b>$FKname</b> zur Darstellung einer Fremdschlüsselverknüpfung wurde in config.php nicht gesetzt.");
-        }
-
+        $darstellungspattern = constant($FKname);
+        if(!$darstellungspattern) $db->log(__FILE__.":".__LINE__." - Die benötigte Konstante $FKname zur Darstellung einer Fremdschlüsselverknüpfung wurde in config.php nicht gesetzt");
+        
         preg_match_all('/##(.*?)##/', $darstellungspattern, $matches);
         
         // Extrahierte Spalten in ein Array speichern
@@ -464,7 +466,7 @@ if (preg_match_all($pattern, $createTable, $matches, PREG_SET_ORDER)) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function renderTableSelectBox($db) {
     $selectedTable = isset($_GET['tab']) ? $_GET['tab'] : "";
-    $tables = $db->query("SELECT TABLE_NAME, TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() ORDER BY TABLE_COMMENT");
+    $tables = $db->query("SELECT TABLE_NAME, TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() ORDER BY TABLE_NAME");
 
     echo '<p><form action="data.php" method="get">';
     echo '<select name="tab" class="form-control" onchange="this.form.submit()">';
@@ -503,7 +505,7 @@ function renderTableHeaders($data) {
 
 function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
     global $db;
-    $columns = $db->query("SHOW COLUMNS FROM $tabelle"); // This is where the SHOW COLUMNS query is fired
+    $columns = $db->query("SHOW COLUMNS FROM $tabelle");
     $columnTypes = [];
     foreach ($columns as $column) {
         $columnTypes[$column['Field']] = $column['Type'];
@@ -537,7 +539,13 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                     if ($admin) {
                         $inputType = 'text';
                         $columnType = $columnTypes[$key];
-                        if (strpos($columnType, 'date') !== false) {
+                        if (strpos($columnType, 'int') !== false) {
+                            $inputType = 'number';
+                        } elseif (preg_match('/decimal\((\d+),(\d+)\)/', $columnType, $matches) || preg_match('/float\((\d+),(\d+)\)/', $columnType, $matches)) {
+                            $inputType = 'number';
+                            $decimalPlaces = (int)$matches[2];
+                            $value = number_format((float)$value, $decimalPlaces, '.', '');
+                        } elseif (strpos($columnType, 'date') !== false) {
                             if (strpos($columnType, 'datetime') !== false) {
                                 $inputType = 'datetime-local';
                                 $value = str_replace(' ', 'T', $value);
@@ -546,11 +554,12 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                             }
                         }
                         echo '<input data-fkIDkey="' . htmlspecialchars($data_fk_ID_key) . '" data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value) . '" type="' . $inputType . '" class="form-control border-0" style="background-color: inherit;" value="' . htmlspecialchars($value) . '"
-                              onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)"
+                              onchange="formatAndUpdateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, ' . $decimalPlaces . ')"
                               onfocus="clearCellColor(this)">';
                     } else {
-                        if (strpos($columnType, 'decimal') !== false || strpos($columnType, 'float') !== false) {
-                            $value = number_format((float)$value, 2, '.', '');
+                        if (preg_match('/decimal\((\d+),(\d+)\)/', $columnType, $matches) || preg_match('/float\((\d+),(\d+)\)/', $columnType, $matches)) {
+                            $decimalPlaces = (int)$matches[2];
+                            $value = number_format((float)$value, $decimalPlaces, '.', '');
                         }
                         echo htmlspecialchars($value);
                     }
@@ -596,3 +605,4 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
 
 </body>
 </html>
+
