@@ -10,8 +10,9 @@ define("spartenleitung1_funktionaer","##Vorname## ##Nachname## (##eMail##)");
 define("spartenleitung2_funktionaer","##Nachname##, ##Vorname##");
 define("mitglieder_geschlecht", "##geschlecht##");
 define("mitglieder_unternehmen", "##Name##");
+define("spartenmitglieder_StammSparte", "##Spartenname##");
 define("spartenmitglieder_StammMitglieder", "##Vorname## ##Nachname##, ##Unternehmen##");
-define("spartenmitglieder_StammSparte", "##Name##");
+
 
 
 # Welche Tabellen sollen nicht angezeigt werden?
