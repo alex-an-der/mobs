@@ -211,22 +211,32 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                 
                 // Gibt es zu dieser Spalte eine Substitutionsanweisung?
                 if(isset($foreignKeys[$key])) { 
-                    $data_fk_ID_key = $foreignKeys[$key][$value];
-                    $data_fk_ID_value = $value;
+                    // Suche die Anzeige mit der korrekten ['id’]:
+                    foreach($foreignKeys[$key] as $fk){
+                        if($fk['id'] == $value){
+                            $data_fk_ID_key = $fk['id'];
+                            $data_fk_ID_value = $fk['anzeige'];
+                            break;
+                        }
+                    }
+                    //$data_fk_ID_key = $foreignKeys[$key][$value];
+                    //$data_fk_ID_value = $value;
 
                     if ($admin) {
                         echo '<select class="form-control border-0" style="background-color: inherit;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)">';
                         echo '<option value=""' . (empty($value) ? ' selected' : '') . '>---</option>';  // Leere Option
 
-                        foreach ($foreignKeys[$key] as $fk_value => $fk_display) {
+                        foreach ($foreignKeys[$key] as $fk ) {
+                            $fk_value = $fk['id'];
+                            $fk_display = $fk['anzeige'];
+
                             $selected = ($fk_value == $value) ? 'selected' : '';
                             echo '<option value="' . htmlspecialchars($fk_value) . '" ' . $selected . '>' . htmlspecialchars($fk_display) . '</option>';
-                            
                         }
 
                         echo '</select>';
                     } else {
-                        echo htmlspecialchars($data_fk_ID_key);
+                        echo htmlspecialchars($data_fk_ID_value);
                     }
                 } else {
                     if ($admin) {
@@ -346,7 +356,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         </thead>
         <tbody>
         <?php 
-            if (!empty($data)) renderTableRows($data, $admin, $tabelle, $foreignKeys);
+            if (!empty($data)) renderTableRows($data, $admin, $tabelle, $FKdata);
         ?>
         </tbody>
     </table>
