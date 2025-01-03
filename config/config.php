@@ -15,7 +15,7 @@ $anzuzeigendeDaten = array();
 
 $anzuzeigendeDaten[0] = array(
     "tabellenname" => "sparten",
-    "auswahltext" => "0-Die BSV-Sparten",
+    "auswahltext" => "Die BSV-Sparten",
     "query" => "select id, Sparte, Beitrag, Leitung, Vertretung from sparten order by Sparte;",
     "referenzqueries" => array(
         "Leitung"    => "select id, CONCAT(Vorname, ' ', Nachname) as anzeige from funktionaere order by Vorname;",
@@ -25,8 +25,8 @@ $anzuzeigendeDaten[0] = array(
 
 $anzuzeigendeDaten[1] = array(
     "tabellenname" => "sparten_mitglieder",
-    "auswahltext" => "1-Sparten-Mitglieder",
-    "query" => "select id, Sparte, Mitglied from sparten_mitglieder;",
+    "auswahltext" => "Sparten-Mitglieder",
+    "query" => "select id, Sparte, Mitglied from sparten_mitglieder order by id desc;",
     "referenzqueries" => array(
         "Sparte" => "select id, Sparte as anzeige from sparten order by anzeige;",
         "Mitglied" => "select m.id as id, CONCAT(m.Nachname,', ',m.Vorname, ' (',u.Name,')') as anzeige from mitglieder as m left join unternehmen as u on m.Unternehmen=u.id order by m.Nachname;"

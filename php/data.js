@@ -129,10 +129,23 @@ function sortTable(column, order) {
         let bText = bCell.innerText.trim();
 
         const aInput = aCell.querySelector('input, select');
-        const bInput = b.querySelector('input, select');
+        const bInput = bCell.querySelector('input, select');
 
-        if (aInput) aText = aInput.value.trim();
-        if (bInput) bText = bInput.value.trim();
+        if (aInput) {
+            if (aInput.tagName.toLowerCase() === 'select') {
+                aText = aInput.options[aInput.selectedIndex].text.trim();
+            } else {
+                aText = aInput.value.trim();
+            }
+        }
+
+        if (bInput) {
+            if (bInput.tagName.toLowerCase() === 'select') {
+                bText = bInput.options[bInput.selectedIndex].text.trim();
+            } else {
+                bText = bInput.value.trim();
+            }
+        }
 
         const aNumber = parseFloat(aText.replace(',', '.'));
         const bNumber = parseFloat(bText.replace(',', '.'));
