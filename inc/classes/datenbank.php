@@ -26,6 +26,7 @@ class Datenbank {
         try{
             $success = $stmt->execute($arguments);
         } catch (PDOException $e) {
+            $this->log("Query error in ".__FILE__.": " . $e->getMessage());
             return false;
         }
         // Prüfen, ob die Abfrage ein SELECT oder SHOW ist
