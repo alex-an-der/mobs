@@ -85,61 +85,52 @@ $tabelle_upper = strtoupper($tabelle)
 // per Regex ermittelt. Die Fremdschlüssel werden in einem Array gespeichert, um später die Anzeige zu verbessern.
 
 
-$createTable = $createTable[0]['Create Table']; // Der eigentliche CREATE inkl. Fremdschlüssel
-$foreignKeys = []; // Array für Fremdschlüssel
-if (!empty($tabelle)) {
-    $createTable = $db->query("SHOW CREATE TABLE $tabelle;");
-    $createTable = $createTable[0]['Create Table'];
+/////////////////////////////////////////////////////////////////////
+
+
+if(isset($anzeigeSubstitutionen[$tabelle])){
+    $substitutionsQueries = $anzeigeSubstitutionen[$tabelle];
 }
 
-// Regex zur Erkennung von Fremdschlüsseln mit FK-Name
-$pattern = "/CONSTRAINT `([^`]+)` FOREIGN KEY \\(`([^`]+)`\\) REFERENCES `([^`]+)` \\(`([^`]+)`\\)/";
+$FKdata = array();
+foreach($substitutionsQueries as $SRC_ID => $query){
+    $FKname = '$anzeigeSubstitutionen'."['$tabelle']['$SRC_ID']";
+        
+        $FKdarstellungAll = $db->query($query);
 
-// Suche nach allen Fremdschlüsseldefinitionen
-if (preg_match_all($pattern, $createTable, $matches, PREG_SET_ORDER)) {
-    foreach ($matches as $match) {
-        
-        $FKname = $match[1];
-        $FKtabelle = $match[3];
-        $FKspalte = $match[4];
-        $SRCspalte = $match[2];
-        
-        $darstellungspattern = "";
-        if (defined($FKname)) {
-            $darstellungspattern = constant($FKname);
-        } else {
-            $db->log(__FILE__.":".__LINE__." - Die benötigte Konstante $FKname zur Darstellung einer Fremdschlüsselverknüpfung wurde in config.php nicht gesetzt.");
-            die("<br>&nbsp;&nbsp;&nbsp;&nbsp;<b>Konfigurationsfehler:</b> Die benötigte Konstante <b>$FKname</b> zur Darstellung einer Fremdschlüsselverknüpfung wurde in config.php nicht gesetzt.");
+        if (!$FKdarstellungAll) {
+            $err = "Die benötigte Konstante $FKname enthält kein gültiges SQL-Statement.";
+            dieWithError($err,__FILE__,__LINE__);
+        } 
+
+        if (count($FKdarstellungAll[0])!=2){
+            $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige': 'id' = ID der Datensätze und 'anzeige' = ein ggf. zusammengesetzten Text, der zur Anzeige verwendet wird. Er liefert aber ".count($FKdarstellungAll[0])." Ergebnisse.";
+            dieWithError($err,__FILE__,__LINE__);
         }
 
-        preg_match_all('/##(.*?)##/', $darstellungspattern, $matches);
-        
-        // Extrahierte Spalten in ein Array speichern
-        $anzuzeigendeSpaltenArray = $matches[1];
-            
-        // Hole die zugehörigen Daten jetzt in einem Rutsch aus der Datenbank
-        $FKdata_all = $db->query("SELECT * FROM $FKtabelle");
-        $FKdata = array();
-
-        // gehe die verknüpfte Tabelle zeilenweise durch und hole die Werte gemäß des Anzeigepatterns
-        foreach($FKdata_all as $row){
-            $anzeige = $darstellungspattern; // Anzeige-Template
-            foreach($anzuzeigendeSpaltenArray as $anzuzeigendeSpalte){
-                $anzeige = str_replace("##$anzuzeigendeSpalte##", $row[$anzuzeigendeSpalte], $anzeige);
-            }
-            $FKdata[$row['id']] = $anzeige;
-            
+        if(!isset($FKdarstellungAll[0]['id'])){
+            $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige'. Er liefert aber keine Daten mit der Bezeichnung 'id'.";
+            dieWithError($err,__FILE__,__LINE__);
         }
-    
-        $foreignKeys[$SRCspalte] = [
-            'FKspalte' => $FKspalte,
-            'anzeige' => $FKdata
-        ]; 
-    }
-}
 
+        if(!isset($FKdarstellungAll[0]['anzeige'])){
+            $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige'. Er liefert aber keine Daten mit der Bezeichnung 'anzeige'.";
+            dieWithError($err,__FILE__,__LINE__);
+        }
+
+        foreach($FKdarstellungAll as $row){
+            // ID und Anzeige - Informationen zentral sammeln
+            $FKdata[$SRC_ID][] = $row;
+        }
+} 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function dieWithError($err, $file, $line) {
+    global $db;
+    $db->log("$file:$line - $err");
+    die("<br><div class='container'><b>Konfigurationsfehler:</b> $err</div>");
+}
+
 function renderTableSelectBox($db) {
     $selectedTable = isset($_GET['tab']) ? $_GET['tab'] : "";
     $tables = $db->query("SELECT TABLE_NAME, TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() ORDER BY TABLE_COMMENT");
@@ -190,26 +181,40 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
     foreach ($data as $row) {
         echo '<tr data-id="' . $row['id'] . '">';
         echo '<td><button type="button" class="btn btn-outline-light btn-sm toggle-btn" data-id="' . $row['id'] . '" onclick="toggleRowSelection(this)">X</button></td>'; // Toggle button for each row
+        // Gehe alle Datensätze durch. 
+        // $key = Name der Spalte, 
+        // $value = der Wert, wie er in der Datenbank steht
         foreach ($row as $key => $value) {
+            // id überspringen, DBI: ggf. über select-angaben direkt steuern
             if (strcasecmp($key, 'id') !== 0) {
                 echo '<td data-field="' . $key . '">';
                 $data_fk_ID_key = "";
                 $data_fk_ID_value = "";
                 
+                // Gibt es zu dieser Spalte eine Substitutionsanweisung?
                 if(isset($foreignKeys[$key])) { 
-                    $data_fk_ID_key = $foreignKeys[$key]['FKspalte'];
-                    $data_fk_ID_value = $value;
+                    // Suche die Anzeige mit der korrekten ['id’]:
+                    foreach($foreignKeys[$key] as $fk){
+                        if($fk['id'] == $value){
+                            $data_fk_ID_key = $fk['id'];
+                            $data_fk_ID_value = $fk['anzeige'];
+                            break;
+                        }
+                    }
 
                     if ($admin) {
                         echo '<select class="form-control border-0" style="background-color: inherit;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)">';
                         echo '<option value=""' . (empty($value) ? ' selected' : '') . '>---</option>';  // Leere Option
-                        foreach ($foreignKeys[$key]['anzeige'] as $fk_value => $fk_display) {
+                        foreach ($foreignKeys[$key] as $fk ) {
+                            $fk_value = $fk['id'];
+                            $fk_display = $fk['anzeige'];
+
                             $selected = ($fk_value == $value) ? 'selected' : '';
                             echo '<option value="' . htmlspecialchars($fk_value) . '" ' . $selected . '>' . htmlspecialchars($fk_display) . '</option>';
                         }
                         echo '</select>';
                     } else {
-                        echo htmlspecialchars($foreignKeys[$key]['anzeige'][$value]);
+                        echo htmlspecialchars($data_fk_ID_value);
                     }
                 } else {
                     if ($admin) {
@@ -266,7 +271,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         </thead>
         <tbody>
         <?php 
-            if (!empty($data)) renderTableRows($data, $admin, $tabelle, $foreignKeys);
+            if (!empty($data)) renderTableRows($data, $admin, $tabelle, $FKdata);
         ?>
         </tbody>
     </table>
