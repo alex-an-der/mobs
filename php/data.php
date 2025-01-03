@@ -119,27 +119,9 @@ foreach($substitutionsQueries as $SRC_ID => $query){
         }
 
         foreach($FKdarstellungAll as $row){
+            // ID und Anzeige - Informationen zentral sammeln
             $FKdata[$SRC_ID][] = $row;
-            /*
-            $newEntry = array();
-            $newEntry['id'] = $row['anzeige'];
-            $newEntry['anzeige'] = $row['anzeige'];*/
-
-            /*
-            $FKdata[$row['id']]['anzeige'] = $row['anzeige'];
-            $FKdata[$row['id']]['id'] = $SRC_ID;*/
         }
-
-        /*$foreignKeys[$SRC_ID] = [
-            'FKspalte' => 'DBI',
-            'anzeige' => $FKdata
-        ]; */
-
-        // id und Anzeige trennen. Wenn key = id, dann sortiert er das Array nach der id. 
-        // Die Sortierung soll aber durch den Query vom Anwender vorgegeben werden (z.B. alphabetisch).
-
-       // $foreignKeys[] = $FKdata;
-
 } 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -219,13 +201,10 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                             break;
                         }
                     }
-                    //$data_fk_ID_key = $foreignKeys[$key][$value];
-                    //$data_fk_ID_value = $value;
 
                     if ($admin) {
                         echo '<select class="form-control border-0" style="background-color: inherit;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)">';
                         echo '<option value=""' . (empty($value) ? ' selected' : '') . '>---</option>';  // Leere Option
-
                         foreach ($foreignKeys[$key] as $fk ) {
                             $fk_value = $fk['id'];
                             $fk_display = $fk['anzeige'];
@@ -233,7 +212,6 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                             $selected = ($fk_value == $value) ? 'selected' : '';
                             echo '<option value="' . htmlspecialchars($fk_value) . '" ' . $selected . '>' . htmlspecialchars($fk_display) . '</option>';
                         }
-
                         echo '</select>';
                     } else {
                         echo htmlspecialchars($data_fk_ID_value);
@@ -266,69 +244,6 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         echo '</tr>';
     }
 }
-
-/*
-function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
-    global $db;
-    $columns = $db->query("SHOW COLUMNS FROM $tabelle"); // This is where the SHOW COLUMNS query is fired
-    $columnTypes = [];
-    foreach ($columns as $column) {
-        $columnTypes[$column['Field']] = $column['Type'];
-    }
-
-    foreach ($data as $row) {
-        echo '<tr data-id="' . $row['id'] . '">';
-        echo '<td><button type="button" class="btn btn-outline-light btn-sm toggle-btn" data-id="' . $row['id'] . '" onclick="toggleRowSelection(this)">X</button></td>'; // Toggle button for each row
-        foreach ($row as $key => $value) {
-            if (strcasecmp($key, 'id') !== 0) {
-                echo '<td data-field="' . $key . '">';
-                $data_fk_ID_key = "";
-                $data_fk_ID_value = "";
-                
-                if(isset($foreignKeys[$key])) { 
-                    $data_fk_ID_key = $foreignKeys[$key]['FKspalte'];
-                    $data_fk_ID_value = $value;
-
-                    if ($admin) {
-                        echo '<select class="form-control border-0" style="background-color: inherit;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)">';
-                        echo '<option value=""' . (empty($value) ? ' selected' : '') . '>---</option>';  // Leere Option
-                        foreach ($foreignKeys[$key]['anzeige'] as $fk_value => $fk_display) {
-                            $selected = ($fk_value == $value) ? 'selected' : '';
-                            echo '<option value="' . htmlspecialchars($fk_value) . '" ' . $selected . '>' . htmlspecialchars($fk_display) . '</option>';
-                        }
-                        echo '</select>';
-                    } else {
-                        echo htmlspecialchars($foreignKeys[$key]['anzeige'][$value]);
-                    }
-                } else {
-                    if ($admin) {
-                        $inputType = 'text';
-                        $columnType = $columnTypes[$key];
-                        if (strpos($columnType, 'date') !== false) {
-                            if (strpos($columnType, 'datetime') !== false) {
-                                $inputType = 'datetime-local';
-                                $value = str_replace(' ', 'T', $value);
-                            } else {
-                                $inputType = 'date';
-                            }
-                        }
-                        echo '<input data-fkIDkey="' . htmlspecialchars($data_fk_ID_key) . '" data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value) . '" type="' . $inputType . '" class="form-control border-0" style="background-color: inherit;" value="' . htmlspecialchars($value) . '"
-                              onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)"
-                              onfocus="clearCellColor(this)">';
-                    } else {
-                        if (strpos($columnType, 'decimal') !== false || strpos($columnType, 'float') !== false) {
-                            $value = number_format((float)$value, 2, '.', '');
-                        }
-                        echo htmlspecialchars($value);
-                    }
-                }
-                echo '</td>';
-            }
-        }
-        echo '</tr>';
-    }
-}
-*/
 ?>
 
     <div class="container mt-4">
