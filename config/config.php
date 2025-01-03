@@ -26,10 +26,11 @@ $anzuzeigendeDaten = array();
 #     )
 # );
 
+
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "mitglieder",
     "auswahltext" => "Mitglieder Stammdaten",
-    "query" => "select * from mitglieder order by Nachname, Vorname;",
+    "query" => "select * from mitglieder order by id desc;",
     "referenzqueries" => array(
         "Geschlecht" => "select id, geschlecht as anzeige from geschlechter order by geschlecht desc;",
         "Unternehmen" => "SELECT id, CONCAT(Name, ', ', Stadt) as anzeige from unternehmen order by Name;"
@@ -57,7 +58,7 @@ $anzuzeigendeDaten[] = array(
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "sparten_mitglieder",
     "auswahltext" => "Sparten-Mitglieder",
-    "query" => "select id, id as LfdNr, Sparte, Mitglied, Kommentar from sparten_mitglieder order by id desc;",
+    "query" => "select id, Sparte, Mitglied, Kommentar from sparten_mitglieder order by id desc;",
     "referenzqueries" => array(
         "Sparte" => "select id, Sparte as anzeige from sparten order by anzeige;",
         "Mitglied" => "select m.id as id, CONCAT(m.Nachname,', ',m.Vorname, ' (',u.Name,')') as anzeige from mitglieder as m left join unternehmen as u on m.Unternehmen=u.id order by m.Nachname;"
@@ -67,14 +68,14 @@ $anzuzeigendeDaten[] = array(
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "unternehmen",
     "auswahltext" => "Unternehmen, Behörden und Betriebssportgemeinschaften",
-    "query" => "select * from unternehmen order by Name;",
+    "query" => "select * from unternehmen order by id desc;",
     "hinweis" => "Dies kann später noch ergänzt werden z.B. mit einer Flag 'natürliche Person (j/n)' - dazu muss ich aber zuerst noch den Datentyp 'binär' implementieren."
 );
 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "funktionaere",
     "auswahltext" => "Amtsträger",
-    "query" => "select * from funktionaere order by Nachname, Vorname;",
+    "query" => "select * from funktionaere order by id desc;",
     "hinweis" => "Dies kann später noch ergänzt werden z.B. mit einer Flag 'Mitglied des erweiterten Vorstandes' - dazu muss ich aber zuerst noch den Datentyp 'binär' implementieren.",
     "referenzqueries" => array(
         "Leitung"    => "select id, CONCAT(Vorname, ' ', Nachname) as anzeige from funktionaere order by Vorname;",

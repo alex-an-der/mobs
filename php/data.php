@@ -19,11 +19,13 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
         $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt keinen g&uuml;ltigen Tabellennamen oder existiert nicht.";
         dieWithError($err,__FILE__,__LINE__);
     }
+    
     // Query funktioniert?
     if(!$data = $db->query($dataquery)){
-        $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt kein g&uuml;ltiges SQL-Statement.";
+        $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt kein g&uuml;ltiges SQL-Statement oder die Tabelle ist leer. In diesem Fall legen Sie bitte einen ersten Datensatz direkt in der Datenbank an.";
         dieWithError($err,__FILE__,__LINE__);
     }
+    
     // Gibt es eine ID-Spalte?
     if(!isset($data[0]['id'])){
         $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] muss eine Spalte 'id' zur&uuml;ckgeben.";
@@ -356,13 +358,17 @@ $tabelle_upper = strtoupper($tabelle)
 
         function toggleSelectAll(source) {
             const buttons = document.querySelectorAll('.toggle-btn');
-            buttons.forEach(button => {
-                if (source.classList.contains('btn-outline-secondary')) {
-                    button.classList.add('btn-light');
-                    button.classList.remove('btn-outline-light');
-                } else {
-                    button.classList.remove('btn-light');
-                    button.classList.add('btn-outline-light');
+            const rows = document.querySelectorAll('table tbody tr');
+            rows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    const button = row.querySelector('.toggle-btn');
+                    if (source.classList.contains('btn-outline-secondary')) {
+                        button.classList.add('btn-light');
+                        button.classList.remove('btn-outline-light');
+                    } else {
+                        button.classList.remove('btn-light');
+                        button.classList.add('btn-outline-light');
+                    }
                 }
             });
             source.classList.toggle('btn-outline-secondary');
@@ -655,34 +661,35 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
 
     <div class="container-fluid mt-4">
     <!--h2><?=$tabelle_upper?><h2-->
-    <div class="container mt-4" style="font-size: 1.75rem; font-weight: bold;">
+    <div class="container mt-4" >
         <?php renderTableSelectBox($db); ?>
-    </div>
+    
 
     <?php 
     if(isset($anzuzeigendeDaten[$selectedTableID]['hinweis'])){
-        echo "<div class='alert alert-info ml-3 mr-3'>";
+        echo "<div class='alert alert-info'>";
         echo $anzuzeigendeDaten[$selectedTableID]['hinweis'];
         echo "</div>";
     }?>
-
+    
     <?php 
     if($tabelle!=""){
-    echo "<div class='container mt-2'>";
+    //echo "<div class='container mt-2'>";
     echo "    <p><input type='text' id='tableFilter' class='form-control' placeholder='Filter...'></p>";
-    echo "</div>";
+    //echo "</div>";
     }
+    
     ?>
 
 
     <?php if (!empty($tabelle) && $admin): ?>
-    <div class="container mt-2">
+    
         <button id="resetButton" class="btn btn-success mb-2" onclick="resetPage()">Daten neu laden</button>
         <button id="insertDefaultButton" class="btn btn-success mb-2">Neuen Datensatz einfügen</button>
         <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte Zeilen löschen</button>
-    </div>
+   
     <?php endif; ?>
-
+    </div>
     <table class="table table-striped table-bordered">
         <thead>
             <tr>
