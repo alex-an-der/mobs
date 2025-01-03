@@ -20,7 +20,7 @@ if ($data['action'] == 'update') {
     } catch (Exception $e) {
         ob_end_clean();
         $db->log("Update error: " . $e->getMessage());
-        echo json_encode(["status" => "error", "message" => "Fehler beim Update. Stimmt das Datenformat?"]);
+        echo json_encode(["status" => "error", "message" => "Fehler beim Update. Stimmt das Datenformat? Für Details siehe log-Tabelle in der Datenbank."]);
     }
 }
 

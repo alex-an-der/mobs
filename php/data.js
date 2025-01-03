@@ -19,7 +19,7 @@ function updateField(tabelle, id, field, value) {
                     checkRow(tabelle, id, field, value);
                 } else {
                     markCellError(id, field);
-                    alert("Fehler beim Update. Stimmt das Datenformat?");
+                    alert("Fehler beim Update. Stimmt das Datenformat? Für Details siehe log-Tabelle in der Datenbank.");
                 }
             } catch (e) {
                 markCellError(id, field);
@@ -27,7 +27,7 @@ function updateField(tabelle, id, field, value) {
             }
         } else if (xhr.readyState === 4 && xhr.status !== 200) {
             markCellError(id, field);
-            alert("Serverfehler beim Update. Stimmt das Datenformat?");
+            alert("Serverfehler beim Update. Stimmt das Datenformat? Für Details siehe log-Tabelle in der Datenbank.");
         }
     };
 

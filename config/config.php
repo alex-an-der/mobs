@@ -19,10 +19,11 @@ $anzuzeigendeDaten = array();
 # query        => Es muss eine Spalte mit dem Namen "id" angefordert werden, die als eindeutiger Schlüssel verwendet wird.
 #              => Die Spalte "id" wird nicht angezeigt. 
 #              => Soll die ID des Datensatzes angezeigt werden, muss diese ein zweites Mal angefordert werden (z.B. SELECT id, id as LfdNr. from ...)
+#              => Es können nur Spalten bearbeitet werden, die nicht mit einem Alias angefordert werden. Beispiel: SELECT Nachname, vName as Vorname -> nur Nachname kann bearbeitet werden.
 $anzuzeigendeDaten[0] = array(
     "tabellenname" => "sparten",
     "auswahltext" => "0-Die BSV-Sparten",
-    "query" => "select id, Spartenname as Sparte, beitrag as `Beitrag (€)`, spartenleitung as Leitung, spartenleitungvertretung as Vertreter from sparten order by Sparte;"
+    "query" => "select id, Sparte, Beitrag, Leitung, Vertretung from sparten order by Sparte;"
 );
 $anzuzeigendeDaten[1] = array(
     "tabellenname" => "sparten_mitglieder",
