@@ -17,6 +17,7 @@ $anzuzeigendeDaten[0] = array(
     "tabellenname" => "sparten",
     "auswahltext" => "Die BSV-Sparten",
     "query" => "select id, Sparte, Beitrag, Leitung, Vertretung from sparten order by Sparte;",
+    "hinweis" => "Hier sind alle Sparten und dies ist ein <b>Hinweistext</b>, was hier zu beachten ist.",
     "referenzqueries" => array(
         "Leitung"    => "select id, CONCAT(Vorname, ' ', Nachname) as anzeige from funktionaere order by Vorname;",
         "Vertretung" => "select id, CONCAT(Vorname, ' ', Nachname) as anzeige from funktionaere order by Vorname;"
