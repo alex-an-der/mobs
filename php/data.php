@@ -1,6 +1,6 @@
 <?php
 require_once(__DIR__ . "/../inc/include.php");
-$admin = 1;
+$admin = 0;
 $selectedTableID = isset($_GET['tab']) ? $_GET['tab'] : "";
 $data = array();
 if(isset($anzuzeigendeDaten[$selectedTableID])){
@@ -340,38 +340,6 @@ function insertDefaultRecord(tabelle) {
 
     xhr.send(data);
 }
-/*
-function insertDefaultRecord(tabelle) {
-
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "ajax.php", true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-
-    const data = JSON.stringify({
-        action: 'insert_default',
-        tabelle: tabelle
-    });
-
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            try {
-                const response = JSON.parse(xhr.responseText);
-                if (response.status === "success") {
-                    resetPage(); // Reload the page to see the new record
-                } else {
-                    alert("Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!");
-                }
-            } catch (e) {
-                alert("Fehler beim Verarbeiten der Serverantwort.");
-            }
-        } else if (xhr.readyState === 4 && xhr.status !== 200) {
-            alert("Serverfehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!");
-        }
-    };
-
-    xhr.send(data);
-}
-    */
 
 function toggleSelectAll(source) {
     const buttons = document.querySelectorAll('.toggle-btn');
@@ -451,46 +419,6 @@ function deleteSelectedRows(tabelle) {
 
     xhr.send(data);
 }
-/*
-function deleteSelectedRows(tabelle) {
-    const selectedIds = Array.from(document.querySelectorAll('.toggle-btn.btn-light')).map(btn => btn.getAttribute('data-id'));
-    if (selectedIds.length === 0) {
-        alert('Keine Zeilen ausgewählt.');
-        return;
-    }
-
-    const confirmation = confirm('Sind Sie sicher, dass Sie die ausgewählten Daten löschen möchten?');
-    if (!confirmation) return;
-
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "ajax.php", true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-
-    const data = JSON.stringify({
-        action: 'delete',
-        tabelle: tabelle,
-        ids: selectedIds
-    });
-
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            try {
-                const response = JSON.parse(xhr.responseText);
-                if (response.status === "success") {
-                    resetPage(); // Reload the page to see the changes
-                } else {
-                    alert("Fehler beim Löschen der Daten.");
-                }
-            } catch (e) {
-                alert("Fehler beim Verarbeiten der Serverantwort.");
-            }
-        } else if (xhr.readyState === 4 && xhr.status !== 200) {
-            alert("Serverfehler beim Löschen der Daten.");
-        }
-    };
-
-    xhr.send(data);
-}*/
 
 function resetPage(){
     caches.keys().then(function(names) {
@@ -616,6 +544,7 @@ function renderTableHeaders($data) {
 
 function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
     global $db;
+    // Eingabemethode (z.B. Date-Picker) nach Datentyp wählen.
     $columns = $db->query("SHOW COLUMNS FROM $tabelle"); // This is where the SHOW COLUMNS query is fired
     $columnTypes = [];
     foreach ($columns as $column) {
