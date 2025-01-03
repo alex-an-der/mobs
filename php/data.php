@@ -300,6 +300,13 @@ function filterTable() {
 }
 
 function insertDefaultRecord(tabelle) {
+    const insertButton = document.getElementById('insertDefaultButton');
+    const originalText = insertButton.innerHTML;
+
+    // Zeige den Spinner und deaktiviere den Button
+    insertButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+    insertButton.disabled = true;
+
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "ajax.php", true);
     xhr.setRequestHeader("Content-Type", "application/json");
@@ -314,7 +321,43 @@ function insertDefaultRecord(tabelle) {
             try {
                 const response = JSON.parse(xhr.responseText);
                 if (response.status === "success") {
-                    location.reload(); // Reload the page to see the new record
+                    resetPage(); // Reload the page to see the new record
+                } else {
+                    alert("Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!");
+                }
+            } catch (e) {
+                alert("Fehler beim Verarbeiten der Serverantwort.");
+            }
+        } else if (xhr.readyState === 4 && xhr.status !== 200) {
+            alert("Serverfehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!");
+        }
+
+        // Setze den Button zurück und aktiviere ihn wieder
+        // Automatisch nach reload.
+        //insertButton.innerHTML = originalText;
+        //insertButton.disabled = false;
+    };
+
+    xhr.send(data);
+}
+/*
+function insertDefaultRecord(tabelle) {
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "ajax.php", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+
+    const data = JSON.stringify({
+        action: 'insert_default',
+        tabelle: tabelle
+    });
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (response.status === "success") {
+                    resetPage(); // Reload the page to see the new record
                 } else {
                     alert("Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!");
                 }
@@ -328,6 +371,7 @@ function insertDefaultRecord(tabelle) {
 
     xhr.send(data);
 }
+    */
 
 function toggleSelectAll(source) {
     const buttons = document.querySelectorAll('.toggle-btn');
@@ -357,6 +401,58 @@ function toggleRowSelection(button) {
 }
 
 function deleteSelectedRows(tabelle) {
+    const deleteButton = document.getElementById('deleteSelectedButton');
+    const originalText = deleteButton.innerHTML;
+
+    const selectedIds = Array.from(document.querySelectorAll('.toggle-btn.btn-light')).map(btn => btn.getAttribute('data-id'));
+    if (selectedIds.length === 0) {
+        alert('Keine Zeilen ausgewählt.');
+        return;
+    }
+
+    const confirmation = confirm('Sind Sie sicher, dass Sie die ausgewählten Daten löschen möchten?');
+    if (!confirmation) return;
+
+    // Zeige den Spinner und deaktiviere den Button
+    deleteButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+    deleteButton.disabled = true;
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "ajax.php", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+
+    const data = JSON.stringify({
+        action: 'delete',
+        tabelle: tabelle,
+        ids: selectedIds
+    });
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (response.status === "success") {
+                    resetPage(); // Reload the page to see the changes
+                } else {
+                    alert("Fehler beim Löschen der Daten.");
+                }
+            } catch (e) {
+                alert("Fehler beim Verarbeiten der Serverantwort.");
+            }
+        } else if (xhr.readyState === 4 && xhr.status !== 200) {
+            alert("Serverfehler beim Löschen der Daten.");
+        }
+
+        // Setze den Button zurück und aktiviere ihn wieder
+        // Automatisch nach reload.
+        // deleteButton.innerHTML = originalText;
+        // deleteButton.disabled = false;
+    };
+
+    xhr.send(data);
+}
+/*
+function deleteSelectedRows(tabelle) {
     const selectedIds = Array.from(document.querySelectorAll('.toggle-btn.btn-light')).map(btn => btn.getAttribute('data-id'));
     if (selectedIds.length === 0) {
         alert('Keine Zeilen ausgewählt.');
@@ -381,7 +477,7 @@ function deleteSelectedRows(tabelle) {
             try {
                 const response = JSON.parse(xhr.responseText);
                 if (response.status === "success") {
-                    location.reload(); // Reload the page to see the changes
+                    resetPage(); // Reload the page to see the changes
                 } else {
                     alert("Fehler beim Löschen der Daten.");
                 }
@@ -394,6 +490,14 @@ function deleteSelectedRows(tabelle) {
     };
 
     xhr.send(data);
+}*/
+
+function resetPage(){
+    caches.keys().then(function(names) {
+        for (let name of names) caches.delete(name);
+    }).then(function() {
+        location.reload(true);
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -416,7 +520,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
+    
     </script>
 
 </head>
@@ -592,17 +696,31 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         <?php renderTableSelectBox($db); ?>
     </div>
 
-    <div class="container mt-2">
-        <p><input type="text" id="tableFilter" class="form-control" placeholder="Filter..."></p>
-    </div>
+    <?php 
+    if(isset($anzuzeigendeDaten[$selectedTableID]['hinweis'])){
+        echo "<div class='alert alert-info ml-3 mr-3'>";
+        echo $anzuzeigendeDaten[$selectedTableID]['hinweis'];
+        echo "</div>";
+    }?>
+
+    <?php 
+    if($tabelle!=""){
+    echo "<div class='container mt-2'>";
+    echo "    <p><input type='text' id='tableFilter' class='form-control' placeholder='Filter...'></p>";
+    echo "</div>";
+    }
+    ?>
+
+
 
     <?php if (!empty($tabelle) && $admin): ?>
     <div class="container mt-2">
-        <button id="insertDefaultButton" class="btn btn-primary mb-2">Neuen Datensatz einfügen</button>
+        <button id="resetButton" class="btn btn-success mb-2" onclick="resetPage()">Reset</button>
+        <button id="insertDefaultButton" class="btn btn-success mb-2">Neuen Datensatz einfügen</button>
         <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte Zeilen löschen</button>
     </div>
     <?php endif; ?>
-
+    
     <table class="table table-striped table-bordered">
         <thead>
             <tr>
