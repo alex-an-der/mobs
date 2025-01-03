@@ -1,7 +1,35 @@
 <?php
+require_once(__DIR__ . "/../inc/include.php");
 $admin = 1;
-if(isset($_GET['tab'])) {
-    $tabelle = $_GET['tab'];
+$selectedTableID = isset($_GET['tab']) ? $_GET['tab'] : "";
+$data = array();
+if(isset($anzuzeigendeDaten[$selectedTableID])){
+
+    // Tabellenname existiert?
+    if(isset($anzuzeigendeDaten[$selectedTableID]['tabellenname'])){
+        $tabelle = $anzuzeigendeDaten[$selectedTableID]['tabellenname'];
+    }else{
+        $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['tabellenname'] enth&auml;lt keinen g&uuml;ltigen Tabellennamen oder existiert nicht.";
+        dieWithError($err,__FILE__,__LINE__);
+    }
+    // Query existiert?
+    if(isset($anzuzeigendeDaten[$selectedTableID]['query'])){
+        $dataquery = $anzuzeigendeDaten[$selectedTableID]['query'];
+    }else{
+        $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt keinen g&uuml;ltigen Tabellennamen oder existiert nicht.";
+        dieWithError($err,__FILE__,__LINE__);
+    }
+    // Query funktioniert?
+    if(!$data = $db->query($dataquery)){
+        $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt kein g&uuml;ltiges SQL-Statement.";
+        dieWithError($err,__FILE__,__LINE__);
+    }
+    // Gibt es eine ID-Spalte?
+    if(!isset($data[0]['id'])){
+        $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] muss eine Spalte 'id' zur&uuml;ckgeben.";
+        dieWithError($err,__FILE__,__LINE__);
+    }
+
 } else {
     $tabelle = "";
 }
@@ -17,28 +45,8 @@ $tabelle_upper = strtoupper($tabelle)
     <title><?=!empty($tabelle_upper) ? $tabelle_upper.' bearbeiten' : 'Tabelle ausw&auml;hlen'?></title>
 
     <?php
-    require_once(__DIR__ . "/../inc/include.php");
     
-    $data = [];
-    if (!empty($tabelle)) {
-        // Find the auto-increment column
-        $columns = $db->query("SHOW COLUMNS FROM $tabelle");
-        $autoIncrementColumn = null;
-        foreach ($columns as $column) {
-            if ($column['Extra'] === 'auto_increment') {
-                $autoIncrementColumn = $column['Field'];
-                break;
-            }
-        }
 
-        if ($autoIncrementColumn) {
-            $data = $db->query("SELECT * FROM $tabelle ORDER BY $autoIncrementColumn DESC");
-        } else {
-            $data = $db->query("SELECT * FROM $tabelle");
-        }
-
-        if (!$data) $db->log(__FILE__.":".__LINE__." - ". $db->error);
-    }
     ?>
 
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
@@ -132,26 +140,22 @@ function dieWithError($err, $file, $line) {
 }
 
 function renderTableSelectBox($db) {
-    $selectedTable = isset($_GET['tab']) ? $_GET['tab'] : "";
-    $tables = $db->query("SELECT TABLE_NAME, TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() ORDER BY TABLE_COMMENT");
-
+    global $anzuzeigendeDaten;
+    global $selectedTableID;
+    
     echo '<p><form action="data.php" method="get">';
     echo '<select name="tab" class="form-control" onchange="this.form.submit()">';
 
-    // Nur anzeigen, wenn keine Tabelle ausgewählt ist
-    if (empty($selectedTable)) {
+    if(!isset($anzuzeigendeDaten[$selectedTableID])){
         echo '<option value="">-- Tabelle wählen --</option>';
     }
 
-    foreach ($tables as $table) {
-        $tableName = htmlspecialchars($table['TABLE_NAME']);
-        $tableComment = htmlspecialchars($table['TABLE_COMMENT']);
+    foreach ($anzuzeigendeDaten as $index => $table) {
+        $tableName = htmlspecialchars($table['tabellenname']);
+        $tableComment = htmlspecialchars($table['auswahltext']);
         $displayText = !empty($tableComment) ? "$tableComment" : $tableName;
-        $selected = ($tableName === $selectedTable) ? 'selected' : '';
-
-        if (!in_array($tableName, NOSHOWS)) {
-            echo '<option value="' . $tableName . '" ' . $selected . '>' . $displayText . '</option>';
-        }
+        $selected = ($index == $selectedTableID) ? 'selected' : '';
+        echo '<option value="' . $index . '" ' . $selected . '>' . $displayText . '</option>';
     }
 
     echo '</select>';
