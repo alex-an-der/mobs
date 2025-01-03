@@ -83,7 +83,11 @@ $tabelle_upper = strtoupper($tabelle)
 // die Daten zu parsen, um den generischen Ansatz weiter verfolgen zu können. Die schema-Tabellen sind leider recht
 // unzuverlässig (eigene Erfahrung). Daher wird hier der CREATE TABLE-String der Tabelle ausgelesen und die Fremdschlüssel
 // per Regex ermittelt. Die Fremdschlüssel werden in einem Array gespeichert, um später die Anzeige zu verbessern.
-
+function dieWithError($err, $file, $line) {
+    global $db;
+    $db->log("$file:$line - $err");
+    die("<br><div class='container'><b>Konfigurationsfehler:</b> $err</div>");
+}
 
 $createTable = $createTable[0]['Create Table']; // Der eigentliche CREATE inkl. Fremdschlüssel
 $foreignKeys = []; // Array für Fremdschlüssel
@@ -99,43 +103,52 @@ $pattern = "/CONSTRAINT `([^`]+)` FOREIGN KEY \\(`([^`]+)`\\) REFERENCES `([^`]+
 if (preg_match_all($pattern, $createTable, $matches, PREG_SET_ORDER)) {
     foreach ($matches as $match) {
         
-        $FKname = $match[1];
+        $FKname = $match[1]; // So soll diese FK-Spalte dargestellt werden
         $FKtabelle = $match[3];
         $FKspalte = $match[4];
-        $SRCspalte = $match[2];
-        
-        $darstellungspattern = "";
+        $SRC_ID = $match[2]; // die ID, mit der auf die FK-Tabelle zugegangen wird.
+
+        $darstellungsQuery = "";
         if (defined($FKname)) {
-            $darstellungspattern = constant($FKname);
+            $darstellungsQuery = constant($FKname);
         } else {
-            $db->log(__FILE__.":".__LINE__." - Die benötigte Konstante $FKname zur Darstellung einer Fremdschlüsselverknüpfung wurde in config.php nicht gesetzt.");
-            die("<br>&nbsp;&nbsp;&nbsp;&nbsp;<b>Konfigurationsfehler:</b> Die benötigte Konstante <b>$FKname</b> zur Darstellung einer Fremdschlüsselverknüpfung wurde in config.php nicht gesetzt.");
+            $err = "Die benötigte Konstante $FKname zur Darstellung einer Fremdschlüsselverknüpfung wurde in config.php nicht gesetzt.";
+            dieWithError($err,__FILE__,__LINE__);
         }
-
-        preg_match_all('/##(.*?)##/', $darstellungspattern, $matches);
         
-        // Extrahierte Spalten in ein Array speichern
-        $anzuzeigendeSpaltenArray = $matches[1];
-            
-        // Hole die zugehörigen Daten jetzt in einem Rutsch aus der Datenbank
-        $FKdata_all = $db->query("SELECT * FROM $FKtabelle");
-        $FKdata = array();
+        $FKdarstellungAll = $db->query($darstellungsQuery);
 
-        // gehe die verknüpfte Tabelle zeilenweise durch und hole die Werte gemäß des Anzeigepatterns
-        foreach($FKdata_all as $row){
-            $anzeige = $darstellungspattern; // Anzeige-Template
-            foreach($anzuzeigendeSpaltenArray as $anzuzeigendeSpalte){
-                $anzeige = str_replace("##$anzuzeigendeSpalte##", $row[$anzuzeigendeSpalte], $anzeige);
-            }
-            $FKdata[$row['id']] = $anzeige;
-            
+        if (!$FKdarstellungAll) {
+            $err = "Die benötigte Konstante $FKname enthält kein gültiges SQL-Statement.";
+            dieWithError($err,__FILE__,__LINE__);
+        } 
+
+        if (count($FKdarstellungAll[0])!=2){
+            $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige': 'id' = ID der Datensätze und 'anzeige' = ein ggf. zusammengesetzten Text, der zur Anzeige verwendet wird. Er liefert aber ".count($FKdarstellungAll[0])." Ergebnisse.";
+            dieWithError($err,__FILE__,__LINE__);
         }
-    
-        $foreignKeys[$SRCspalte] = [
+
+        if(!isset($FKdarstellungAll[0]['id'])){
+            $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige'. Er liefert aber keine Daten mit der Bezeichnung 'id'.";
+            dieWithError($err,__FILE__,__LINE__);
+        }
+
+        if(!isset($FKdarstellungAll[0]['anzeige'])){
+            $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige'. Er liefert aber keine Daten mit der Bezeichnung 'anzeige'.";
+            dieWithError($err,__FILE__,__LINE__);
+        }
+
+        foreach($FKdarstellungAll as $row){
+            $FKdata[$row['id']] = $row['anzeige'];
+        }
+
+        $foreignKeys[$SRC_ID] = [
             'FKspalte' => $FKspalte,
             'anzeige' => $FKdata
         ]; 
+
     }
+
 }
 
 

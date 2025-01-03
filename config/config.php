@@ -10,12 +10,13 @@ define("spartenleitung1_funktionaer","##Vorname## ##Nachname## (##eMail##)");
 define("spartenleitung2_funktionaer","##Nachname##, ##Vorname##");
 define("mitglieder_geschlecht", "##geschlecht##");
 define("mitglieder_unternehmen", "##Name##");
-define("spartenmitglieder_StammSparte", "##Spartenname##");
-define("spartenmitglieder_StammMitglieder", "##Vorname## ##Nachname##, ##Unternehmen##");
+define("spartenmitglieder_StammSparte", "select id, Spartenname as anzeige from sparten;");
+define("spartenmitglieder_StammMitglieder", "select m.id as id, CONCAT(m.Nachname,', ',m.Vorname, ' (',u.Name,')') as anzeige from mitglieder as m left join unternehmen as u on m.Unternehmen=u.id;");
 
 
 
 # Welche Tabellen sollen nicht angezeigt werden?
-define("NOSHOWS", ["log", "yuser", "geschlechter"]);
+define("NOSHOWS", ["yuser", "geschlechter"]);
+# define("NOSHOWS", ["log", "yuser", "geschlechter"]);
 
 ?>

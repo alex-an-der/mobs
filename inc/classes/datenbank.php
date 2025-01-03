@@ -23,8 +23,11 @@ class Datenbank {
     // Führt pdo-Query aus und liefert das Ergebnis als Array zurück
     public function query($query, $arguments = array()) {
         $stmt = $this->pdo->prepare($query);
-        $success = $stmt->execute($arguments);
-    
+        try{
+            $success = $stmt->execute($arguments);
+        } catch (PDOException $e) {
+            return false;
+        }
         // Prüfen, ob die Abfrage ein SELECT oder SHOW ist
 
         if (stripos(trim($query), 'SELECT') === 0 || stripos(trim($query), 'SHOW') === 0) {
