@@ -83,11 +83,7 @@ $tabelle_upper = strtoupper($tabelle)
 // die Daten zu parsen, um den generischen Ansatz weiter verfolgen zu können. Die schema-Tabellen sind leider recht
 // unzuverlässig (eigene Erfahrung). Daher wird hier der CREATE TABLE-String der Tabelle ausgelesen und die Fremdschlüssel
 // per Regex ermittelt. Die Fremdschlüssel werden in einem Array gespeichert, um später die Anzeige zu verbessern.
-function dieWithError($err, $file, $line) {
-    global $db;
-    $db->log("$file:$line - $err");
-    die("<br><div class='container'><b>Konfigurationsfehler:</b> $err</div>");
-}
+
 
 /////////////////////////////////////////////////////////////////////
 
@@ -96,6 +92,7 @@ if(isset($anzeigeSubstitutionen[$tabelle])){
     $substitutionsQueries = $anzeigeSubstitutionen[$tabelle];
 }
 
+$FKdata = array();
 foreach($substitutionsQueries as $SRC_ID => $query){
     $FKname = '$anzeigeSubstitutionen'."['$tabelle']['$SRC_ID']";
         
@@ -122,81 +119,36 @@ foreach($substitutionsQueries as $SRC_ID => $query){
         }
 
         foreach($FKdarstellungAll as $row){
-            $FKdata[$row['id']] = $row['anzeige'];
+            $FKdata[$SRC_ID][] = $row;
+            /*
+            $newEntry = array();
+            $newEntry['id'] = $row['anzeige'];
+            $newEntry['anzeige'] = $row['anzeige'];*/
+
+            /*
+            $FKdata[$row['id']]['anzeige'] = $row['anzeige'];
+            $FKdata[$row['id']]['id'] = $SRC_ID;*/
         }
 
-        $foreignKeys[$SRC_ID] = [
+        /*$foreignKeys[$SRC_ID] = [
             'FKspalte' => 'DBI',
             'anzeige' => $FKdata
-        ]; 
-}
+        ]; */
 
+        // id und Anzeige trennen. Wenn key = id, dann sortiert er das Array nach der id. 
+        // Die Sortierung soll aber durch den Query vom Anwender vorgegeben werden (z.B. alphabetisch).
 
-/*
-$createTable = $createTable[0]['Create Table']; // Der eigentliche CREATE inkl. Fremdschlüssel
-$foreignKeys = []; // Array für Fremdschlüssel
-if (!empty($tabelle)) {
-    $createTable = $db->query("SHOW CREATE TABLE $tabelle;");
-    $createTable = $createTable[0]['Create Table'];
-}
+       // $foreignKeys[] = $FKdata;
 
-// Regex zur Erkennung von Fremdschlüsseln mit FK-Name
-$pattern = "/CONSTRAINT `([^`]+)` FOREIGN KEY \\(`([^`]+)`\\) REFERENCES `([^`]+)` \\(`([^`]+)`\\)/";
-
-// Suche nach allen Fremdschlüsseldefinitionen
-if (preg_match_all($pattern, $createTable, $matches, PREG_SET_ORDER)) {
-    foreach ($matches as $match) {
-        
-        $FKname = $match[1]; // So soll diese FK-Spalte dargestellt werden
-        // $FKtabelle = $match[3]; // Die Tabelle, auf die verwiesen wird
-        $FK_ID = $match[4]; // Die Spalte, auf die verwiesen wird in der referenzierten Tabelle (meist ID).
-        $SRC_ID = $match[2]; // die Spalte, mit der auf die referenzierte Tabelle zugegangen wird (SRC.SRC_ID = FK.FK_ID)
-
-        $darstellungsQuery = "";
-        if (defined($FKname)) {
-            $darstellungsQuery = constant($FKname);
-        } else {
-            $err = "Die benötigte Konstante $FKname zur Darstellung einer Fremdschlüsselverknüpfung wurde in config.php nicht gesetzt.";
-            dieWithError($err,__FILE__,__LINE__);
-        }
-        
-        $FKdarstellungAll = $db->query($darstellungsQuery);
-
-        if (!$FKdarstellungAll) {
-            $err = "Die benötigte Konstante $FKname enthält kein gültiges SQL-Statement.";
-            dieWithError($err,__FILE__,__LINE__);
-        } 
-
-        if (count($FKdarstellungAll[0])!=2){
-            $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige': 'id' = ID der Datensätze und 'anzeige' = ein ggf. zusammengesetzten Text, der zur Anzeige verwendet wird. Er liefert aber ".count($FKdarstellungAll[0])." Ergebnisse.";
-            dieWithError($err,__FILE__,__LINE__);
-        }
-
-        if(!isset($FKdarstellungAll[0]['id'])){
-            $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige'. Er liefert aber keine Daten mit der Bezeichnung 'id'.";
-            dieWithError($err,__FILE__,__LINE__);
-        }
-
-        if(!isset($FKdarstellungAll[0]['anzeige'])){
-            $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige'. Er liefert aber keine Daten mit der Bezeichnung 'anzeige'.";
-            dieWithError($err,__FILE__,__LINE__);
-        }
-
-        foreach($FKdarstellungAll as $row){
-            $FKdata[$row['id']] = $row['anzeige'];
-        }
-
-        $foreignKeys[$SRC_ID] = [
-            'FKspalte' => $FK_ID,
-            #'FKspalte' => 'id2',
-            'anzeige' => $FKdata
-        ]; 
-
-    }
-}
-*/
+} 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function dieWithError($err, $file, $line) {
+    global $db;
+    $db->log("$file:$line - $err");
+    die("<br><div class='container'><b>Konfigurationsfehler:</b> $err</div>");
+}
+
 function renderTableSelectBox($db) {
     $selectedTable = isset($_GET['tab']) ? $_GET['tab'] : "";
     $tables = $db->query("SELECT TABLE_NAME, TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() ORDER BY TABLE_COMMENT");
@@ -236,6 +188,76 @@ function renderTableHeaders($data) {
     }
 }
 
+function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
+    global $db;
+    $columns = $db->query("SHOW COLUMNS FROM $tabelle"); // This is where the SHOW COLUMNS query is fired
+    $columnTypes = [];
+    foreach ($columns as $column) {
+        $columnTypes[$column['Field']] = $column['Type'];
+    }
+
+    foreach ($data as $row) {
+        echo '<tr data-id="' . $row['id'] . '">';
+        echo '<td><button type="button" class="btn btn-outline-light btn-sm toggle-btn" data-id="' . $row['id'] . '" onclick="toggleRowSelection(this)">X</button></td>'; // Toggle button for each row
+        // Gehe alle Datensätze durch. 
+        // $key = Name der Spalte, 
+        // $value = der Wert, wie er in der Datenbank steht
+        foreach ($row as $key => $value) {
+            // id überspringen, DBI: ggf. über select-angaben direkt steuern
+            if (strcasecmp($key, 'id') !== 0) {
+                echo '<td data-field="' . $key . '">';
+                $data_fk_ID_key = "";
+                $data_fk_ID_value = "";
+                
+                // Gibt es zu dieser Spalte eine Substitutionsanweisung?
+                if(isset($foreignKeys[$key])) { 
+                    $data_fk_ID_key = $foreignKeys[$key][$value];
+                    $data_fk_ID_value = $value;
+
+                    if ($admin) {
+                        echo '<select class="form-control border-0" style="background-color: inherit;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)">';
+                        echo '<option value=""' . (empty($value) ? ' selected' : '') . '>---</option>';  // Leere Option
+
+                        foreach ($foreignKeys[$key] as $fk_value => $fk_display) {
+                            $selected = ($fk_value == $value) ? 'selected' : '';
+                            echo '<option value="' . htmlspecialchars($fk_value) . '" ' . $selected . '>' . htmlspecialchars($fk_display) . '</option>';
+                            
+                        }
+
+                        echo '</select>';
+                    } else {
+                        echo htmlspecialchars($data_fk_ID_key);
+                    }
+                } else {
+                    if ($admin) {
+                        $inputType = 'text';
+                        $columnType = $columnTypes[$key];
+                        if (strpos($columnType, 'date') !== false) {
+                            if (strpos($columnType, 'datetime') !== false) {
+                                $inputType = 'datetime-local';
+                                $value = str_replace(' ', 'T', $value);
+                            } else {
+                                $inputType = 'date';
+                            }
+                        }
+                        echo '<input data-fkIDkey="' . htmlspecialchars($data_fk_ID_key) . '" data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value) . '" type="' . $inputType . '" class="form-control border-0" style="background-color: inherit;" value="' . htmlspecialchars($value) . '"
+                              onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value)"
+                              onfocus="clearCellColor(this)">';
+                    } else {
+                        if (strpos($columnType, 'decimal') !== false || strpos($columnType, 'float') !== false) {
+                            $value = number_format((float)$value, 2, '.', '');
+                        }
+                        echo htmlspecialchars($value);
+                    }
+                }
+                echo '</td>';
+            }
+        }
+        echo '</tr>';
+    }
+}
+
+/*
 function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
     global $db;
     $columns = $db->query("SHOW COLUMNS FROM $tabelle"); // This is where the SHOW COLUMNS query is fired
@@ -296,6 +318,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         echo '</tr>';
     }
 }
+*/
 ?>
 
     <div class="container mt-4">
