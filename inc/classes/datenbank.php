@@ -22,6 +22,7 @@ class Datenbank {
 
     // Führt pdo-Query aus und liefert das Ergebnis als Array zurück
     public function query($query, $arguments = array()) {
+        
         $stmt = $this->pdo->prepare($query);
         try{
             $success = $stmt->execute($arguments);
@@ -36,6 +37,10 @@ class Datenbank {
         }
         
         // UPDATE, INSERT, DELETE – Anzahl der betroffenen Zeilen zurückgeben
+        foreach ($arguments as $argument) {
+            $query = preg_replace('/\?/', $argument, $query, 1);
+        }
+        $this->log( $query);
         return $success ? $stmt->rowCount() : false;
     }
 

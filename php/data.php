@@ -543,13 +543,32 @@ function renderTableSelectBox($db) {
     echo '</form></p>';
 }
 
-
+/*
 function renderTableHeaders($data) {
+
     if (!empty($data)) {
         echo '<th><button type="button" class="btn btn-outline-secondary btn-sm toggle-btn toggle-btn-header" id="selectAll" onclick="toggleSelectAll(this)">X</button></th>'; // Toggle button for selecting all rows
         foreach (array_keys($data[0]) as $header) {
             if (strcasecmp($header, 'id') !== 0) {
                 echo '<th data-field="' . htmlspecialchars($header) . '">' . htmlspecialchars($header) . '</th>';
+            }
+        }
+    }
+}
+*/
+
+function renderTableHeaders($data) {
+    global $anzuzeigendeDaten;
+    global $selectedTableID;
+
+    if (!empty($data)) {
+
+        echo '<th><button type="button" class="btn btn-outline-secondary btn-sm toggle-btn toggle-btn-header" id="selectAll" onclick="toggleSelectAll(this)">X</button></th>'; // Toggle button for selecting all rows
+        foreach (array_keys($data[0]) as $header) {
+            $style = "";
+            if(isset($anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header])) $style = "style='width: ".$anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header].";'";
+            if (strcasecmp($header, 'id') !== 0) {
+                echo "<th $style data-field='" . htmlspecialchars($header) . "'>" . htmlspecialchars($header) . "</th>";
             }
         }
     }
@@ -617,6 +636,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                         echo '<input data-type="'.$columnType.'" data-fkIDkey="' . htmlspecialchars($data_fk_ID_key) . '" data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value) . '" type="' . $inputType . '" class="form-control border-0" style="background-color: inherit;" value="' . htmlspecialchars($value) . '"
                               onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, \'' . $columnType . '\')"
                               onfocus="clearCellColor(this)">';
+                
                     } else {
                         if (strpos($columnType, 'decimal') !== false || strpos($columnType, 'float') !== false) {
                             $value = number_format((float)$value, 2, '.', '');
@@ -630,9 +650,10 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         echo '</tr>';
     }
 }
+
 ?>
 
-    <div class="container mt-4">
+    <div class="container-fluid mt-4">
     <!--h2><?=$tabelle_upper?><h2-->
     <div class="container mt-4" style="font-size: 1.75rem; font-weight: bold;">
         <?php renderTableSelectBox($db); ?>
@@ -654,7 +675,6 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
     ?>
 
 
-
     <?php if (!empty($tabelle) && $admin): ?>
     <div class="container mt-2">
         <button id="resetButton" class="btn btn-success mb-2" onclick="resetPage()">Daten neu laden</button>
@@ -662,7 +682,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte Zeilen löschen</button>
     </div>
     <?php endif; ?>
-    
+
     <table class="table table-striped table-bordered">
         <thead>
             <tr>
@@ -675,6 +695,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         ?>
         </tbody>
     </table>
+
 </div>
 
 </body>
