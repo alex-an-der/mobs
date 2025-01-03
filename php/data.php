@@ -19,11 +19,13 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
         $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt keinen g&uuml;ltigen Tabellennamen oder existiert nicht.";
         dieWithError($err,__FILE__,__LINE__);
     }
+    
     // Query funktioniert?
     if(!$data = $db->query($dataquery)){
-        $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt kein g&uuml;ltiges SQL-Statement.";
+        $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt kein g&uuml;ltiges SQL-Statement oder die Tabelle ist leer. In diesem Fall legen Sie bitte einen ersten Datensatz direkt in der Datenbank an.";
         dieWithError($err,__FILE__,__LINE__);
     }
+    
     // Gibt es eine ID-Spalte?
     if(!isset($data[0]['id'])){
         $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] muss eine Spalte 'id' zur&uuml;ckgeben.";

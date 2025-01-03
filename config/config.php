@@ -27,6 +27,12 @@ $anzuzeigendeDaten = array();
 # );
 
 $anzuzeigendeDaten[] = array(
+    "tabellenname" => "kommentare",
+    "auswahltext" => "!! Bitte hier kommentieren, was euch gefällt oder nicht gefällt.",
+    "query" => "select id, timestamp as Zeitstempel, Kommentar, Autor from kommentare order by id desc;"
+);
+
+$anzuzeigendeDaten[] = array(
     "tabellenname" => "mitglieder",
     "auswahltext" => "Mitglieder Stammdaten",
     "query" => "select * from mitglieder order by id desc;",
