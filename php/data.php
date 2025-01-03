@@ -89,6 +89,50 @@ function dieWithError($err, $file, $line) {
     die("<br><div class='container'><b>Konfigurationsfehler:</b> $err</div>");
 }
 
+/////////////////////////////////////////////////////////////////////
+
+
+if(isset($anzeigeSubstitutionen[$tabelle])){
+    $substitutionsQueries = $anzeigeSubstitutionen[$tabelle];
+}
+
+foreach($substitutionsQueries as $SRC_ID => $query){
+    $FKname = '$anzeigeSubstitutionen'."['$tabelle']['$SRC_ID']";
+        
+        $FKdarstellungAll = $db->query($query);
+
+        if (!$FKdarstellungAll) {
+            $err = "Die benötigte Konstante $FKname enthält kein gültiges SQL-Statement.";
+            dieWithError($err,__FILE__,__LINE__);
+        } 
+
+        if (count($FKdarstellungAll[0])!=2){
+            $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige': 'id' = ID der Datensätze und 'anzeige' = ein ggf. zusammengesetzten Text, der zur Anzeige verwendet wird. Er liefert aber ".count($FKdarstellungAll[0])." Ergebnisse.";
+            dieWithError($err,__FILE__,__LINE__);
+        }
+
+        if(!isset($FKdarstellungAll[0]['id'])){
+            $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige'. Er liefert aber keine Daten mit der Bezeichnung 'id'.";
+            dieWithError($err,__FILE__,__LINE__);
+        }
+
+        if(!isset($FKdarstellungAll[0]['anzeige'])){
+            $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige'. Er liefert aber keine Daten mit der Bezeichnung 'anzeige'.";
+            dieWithError($err,__FILE__,__LINE__);
+        }
+
+        foreach($FKdarstellungAll as $row){
+            $FKdata[$row['id']] = $row['anzeige'];
+        }
+
+        $foreignKeys[$SRC_ID] = [
+            'FKspalte' => 'DBI',
+            'anzeige' => $FKdata
+        ]; 
+}
+
+
+/*
 $createTable = $createTable[0]['Create Table']; // Der eigentliche CREATE inkl. Fremdschlüssel
 $foreignKeys = []; // Array für Fremdschlüssel
 if (!empty($tabelle)) {
@@ -104,9 +148,9 @@ if (preg_match_all($pattern, $createTable, $matches, PREG_SET_ORDER)) {
     foreach ($matches as $match) {
         
         $FKname = $match[1]; // So soll diese FK-Spalte dargestellt werden
-        $FKtabelle = $match[3];
-        $FKspalte = $match[4];
-        $SRC_ID = $match[2]; // die ID, mit der auf die FK-Tabelle zugegangen wird.
+        // $FKtabelle = $match[3]; // Die Tabelle, auf die verwiesen wird
+        $FK_ID = $match[4]; // Die Spalte, auf die verwiesen wird in der referenzierten Tabelle (meist ID).
+        $SRC_ID = $match[2]; // die Spalte, mit der auf die referenzierte Tabelle zugegangen wird (SRC.SRC_ID = FK.FK_ID)
 
         $darstellungsQuery = "";
         if (defined($FKname)) {
@@ -143,14 +187,14 @@ if (preg_match_all($pattern, $createTable, $matches, PREG_SET_ORDER)) {
         }
 
         $foreignKeys[$SRC_ID] = [
-            'FKspalte' => $FKspalte,
+            'FKspalte' => $FK_ID,
+            #'FKspalte' => 'id2',
             'anzeige' => $FKdata
         ]; 
 
     }
-
 }
-
+*/
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function renderTableSelectBox($db) {

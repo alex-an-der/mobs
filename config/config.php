@@ -13,7 +13,9 @@ define("mitglieder_unternehmen", "##Name##");
 define("spartenmitglieder_StammSparte", "select id, Spartenname as anzeige from sparten;");
 define("spartenmitglieder_StammMitglieder", "select m.id as id, CONCAT(m.Nachname,', ',m.Vorname, ' (',u.Name,')') as anzeige from mitglieder as m left join unternehmen as u on m.Unternehmen=u.id;");
 
-
+$anzeigeSubstitutionen = array();
+$anzeigeSubstitutionen['sparten_mitglieder']['Sparte'] = "select id, Spartenname as anzeige from sparten;";
+$anzeigeSubstitutionen['sparten_mitglieder']['Mitglied'] = "select m.id as id, CONCAT(m.Nachname,', ',m.Vorname, ' (',u.Name,')') as anzeige from mitglieder as m left join unternehmen as u on m.Unternehmen=u.id;";
 
 # Welche Tabellen sollen nicht angezeigt werden?
 define("NOSHOWS", ["yuser", "geschlechter"]);
