@@ -95,9 +95,8 @@ $tabelle_upper = strtoupper($tabelle)
 
 /////////////////////////////////////////////////////////////////////
 
-
-if(isset($anzeigeSubstitutionen[$tabelle])){
-    $substitutionsQueries = $anzeigeSubstitutionen[$tabelle];
+if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])){
+    $substitutionsQueries = $anzuzeigendeDaten[$selectedTableID]['referenzqueries'];
 }
 
 $FKdata = array();
