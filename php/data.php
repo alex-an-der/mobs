@@ -215,6 +215,61 @@ $tabelle_upper = strtoupper($tabelle)
             }
         }
 
+        function checkDubletten() {
+            const checkButton = document.getElementById('check-duplicates');
+            const originalText = checkButton.innerHTML;
+
+            // Zeige den Spinner und deaktiviere den Button
+            checkButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            checkButton.disabled = true;
+
+            fetch('ajax.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ action: 'check_duplicates', tabelle: '<?php echo $tabelle; ?>' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    if (data.duplicates.length > 0) {
+                        filterRowsById(data.duplicates);
+                    } else {
+                        alert('Es wurden keine doppelten Einträge gefunden.');
+                    }
+                } else {
+                    alert('Fehler beim Überprüfen auf doppelte Einträge.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Fehler beim Verarbeiten der Serverantwort.');
+            })
+            .finally(() => {
+                // Setze den Button zurück und aktiviere ihn wieder
+                checkButton.innerHTML = originalText;
+                checkButton.disabled = false;
+            });
+        }
+
+        function filterRowsById(desiredIds) {
+            const table = document.querySelector('table'); // Passe den Selektor bei Bedarf an
+            const rows = table.querySelectorAll('tr[data-id]');
+
+            rows.forEach(row => {
+                const id = parseInt(row.getAttribute('data-id'), 10); // 10 steht für das Dezimalsystem
+                if (desiredIds.includes(id)) {
+                    row.style.display = ''; // Zeige die Zeile an
+                } else {
+                    row.style.display = 'none'; // Blende die Zeile aus
+                }
+            });
+        }
+
+        let lastSortColumn = null;
+        let lastSortOrder = 'asc';
+
         function sortTable(column, order) {
             const table = document.querySelector('table tbody');
             const rows = Array.from(table.rows);
@@ -248,14 +303,57 @@ $tabelle_upper = strtoupper($tabelle)
                 const aNumber = parseFloat(aText.replace(',', '.'));
                 const bNumber = parseFloat(bText.replace(',', '.'));
 
+                let primaryComparison;
                 if (!isNaN(aNumber) && !isNaN(bNumber)) {
-                    return order === 'asc' ? aNumber - bNumber : bNumber - aNumber;
+                    primaryComparison = order === 'asc' ? aNumber - bNumber : bNumber - aNumber;
                 } else {
-                    return order === 'asc' ? aText.localeCompare(bText, undefined, { numeric: true }) : bText.localeCompare(aText, undefined, { numeric: true });
+                    primaryComparison = order === 'asc' ? aText.localeCompare(bText, undefined, { numeric: true }) : bText.localeCompare(aText, undefined, { numeric: true });
+                }
+
+                if (primaryComparison !== 0 || lastSortColumn === null) {
+                    return primaryComparison;
+                }
+
+                // Secondary sort by last sorted column
+                const aLastCell = a.querySelector(`td[data-field='${lastSortColumn}']`);
+                const bLastCell = b.querySelector(`td[data-field='${lastSortColumn}']`);
+
+                let aLastText = aLastCell.innerText.trim();
+                let bLastText = bLastCell.innerText.trim();
+
+                const aLastInput = aLastCell.querySelector('input, select');
+                const bLastInput = bLastCell.querySelector('input, select');
+
+                if (aLastInput) {
+                    if (aLastInput.tagName.toLowerCase() === 'select') {
+                        aLastText = aLastInput.options[aLastInput.selectedIndex].text.trim();
+                    } else {
+                        aLastText = aLastInput.value.trim();
+                    }
+                }
+
+                if (bLastInput) {
+                    if (bLastInput.tagName.toLowerCase() === 'select') {
+                        bLastText = bLastInput.options[bLastInput.selectedIndex].text.trim();
+                    } else {
+                        bLastText = bLastInput.value.trim();
+                    }
+                }
+
+                const aLastNumber = parseFloat(aLastText.replace(',', '.'));
+                const bLastNumber = parseFloat(bLastText.replace(',', '.'));
+
+                if (!isNaN(aLastNumber) && !isNaN(bLastNumber)) {
+                    return lastSortOrder === 'asc' ? aLastNumber - bLastNumber : bLastNumber - aLastNumber;
+                } else {
+                    return lastSortOrder === 'asc' ? aLastText.localeCompare(bLastText, undefined, { numeric: true }) : bLastText.localeCompare(aLastText, undefined, { numeric: true });
                 }
             });
 
             rows.forEach(row => table.appendChild(row));
+
+            lastSortColumn = column;
+            lastSortOrder = order;
         }
 
         function addSortEventListeners() {
@@ -465,6 +563,10 @@ $tabelle_upper = strtoupper($tabelle)
                 deleteButton.addEventListener('click', function() {
                     deleteSelectedRows('<?=$tabelle?>');
                 });
+            }
+            const checkDuplicatesButton = document.getElementById('check-duplicates');
+            if (checkDuplicatesButton) {
+                checkDuplicatesButton.addEventListener('click', checkDubletten);
             }
         });
     
@@ -687,6 +789,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         <button id="resetButton" class="btn btn-success mb-2" onclick="resetPage()">Daten neu laden</button>
         <button id="insertDefaultButton" class="btn btn-success mb-2">Neuen Datensatz einfügen</button>
         <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte Zeilen löschen</button>
+        <button id="check-duplicates" class="btn btn-success mb-2">Dubletten anzeigen</button>
    
     <?php endif; ?>
     </div>

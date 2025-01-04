@@ -114,4 +114,38 @@ if ($data['action'] == 'delete') {
         echo json_encode(["status" => "error", "message" => "Fehler beim Löschen der Daten."]);
     }
 }
+
+// Überprüfen auf doppelte Einträge
+if ($data['action'] == 'check_duplicates') {
+    $tabelle = $data['tabelle'];
+
+    // Get columns excluding auto-increment columns
+    $columnsQuery = "SHOW COLUMNS FROM `$tabelle`";
+    $columnsResult = $db->query($columnsQuery);
+    $columns = array_filter($columnsResult, function($column) {
+        return $column['Extra'] !== 'auto_increment';
+    });
+    $columns = array_column($columns, 'Field');
+
+    // Build query to find duplicates
+    $columnsList = implode(", ", $columns);
+    $duplicatesQuery = "
+        SELECT id
+        FROM (
+            SELECT id, COUNT(*) OVER (PARTITION BY $columnsList) AS cnt
+            FROM `$tabelle` 
+        ) sub
+        WHERE cnt > 1 
+    ";
+    try {
+        $duplicatesResult = $db->query($duplicatesQuery);
+        $duplicateIds = array_column($duplicatesResult, 'id');
+        ob_end_clean();  // Puffer löschen, um saubere JSON-Antwort zu gewährleisten
+        echo json_encode(["status" => "success", "duplicates" => $duplicateIds]);
+    } catch (Exception $e) {
+        ob_end_clean();
+        $db->log("Check duplicates error: " . $e->getMessage());
+        echo json_encode(["status" => "error", "message" => "Fehler beim Überprüfen auf doppelte Einträge."]);
+    }
+}
 ?>
