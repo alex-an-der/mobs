@@ -215,6 +215,58 @@ $tabelle_upper = strtoupper($tabelle)
             }
         }
 
+        function checkDubletten() {
+            const checkButton = document.getElementById('check-duplicates');
+            const originalText = checkButton.innerHTML;
+
+            // Zeige den Spinner und deaktiviere den Button
+            checkButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            checkButton.disabled = true;
+
+            fetch('ajax.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ action: 'check_duplicates', tabelle: '<?php echo $tabelle; ?>' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    if (data.duplicates.length > 0) {
+                        filterRowsById(data.duplicates);
+                    } else {
+                        alert('Es wurden keine doppelten Einträge gefunden.');
+                    }
+                } else {
+                    alert('Fehler beim Überprüfen auf doppelte Einträge.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Fehler beim Verarbeiten der Serverantwort.');
+            })
+            .finally(() => {
+                // Setze den Button zurück und aktiviere ihn wieder
+                checkButton.innerHTML = originalText;
+                checkButton.disabled = false;
+            });
+        }
+
+        function filterRowsById(desiredIds) {
+            const table = document.querySelector('table'); // Passe den Selektor bei Bedarf an
+            const rows = table.querySelectorAll('tr[data-id]');
+
+            rows.forEach(row => {
+                const id = parseInt(row.getAttribute('data-id'), 10); // 10 steht für das Dezimalsystem
+                if (desiredIds.includes(id)) {
+                    row.style.display = ''; // Zeige die Zeile an
+                } else {
+                    row.style.display = 'none'; // Blende die Zeile aus
+                }
+            });
+        }
+
         function sortTable(column, order) {
             const table = document.querySelector('table tbody');
             const rows = Array.from(table.rows);
@@ -466,6 +518,10 @@ $tabelle_upper = strtoupper($tabelle)
                     deleteSelectedRows('<?=$tabelle?>');
                 });
             }
+            const checkDuplicatesButton = document.getElementById('check-duplicates');
+            if (checkDuplicatesButton) {
+                checkDuplicatesButton.addEventListener('click', checkDubletten);
+            }
         });
     
     </script>
@@ -687,6 +743,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         <button id="resetButton" class="btn btn-success mb-2" onclick="resetPage()">Daten neu laden</button>
         <button id="insertDefaultButton" class="btn btn-success mb-2">Neuen Datensatz einfügen</button>
         <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte Zeilen löschen</button>
+        <button id="check-duplicates" class="btn btn-success mb-2">Dubletten anzeigen</button>
    
     <?php endif; ?>
     </div>
