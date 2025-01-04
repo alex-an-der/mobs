@@ -7,6 +7,7 @@ define("DB_PASS", "BallBierBertha42");
 
 
 $anzuzeigendeDaten = array();
+
 # tabellenname => Nur hierein kann in dieser Ansicht ein insert oder update ausgeführt werden.
 #              => Basistabelle für Referenzierung in anderen Tabellen
 # query        => Es muss eine Spalte mit dem Namen "id" angefordert werden, die als eindeutiger Schlüssel verwendet wird.
@@ -16,19 +17,8 @@ $anzuzeigendeDaten = array();
 #
 # KOMPLETTBEISPIEL:
 # ----------------
-# $anzuzeigendeDaten[] = array(
-#     "tabellenname" => "sparten",
-#     "auswahltext" => "Die BSV-Sparten",
-#     "query" => "select id, Sparte, CONCAT(REPLACE(Beitrag,'.',','),' €') as Beitrag, Leitung, Vertretung from sparten order by Sparte;",
-#     "hinweis" => "Hier sind alle Sparten und dies ist ein <b>Hinweistext</b>, was hier zu beachten ist.",
-#     "referenzqueries" => array(
-#         "Leitung"    => "select id, CONCAT(Vorname, ' ', Nachname) as anzeige from funktionaere order by Vorname;",
-#         "Vertretung" => "select id, CONCAT(Vorname, ' ', Nachname) as anzeige from funktionaere order by Vorname;"
-#     )
-# );
-
-
-$anzuzeigendeDaten[] = array(
+#
+/*
     "tabellenname" => "mitglieder",
     "auswahltext" => "Mitglieder Stammdaten",
     "query" => "select * from mitglieder order by id desc;",
@@ -45,44 +35,9 @@ $anzuzeigendeDaten[] = array(
         "Geschlecht"    => "40px"
     )
 );
+*/
 
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "sparten",
-    "auswahltext" => "Die BSV-Sparten",
-    "query" => "select id, Sparte, CONCAT(REPLACE(Beitrag,'.',','),' €') as Beitrag, Leitung, Vertretung from sparten order by Sparte;",
-    "referenzqueries" => array(
-        "Leitung"    => "select id, CONCAT(Vorname, ' ', Nachname) as anzeige from funktionaere order by Vorname;",
-        "Vertretung" => "select id, CONCAT(Vorname, ' ', Nachname) as anzeige from funktionaere order by Vorname;"
-    )
-);
 
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "sparten_mitglieder",
-    "auswahltext" => "Sparten-Mitglieder",
-    "query" => "select id, Sparte, Mitglied, Kommentar from sparten_mitglieder order by id desc;",
-    "referenzqueries" => array(
-        "Sparte" => "select id, Sparte as anzeige from sparten order by anzeige;",
-        "Mitglied" => "select m.id as id, CONCAT(m.Nachname,', ',m.Vorname, ' (',u.Name,')') as anzeige from mitglieder as m left join unternehmen as u on m.Unternehmen=u.id order by m.Nachname;"
-    )
-);
-
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "unternehmen",
-    "auswahltext" => "Unternehmen, Behörden und Betriebssportgemeinschaften",
-    "query" => "select * from unternehmen order by id desc;",
-    "hinweis" => "Dies kann später noch ergänzt werden z.B. mit einer Flag 'natürliche Person (j/n)' - dazu muss ich aber zuerst noch den Datentyp 'binär' implementieren."
-);
-
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "funktionaere",
-    "auswahltext" => "Amtsträger",
-    "query" => "select funktionaere.* from funktionaere order by id desc;",
-    "hinweis" => "Dies kann später noch ergänzt werden z.B. mit einer Flag 'Mitglied des erweiterten Vorstandes' - dazu muss ich aber zuerst noch den Datentyp 'binär' implementieren.",
-    "referenzqueries" => array(
-        "Leitung"    => "select id, CONCAT(Vorname, ' ', Nachname) as anzeige from funktionaere order by Vorname;",
-        "Vertretung" => "select id, CONCAT(Vorname, ' ', Nachname) as anzeige from funktionaere order by Vorname;"
-    )
-);
 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "log",
