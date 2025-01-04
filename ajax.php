@@ -1,6 +1,11 @@
 <?php
 ob_start();  // Ausgabe-Pufferung starten
+<<<<<<< Updated upstream
 require_once(__DIR__ . "/mods/ajax_head.php");
+=======
+require_once(__DIR__ . "/mods/all.head.php");
+require_once(__DIR__ . "/mods/ajax.head.php");
+>>>>>>> Stashed changes
 require_once(__DIR__ . "/inc/include.php");
 
 $data = json_decode(file_get_contents('php://input'), true);
