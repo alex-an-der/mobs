@@ -792,6 +792,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         <button id="check-duplicates" class="btn btn-success mb-2">Dubletten anzeigen</button>
    
     <?php endif; ?>
+
     </div>
     <table class="table table-striped table-bordered">
         <thead>
