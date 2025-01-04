@@ -13,3 +13,8 @@ INSERT INTO log (eintrag) VALUES ('Herzlich Willkommen!');
 ```
   
   1. In einer Tabelle muss zunächst mindestens ein Datensatz existieren, bevor die Darstellung dieser Tabelle korrekt funktioniert.
+
+# YPUM
+## Installation
+1. /yconf/lock.json: von `"installmodus":false` auf `"installmodus":true` stellen.
+2. In das /youm/-Verzeichnis wechseln und die Installation beginnen.

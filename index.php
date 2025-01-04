@@ -1,4 +1,6 @@
 <?php
+require_once(__DIR__ . "/mods/all.head.php");
+require_once(__DIR__ . "/mods/index.head.php");
 require_once(__DIR__ . "/inc/include.php");
 $admin = 1;
 $selectedTableID = isset($_GET['tab']) ? $_GET['tab'] : "";
