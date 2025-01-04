@@ -1,4 +1,14 @@
-# universellerdatenmanager_udama
-Der Udama soll nur aufgrund einer vorhandenen DB-Struktur Daten anzeigen und bearbeiten lassen. Das Rechtemanagement wird mit ypum umgesetzt.
-
-Der Name für den BSV: Datenbankbasierter universeller Mitgliedermanager - DUMM.
+# D.U.M.M. - Datenbasierter universeller Mitgliedermanager
+## Installieren
+1. In der Datenbank muss es eine Log-Tabelle geben. Diese kann so angelegt werden:
+```
+CREATE TABLE `log` ( 
+    `ID` BIGINT AUTO_INCREMENT NOT NULL,
+    `zeit` DATETIME NULL DEFAULT CURRENT_TIMESTAMP ,
+    `eintrag` VARCHAR(1000) NULL,
+     PRIMARY KEY (`ID`)
+  )
+  ENGINE = InnoDB;
+  ```
+  
+  1. In einer Tabelle muss zunächst mindestens ein Datensatz existieren, bevor die Darstellung dieser Tabelle korrekt funktioniert.

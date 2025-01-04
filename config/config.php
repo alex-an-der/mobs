@@ -1,9 +1,10 @@
 <?php 
 # Datenbank-Zugangsdaten
-define("DB_NAME", "db_441127_12");
+define("DB_NAME", "db_441127_14");
 define("DB_HOST", "x96.lima-db.de");
-define("DB_USER", "USER441127");
+define("DB_USER", "USER441127_bsadm");
 define("DB_PASS", "BallBierBertha42");
+
 
 $anzuzeigendeDaten = array();
 # tabellenname => Nur hierein kann in dieser Ansicht ein insert oder update ausgeführt werden.
