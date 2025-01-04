@@ -379,11 +379,11 @@ $tabelle_upper = strtoupper($tabelle)
             if (button.classList.contains('btn-outline-light')) {
                 button.classList.add('btn-light');
                 button.classList.remove('btn-outline-light');
-                button.innerText = 'X';
+                button.innerText = '>>>';
             } else {
                 button.classList.remove('btn-light');
                 button.classList.add('btn-outline-light');
-                button.innerText = 'X';
+                button.innerText = '>>>';
             }
         }
 
@@ -591,7 +591,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
 
     foreach ($data as $row) {
         echo '<tr data-id="' . $row['id'] . '">';
-        echo '<td><button type="button" class="btn btn-outline-light btn-sm toggle-btn" data-id="' . $row['id'] . '" onclick="toggleRowSelection(this)">X</button></td>'; // Toggle button for each row
+        echo '<td><button type="button" class="btn btn-outline-light btn-sm toggle-btn" data-id="' . $row['id'] . '" onclick="toggleRowSelection(this)">>>></button></td>'; // Toggle button for each row
         // Gehe alle Datensätze durch. 
         // $key = Name der Spalte, 
         // $value = der Wert, wie er in der Datenbank steht
