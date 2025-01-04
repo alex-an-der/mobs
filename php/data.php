@@ -267,6 +267,9 @@ $tabelle_upper = strtoupper($tabelle)
             });
         }
 
+        let lastSortColumn = null;
+        let lastSortOrder = 'asc';
+
         function sortTable(column, order) {
             const table = document.querySelector('table tbody');
             const rows = Array.from(table.rows);
@@ -300,14 +303,57 @@ $tabelle_upper = strtoupper($tabelle)
                 const aNumber = parseFloat(aText.replace(',', '.'));
                 const bNumber = parseFloat(bText.replace(',', '.'));
 
+                let primaryComparison;
                 if (!isNaN(aNumber) && !isNaN(bNumber)) {
-                    return order === 'asc' ? aNumber - bNumber : bNumber - aNumber;
+                    primaryComparison = order === 'asc' ? aNumber - bNumber : bNumber - aNumber;
                 } else {
-                    return order === 'asc' ? aText.localeCompare(bText, undefined, { numeric: true }) : bText.localeCompare(aText, undefined, { numeric: true });
+                    primaryComparison = order === 'asc' ? aText.localeCompare(bText, undefined, { numeric: true }) : bText.localeCompare(aText, undefined, { numeric: true });
+                }
+
+                if (primaryComparison !== 0 || lastSortColumn === null) {
+                    return primaryComparison;
+                }
+
+                // Secondary sort by last sorted column
+                const aLastCell = a.querySelector(`td[data-field='${lastSortColumn}']`);
+                const bLastCell = b.querySelector(`td[data-field='${lastSortColumn}']`);
+
+                let aLastText = aLastCell.innerText.trim();
+                let bLastText = bLastCell.innerText.trim();
+
+                const aLastInput = aLastCell.querySelector('input, select');
+                const bLastInput = bLastCell.querySelector('input, select');
+
+                if (aLastInput) {
+                    if (aLastInput.tagName.toLowerCase() === 'select') {
+                        aLastText = aLastInput.options[aLastInput.selectedIndex].text.trim();
+                    } else {
+                        aLastText = aLastInput.value.trim();
+                    }
+                }
+
+                if (bLastInput) {
+                    if (bLastInput.tagName.toLowerCase() === 'select') {
+                        bLastText = bLastInput.options[bLastInput.selectedIndex].text.trim();
+                    } else {
+                        bLastText = bLastInput.value.trim();
+                    }
+                }
+
+                const aLastNumber = parseFloat(aLastText.replace(',', '.'));
+                const bLastNumber = parseFloat(bLastText.replace(',', '.'));
+
+                if (!isNaN(aLastNumber) && !isNaN(bLastNumber)) {
+                    return lastSortOrder === 'asc' ? aLastNumber - bLastNumber : bLastNumber - aLastNumber;
+                } else {
+                    return lastSortOrder === 'asc' ? aLastText.localeCompare(bLastText, undefined, { numeric: true }) : bLastText.localeCompare(aLastText, undefined, { numeric: true });
                 }
             });
 
             rows.forEach(row => table.appendChild(row));
+
+            lastSortColumn = column;
+            lastSortOrder = order;
         }
 
         function addSortEventListeners() {

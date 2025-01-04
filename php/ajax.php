@@ -133,9 +133,9 @@ if ($data['action'] == 'check_duplicates') {
         SELECT id
         FROM (
             SELECT id, COUNT(*) OVER (PARTITION BY $columnsList) AS cnt
-            FROM `$tabelle`
+            FROM `$tabelle` 
         ) sub
-        WHERE cnt > 1
+        WHERE cnt > 1 
     ";
     try {
         $duplicatesResult = $db->query($duplicatesQuery);
