@@ -18,7 +18,7 @@ class Datenbank {
             $this->pdo = new PDO($dsn, $dbuser, $dbpass);
             $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
-            echo 'Connection to 96-Database failed: ' . $e->getMessage();
+            echo 'Connection to Database failed: ' . $e->getMessage();
         }
     }
 
