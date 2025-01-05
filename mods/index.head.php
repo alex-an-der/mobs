@@ -1,0 +1,1 @@
+<?php require_once("/home/webpages/lima-city/x96/WWW_PROD/bsv/dumm/ypum/yback/ypum.php");?>
