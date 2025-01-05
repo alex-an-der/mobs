@@ -587,40 +587,42 @@ $tabelle_upper = strtoupper($tabelle)
 
 /////////////////////////////////////////////////////////////////////
 
+$FKdata = array();
+
 if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])){
     $substitutionsQueries = $anzuzeigendeDaten[$selectedTableID]['referenzqueries'];
-}
 
-$FKdata = array();
-foreach($substitutionsQueries as $SRC_ID => $query){
-    $FKname = '$anzeigeSubstitutionen'."['$tabelle']['$SRC_ID']";
-        
-        $FKdarstellungAll = $db->query($query);
+    
+    foreach($substitutionsQueries as $SRC_ID => $query){
+        $FKname = '$anzeigeSubstitutionen'."['$tabelle']['$SRC_ID']";
+            
+            $FKdarstellungAll = $db->query($query);
 
-        if (!$FKdarstellungAll) {
-            $err = "Die benötigte Konstante $FKname enthält kein gültiges SQL-Statement.";
-            dieWithError($err,__FILE__,__LINE__);
-        } 
+            if (!$FKdarstellungAll) {
+                $err = "Die benötigte Konstante $FKname enthält kein gültiges SQL-Statement.";
+                dieWithError($err,__FILE__,__LINE__);
+            } 
 
-        if (count($FKdarstellungAll[0])!=2){
-            $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige': 'id' = ID der Datensätze und 'anzeige' = ein ggf. zusammengesetzten Text, der zur Anzeige verwendet wird. Er liefert aber ".count($FKdarstellungAll[0])." Ergebnisse.";
-            dieWithError($err,__FILE__,__LINE__);
-        }
+            if (count($FKdarstellungAll[0])!=2){
+                $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige': 'id' = ID der Datensätze und 'anzeige' = ein ggf. zusammengesetzten Text, der zur Anzeige verwendet wird. Er liefert aber ".count($FKdarstellungAll[0])." Ergebnisse.";
+                dieWithError($err,__FILE__,__LINE__);
+            }
 
-        if(!isset($FKdarstellungAll[0]['id'])){
-            $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige'. Er liefert aber keine Daten mit der Bezeichnung 'id'.";
-            dieWithError($err,__FILE__,__LINE__);
-        }
+            if(!isset($FKdarstellungAll[0]['id'])){
+                $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige'. Er liefert aber keine Daten mit der Bezeichnung 'id'.";
+                dieWithError($err,__FILE__,__LINE__);
+            }
 
-        if(!isset($FKdarstellungAll[0]['anzeige'])){
-            $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige'. Er liefert aber keine Daten mit der Bezeichnung 'anzeige'.";
-            dieWithError($err,__FILE__,__LINE__);
-        }
+            if(!isset($FKdarstellungAll[0]['anzeige'])){
+                $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige'. Er liefert aber keine Daten mit der Bezeichnung 'anzeige'.";
+                dieWithError($err,__FILE__,__LINE__);
+            }
 
-        foreach($FKdarstellungAll as $row){
-            // ID und Anzeige - Informationen zentral sammeln
-            $FKdata[$SRC_ID][] = $row;
-        }
+            foreach($FKdarstellungAll as $row){
+                // ID und Anzeige - Informationen zentral sammeln
+                $FKdata[$SRC_ID][] = $row;
+            }
+    }
 } 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

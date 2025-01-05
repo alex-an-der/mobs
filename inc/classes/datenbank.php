@@ -4,7 +4,7 @@ class Datenbank {
     private $pdo;
 
     public function __construct($sync = false){
-
+        
         require_once(__DIR__ . "/../../mods/all.head.php");
         require_once(__DIR__ . "/../../mods/datenbanken.head.php");
 

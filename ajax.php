@@ -9,6 +9,7 @@ $data = json_decode(file_get_contents('php://input'), true);
 // Update-Logik
 if ($data['action'] == 'update') {
     $id = $data['id'];
+    //$id = intval($id, 10);
     $field = $data['field'];
     $value = $data['value'];
     $tabelle = $data['tabelle'];
