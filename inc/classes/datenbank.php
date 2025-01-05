@@ -25,7 +25,8 @@ class Datenbank {
 
     // Führt pdo-Query aus und liefert das Ergebnis als Array zurück
     public function query($query, $arguments = array()) {
-        
+        require_once(__DIR__ . "/../../mods/before_sending_query.php");
+
         $stmt = $this->pdo->prepare($query);
         try{
             $success = $stmt->execute($arguments);
@@ -48,6 +49,7 @@ class Datenbank {
     }
 
     public function log($eintrag) {
+        require_once(__DIR__ . "/../../mods/before_logging.php");
         try {
             $query = "INSERT INTO log (eintrag) VALUES (:eintrag)";
             $stmt = $this->pdo->prepare($query);
