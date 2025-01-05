@@ -69,8 +69,8 @@ $tabelle_upper = strtoupper($tabelle)
             background-color: red !important;
         }
         .toggle-btn {
-            width: 100%;
-            height: 100%;
+            width: 40px;
+            height: 40px;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -258,7 +258,7 @@ $tabelle_upper = strtoupper($tabelle)
         function filterRowsById(desiredIds) {
             const table = document.querySelector('table'); // Passe den Selektor bei Bedarf an
             const rows = table.querySelectorAll('tr[data-id]');
-
+            2
             rows.forEach(row => {
                 const id = parseInt(row.getAttribute('data-id'), 10); // 10 steht für das Dezimalsystem
                 if (desiredIds.includes(id)) {
@@ -675,7 +675,7 @@ function renderTableHeaders($data) {
 
     if (!empty($data)) {
 
-        echo '<th><button type="button" class="btn btn-outline-secondary btn-sm toggle-btn toggle-btn-header" id="selectAll" onclick="toggleSelectAll(this)">X</button></th>'; // Toggle button for selecting all rows
+        echo "<th style='width:50px;'><button type='button' class='btn p-0 b-0 btn-outline-secondary btn-sm toggle-btn toggle-btn-header' id='selectAll' onclick='toggleSelectAll(this)'>X</button></th>"; // Toggle button for selecting all rows
         foreach (array_keys($data[0]) as $header) {
             $style = "";
             if(isset($anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header])) $style = "style='width: ".$anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header].";'";

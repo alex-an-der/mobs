@@ -43,14 +43,23 @@ $anzuzeigendeDaten[] = array(
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "bsv_1_ortsverbaende",
     "auswahltext" => "Ortsverbände im LBSV Niedersachsen",
-    "query" => "select id, auth_key, Name, Kurzname, Internetadresse from bsv_1_ortsverbaende order by id desc;"
+    "query" => "select id, auth_key, Name, Kurzname, Internetadresse from bsv_1_ortsverbaende order by id desc;",
+    "spaltenbreiten" => array(
+        "auth_key"          => "250px",
+        "Name"              => "350px",
+        "Kurzname"          => "250px",
+    )
 );
 
 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "log",
     "auswahltext" => "Log (zur Entwicklung)",
-    "query" => "select id, id as `Nr.`, zeit as Timestamp, eintrag as Log from log order by id desc;"
+    "query" => "select id, id as `Nr.`, zeit as Timestamp, eintrag as Log from log order by id desc;",
+    "spaltenbreiten" => array(
+        "Nr."       => "80px",
+        "Timestamp" => "220px"
+    )
 );
 
 ?>
