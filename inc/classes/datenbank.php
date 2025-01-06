@@ -5,9 +5,7 @@ class Datenbank {
 
     public function __construct($sync = false){
         
-        require_once(__DIR__ . "/../../mods/all.head.php");
-        require_once(__DIR__ . "/../../mods/datenbanken.head.php");
-
+        
         $dbname = DB_NAME;
         $dbhost = DB_HOST;
         $dbuser = DB_USER;
@@ -37,7 +35,19 @@ class Datenbank {
         // Prüfen, ob die Abfrage ein SELECT oder SHOW ist
 
         if (stripos(trim($query), 'SELECT') === 0 || stripos(trim($query), 'SHOW') === 0) {
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            // DBI
+            if ($result === false) {
+                // Ein Fehler ist aufgetreten
+                return ['error' => 'Ein Fehler ist aufgetreten'];
+            } elseif (empty($result)) {
+                // Keine Daten gefunden
+                return ['message' => 'Keine Daten für Ihre Berechtigungseinstellungen vorhanden.'];
+                
+            } else {
+                // Daten erfolgreich abgerufen
+                return $result;
+            }
         }
         
         // UPDATE, INSERT, DELETE – Anzahl der betroffenen Zeilen zurückgeben
