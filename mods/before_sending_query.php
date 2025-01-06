@@ -1,8 +1,13 @@
 <?php
 # Hier können Sie den Query manipulieren, bevor er an die Datenbank gesendet wird.
 
+# Hier können Sie den Query manipulieren, bevor er an die Datenbank gesendet wird.
+
 # $query = Der Query (select, insert, update, delete), der per PDO an die Datenbank gesendet wird.
 # $arguments = Array von Argumenten, die in den Query eingefügt werden (prepared Statements)
+# $pdo ist ein PDO-Objekt für die aktuelle Datenbank
+# $this ist die Datenbankklasse (inc/classes/datenbank.php)
+
 # $pdo ist ein PDO-Objekt für die aktuelle Datenbank
 # $this ist die Datenbankklasse (inc/classes/datenbank.php)
 

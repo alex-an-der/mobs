@@ -5,7 +5,9 @@ class Datenbank {
 
     public function __construct($sync = false){
         
-        
+        require_once(__DIR__ . "/../../mods/all.head.php");
+        require_once(__DIR__ . "/../../mods/datenbanken.head.php");
+
         $dbname = DB_NAME;
         $dbhost = DB_HOST;
         $dbuser = DB_USER;
