@@ -30,21 +30,23 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
     } elseif (isset($data['message'])) {
         // Leerer Datensatz
         $err = $data['message'];
-        
+        $data = array();
     } elseif (isset($data['data'])) {
         // Datensätze vorhanden
         $data = $data['data'];
+
+        // Gibt es eine ID-Spalte?
+        if(!isset($data[0]['id'])){
+            $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] muss eine Spalte 'id' zur&uuml;ckgeben.";
+            dieWithError($err,__FILE__,__LINE__);
+        }
     } else {
         // Unerwarteter Fall
-        $err = "Ein unerwarteter Fehler ist aufgetreten.";
+        $err = "Ein unbekannter Fehler ist aufgetreten."; 
         dieWithError($err,__FILE__,__LINE__);
     }
     
-    // Gibt es eine ID-Spalte?
-    if(!isset($data[0]['id'])){
-        $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] muss eine Spalte 'id' zur&uuml;ckgeben.";
-        dieWithError($err,__FILE__,__LINE__);
-    }
+
 
 } else {
     $tabelle = "";

@@ -46,7 +46,7 @@ class Datenbank {
                 
             } else {
                 // Daten erfolgreich abgerufen
-                return $result;
+                return ['data' => $result];
             }
         }
         
