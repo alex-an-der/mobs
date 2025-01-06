@@ -23,8 +23,20 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
     }
     
     // Query funktioniert?
-    if(!$data = $db->query($dataquery)){
-        $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt kein g&uuml;ltiges SQL-Statement oder die Tabelle ist leer. In diesem Fall legen Sie bitte einen ersten Datensatz direkt in der Datenbank an.";
+    $data = $db->query($dataquery);
+    if(isset($data['error'])){
+        $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt keinen g&uuml;ltiges SQL-Query.";
+        dieWithError($err,__FILE__,__LINE__);
+    } elseif (isset($data['message'])) {
+        // Leerer Datensatz
+        $err = $data['message'];
+        
+    } elseif (isset($data['data'])) {
+        // Datensätze vorhanden
+        $data = $data['data'];
+    } else {
+        // Unerwarteter Fall
+        $err = "Ein unerwarteter Fehler ist aufgetreten.";
         dieWithError($err,__FILE__,__LINE__);
     }
     
@@ -599,7 +611,7 @@ if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])){
             $FKdarstellungAll = $db->query($query);
 
             if (!$FKdarstellungAll) {
-                $err = "Die benötigte Konstante $FKname enthält kein gültiges SQL-Statement.";
+                $err = "Die benötigte Konstante $FKname enthält kein gültiges SQL-Statement. (Eingelesener Query: $query)";
                 dieWithError($err,__FILE__,__LINE__);
             } 
 
@@ -626,10 +638,11 @@ if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])){
 } 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-function dieWithError($err, $file, $line) {
+function dieWithError($err, $file, $line, $stayAlive = false) {
     global $db;
     $db->log("$file:$line - $err");
-    die("<br><div class='container'><b>Konfigurationsfehler:</b> $err</div>");
+    echo("<br><div class='container'><b>Konfigurationsfehler:</b> $err</div>");
+    if(!$stayAlive) die();
 }
 
 function renderTableSelectBox($db) {
@@ -654,20 +667,6 @@ function renderTableSelectBox($db) {
     echo '</select>';
     echo '</form></p>';
 }
-
-/*
-function renderTableHeaders($data) {
-
-    if (!empty($data)) {
-        echo '<th><button type="button" class="btn btn-outline-secondary btn-sm toggle-btn toggle-btn-header" id="selectAll" onclick="toggleSelectAll(this)">X</button></th>'; // Toggle button for selecting all rows
-        foreach (array_keys($data[0]) as $header) {
-            if (strcasecmp($header, 'id') !== 0) {
-                echo '<th data-field="' . htmlspecialchars($header) . '">' . htmlspecialchars($header) . '</th>';
-            }
-        }
-    }
-}
-*/
 
 function renderTableHeaders($data) {
     global $anzuzeigendeDaten;

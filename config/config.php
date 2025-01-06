@@ -41,9 +41,9 @@ $anzuzeigendeDaten[] = array(
 */
 
 $anzuzeigendeDaten[] = array(
-    "tabellenname" => "bsv_1_ortsverbaende",
+    "tabellenname" => "bsv_1_verband",
     "auswahltext" => "Ortsverbände im LBSV Niedersachsen",
-    "query" => "select id, auth_key, Name, Kurzname, Internetadresse from bsv_1_ortsverbaende order by id desc;",
+    "query" => "select id, auth_key, Name, Kurzname, Internetadresse from bsv_1_verband order by id desc;",
     "spaltenbreiten" => array(
         "auth_key"          => "250px",
         "Name"              => "350px",
