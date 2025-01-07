@@ -23,16 +23,30 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
     }
     
     // Query funktioniert?
-    if(!$data = $db->query($dataquery)){
-        $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt kein g&uuml;ltiges SQL-Statement oder die Tabelle ist leer. In diesem Fall legen Sie bitte einen ersten Datensatz direkt in der Datenbank an.";
+    $data = $db->query($dataquery);
+    if(isset($data['error'])){
+        $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt keinen g&uuml;ltiges SQL-Query.";
+        dieWithError($err,__FILE__,__LINE__);
+    } elseif (isset($data['message'])) {
+        // Leerer Datensatz
+        $err = $data['message'];
+        $data = array();
+    } elseif (isset($data['data'])) {
+        // Datensätze vorhanden
+        $data = $data['data'];
+
+        // Gibt es eine ID-Spalte?
+        if(!isset($data[0]['id'])){
+            $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] muss eine Spalte 'id' zur&uuml;ckgeben.";
+            dieWithError($err,__FILE__,__LINE__);
+        }
+    } else {
+        // Unerwarteter Fall
+        $err = "Ein unbekannter Fehler ist aufgetreten."; 
         dieWithError($err,__FILE__,__LINE__);
     }
     
-    // Gibt es eine ID-Spalte?
-    if(!isset($data[0]['id'])){
-        $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] muss eine Spalte 'id' zur&uuml;ckgeben.";
-        dieWithError($err,__FILE__,__LINE__);
-    }
+
 
 } else {
     $tabelle = "";
@@ -69,8 +83,8 @@ $tabelle_upper = strtoupper($tabelle)
             background-color: red !important;
         }
         .toggle-btn {
-            width: 100%;
-            height: 100%;
+            width: 40px;
+            height: 40px;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -150,7 +164,7 @@ $tabelle_upper = strtoupper($tabelle)
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     try {
-                        const response = JSON.parse(xhr.responseText);
+                        const response = JSON.parse(xhr.responseText); console.log(response);
                         if (response.status === "success" && response.row) {
                             updateRowColors(response.row, id, field);
                         }
@@ -163,7 +177,7 @@ $tabelle_upper = strtoupper($tabelle)
             xhr.send(data);
         }
 
-        function updateRowColors(dbRow, id, field) {
+        function updateRowColors(dbRow, id, field) { 
             const row = document.querySelector(`tr[data-id='${id}']`);
             if (row) {
                 const td = row.querySelector(`td[data-field='${field}']`);
@@ -171,7 +185,7 @@ $tabelle_upper = strtoupper($tabelle)
                     const input = td.querySelector('input');
                     const select = td.querySelector('select');
 
-                    if (input) {
+                    if (input) { 
                         const inputValue = input.value.trim();
                         const dbValue = dbRow[field] === null ? "" : dbRow[field].toString().trim();
 
@@ -258,7 +272,7 @@ $tabelle_upper = strtoupper($tabelle)
         function filterRowsById(desiredIds) {
             const table = document.querySelector('table'); // Passe den Selektor bei Bedarf an
             const rows = table.querySelectorAll('tr[data-id]');
-
+            2
             rows.forEach(row => {
                 const id = parseInt(row.getAttribute('data-id'), 10); // 10 steht für das Dezimalsystem
                 if (desiredIds.includes(id)) {
@@ -587,47 +601,50 @@ $tabelle_upper = strtoupper($tabelle)
 
 /////////////////////////////////////////////////////////////////////
 
+$FKdata = array();
+
 if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])){
     $substitutionsQueries = $anzuzeigendeDaten[$selectedTableID]['referenzqueries'];
-}
 
-$FKdata = array();
-foreach($substitutionsQueries as $SRC_ID => $query){
-    $FKname = '$anzeigeSubstitutionen'."['$tabelle']['$SRC_ID']";
-        
-        $FKdarstellungAll = $db->query($query);
+    
+    foreach($substitutionsQueries as $SRC_ID => $query){
+        $FKname = '$anzeigeSubstitutionen'."['$tabelle']['$SRC_ID']";
+            
+            $FKdarstellungAll = $db->query($query);
 
-        if (!$FKdarstellungAll) {
-            $err = "Die benötigte Konstante $FKname enthält kein gültiges SQL-Statement.";
-            dieWithError($err,__FILE__,__LINE__);
-        } 
+            if (!$FKdarstellungAll) {
+                $err = "Die benötigte Konstante $FKname enthält kein gültiges SQL-Statement. (Eingelesener Query: $query)";
+                dieWithError($err,__FILE__,__LINE__);
+            } 
 
-        if (count($FKdarstellungAll[0])!=2){
-            $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige': 'id' = ID der Datensätze und 'anzeige' = ein ggf. zusammengesetzten Text, der zur Anzeige verwendet wird. Er liefert aber ".count($FKdarstellungAll[0])." Ergebnisse.";
-            dieWithError($err,__FILE__,__LINE__);
-        }
+            if (count($FKdarstellungAll[0])!=2){
+                $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige': 'id' = ID der Datensätze und 'anzeige' = ein ggf. zusammengesetzten Text, der zur Anzeige verwendet wird. Er liefert aber ".count($FKdarstellungAll[0])." Ergebnisse.";
+                dieWithError($err,__FILE__,__LINE__);
+            }
 
-        if(!isset($FKdarstellungAll[0]['id'])){
-            $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige'. Er liefert aber keine Daten mit der Bezeichnung 'id'.";
-            dieWithError($err,__FILE__,__LINE__);
-        }
+            if(!isset($FKdarstellungAll[0]['id'])){
+                $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige'. Er liefert aber keine Daten mit der Bezeichnung 'id'.";
+                dieWithError($err,__FILE__,__LINE__);
+            }
 
-        if(!isset($FKdarstellungAll[0]['anzeige'])){
-            $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige'. Er liefert aber keine Daten mit der Bezeichnung 'anzeige'.";
-            dieWithError($err,__FILE__,__LINE__);
-        }
+            if(!isset($FKdarstellungAll[0]['anzeige'])){
+                $err = "Der Query in der Konstante $FKname muss genau zwei Ergebnisse liefern: 'id' und 'anzeige'. Er liefert aber keine Daten mit der Bezeichnung 'anzeige'.";
+                dieWithError($err,__FILE__,__LINE__);
+            }
 
-        foreach($FKdarstellungAll as $row){
-            // ID und Anzeige - Informationen zentral sammeln
-            $FKdata[$SRC_ID][] = $row;
-        }
+            foreach($FKdarstellungAll as $row){
+                // ID und Anzeige - Informationen zentral sammeln
+                $FKdata[$SRC_ID][] = $row;
+            }
+    }
 } 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-function dieWithError($err, $file, $line) {
+function dieWithError($err, $file, $line, $stayAlive = false) {
     global $db;
     $db->log("$file:$line - $err");
-    die("<br><div class='container'><b>Konfigurationsfehler:</b> $err</div>");
+    echo("<br><div class='container'><b>Konfigurationsfehler:</b> $err</div>");
+    if(!$stayAlive) die();
 }
 
 function renderTableSelectBox($db) {
@@ -653,27 +670,13 @@ function renderTableSelectBox($db) {
     echo '</form></p>';
 }
 
-/*
-function renderTableHeaders($data) {
-
-    if (!empty($data)) {
-        echo '<th><button type="button" class="btn btn-outline-secondary btn-sm toggle-btn toggle-btn-header" id="selectAll" onclick="toggleSelectAll(this)">X</button></th>'; // Toggle button for selecting all rows
-        foreach (array_keys($data[0]) as $header) {
-            if (strcasecmp($header, 'id') !== 0) {
-                echo '<th data-field="' . htmlspecialchars($header) . '">' . htmlspecialchars($header) . '</th>';
-            }
-        }
-    }
-}
-*/
-
 function renderTableHeaders($data) {
     global $anzuzeigendeDaten;
     global $selectedTableID;
 
     if (!empty($data)) {
 
-        echo '<th><button type="button" class="btn btn-outline-secondary btn-sm toggle-btn toggle-btn-header" id="selectAll" onclick="toggleSelectAll(this)">X</button></th>'; // Toggle button for selecting all rows
+        echo "<th style='width:50px;'><button type='button' class='btn p-0 b-0 btn-outline-secondary btn-sm toggle-btn toggle-btn-header' id='selectAll' onclick='toggleSelectAll(this)'>X</button></th>"; // Toggle button for selecting all rows
         foreach (array_keys($data[0]) as $header) {
             $style = "";
             if(isset($anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header])) $style = "style='width: ".$anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header].";'";
@@ -689,7 +692,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
     // Eingabemethode (z.B. Date-Picker) nach Datentyp wählen.
     $columns = $db->query("SHOW COLUMNS FROM $tabelle"); // This is where the SHOW COLUMNS query is fired
     $columnTypes = [];
-    foreach ($columns as $column) {
+    foreach ($columns['data'] as $column) {
         $columnTypes[$column['Field']] = $column['Type'];
     }
 

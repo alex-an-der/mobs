@@ -9,6 +9,7 @@ $data = json_decode(file_get_contents('php://input'), true);
 // Update-Logik
 if ($data['action'] == 'update') {
     $id = $data['id'];
+    //$id = intval($id, 10);
     $field = $data['field'];
     $value = $data['value'];
     $tabelle = $data['tabelle'];
@@ -37,8 +38,8 @@ if ($data['action'] == 'check') {
     try {
         $result = $db->query($query, $args);
         ob_end_clean();
-        if ($result && count($result) > 0) {
-            echo json_encode(["status" => "success", "row" => $result[0]]);
+        if ($result && count($result['data']) > 0) {
+            echo json_encode(["status" => "success", "row" => $result['data'][0]]);
         } else {
             echo json_encode(["status" => "error", "message" => "Keine Zeile gefunden"]);
         }
@@ -62,7 +63,7 @@ if ($data['action'] == 'insert') {
     try {
         $result = $db->query($query, $values);
         ob_end_clean();
-        if ($result) {
+        if ($result['data']) {
             echo json_encode(["status" => "success"]);
         } else {
             $errorInfo = $db->errorInfo();
