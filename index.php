@@ -23,16 +23,30 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
     }
     
     // Query funktioniert?
-    if(!$data = $db->query($dataquery)){
-        $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt kein g&uuml;ltiges SQL-Statement oder die Tabelle ist leer. In diesem Fall legen Sie bitte einen ersten Datensatz direkt in der Datenbank an.";
+    $data = $db->query($dataquery);
+    if(isset($data['error'])){
+        $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt keinen g&uuml;ltiges SQL-Query.";
+        dieWithError($err,__FILE__,__LINE__);
+    } elseif (isset($data['message'])) {
+        // Leerer Datensatz
+        $err = $data['message'];
+        $data = array();
+    } elseif (isset($data['data'])) {
+        // Datensätze vorhanden
+        $data = $data['data'];
+
+        // Gibt es eine ID-Spalte?
+        if(!isset($data[0]['id'])){
+            $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] muss eine Spalte 'id' zur&uuml;ckgeben.";
+            dieWithError($err,__FILE__,__LINE__);
+        }
+    } else {
+        // Unerwarteter Fall
+        $err = "Ein unbekannter Fehler ist aufgetreten."; 
         dieWithError($err,__FILE__,__LINE__);
     }
     
-    // Gibt es eine ID-Spalte?
-    if(!isset($data[0]['id'])){
-        $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] muss eine Spalte 'id' zur&uuml;ckgeben.";
-        dieWithError($err,__FILE__,__LINE__);
-    }
+
 
 } else {
     $tabelle = "";
@@ -150,7 +164,7 @@ $tabelle_upper = strtoupper($tabelle)
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     try {
-                        const response = JSON.parse(xhr.responseText);
+                        const response = JSON.parse(xhr.responseText); console.log(response);
                         if (response.status === "success" && response.row) {
                             updateRowColors(response.row, id, field);
                         }
@@ -163,7 +177,7 @@ $tabelle_upper = strtoupper($tabelle)
             xhr.send(data);
         }
 
-        function updateRowColors(dbRow, id, field) {
+        function updateRowColors(dbRow, id, field) { 
             const row = document.querySelector(`tr[data-id='${id}']`);
             if (row) {
                 const td = row.querySelector(`td[data-field='${field}']`);
@@ -171,7 +185,7 @@ $tabelle_upper = strtoupper($tabelle)
                     const input = td.querySelector('input');
                     const select = td.querySelector('select');
 
-                    if (input) {
+                    if (input) { 
                         const inputValue = input.value.trim();
                         const dbValue = dbRow[field] === null ? "" : dbRow[field].toString().trim();
 
@@ -599,7 +613,7 @@ if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])){
             $FKdarstellungAll = $db->query($query);
 
             if (!$FKdarstellungAll) {
-                $err = "Die benötigte Konstante $FKname enthält kein gültiges SQL-Statement.";
+                $err = "Die benötigte Konstante $FKname enthält kein gültiges SQL-Statement. (Eingelesener Query: $query)";
                 dieWithError($err,__FILE__,__LINE__);
             } 
 
@@ -626,10 +640,11 @@ if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])){
 } 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-function dieWithError($err, $file, $line) {
+function dieWithError($err, $file, $line, $stayAlive = false) {
     global $db;
     $db->log("$file:$line - $err");
-    die("<br><div class='container'><b>Konfigurationsfehler:</b> $err</div>");
+    echo("<br><div class='container'><b>Konfigurationsfehler:</b> $err</div>");
+    if(!$stayAlive) die();
 }
 
 function renderTableSelectBox($db) {
@@ -655,20 +670,6 @@ function renderTableSelectBox($db) {
     echo '</form></p>';
 }
 
-/*
-function renderTableHeaders($data) {
-
-    if (!empty($data)) {
-        echo '<th><button type="button" class="btn btn-outline-secondary btn-sm toggle-btn toggle-btn-header" id="selectAll" onclick="toggleSelectAll(this)">X</button></th>'; // Toggle button for selecting all rows
-        foreach (array_keys($data[0]) as $header) {
-            if (strcasecmp($header, 'id') !== 0) {
-                echo '<th data-field="' . htmlspecialchars($header) . '">' . htmlspecialchars($header) . '</th>';
-            }
-        }
-    }
-}
-*/
-
 function renderTableHeaders($data) {
     global $anzuzeigendeDaten;
     global $selectedTableID;
@@ -691,7 +692,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
     // Eingabemethode (z.B. Date-Picker) nach Datentyp wählen.
     $columns = $db->query("SHOW COLUMNS FROM $tabelle"); // This is where the SHOW COLUMNS query is fired
     $columnTypes = [];
-    foreach ($columns as $column) {
+    foreach ($columns['data'] as $column) {
         $columnTypes[$column['Field']] = $column['Type'];
     }
 
