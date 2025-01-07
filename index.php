@@ -164,7 +164,7 @@ $tabelle_upper = strtoupper($tabelle)
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     try {
-                        const response = JSON.parse(xhr.responseText);
+                        const response = JSON.parse(xhr.responseText); console.log(response);
                         if (response.status === "success" && response.row) {
                             updateRowColors(response.row, id, field);
                         }
@@ -177,7 +177,7 @@ $tabelle_upper = strtoupper($tabelle)
             xhr.send(data);
         }
 
-        function updateRowColors(dbRow, id, field) {
+        function updateRowColors(dbRow, id, field) { 
             const row = document.querySelector(`tr[data-id='${id}']`);
             if (row) {
                 const td = row.querySelector(`td[data-field='${field}']`);
@@ -185,7 +185,7 @@ $tabelle_upper = strtoupper($tabelle)
                     const input = td.querySelector('input');
                     const select = td.querySelector('select');
 
-                    if (input) {
+                    if (input) { 
                         const inputValue = input.value.trim();
                         const dbValue = dbRow[field] === null ? "" : dbRow[field].toString().trim();
 
@@ -692,7 +692,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
     // Eingabemethode (z.B. Date-Picker) nach Datentyp wählen.
     $columns = $db->query("SHOW COLUMNS FROM $tabelle"); // This is where the SHOW COLUMNS query is fired
     $columnTypes = [];
-    foreach ($columns as $column) {
+    foreach ($columns['data'] as $column) {
         $columnTypes[$column['Field']] = $column['Type'];
     }
 
