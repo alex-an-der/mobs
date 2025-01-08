@@ -7,7 +7,7 @@ define("DB_HOST", "x96.lima-db.de");
 define("DB_USER", "USER441127_bsadm");
 define("DB_PASS", "BallBierBertha42");
 
-
+$uid = $_SESSION['uid'];
 $anzuzeigendeDaten = array();
 
 # tabellenname => Nur hierein kann in dieser Ansicht ein insert oder update ausgeführt werden.
@@ -40,9 +40,10 @@ $anzuzeigendeDaten[] = array(
 );
 */
 
+# Verbände
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "bsv_1_verband",
-    "auswahltext" => "Ortsverbände im LBSV Niedersachsen",
+    "auswahltext" => "Verbände im LBSV Niedersachsen",
     "query" => "select id, Name, Kurzname, Internetadresse from bsv_1_verband order by id desc;",
     "spaltenbreiten" => array(
         "Name"              => "350px",
@@ -50,6 +51,83 @@ $anzuzeigendeDaten[] = array(
     )
 );
 
+#Verband-Rechte
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "bsv_1_verband_rechte",
+    "auswahltext" => "Rechtemanagement: Verbände",
+    "query" => "select id, berechtigter_yuser, Verband from bsv_1_verband_rechte order by id desc;",
+    "referenzqueries" => array(
+        "berechtigter_yuser" => "select id, mail as anzeige from y_user order by mail;",
+        "Verband" => "SELECT id, `Name` as anzeige from bsv_1_verband order by Name;"
+    )
+);
+
+/*
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "bsv_1_verband_rechte",
+    "auswahltext" => "Rechtemanagement: Verbände",
+    "query" => "select id, Nutzer, Verband from bsv_1_verband_rechte order by id desc;",
+    "referenzqueries" => array(
+        "Nutzer" => "select id, mail as anzeige from yuser order by mail;",
+        "Verband" => "SELECT id, `Name` as anzeige from bsv_1_verband order by Name;"
+    )
+);*/
+
+# BSG 
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "bsv_2_bsg",
+    "auswahltext" => "BSG",
+    "query" => "
+        select b.id as id, b.Verband as Verband, b.Name as Name, b.Debitor as Debitor
+        from bsv_1_verband_rechte as r
+        join bsv_2_bsg as b
+        on r.Verband = b.Verband
+        WHERE r.berechtigter_yuser=$uid;",
+
+    "referenzqueries" => array(
+
+        "Verband" => "
+            select v.id as id, v.Name as anzeige 
+            from bsv_1_verband_rechte as r
+            join bsv_1_verband as v
+            on r.Verband = v.id
+            WHERE r.berechtigter_yuser=$uid
+            ORDER BY anzeige;
+            "
+        )
+    
+);
+
+# Sparten
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "bsv_2_sparte",
+    "auswahltext" => "Unsere Sparten",
+    "query" => "
+        select s.id as id, v.Name as Verband, s.Sparte as Sparte, s.Spartenleiter as Spartenleiter 
+        from bsv_2_sparte_rechte as r
+        join bsv_2_sparte as s  on r.Sparte = s.id
+        join bsv_1_verband as v on s.Verband = v.id
+        WHERE r.berechtigter_yuser=$uid 
+
+        union
+
+        select s.id as id, v.Name as Verband, s.Sparte as Sparte, s.Spartenleiter as Spartenleiter 
+        from bsv_1_verband_rechte as r
+        join bsv_2_sparte as s on r.Verband = s.Verband
+        join bsv_1_verband as v on s.Verband = v.id
+        WHERE r.berechtigter_yuser=$uid;"
+);
+
+# Sparten-Rechte
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "bsv_2_sparte_rechte",
+    "auswahltext" => "Rechtemanagement: Sparten",
+    "query" => "select id, Nutzer, Sparte from bsv_2_sparte_rechte order by id desc;",
+    "referenzqueries" => array(
+        "Nutzer" => "select id, geschlecht as anzeige from geschlechter order by geschlecht desc;",
+        "Sparte" => "SELECT id, CONCAT(Name, ', ', Stadt) as anzeige from unternehmen order by Name;"
+    )
+);
 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "log",

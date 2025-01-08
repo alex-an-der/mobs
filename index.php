@@ -610,7 +610,7 @@ if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])){
     foreach($substitutionsQueries as $SRC_ID => $query){
         $FKname = '$anzeigeSubstitutionen'."['$tabelle']['$SRC_ID']";
             
-            $FKdarstellungAll = $db->query($query);
+            $FKdarstellungAll = $db->query($query)['data'];
 
             if (!$FKdarstellungAll) {
                 $err = "Die benötigte Konstante $FKname enthält kein gültiges SQL-Statement. (Eingelesener Query: $query)";
@@ -684,6 +684,12 @@ function renderTableHeaders($data) {
                 echo "<th $style data-field='" . htmlspecialchars($header) . "'>" . htmlspecialchars($header) . "</th>";
             }
         }
+    } else {
+        if ($selectedTableID !== "") {
+            echo "<div class='container mt-4'><div class='alert alert-light' role='alert'>Es gibt keine Datensätze, für die Sie ein Leserecht haben.</div></div>";
+        }else{
+            echo "<div class='container mt-4'><div class='alert alert-light' role='alert'>Bitte wählen Sie eine Tabelle aus.</div></div>";
+        }
     }
 }
 
@@ -703,11 +709,15 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         // $key = Name der Spalte, 
         // $value = der Wert, wie er in der Datenbank steht
         foreach ($row as $key => $value) {
-            // id überspringen, DBI: ggf. über select-angaben direkt steuern
+            if ($value === null) {
+                $value = "";
+            }
+            // id überspringen, 
             if (strcasecmp($key, 'id') !== 0) {
                 echo '<td data-field="' . $key . '">';
                 $data_fk_ID_key = "";
                 $data_fk_ID_value = "";
+               
                 
                 // Gibt es zu dieser Spalte eine Substitutionsanweisung?
                 if(isset($foreignKeys[$key])) { 
