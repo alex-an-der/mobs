@@ -51,16 +51,7 @@ $anzuzeigendeDaten[] = array(
     )
 );
 
-#Verband-Rechte
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "bsv_1_verband_rechte",
-    "auswahltext" => "Rechtemanagement: Verbände",
-    "query" => "select id, berechtigter_yuser, Verband from bsv_1_verband_rechte order by id desc;",
-    "referenzqueries" => array(
-        "berechtigter_yuser" => "select id, mail as anzeige from y_user order by mail;",
-        "Verband" => "SELECT id, `Name` as anzeige from bsv_1_verband order by Name;"
-    )
-);
+
 
 /*
 $anzuzeigendeDaten[] = array(
@@ -99,11 +90,15 @@ $anzuzeigendeDaten[] = array(
 );
 
 # Sparten
+# Alle Sparten, zu denen der User direkt das Leserecht hat +
+# Alle Sparten, zu denen der User das Verbands-Leserecht hat +
+# Alle Sparten, die keinem Verband zugeordnet sind
+
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "bsv_2_sparte",
     "auswahltext" => "Unsere Sparten",
     "query" => "
-        select s.id as id, v.Name as Verband, s.Sparte as Sparte, s.Spartenleiter as Spartenleiter 
+        select s.id as id, v.id as Verband, s.Sparte as Sparte, s.Spartenleiter as Spartenleiter 
         from bsv_2_sparte_rechte as r
         join bsv_2_sparte as s  on r.Sparte = s.id
         join bsv_1_verband as v on s.Verband = v.id
@@ -111,21 +106,66 @@ $anzuzeigendeDaten[] = array(
 
         union
 
-        select s.id as id, v.Name as Verband, s.Sparte as Sparte, s.Spartenleiter as Spartenleiter 
+        select s.id as id, v.id as Verband, s.Sparte as Sparte, s.Spartenleiter as Spartenleiter 
         from bsv_1_verband_rechte as r
         join bsv_2_sparte as s on r.Verband = s.Verband
         join bsv_1_verband as v on s.Verband = v.id
-        WHERE r.berechtigter_yuser=$uid;"
-);
+        WHERE r.berechtigter_yuser=$uid
+
+        union
+
+        select s.id as id, v.id as Verband, s.Sparte as Sparte, s.Spartenleiter as Spartenleiter 
+        from bsv_2_sparte as s 
+        left join bsv_1_verband as v on s.Verband = v.id
+        WHERE s.Verband IS NULL;
+        ;",
+        "referenzqueries" => array(
+            "Verband" => "
+            select v.id as id, v.Name as anzeige 
+            FROM bsv_2_sparte_rechte as r
+            join bsv_2_sparte as s on r.Sparte = s.id
+            join bsv_1_verband as v on v.id = s.Verband
+            WHERE r.berechtigter_yuser=$uid
+            
+            union
+            select v.id as id, Name as anzeige 
+            FROM bsv_1_verband_rechte as r
+            join bsv_1_verband as v on v.id = r.Verband
+            WHERE r.berechtigter_yuser=$uid;
+            ;"
+        )
+    );
+
 
 # Sparten-Rechte
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "bsv_2_sparte_rechte",
     "auswahltext" => "Rechtemanagement: Sparten",
-    "query" => "select id, Nutzer, Sparte from bsv_2_sparte_rechte order by id desc;",
+    "query" => "
+        select r.id as id, yu.mail, s.id as Sparte from bsv_2_sparte_rechte as r
+        join bsv_2_sparte as s on s.id = r.Sparte
+        join y_user as yu on r.berechtigter_yuser = yu.id
+        WHERE r.berechtigter_yuser=4
+        union
+        select  r.id as id,yu.mail, s.id as Sparte from bsv_1_verband_rechte as r
+        join bsv_2_sparte as s on r.Verband = s.Sparte
+        join y_user as yu on r.berechtigter_yuser = yu.id
+        WHERE r.berechtigter_yuser=4;"/*,
+
+        MACH DIE RECHTEABFRAGE ÜBER EINE PROCEDURE AM ENDE!
     "referenzqueries" => array(
-        "Nutzer" => "select id, geschlecht as anzeige from geschlechter order by geschlecht desc;",
         "Sparte" => "SELECT id, CONCAT(Name, ', ', Stadt) as anzeige from unternehmen order by Name;"
+    )*/
+);
+
+#Verband-Rechte
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "bsv_1_verband_rechte",
+    "auswahltext" => "Rechtemanagement: Verbände",
+    "query" => "select id, berechtigter_yuser, Verband from bsv_1_verband_rechte order by id desc;",
+    "referenzqueries" => array(
+        "berechtigter_yuser" => "select id, mail as anzeige from y_user order by mail;",
+        "Verband" => "SELECT id, `Name` as anzeige from bsv_1_verband order by Name;"
     )
 );
 
