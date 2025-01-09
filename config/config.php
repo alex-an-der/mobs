@@ -6,6 +6,7 @@ define("DB_NAME", "db_441127_14");
 define("DB_HOST", "x96.lima-db.de");
 define("DB_USER", "USER441127_bsadm");
 define("DB_PASS", "BallBierBertha42");
+define("TITEL", "LBSV Nds. Mitgliederverwaltung");
 
 $uid = $_SESSION['uid'];
 $anzuzeigendeDaten = array();
@@ -38,23 +39,112 @@ $anzuzeigendeDaten[] = array(
         "Geschlecht"    => "40px"
     )
 );
+
+Kovention: Spalten, die nur lesend angezeigt werden, wird zur Visualisierung für den Nutzer ein Unterstrich vorangestellt. Beispiel: _Verband
 */
 
-# Verbände
+# Verbände - Berechtigt: Administratoren
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_regionalverband",
-    "auswahltext" => "Verbände im LBSV Niedersachsen",
-    "query" => "select id, Name, Kurzname, Internetadresse from b_regionalverband order by id desc;",
+    "auswahltext" => "Regionalverbände",
+    "query" => "select id, Verband, Kurzname, Internetadresse from b_regionalverband order by id desc;",
     "spaltenbreiten" => array(
         "Name"              => "350px",
         "Kurzname"          => "250px",
     )
 );
 
+
+$uid=4;
+
+# Sparten (Verbandsansicht)
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_sparte",
+    "auswahltext" => "Sparten (Verbandsansicht)",
+    "query" => "SELECT s.id, s.Verband as Verband, s.Sparte
+        FROM b_sparte as s
+        LEFT JOIN b_regionalverband_rechte as r on r.Verband = s.Verband
+        WHERE r.Nutzer IS NULL OR r.Nutzer = $uid;
+    ",
+    "referenzqueries" => array(
+        "Verband" => "SELECT v.id, v.Verband as anzeige
+        FROM b_regionalverband as v
+        JOIN b_regionalverband_rechte as r on r.Verband = v.id 
+        where r.Nutzer = $uid 
+        ORDER BY anzeige;
+        "
+    )
+);
+
+# BSG (Verbandsansicht)
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_bsg",
+    "auswahltext" => "BSG (Verbandsansicht)",
+    "query" => "SELECT b.id,
+        b.Verband,
+        `BSG`,
+        `Debitor`,
+        `Ansprechpartner`,
+        `Rechnungsempfänger_Name`,
+        `Rechnungsempfänger_Name2`,
+        `Rechnungsempfänger_Strasse_Nr`,
+        `Rechnungsempfänger_Strasse2`,
+        `Rechnungsempfänger_PLZ_Ort`
+        FROM b_bsg as b
+        LEFT JOIN b_regionalverband_rechte as r on r.Verband = b.Verband
+        WHERE Nutzer IS NULL OR Nutzer = $uid;
+    ",
+    "referenzqueries" => array(
+        "Verband" => "SELECT v.id, v.Verband as anzeige
+        from b_regionalverband as v
+        join b_regionalverband_rechte as r on r.Verband = v.id 
+        where r.Nutzer = $uid 
+        ORDER BY anzeige;
+        "
+    )
+);
+
+###################################################################################
+
+
+
+###################################################################################
+
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_regionalverband_rechte",
+    "auswahltext" => "Rechteverwaltung: Regionalverbände",
+    "query" => "SELECT r.id as id, r.Verband as Verband, r.Nutzer
+    FROM b_regionalverband_rechte as r
+    LEFT JOIN y_user as y on r.Nutzer = y.id     
+    order by id desc;
+    ",
+    "referenzqueries" => array(
+        "Verband" => "SELECT id, Verband as anzeige from b_regionalverband ORDER BY anzeige;",
+        "Nutzer" => "SELECT id, mail as anzeige from y_user ORDER BY anzeige;"
+    )
+);
+
+## Darf ich nur BSG meines Verbandes berechtigen....?
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_bsg_rechte",
+    "auswahltext" => "Rechteverwaltung: BSG",
+    "query" => "SELECT r.id as id, r.BSG as BSG, r.Nutzer
+    FROM b_bsg_rechte as r
+    LEFT JOIN y_user as y on r.Nutzer = y.id     
+    order by id desc;
+    ",
+    "referenzqueries" => array(
+        "Verband" => "SELECT id, Verband as anzeige from b_regionalverband ORDER BY anzeige;",
+        "Nutzer" => "SELECT id, mail as anzeige from y_user ORDER BY anzeige;"
+    )
+);
+
+###################################################################################
+
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "log",
     "auswahltext" => "Log (zur Entwicklung)",
-    "query" => "select id, id as `Nr.`, zeit as Timestamp, eintrag as Log from log order by id desc;",
+    "query" => "SELECT id, id as `Nr.`, zeit as Timestamp, eintrag as Log from log order by zeit desc;",
     "spaltenbreiten" => array(
         "Nr."       => "80px",
         "Timestamp" => "220px"

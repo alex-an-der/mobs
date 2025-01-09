@@ -60,7 +60,7 @@ $tabelle_upper = strtoupper($tabelle)
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?=!empty($tabelle_upper) ? $tabelle_upper.' bearbeiten' : 'Tabelle ausw&auml;hlen'?></title>
+    <title><?=TITEL?></title>
 
     <?php
     
@@ -744,6 +744,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                     } else {
                         echo htmlspecialchars($data_fk_ID_value);
                     }
+
                 } else {
                     if ($admin) {
                         $inputType = 'text';
@@ -801,7 +802,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
 
     <?php if (!empty($tabelle) && $admin): ?>
     
-        <button id="resetButton" class="btn btn-success mb-2" onclick="resetPage()">Daten neu laden</button>
+        <button id="resetButton" class="btn btn-info mb-2" onclick="resetPage()">Daten neu laden</button>
         <button id="insertDefaultButton" class="btn btn-success mb-2">Neuen Datensatz einfügen</button>
         <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte Zeilen löschen</button>
         <button id="check-duplicates" class="btn btn-success mb-2">Dubletten anzeigen</button>
