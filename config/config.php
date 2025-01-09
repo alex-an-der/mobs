@@ -42,15 +42,24 @@ $anzuzeigendeDaten[] = array(
 
 # Verbände
 $anzuzeigendeDaten[] = array(
-    "tabellenname" => "bsv_1_verband",
+    "tabellenname" => "b_regionalverband",
     "auswahltext" => "Verbände im LBSV Niedersachsen",
-    "query" => "select id, Name, Kurzname, Internetadresse from bsv_1_verband order by id desc;",
+    "query" => "select id, Name, Kurzname, Internetadresse from b_regionalverband order by id desc;",
     "spaltenbreiten" => array(
         "Name"              => "350px",
         "Kurzname"          => "250px",
     )
 );
 
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "log",
+    "auswahltext" => "Log (zur Entwicklung)",
+    "query" => "select id, id as `Nr.`, zeit as Timestamp, eintrag as Log from log order by id desc;",
+    "spaltenbreiten" => array(
+        "Nr."       => "80px",
+        "Timestamp" => "220px"
+    )
+);
 
 
 /*
@@ -63,7 +72,7 @@ $anzuzeigendeDaten[] = array(
         "Verband" => "SELECT id, `Name` as anzeige from bsv_1_verband order by Name;"
     )
 );*/
-
+/*
 # BSG 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "bsv_2_bsg",
@@ -155,7 +164,7 @@ $anzuzeigendeDaten[] = array(
         MACH DIE RECHTEABFRAGE ÜBER EINE PROCEDURE AM ENDE!
     "referenzqueries" => array(
         "Sparte" => "SELECT id, CONCAT(Name, ', ', Stadt) as anzeige from unternehmen order by Name;"
-    )*/
+    )
 );
 
 #Verband-Rechte
@@ -168,15 +177,7 @@ $anzuzeigendeDaten[] = array(
         "Verband" => "SELECT id, `Name` as anzeige from bsv_1_verband order by Name;"
     )
 );
+*/
 
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "log",
-    "auswahltext" => "Log (zur Entwicklung)",
-    "query" => "select id, id as `Nr.`, zeit as Timestamp, eintrag as Log from log order by id desc;",
-    "spaltenbreiten" => array(
-        "Nr."       => "80px",
-        "Timestamp" => "220px"
-    )
-);
 
 ?>
