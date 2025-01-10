@@ -25,7 +25,7 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
     // Query funktioniert?
     $data = $db->query($dataquery);
     if(isset($data['error'])){
-        $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt keinen g&uuml;ltiges SQL-Query.";
+        $err = "<p>Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt keinen g&uuml;ltiges SQL-Query:</p> <p><b>". $data['error']."</b></p>";
         dieWithError($err,__FILE__,__LINE__);
     } elseif (isset($data['message'])) {
         // Leerer Datensatz
@@ -95,6 +95,17 @@ $tabelle_upper = strtoupper($tabelle)
         }
         .toggle-btn-header {
             color: darkgrey !important;
+        }
+        thead {
+            position: sticky;
+        }
+        .table-container {
+        overflow: scroll; /* Erlaubt das Scrollen */
+        width: 100%; /* Passt die Breite des Containers an */
+        }
+        .table {
+            table-layout: fixed; /* Stellt sicher, dass die Spaltenbreiten respektiert werden */
+            width: max-content; /* Passt die Breite der Tabelle an */
         }
     </style>
 
@@ -610,10 +621,13 @@ if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])){
     foreach($substitutionsQueries as $SRC_ID => $query){
         $FKname = '$anzeigeSubstitutionen'."['$tabelle']['$SRC_ID']";
             
-            $FKdarstellungAll = $db->query($query)['data'];
-
+            $result = $db->query($query);
+            $FKdarstellungAll = false;
+            if(isset($result['data'])) $FKdarstellungAll = $result['data'];
+            
             if (!$FKdarstellungAll) {
                 $err = "Die benötigte Konstante $FKname enthält kein gültiges SQL-Statement. (Eingelesener Query: $query)";
+                if(isset($result['error'])) $err .= "<p>".$result['error']."</p>";
                 dieWithError($err,__FILE__,__LINE__);
             } 
 
@@ -676,10 +690,10 @@ function renderTableHeaders($data) {
 
     if (!empty($data)) {
 
-        echo "<th style='width:50px;'><button type='button' class='btn p-0 b-0 btn-outline-secondary btn-sm toggle-btn toggle-btn-header' id='selectAll' onclick='toggleSelectAll(this)'>X</button></th>"; // Toggle button for selecting all rows
+        echo "<th style='width: 60px'><button type='button' class='btn p-0 b-0 btn-outline-secondary btn-sm toggle-btn toggle-btn-header' id='selectAll' onclick='toggleSelectAll(this)'>X</button></th>"; // Toggle button for selecting all rows
         foreach (array_keys($data[0]) as $header) {
             $style = "";
-            if(isset($anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header])) $style = "style='width: ".$anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header].";'";
+        if(isset($anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header])) $style = "style='width: ".$anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header]."px;'";
             if (strcasecmp($header, 'id') !== 0) {
                 echo "<th $style data-field='" . htmlspecialchars($header) . "'>" . htmlspecialchars($header) . "</th>";
             }
@@ -810,18 +824,20 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
     <?php endif; ?>
 
     </div>
-    <table class="table table-striped table-bordered">
-        <thead>
-            <tr>
-                <?php renderTableHeaders($data); ?>
-            </tr>
-        </thead>
-        <tbody>
-        <?php 
-            if (!empty($data)) renderTableRows($data, $admin, $tabelle, $FKdata);
-        ?>
-        </tbody>
-    </table>
+    <div class="table-container">
+        <table class="table table-striped table-bordered">
+            <thead> 
+                <tr>
+                    <?php renderTableHeaders($data); ?>
+                </tr>
+            </thead>
+            <tbody>
+            <?php 
+                if (!empty($data)) renderTableRows($data, $admin, $tabelle, $FKdata);
+            ?>
+            </tbody>
+        </table>
+    </div>  
 
 </div>
 
