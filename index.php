@@ -100,12 +100,16 @@ $tabelle_upper = strtoupper($tabelle)
             position: sticky;
         }
         .table-container {
-        overflow: scroll; /* Erlaubt das Scrollen */
-        width: 100%; /* Passt die Breite des Containers an */
+            overflow-x: auto;
+            margin: 0 auto;
         }
         .table {
-            table-layout: fixed; /* Stellt sicher, dass die Spaltenbreiten respektiert werden */
-            width: max-content; /* Passt die Breite der Tabelle an */
+            table-layout: fixed;
+            margin: 0 auto;
+        }
+        th, td {
+            white-space: nowrap;
+            min-width: fit-content;
         }
     </style>
 
@@ -572,6 +576,22 @@ $tabelle_upper = strtoupper($tabelle)
             });
         }
 
+        // Neue Funktion für Container-Management
+        function adjustContainer() {
+            const table = document.querySelector('.table');
+            const container = document.querySelector('.table-container');
+            const containerParent = container.parentElement;
+            
+            // Prüfe ob Tabelle in normalen Container passt
+            if (table.offsetWidth <= 1140) { // Bootstrap container max-width
+                containerParent.classList.remove('container-fluid');
+                containerParent.classList.add('container');
+            } else {
+                containerParent.classList.remove('container');
+                containerParent.classList.add('container-fluid');
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             addSortEventListeners();
             const filterInput = document.getElementById('tableFilter');
@@ -595,6 +615,12 @@ $tabelle_upper = strtoupper($tabelle)
             if (checkDuplicatesButton) {
                 checkDuplicatesButton.addEventListener('click', checkDubletten);
             }
+
+            // Container beim Laden anpassen
+            adjustContainer();
+            
+            // Container bei Größenänderung anpassen
+            window.addEventListener('resize', adjustContainer);
         });
     
     </script>
@@ -689,11 +715,12 @@ function renderTableHeaders($data) {
     global $selectedTableID;
 
     if (!empty($data)) {
-
         echo "<th style='width: 60px'><button type='button' class='btn p-0 b-0 btn-outline-secondary btn-sm toggle-btn toggle-btn-header' id='selectAll' onclick='toggleSelectAll(this)'>X</button></th>"; // Toggle button for selecting all rows
         foreach (array_keys($data[0]) as $header) {
             $style = "";
-        if(isset($anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header])) $style = "style='width: ".$anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header]."px;'";
+            if(isset($anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header])) {
+                $style = "style='width: ".$anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header]."px;'";
+            }
             if (strcasecmp($header, 'id') !== 0) {
                 echo "<th $style data-field='" . htmlspecialchars($header) . "'>" . htmlspecialchars($header) . "</th>";
             }
@@ -701,7 +728,7 @@ function renderTableHeaders($data) {
     } else {
         if ($selectedTableID !== "") {
             echo "<div class='container mt-4'><div class='alert alert-light' role='alert'>Es gibt keine Datensätze, für die Sie ein Leserecht haben.</div></div>";
-        }else{
+        } else {
             echo "<div class='container mt-4'><div class='alert alert-light' role='alert'>Bitte wählen Sie eine Tabelle aus.</div></div>";
         }
     }
@@ -709,6 +736,9 @@ function renderTableHeaders($data) {
 
 function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
     global $db;
+    global $anzuzeigendeDaten;
+    global $selectedTableID;
+
     // Eingabemethode (z.B. Date-Picker) nach Datentyp wählen.
     $columns = $db->query("SHOW COLUMNS FROM $tabelle"); // This is where the SHOW COLUMNS query is fired
     $columnTypes = [];
@@ -728,7 +758,11 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
             }
             // id überspringen, 
             if (strcasecmp($key, 'id') !== 0) {
-                echo '<td data-field="' . $key . '">';
+                $style = "";
+                if(isset($anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$key])) {
+                    $style = "style='width: ".$anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$key]."px;'";
+                }
+                echo '<td data-field="' . $key . '" ' . $style . '>';
                 $data_fk_ID_key = "";
                 $data_fk_ID_value = "";
                
@@ -824,7 +858,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
     <?php endif; ?>
 
     </div>
-    <div class="container">
+    <div class="container-fluid table-container">
         <table class="table table-striped table-bordered">
             <thead> 
                 <tr>

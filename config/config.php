@@ -106,9 +106,9 @@ $anzuzeigendeDaten[] = array(
         "
     ),
     "spaltenbreiten" => array(
-        "Verband"                       => "200",
+        "Verband"                       => "400",
         "BSG"                           => "200",  
-        "Ansrechpartner"                => "400",  
+        "Ansprechpartner"               => "400",  
         "RE_Name"                       => "200",  
         "RE_Name2"                      => "200",  
         "RE_Strase_Nr"                  => "200",  
@@ -119,9 +119,6 @@ $anzuzeigendeDaten[] = array(
 
 ###################################################################################
 
-
-
-###################################################################################
 
 # Alle Verbände werden angezeigt
 $anzuzeigendeDaten[] = array(
@@ -162,7 +159,8 @@ $anzuzeigendeDaten[] = array(
     "query" => "SELECT id, id as Nr, zeit as Timestamp, eintrag as Log from log order by zeit desc;",
     "spaltenbreiten" => array(
         "Nr"       => "80",
-        "Timestamp" => "220"
+        "Timestamp" => "220",
+        "eintrag" => "1620"
     )
 );
 
