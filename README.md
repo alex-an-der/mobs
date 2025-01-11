@@ -39,6 +39,6 @@ offen (4) Als Sonderfall: M => M
 
 # LoP
 ## Berechtigungen weitermachen
-## BUG: SPaltenbreite ist nicht ausreichend implementiert.
+## fix: Spaltenbreite ist nicht ausreichend implementiert.
 ## Wenn M vorhanden:
 BSG-Vewrbandsansicht, Ansprechpartner verbinden
