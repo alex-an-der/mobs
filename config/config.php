@@ -160,7 +160,7 @@ $anzuzeigendeDaten[] = array(
     "spaltenbreiten" => array(
         "Nr"       => "80",
         "Timestamp" => "220",
-        "eintrag" => "1620"
+        "Log" => "1620"
     )
 );
 
