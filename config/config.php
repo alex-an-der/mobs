@@ -111,7 +111,7 @@ $anzuzeigendeDaten[] = array(
         "Ansprechpartner"               => "400",  
         "RE_Name"                       => "200",  
         "RE_Name2"                      => "200",  
-        "RE_Strase_Nr"                  => "200",  
+        "RE_Strase_Nr"                  => "1200",  
         "RE_Strasse2"                   => "200",  
         "RE_PLZ_Ort"                    => "200"
     )

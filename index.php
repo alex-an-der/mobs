@@ -582,17 +582,52 @@ $tabelle_upper = strtoupper($tabelle)
             const container = document.querySelector('.table-container');
             const containerParent = container.parentElement;
             
-            // Prüfe ob Tabelle in normalen Container passt
-            if (table.offsetWidth <= 1140) { // Bootstrap container max-width
-                containerParent.classList.remove('container-fluid');
-                containerParent.classList.add('container');
-            } else {
+            if (!table || !container || !containerParent) return;
+
+            // Bootstrap breakpoints
+            const containerMaxWidth = {
+                sm: 540,
+                md: 720,
+                lg: 960,
+                xl: 1140
+            };
+            
+            // Aktuelle Viewport-Breite
+            const viewportWidth = window.innerWidth;
+            
+            // Temporär container für korrekte Messung
+            containerParent.classList.remove('container-fluid');
+            containerParent.classList.add('container');
+            
+            // Force layout recalculation
+            void containerParent.offsetWidth;
+            
+            // Tatsächliche Tabellenbreite messen
+            const tableWidth = table.offsetWidth;
+            
+            // Aktuelle effektive Container-Breite ermitteln
+            let currentMaxWidth = containerMaxWidth.xl;
+            if (viewportWidth < 1200) currentMaxWidth = containerMaxWidth.lg;
+            if (viewportWidth < 992) currentMaxWidth = containerMaxWidth.md;
+            if (viewportWidth < 768) currentMaxWidth = containerMaxWidth.sm;
+            
+            // Entscheidung: container oder container-fluid
+            if (tableWidth > currentMaxWidth - 30) {
                 containerParent.classList.remove('container');
                 containerParent.classList.add('container-fluid');
+                container.style.overflowX = 'auto';
+            } else {
+                containerParent.classList.remove('container-fluid');
+                containerParent.classList.add('container');
+                container.style.overflowX = 'visible';
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Warte kurz bis Layout stabil ist
+            setTimeout(adjustContainer, 100);
+            
+            // Bereits existierender Code
             addSortEventListeners();
             const filterInput = document.getElementById('tableFilter');
             if (filterInput) {
