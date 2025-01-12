@@ -27,6 +27,7 @@ class Datenbank {
 
         $stmt = $this->pdo->prepare($query);
         try{
+            //$this->log("QUERY: $query" );
             $success = $stmt->execute($arguments);
         } catch (PDOException $e) {
             $errmsg = $e->getMessage();
