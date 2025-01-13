@@ -28,9 +28,9 @@ M := Mitglieder
 
 Dann gilt:
 (1) V => B
-offen (2)      B => M
+(2)      B => M
 (3) V => S
-offen (4) Als Sonderfall: M => M
+(4) Als Sonderfall: M => M
 offen (5) B => M->S
 
 (1) Nur der Verband kann seine BSG anlegen und (z.B. ANsprechpartner) ändern.
