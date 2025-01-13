@@ -168,9 +168,62 @@ function renderTableSelectBox($db) {
 
         function showValidationResult(isValid, message) {
             const resultDiv = document.getElementById('validationResult');
+            const importButton = document.getElementById('importButton');
+            const importHelpContent = document.getElementById('importHelpContent');
+            
             resultDiv.style.display = 'block';
             resultDiv.className = 'alert ' + (isValid ? 'alert-success' : 'alert-danger');
             resultDiv.innerHTML = message;
+            
+            if (isValid) {
+                importButton.style.display = 'inline-block';
+                importHelpContent.classList.remove('show');
+            } else {
+                importButton.style.display = 'none';
+                importHelpContent.classList.add('show');
+            }
+        }
+
+        function importData() {
+            const textarea = document.getElementById('importData');
+            const data = textarea.value.trim();
+            const lines = data.split('\n');
+            const header = parseCSVLine(lines[0]);
+            const values = lines.slice(1)
+                .filter(line => line.trim())
+                .map(line => parseCSVLine(line));
+
+            const importButton = document.getElementById('importButton');
+            importButton.disabled = true;
+            importButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Importiere...';
+
+            fetch('ajax.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'import',
+                    tabelle: '<?= $tabelle ?>',
+                    header: header,
+                    values: values
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.status === 'success') {
+                    showValidationResult(true, result.message);
+                } else {
+                    showValidationResult(false, 'Fehler beim Import: ' + result.message);
+                }
+            })
+            .catch(error => {
+                showValidationResult(false, 'Fehler beim Import: ' + error.message);
+            })
+            .finally(() => {
+                importButton.disabled = false;
+                importButton.innerHTML = 'Daten importieren';
+            });
         }
 
         function parseCSVLine(line) {
@@ -246,13 +299,20 @@ function renderTableSelectBox($db) {
                     <h4>Datenimport für: <?= htmlspecialchars($anzuzeigendeDaten[$selectedTableID]['auswahltext']) ?></h4>
                     
                     <!-- Import Rules -->
-                    <div class="alert alert-warning">
-                        <p><strong>Ihre Tabelle verwendet folgende Spalten:</strong></p>
-                        <p>In der Kopfzeile können folgende Spalten verwendet werden:</p>
-                        <p><code><strong><?= implode(",", $tableColumns) ?></strong></code></p>
-                        <p class="mt-2">Beispiel mit fehlenden Werten:</p>
-                        <code>Anrede,Vorname,Nachname<br>Herr,,Meier<br>Frau,Lisa,</code>
-                        <p class="mt-2"><small>Im Beispiel bleiben die Felder 'Vorname' bzw. 'Nachname' leer (NULL)</small></p>
+                    <div class="alert alert-warning" id="importHelp">
+                        <p class="mb-0">
+                            <button class="btn btn-link p-0" type="button" data-toggle="collapse" data-target="#importHelpContent">
+                                Hilfe zum Import anzeigen/ausblenden
+                            </button>
+                        </p>
+                        <div class="collapse show" id="importHelpContent">
+                            <p class="mt-3"><strong>Ihre Tabelle verwendet folgende Spalten:</strong></p>
+                            <p>In der Kopfzeile können folgende Spalten verwendet werden:</p>
+                            <p><code><strong><?= implode(",", $tableColumns) ?></strong></code></p>
+                            <p class="mt-2">Beispiel mit fehlenden Werten:</p>
+                            <code>Anrede,Vorname,Nachname<br>Herr,,Meier<br>Frau,Lisa,</code>
+                            <p class="mt-2"><small>Im Beispiel bleiben die Felder 'Vorname' bzw. 'Nachname' leer (NULL)</small></p>
+                        </div>
                     </div>
 
                     <!-- Import Form -->
@@ -266,6 +326,7 @@ function renderTableSelectBox($db) {
                     
                     <div id="validationResult" class="alert" style="display:none;"></div>
                     <button onclick="validateImport()" class="btn btn-primary">Daten prüfen</button>
+                    <button onclick="importData()" class="btn btn-success ml-2" id="importButton" style="display:none;">Daten importieren</button>
                 </div>
             <?php endif; ?>
         </div>
