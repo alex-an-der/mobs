@@ -153,6 +153,7 @@ $anzuzeigendeDaten[] = array(
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
     "auswahltext" => "Meine Daten",
+    "import" => false,
     "query" => "SELECT m.*
             FROM b_mitglieder as m 
             join y_user as y on y.mail = m.Mail
