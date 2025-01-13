@@ -151,4 +151,39 @@ if ($data['action'] == 'check_duplicates') {
         echo json_encode(["status" => "error", "message" => "Fehler beim Überprüfen auf doppelte Einträge."]);
     }
 }
+
+// Importieren von Datensätzen
+if ($data['action'] == 'import') {
+    $tabelle = $data['tabelle'];
+    $header = $data['header'];
+    $values = $data['values'];
+    
+    try {
+        // Baue INSERT Query
+        $columns = implode(', ', $header);
+        $valueStrings = [];
+        
+        foreach($values as $row) {
+            $rowValues = array_map(function($val) {
+                if($val === '') return 'NULL';
+                return "'" . addslashes($val) . "'";
+            }, $row);
+            $valueStrings[] = '(' . implode(', ', $rowValues) . ')';
+        }
+        
+        $valuesSql = implode(",\n", $valueStrings);
+        $query = "INSERT INTO $tabelle ($columns) VALUES $valuesSql";
+        
+        $result = $db->query($query);
+        
+        if(isset($result['error'])) {
+            echo json_encode(['status' => 'error', 'message' => $result['error']]);
+        } else {
+            $count = count($values);
+            echo json_encode(['status' => 'success', 'message' => "$count Datensätze wurden importiert"]);
+        }
+    } catch(Exception $e) {
+        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    }
+}
 ?>

@@ -94,6 +94,40 @@ function renderTableSelectBox($db) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?=TITEL?></title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .textarea-container {
+            display: flex;
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        .line-numbers {
+            width: 3em;
+            border-radius: 0.25rem 0 0 0.25rem;
+            border-right: none;
+            text-align: right;
+            color: #6c757d;
+            background-color: #f8f9fa;
+            resize: none;
+            cursor: default;
+            user-select: none;
+            font-family: monospace;
+            padding-right: 0.5rem;
+        }
+        #importData {
+            flex-grow: 1;
+            border-radius: 0 0.25rem 0.25rem 0;
+            font-family: monospace;
+            resize: vertical;
+        }
+        /* Gemeinsame Styles für beide Textareas */
+        .line-numbers, #importData {
+            font-size: 1rem;
+            line-height: 1.5;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            min-height: 200px;
+        }
+    </style>
     <script>
         // Globale Variablen für PHP-Werte
         const validColumns = <?= json_encode($tableColumns ?? []) ?>;
@@ -160,6 +194,28 @@ function renderTableSelectBox($db) {
             fields.push(field.trim());
             return fields;
         }
+
+        function updateLineNumbers() {
+            const textarea = document.getElementById('importData');
+            const lineNumbers = document.getElementById('line-numbers');
+            const lines = textarea.value.split('\n').length;
+            lineNumbers.value = Array.from({length: lines}, (_, i) => i + 1).join('\n');
+            
+            // Synchronisiere Scroll und Höhe
+            lineNumbers.style.height = textarea.offsetHeight + 'px';
+            lineNumbers.scrollTop = textarea.scrollTop;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const textarea = document.getElementById('importData');
+            textarea.addEventListener('input', updateLineNumbers);
+            textarea.addEventListener('scroll', function() {
+                document.getElementById('line-numbers').scrollTop = this.scrollTop;
+            });
+            
+            // Initial update
+            updateLineNumbers();
+        });
     </script>
 </head>
 <body>
@@ -192,7 +248,7 @@ function renderTableSelectBox($db) {
                     <!-- Import Rules -->
                     <div class="alert alert-warning">
                         <p><strong>Ihre Tabelle verwendet folgende Spalten:</strong></p>
-                        <p>Header kann folgende Spalten enthalten:</p>
+                        <p>In der Kopfzeile können folgende Spalten verwendet werden:</p>
                         <p><code><strong><?= implode(",", $tableColumns) ?></strong></code></p>
                         <p class="mt-2">Beispiel mit fehlenden Werten:</p>
                         <code>Anrede,Vorname,Nachname<br>Herr,,Meier<br>Frau,Lisa,</code>
@@ -201,8 +257,11 @@ function renderTableSelectBox($db) {
 
                     <!-- Import Form -->
                     <div class="form-group">
-                        <textarea id="importData" class="form-control" rows="10" 
-                                placeholder="z.B.:&#10;Name,Alter,Stadt&#10;Max Müller,42,Berlin&#10;'Mustermann, Peter',23,Hamburg"></textarea>
+                        <div class="textarea-container">
+                            <textarea id="line-numbers" class="line-numbers" readonly>1</textarea>
+                            <textarea id="importData" class="form-control" rows="10" 
+                                    placeholder="z.B.:&#10;Name,Alter,Stadt&#10;Max Müller,42,Berlin&#10;'Mustermann, Peter',23,Hamburg"></textarea>
+                        </div>
                     </div>
                     
                     <div id="validationResult" class="alert" style="display:none;"></div>
