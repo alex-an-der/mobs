@@ -111,7 +111,7 @@ $anzuzeigendeDaten[] = array(
         "RE_Strasse_Nr"                 => "200",  
         "RE_Strasse2"                   => "200",  
         "RE_PLZ_Ort"                    => "200"
-    )
+    ) 
 );
 
 # Mitglieder in der BSG
