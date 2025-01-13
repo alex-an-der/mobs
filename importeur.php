@@ -275,8 +275,8 @@ function renderTableSelectBox($db) {
     <div class="container-fluid mt-4">
         <div class="container mt-4">
             <!-- Table Select -->
-            <form method="get">
-                <select name="tab" class="form-control" onchange="this.form.submit()">
+            <form method="get" class="d-flex align-items-center">
+                <select name="tab" class="form-control mr-2" onchange="this.form.submit()">
                     <?php foreach(renderTableSelectBox($db) as $option): ?>
                         <option value="<?= htmlspecialchars($option['value']) ?>" 
                                 <?= $option['selected'] ? 'selected' : '' ?>>
@@ -284,6 +284,7 @@ function renderTableSelectBox($db) {
                         </option>
                     <?php endforeach; ?>
                 </select>
+                <a href="index.php?tab=<?= $selectedTableID ?>" class="btn btn-secondary">Zurück</a>
             </form>
 
             <!-- Hints -->

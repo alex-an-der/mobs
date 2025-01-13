@@ -1,8 +1,9 @@
 <?php
-ob_start();  // Ausgabe-Pufferung starten
+ob_start();  // Ausgabe-Pufferung starten vor allen includes
 require_once(__DIR__ . "/mods/all.head.php");
 require_once(__DIR__ . "/mods/ajax.head.php");
 require_once(__DIR__ . "/inc/include.php");
+ob_clean();  // Löschen aller bisherigen Ausgaben
 
 $data = json_decode(file_get_contents('php://input'), true);
 
@@ -18,13 +19,13 @@ if ($data['action'] == 'update') {
     $args = array($value, $id);
     try {
         $result = $db->query($query, $args);
-        ob_end_clean();  // Puffer löschen, um saubere JSON-Antwort zu gewährleisten
-        echo json_encode(["status" => $result ? "success" : "error"]);
+        $response = ["status" => $result ? "success" : "error"];
     } catch (Exception $e) {
-        ob_end_clean();
         $db->log("Update error: " . $e->getMessage());
-        echo json_encode(["status" => "error", "message" => "Fehler beim Update. Stimmt das Datenformat? Für Details siehe log-Tabelle in der Datenbank."]);
+        $response = ["status" => "error", "message" => "Fehler beim Update. Stimmt das Datenformat? Für Details siehe log-Tabelle in der Datenbank."];
     }
+    ob_end_clean();
+    echo json_encode($response);
 }
 
 // Zeilenprüfung nach dem Update
@@ -37,17 +38,17 @@ if ($data['action'] == 'check') {
     $args = array($id);
     try {
         $result = $db->query($query, $args);
-        ob_end_clean();
         if ($result && count($result['data']) > 0) {
-            echo json_encode(["status" => "success", "row" => $result['data'][0]]);
+            $response = ["status" => "success", "row" => $result['data'][0]];
         } else {
-            echo json_encode(["status" => "error", "message" => "Keine Zeile gefunden"]);
+            $response = ["status" => "error", "message" => "Keine Zeile gefunden"];
         }
     } catch (Exception $e) {
-        ob_end_clean();
         $db->log("Check error: " . $e->getMessage());
-        echo json_encode(["status" => "error", "message" => "Fehler beim Zeilenprüfen."]);
+        $response = ["status" => "error", "message" => "Fehler beim Zeilenprüfen."];
     }
+    ob_end_clean();
+    echo json_encode($response);
 }
 
 // Einfügen eines neuen Datensatzes mit Standardwerten
@@ -62,19 +63,19 @@ if ($data['action'] == 'insert') {
     $query = "INSERT INTO `$tabelle` ($fields) VALUES ($placeholders)";
     try {
         $result = $db->query($query, $values);
-        ob_end_clean();
         if ($result['data']) {
-            echo json_encode(["status" => "success"]);
+            $response = ["status" => "success"];
         } else {
             $errorInfo = $db->errorInfo();
             $db->log("Insert error: " . json_encode($errorInfo));
-            echo json_encode(["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!"]);
+            $response = ["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!"];
         }
     } catch (Exception $e) {
-        ob_end_clean();
         $db->log("Exception: " . $e->getMessage());
-        echo json_encode(["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!"]);
+        $response = ["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!"];
     }
+    ob_end_clean();
+    echo json_encode($response);
 }
 
 // Einfügen eines neuen Datensatzes mit Standardwerten aus der Datenbankschema
@@ -85,19 +86,19 @@ if ($data['action'] == 'insert_default') {
     $query = "INSERT INTO `$tabelle` () VALUES ()";
     try {
         $result = $db->query($query);
-        ob_end_clean();
         if ($result) {
-            echo json_encode(["status" => "success"]);
+            $response = ["status" => "success"];
         } else {
             $errorInfo = $db->errorInfo();
             $db->log("Insert error: " . json_encode($errorInfo));
-            echo json_encode(["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!"]);
+            $response = ["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!"];
         }
     } catch (Exception $e) {
-        ob_end_clean();
         $db->log("Exception: " . $e->getMessage());
-        echo json_encode(["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!"]);
+        $response = ["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!"];
     }
+    ob_end_clean();
+    echo json_encode($response);
 }
 
 // Löschen von ausgewählten Datensätzen
@@ -109,13 +110,13 @@ if ($data['action'] == 'delete') {
     $query = "DELETE FROM `$tabelle` WHERE `id` IN ($placeholders)";
     try {
         $result = $db->query($query, $ids);
-        ob_end_clean();
-        echo json_encode(["status" => "success"]);
+        $response = ["status" => "success"];
     } catch (Exception $e) {
-        ob_end_clean();
         $db->log("Delete error: " . $e->getMessage());
-        echo json_encode(["status" => "error", "message" => "Fehler beim Löschen der Daten."]);
+        $response = ["status" => "error", "message" => "Fehler beim Löschen der Daten."];
     }
+    ob_end_clean();
+    echo json_encode($response);
 }
 
 // Überprüfen auf doppelte Einträge
@@ -143,13 +144,13 @@ if ($data['action'] == 'check_duplicates') {
     try {
         $duplicatesResult = $db->query($duplicatesQuery);
         $duplicateIds = array_column($duplicatesResult, 'id');
-        ob_end_clean();  // Puffer löschen, um saubere JSON-Antwort zu gewährleisten
-        echo json_encode(["status" => "success", "duplicates" => $duplicateIds]);
+        $response = ["status" => "success", "duplicates" => $duplicateIds];
     } catch (Exception $e) {
-        ob_end_clean();
         $db->log("Check duplicates error: " . $e->getMessage());
-        echo json_encode(["status" => "error", "message" => "Fehler beim Überprüfen auf doppelte Einträge."]);
+        $response = ["status" => "error", "message" => "Fehler beim Überprüfen auf doppelte Einträge."];
     }
+    ob_end_clean();
+    echo json_encode($response);
 }
 
 // Importieren von Datensätzen
@@ -177,13 +178,15 @@ if ($data['action'] == 'import') {
         $result = $db->query($query);
         
         if(isset($result['error'])) {
-            echo json_encode(['status' => 'error', 'message' => $result['error']]);
+            $response = ['status' => 'error', 'message' => $result['error']];
         } else {
             $count = count($values);
-            echo json_encode(['status' => 'success', 'message' => "$count Datensätze wurden importiert"]);
+            $response = ['status' => 'success', 'message' => "$count Datensätze wurden importiert"];
         }
     } catch(Exception $e) {
-        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        $response = ['status' => 'error', 'message' => $e->getMessage()];
     }
+    ob_end_clean();
+    echo json_encode($response);
 }
 ?>

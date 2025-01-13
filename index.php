@@ -892,6 +892,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         <button id="insertDefaultButton" class="btn btn-success mb-2">Neuen Datensatz einfügen</button>
         <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte Zeilen löschen</button>
         <button id="check-duplicates" class="btn btn-success mb-2">Dubletten anzeigen</button>
+        <a href="importeur.php?tab=<?= $selectedTableID ?>" class="btn btn-info mb-2">Daten importieren</a>
    
     <?php endif; ?>
 
