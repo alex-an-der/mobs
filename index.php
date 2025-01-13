@@ -1,7 +1,10 @@
 <?php
+
 require_once(__DIR__ . "/mods/all.head.php");
 require_once(__DIR__ . "/mods/index.head.php");
 require_once(__DIR__ . "/inc/include.php");
+
+
 $admin = 1;
 $selectedTableID = isset($_GET['tab']) ? $_GET['tab'] : "";
 $data = array();
@@ -25,7 +28,7 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
     // Query funktioniert?
     $data = $db->query($dataquery);
     if(isset($data['error'])){
-        $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt keinen g&uuml;ltiges SQL-Query.";
+        $err = "<p>Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt keinen g&uuml;ltiges SQL-Query:</p> <p><b>". $data['error']."</b></p>";
         dieWithError($err,__FILE__,__LINE__);
     } elseif (isset($data['message'])) {
         // Leerer Datensatz
@@ -60,7 +63,7 @@ $tabelle_upper = strtoupper($tabelle)
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?=!empty($tabelle_upper) ? $tabelle_upper.' bearbeiten' : 'Tabelle ausw&auml;hlen'?></title>
+    <title><?=TITEL?></title>
 
     <?php
     
@@ -95,6 +98,21 @@ $tabelle_upper = strtoupper($tabelle)
         }
         .toggle-btn-header {
             color: darkgrey !important;
+        }
+        thead {
+            position: sticky;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin: 0 auto;
+        }
+        .table {
+            table-layout: fixed;
+            margin: 0 auto;
+        }
+        th, td {
+            white-space: nowrap;
+            min-width: fit-content;
         }
     </style>
 
@@ -561,7 +579,58 @@ $tabelle_upper = strtoupper($tabelle)
             });
         }
 
+        // Neue Funktion für Container-Management
+        function adjustContainer() {
+            const table = document.querySelector('.table');
+            const container = document.querySelector('.table-container');
+            const containerParent = container.parentElement;
+            
+            if (!table || !container || !containerParent) return;
+
+            // Bootstrap breakpoints
+            const containerMaxWidth = {
+                sm: 540,
+                md: 720,
+                lg: 960,
+                xl: 1140
+            };
+            
+            // Aktuelle Viewport-Breite
+            const viewportWidth = window.innerWidth;
+            
+            // Temporär container für korrekte Messung
+            containerParent.classList.remove('container-fluid');
+            containerParent.classList.add('container');
+            
+            // Force layout recalculation
+            void containerParent.offsetWidth;
+            
+            // Tatsächliche Tabellenbreite messen
+            const tableWidth = table.offsetWidth;
+            
+            // Aktuelle effektive Container-Breite ermitteln
+            let currentMaxWidth = containerMaxWidth.xl;
+            if (viewportWidth < 1200) currentMaxWidth = containerMaxWidth.lg;
+            if (viewportWidth < 992) currentMaxWidth = containerMaxWidth.md;
+            if (viewportWidth < 768) currentMaxWidth = containerMaxWidth.sm;
+            
+            // Entscheidung: container oder container-fluid
+            if (tableWidth > currentMaxWidth - 30) {
+                containerParent.classList.remove('container');
+                containerParent.classList.add('container-fluid');
+                container.style.overflowX = 'auto';
+            } else {
+                containerParent.classList.remove('container-fluid');
+                containerParent.classList.add('container');
+                container.style.overflowX = 'visible';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+            // Warte kurz bis Layout stabil ist
+            setTimeout(adjustContainer, 100);
+            
+            // Bereits existierender Code
             addSortEventListeners();
             const filterInput = document.getElementById('tableFilter');
             if (filterInput) {
@@ -584,6 +653,12 @@ $tabelle_upper = strtoupper($tabelle)
             if (checkDuplicatesButton) {
                 checkDuplicatesButton.addEventListener('click', checkDubletten);
             }
+
+            // Container beim Laden anpassen
+            adjustContainer();
+            
+            // Container bei Größenänderung anpassen
+            window.addEventListener('resize', adjustContainer);
         });
     
     </script>
@@ -610,10 +685,13 @@ if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])){
     foreach($substitutionsQueries as $SRC_ID => $query){
         $FKname = '$anzeigeSubstitutionen'."['$tabelle']['$SRC_ID']";
             
-            $FKdarstellungAll = $db->query($query);
-
+            $result = $db->query($query);
+            $FKdarstellungAll = false;
+            if(isset($result['data'])) $FKdarstellungAll = $result['data'];
+            
             if (!$FKdarstellungAll) {
                 $err = "Die benötigte Konstante $FKname enthält kein gültiges SQL-Statement. (Eingelesener Query: $query)";
+                if(isset($result['error'])) $err .= "<p>".$result['error']."</p>";
                 dieWithError($err,__FILE__,__LINE__);
             } 
 
@@ -675,20 +753,30 @@ function renderTableHeaders($data) {
     global $selectedTableID;
 
     if (!empty($data)) {
-
-        echo "<th style='width:50px;'><button type='button' class='btn p-0 b-0 btn-outline-secondary btn-sm toggle-btn toggle-btn-header' id='selectAll' onclick='toggleSelectAll(this)'>X</button></th>"; // Toggle button for selecting all rows
+        echo "<th style='width: 60px'><button type='button' class='btn p-0 b-0 btn-outline-secondary btn-sm toggle-btn toggle-btn-header' id='selectAll' onclick='toggleSelectAll(this)'>X</button></th>"; // Toggle button for selecting all rows
         foreach (array_keys($data[0]) as $header) {
             $style = "";
-            if(isset($anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header])) $style = "style='width: ".$anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header].";'";
+            if(isset($anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header])) {
+                $style = "style='width: ".$anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header]."px;'";
+            }
             if (strcasecmp($header, 'id') !== 0) {
                 echo "<th $style data-field='" . htmlspecialchars($header) . "'>" . htmlspecialchars($header) . "</th>";
             }
+        }
+    } else {
+        if ($selectedTableID !== "") {
+            echo "<div class='container mt-4'><div class='alert alert-light' role='alert'>Es gibt keine Datensätze, für die Sie ein Leserecht haben.</div></div>";
+        } else {
+            echo "<div class='container mt-4'><div class='alert alert-light' role='alert'>Bitte wählen Sie eine Tabelle aus.</div></div>";
         }
     }
 }
 
 function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
     global $db;
+    global $anzuzeigendeDaten;
+    global $selectedTableID;
+
     // Eingabemethode (z.B. Date-Picker) nach Datentyp wählen.
     $columns = $db->query("SHOW COLUMNS FROM $tabelle"); // This is where the SHOW COLUMNS query is fired
     $columnTypes = [];
@@ -703,11 +791,19 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         // $key = Name der Spalte, 
         // $value = der Wert, wie er in der Datenbank steht
         foreach ($row as $key => $value) {
-            // id überspringen, DBI: ggf. über select-angaben direkt steuern
+            if ($value === null) {
+                $value = "";
+            }
+            // id überspringen, 
             if (strcasecmp($key, 'id') !== 0) {
-                echo '<td data-field="' . $key . '">';
+                $style = "";
+                if(isset($anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$key])) {
+                    $style = "style='width: ".$anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$key]."px;'";
+                }
+                echo '<td data-field="' . $key . '" ' . $style . '>';
                 $data_fk_ID_key = "";
                 $data_fk_ID_value = "";
+               
                 
                 // Gibt es zu dieser Spalte eine Substitutionsanweisung?
                 if(isset($foreignKeys[$key])) { 
@@ -734,6 +830,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                     } else {
                         echo htmlspecialchars($data_fk_ID_value);
                     }
+
                 } else {
                     if ($admin) {
                         $inputType = 'text';
@@ -791,7 +888,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
 
     <?php if (!empty($tabelle) && $admin): ?>
     
-        <button id="resetButton" class="btn btn-success mb-2" onclick="resetPage()">Daten neu laden</button>
+        <button id="resetButton" class="btn btn-info mb-2" onclick="resetPage()">Daten neu laden</button>
         <button id="insertDefaultButton" class="btn btn-success mb-2">Neuen Datensatz einfügen</button>
         <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte Zeilen löschen</button>
         <button id="check-duplicates" class="btn btn-success mb-2">Dubletten anzeigen</button>
@@ -799,18 +896,20 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
     <?php endif; ?>
 
     </div>
-    <table class="table table-striped table-bordered">
-        <thead>
-            <tr>
-                <?php renderTableHeaders($data); ?>
-            </tr>
-        </thead>
-        <tbody>
-        <?php 
-            if (!empty($data)) renderTableRows($data, $admin, $tabelle, $FKdata);
-        ?>
-        </tbody>
-    </table>
+    <div class="container-fluid table-container">
+        <table class="table table-striped table-bordered">
+            <thead> 
+                <tr>
+                    <?php renderTableHeaders($data); ?>
+                </tr>
+            </thead>
+            <tbody>
+            <?php 
+                if (!empty($data)) renderTableRows($data, $admin, $tabelle, $FKdata);
+            ?>
+            </tbody>
+        </table>
+    </div>  
 
 </div>
 

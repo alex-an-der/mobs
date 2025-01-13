@@ -59,18 +59,17 @@ $anzuzeigendeDaten[] = array(
 );
 
 
-$uid=1  ;
+$uid=2  ;
 
 
-# Sparten im Regionalverband
+# Sparten (Verbandsansicht)
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_sparte",
-    "auswahltext" => "Sparten im Regionalverband",
-    "query" => "SELECT s.id as id, s.Verband as Verband, s.Sparte, s.Sportart as Sportart
+    "auswahltext" => "Sparten (Verbandsansicht)",
+    "query" => "SELECT s.id, s.Verband as Verband, s.Sparte, s.Sportart as Sportart
         FROM b_sparte as s
         LEFT JOIN b_regionalverband_rechte as r on r.Verband = s.Verband
-        WHERE r.Nutzer IS NULL OR r.Nutzer = $uid
-        order by id desc;
+        WHERE r.Nutzer IS NULL OR r.Nutzer = $uid;
     ",
     "referenzqueries" => array(
         "Verband" => "SELECT v.id, v.Verband as anzeige
@@ -83,16 +82,15 @@ $anzuzeigendeDaten[] = array(
     )
 );
 
-# BSG im Regionalverband
+# BSG (Verbandsansicht)
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_bsg",
-    "auswahltext" => "BSG im Regionalverband",
+    "auswahltext" => "BSG (Verbandsansicht)",
     "hinweis" => "<b>RE </b> = Rechnungsempfänger. In diese Spalten bitte eintragen, wohin eventuelle Rechnungen geschickt werden sollen.",
-    "query" => "SELECT b.id as id, b.Verband as Verband, b.BSG as BSG
-        FROM b_bsg as b
-        LEFT JOIN b_regionalverband_rechte as r on r.Verband = b.Verband
-        WHERE b.Verband  IS NULL OR Nutzer = $uid
-        order by id desc;
+    "query" => "SELECT s.id as id, s.Verband as Verband, s.Sparte as Sparte
+        FROM b_sparte as s
+        LEFT JOIN b_regionalverband_rechte as r on r.Verband = s.Verband
+        WHERE s.Verband  IS NULL OR Nutzer = $uid;
     ",
     "referenzqueries" => array(
         "Verband" => "SELECT v.id, v.Verband as anzeige
@@ -111,50 +109,8 @@ $anzuzeigendeDaten[] = array(
         "RE_Strasse_Nr"                 => "200",  
         "RE_Strasse2"                   => "200",  
         "RE_PLZ_Ort"                    => "200"
-    ) 
-);
-
-# Mitglieder in der BSG
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_mitglieder",
-    "auswahltext" => "Mitglieder in der BSG",
-    "query" => "SELECT m.id as id, m.BSG, m.Vorname, m.Nachname, m.Mail
-            from b_mitglieder as m
-            LEFT JOIN b_bsg_rechte as r on r.BSG = m.BSG
-            WHERE m.BSG  IS NULL OR Nutzer = $uid
-            order by id desc;
-    ",
-    "referenzqueries" => array(
-        "BSG" => "SELECT b.id, b.BSG as anzeige
-        from b_bsg as b
-        join b_bsg_rechte as r on r.BSG = b.id 
-        where r.Nutzer = $uid 
-        ORDER BY anzeige;
-        "
     )
 );
-
-# Meine Mitglieder-Daten
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_mitglieder",
-    "auswahltext" => "Meine Daten",
-    "query" => "SELECT m.*
-            FROM b_mitglieder as m 
-            join y_user as y on y.mail = m.Mail
-            WHERE y.id = $uid
-            order by m.id desc;
-    ",
-    "referenzqueries" => array(
-        "BSG" => "SELECT b.id, b.BSG as anzeige
-        from b_bsg as b
-        join b_bsg_rechte as r on r.BSG = b.id 
-        where r.Nutzer = $uid 
-        ORDER BY anzeige;
-        "
-    )
-);
-
-
 
 ###################################################################################
 ##   RECHTEVERWALTUNG                                                            ##
@@ -164,7 +120,6 @@ $anzuzeigendeDaten[] = array(
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_regionalverband_rechte",
     "auswahltext" => "Rechteverwaltung: Regionalverbände",
-    "hinweis" => "Berechtigt angemeldete Nutzer, Sparten und BSG eines Verbandes zu sehen und zu bearbeiten.",
     "query" => "SELECT r.id as id, r.Verband as Verband, r.Nutzer
                 FROM b_regionalverband_rechte as r 
                 order by id desc;
@@ -181,7 +136,6 @@ $anzuzeigendeDaten[] = array(
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_bsg_rechte",
     "auswahltext" => "Rechteverwaltung: BSG",
-    "hinweis" => "Berechtigt angemeldete Nutzer, Mitglieder einer BSG zu sehen und zu bearbeiten.",
     "query" => "SELECT br.id as id, br.BSG, br.Nutzer
                 from b_bsg_rechte as br
                 left join v_verbands_berechtigte_bsg as vrb on br.BSG = vrb.BSG

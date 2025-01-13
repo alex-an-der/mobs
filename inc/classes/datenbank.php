@@ -27,10 +27,12 @@ class Datenbank {
 
         $stmt = $this->pdo->prepare($query);
         try{
+            //$this->log("QUERY: $query" );
             $success = $stmt->execute($arguments);
         } catch (PDOException $e) {
-            $this->log("Query error in ".__FILE__.": " . $e->getMessage());
-            return false;
+            $errmsg = $e->getMessage();
+            $this->log("Query error in ".__FILE__.": " . $errmsg);
+            return ['error' => "Ein Fehler ist aufgetreten: <b>$errmsg</b>"];
         }
         // Prüfen, ob die Abfrage ein SELECT oder SHOW ist
 
@@ -39,7 +41,7 @@ class Datenbank {
             // DBI
             if ($result === false) {
                 // Ein Fehler ist aufgetreten
-                return ['error' => 'Ein Fehler ist aufgetreten'];
+                return ['error' => 'Ein unbekannter Fehler ist aufgetreten'];
             } elseif (empty($result)) {
                 // Keine Daten gefunden
                 return ['message' => 'Keine Daten für Ihre Berechtigungseinstellungen vorhanden.'];
