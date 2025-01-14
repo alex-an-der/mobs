@@ -45,3 +45,8 @@ offen (5) B => M->S
 ## fix: Spaltenbreite ist nicht ausreichend implementiert.
 ## Wenn M vorhanden:
 BSG-Vewrbandsansicht, Ansprechpartner verbinden
+
+## ####################################
+Suche nicht nur in den Datenfeldern des Queries, sondern erweitere die Felder auf * (from und joins bleiben natürlich)
+## ####################################
+
