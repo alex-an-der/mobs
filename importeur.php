@@ -43,18 +43,16 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
     }
     echo "</div>";
 
-    if(!$hasForeignKeys) {
-        // Hole Spalteninformationen
-        $columns = $db->query("SHOW COLUMNS FROM $tabelle");
-        if(!isset($columns['data'])) {
-            dieWithError("Konnte Spalteninformationen nicht abrufen", __FILE__, __LINE__);
-        }
+    // Hole Spalteninformationen
+    $columns = $db->query("SHOW COLUMNS FROM $tabelle");
+    if(!isset($columns['data'])) {
+        dieWithError("Konnte Spalteninformationen nicht abrufen", __FILE__, __LINE__);
+    }
 
-        $tableColumns = array();
-        foreach($columns['data'] as $col) {
-            if($col['Extra'] != 'auto_increment') {
-                $tableColumns[] = $col['Field'];
-            }
+    $tableColumns = array();
+    foreach($columns['data'] as $col) {
+        if($col['Extra'] != 'auto_increment') {
+            $tableColumns[] = $col['Field'];
         }
     }
 }
@@ -85,6 +83,33 @@ function renderTableSelectBox($db) {
     }
     
     return $options;
+}
+
+// Helper für FK-Matching
+function findForeignKeyMatch($db, $searchValue, $referenzquery) {
+    $result = $db->query($referenzquery);
+    if (!isset($result['data'])) return null;
+
+    $searchTerms = array_filter(explode(' ', strtolower($searchValue)));
+    $matches = [];
+
+    foreach ($result['data'] as $row) {
+        $allFieldsMatch = true;
+        $allFields = strtolower(implode(' ', $row));
+        
+        foreach ($searchTerms as $term) {
+            if (strpos($allFields, $term) === false) {
+                $allFieldsMatch = false;
+                break;
+            }
+        }
+        
+        if ($allFieldsMatch) {
+            $matches[] = $row['id'];
+        }
+    }
+
+    return count($matches) === 1 ? $matches[0] : null;
 }
 ?>
 <!DOCTYPE html>
@@ -131,6 +156,7 @@ function renderTableSelectBox($db) {
     <script>
         // Globale Variablen für PHP-Werte
         const validColumns = <?= json_encode($tableColumns ?? []) ?>;
+        const hasForeignKeys = <?= json_encode($hasForeignKeys ?? false) ?>;  // Diese Zeile hinzufügen
         
         function validateImport() {
             const textarea = document.getElementById('importData');
@@ -160,6 +186,43 @@ function renderTableSelectBox($db) {
                 if(fields.length !== header.length) {
                     showValidationResult(false, `Fehler: Zeile ${i+1} hat eine falsche Anzahl Felder (${fields.length} statt ${header.length})`);
                     return;
+                }
+            }
+
+            // FK-Validierung hinzufügen
+            if (hasForeignKeys) {
+                const referenzqueries = <?= json_encode($anzuzeigendeDaten[$selectedTableID]['referenzqueries'] ?? []) ?>;
+                
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].trim() === '') continue;
+                    const fields = parseCSVLine(lines[i]);
+                    
+                    for (let j = 0; j < header.length; j++) {
+                        const column = header[j];
+                        if (referenzqueries[column]) {
+                            const value = fields[j];
+                            fetch('ajax.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    action: 'matchForeignKey',
+                                    query: referenzqueries[column],
+                                    value: value
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(result => {
+                                if (result.status === 'error') {
+                                    showValidationResult(false, `Zeile ${i+1}, Spalte ${column}: ${result.message}`);
+                                } else if (result.id) {
+                                    // Ersetze Wert durch gefundene ID
+                                    fields[j] = result.id;
+                                    lines[i] = fields.join(',');
+                                    textarea.value = lines.join('\n');
+                                }
+                            });
+                        }
+                    }
                 }
             }
 
@@ -295,7 +358,7 @@ function renderTableSelectBox($db) {
             <?php endif; ?>
 
             <!-- Import Section -->
-            <?php if(!$hasForeignKeys && isset($tableColumns)): ?>
+            <?php if(isset($tableColumns)): ?>
                 <div class="mt-4">
                     <h4>Datenimport für: <?= htmlspecialchars($anzuzeigendeDaten[$selectedTableID]['auswahltext']) ?></h4>
                     
@@ -326,8 +389,10 @@ function renderTableSelectBox($db) {
                     </div>
                     
                     <div id="validationResult" class="alert" style="display:none;"></div>
-                    <button onclick="validateImport()" class="btn btn-primary">Daten prüfen</button>
-                    <button onclick="importData()" class="btn btn-success ml-2" id="importButton" style="display:none;">Daten importieren</button>
+                    <div class="mb-3">  <!-- Hier neues div mit margin-bottom -->
+                        <button onclick="validateImport()" class="btn btn-primary">Daten prüfen</button>
+                        <button onclick="importData()" class="btn btn-success ml-2" id="importButton" style="display:none;">Daten importieren</button>
+                    </div>
                 </div>
             <?php endif; ?>
         </div>

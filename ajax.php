@@ -6,187 +6,243 @@ require_once(__DIR__ . "/inc/include.php");
 ob_clean();  // Löschen aller bisherigen Ausgaben
 
 $data = json_decode(file_get_contents('php://input'), true);
+$action = $data['action'] ?? '';
 
-// Update-Logik
-if ($data['action'] == 'update') {
-    $id = $data['id'];
-    //$id = intval($id, 10);
-    $field = $data['field'];
-    $value = $data['value'];
-    $tabelle = $data['tabelle'];
+switch($action) {
+    case 'update':
+        $id = $data['id'];
+        //$id = intval($id, 10);
+        $field = $data['field'];
+        $value = $data['value'];
+        $tabelle = $data['tabelle'];
 
-    $query = "UPDATE `$tabelle` SET `$field` = ? WHERE `id` = ?";
-    $args = array($value, $id);
-    try {
-        $result = $db->query($query, $args);
-        $response = ["status" => $result ? "success" : "error"];
-    } catch (Exception $e) {
-        $db->log("Update error: " . $e->getMessage());
-        $response = ["status" => "error", "message" => "Fehler beim Update. Stimmt das Datenformat? Für Details siehe log-Tabelle in der Datenbank."];
-    }
-    ob_end_clean();
-    echo json_encode($response);
-}
-
-// Zeilenprüfung nach dem Update
-if ($data['action'] == 'check') {
-    $id = $data['id'];
-    $field = $data['field'];
-    $tabelle = $data['tabelle'];
-
-    $query = "SELECT * FROM `$tabelle` WHERE `id` = ?";
-    $args = array($id);
-    try {
-        $result = $db->query($query, $args);
-        if ($result && count($result['data']) > 0) {
-            $response = ["status" => "success", "row" => $result['data'][0]];
-        } else {
-            $response = ["status" => "error", "message" => "Keine Zeile gefunden"];
+        $query = "UPDATE `$tabelle` SET `$field` = ? WHERE `id` = ?";
+        $args = array($value, $id);
+        try {
+            $result = $db->query($query, $args);
+            $response = ["status" => $result ? "success" : "error"];
+        } catch (Exception $e) {
+            $db->log("Update error: " . $e->getMessage());
+            $response = ["status" => "error", "message" => "Fehler beim Update. Stimmt das Datenformat? Für Details siehe log-Tabelle in der Datenbank."];
         }
-    } catch (Exception $e) {
-        $db->log("Check error: " . $e->getMessage());
-        $response = ["status" => "error", "message" => "Fehler beim Zeilenprüfen."];
-    }
-    ob_end_clean();
-    echo json_encode($response);
-}
+        ob_end_clean();
+        echo json_encode($response);
+        break;
 
-// Einfügen eines neuen Datensatzes mit Standardwerten
-if ($data['action'] == 'insert') {
-    $tabelle = $data['tabelle'];
-    $defaultValues = $data['defaultValues'];
+    case 'check':
+        $id = $data['id'];
+        $field = $data['field'];
+        $tabelle = $data['tabelle'];
 
-    $fields = implode(", ", array_keys($defaultValues));
-    $placeholders = implode(", ", array_fill(0, count($defaultValues), "?"));
-    $values = array_values($defaultValues);
+        $query = "SELECT * FROM `$tabelle` WHERE `id` = ?";
+        $args = array($id);
+        try {
+            $result = $db->query($query, $args);
+            if ($result && count($result['data']) > 0) {
+                $response = ["status" => "success", "row" => $result['data'][0]];
+            } else {
+                $response = ["status" => "error", "message" => "Keine Zeile gefunden"];
+            }
+        } catch (Exception $e) {
+            $db->log("Check error: " . $e->getMessage());
+            $response = ["status" => "error", "message" => "Fehler beim Zeilenprüfen."];
+        }
+        ob_end_clean();
+        echo json_encode($response);
+        break;
 
-    $query = "INSERT INTO `$tabelle` ($fields) VALUES ($placeholders)";
-    try {
-        $result = $db->query($query, $values);
-        if ($result['data']) {
-            $response = ["status" => "success"];
-        } else {
-            $errorInfo = $db->errorInfo();
-            $db->log("Insert error: " . json_encode($errorInfo));
+    case 'insert':
+        $tabelle = $data['tabelle'];
+        $defaultValues = $data['defaultValues'];
+
+        $fields = implode(", ", array_keys($defaultValues));
+        $placeholders = implode(", ", array_fill(0, count($defaultValues), "?"));
+        $values = array_values($defaultValues);
+
+        $query = "INSERT INTO `$tabelle` ($fields) VALUES ($placeholders)";
+        try {
+            $result = $db->query($query, $values);
+            if ($result['data']) {
+                $response = ["status" => "success"];
+            } else {
+                $errorInfo = $db->errorInfo();
+                $db->log("Insert error: " . json_encode($errorInfo));
+                $response = ["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!"];
+            }
+        } catch (Exception $e) {
+            $db->log("Exception: " . $e->getMessage());
             $response = ["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!"];
         }
-    } catch (Exception $e) {
-        $db->log("Exception: " . $e->getMessage());
-        $response = ["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!"];
-    }
-    ob_end_clean();
-    echo json_encode($response);
-}
+        ob_end_clean();
+        echo json_encode($response);
+        break;
 
-// Einfügen eines neuen Datensatzes mit Standardwerten aus der Datenbankschema
-if ($data['action'] == 'insert_default') {
-    $tabelle = $data['tabelle'];
+    case 'insert_default':
+        $tabelle = $data['tabelle'];
 
-    // Insert an empty dataset to let the database take the default values
-    $query = "INSERT INTO `$tabelle` () VALUES ()";
-    try {
-        $result = $db->query($query);
-        if ($result) {
-            $response = ["status" => "success"];
-        } else {
-            $errorInfo = $db->errorInfo();
-            $db->log("Insert error: " . json_encode($errorInfo));
+        // Insert an empty dataset to let the database take the default values
+        $query = "INSERT INTO `$tabelle` () VALUES ()";
+        try {
+            $result = $db->query($query);
+            if ($result) {
+                $response = ["status" => "success"];
+            } else {
+                $errorInfo = $db->errorInfo();
+                $db->log("Insert error: " . json_encode($errorInfo));
+                $response = ["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!"];
+            }
+        } catch (Exception $e) {
+            $db->log("Exception: " . $e->getMessage());
             $response = ["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!"];
         }
-    } catch (Exception $e) {
-        $db->log("Exception: " . $e->getMessage());
-        $response = ["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!"];
-    }
-    ob_end_clean();
-    echo json_encode($response);
-}
+        ob_end_clean();
+        echo json_encode($response);
+        break;
 
-// Löschen von ausgewählten Datensätzen
-if ($data['action'] == 'delete') {
-    $tabelle = $data['tabelle'];
-    $ids = $data['ids'];
+    case 'delete':
+        $tabelle = $data['tabelle'];
+        $ids = $data['ids'];
 
-    $placeholders = implode(',', array_fill(0, count($ids), '?'));
-    $query = "DELETE FROM `$tabelle` WHERE `id` IN ($placeholders)";
-    try {
-        $result = $db->query($query, $ids);
-        $response = ["status" => "success"];
-    } catch (Exception $e) {
-        $db->log("Delete error: " . $e->getMessage());
-        $response = ["status" => "error", "message" => "Fehler beim Löschen der Daten."];
-    }
-    ob_end_clean();
-    echo json_encode($response);
-}
-
-// Überprüfen auf doppelte Einträge
-if ($data['action'] == 'check_duplicates') {
-    $tabelle = $data['tabelle'];
-
-    // Get columns excluding auto-increment columns
-    $columnsQuery = "SHOW COLUMNS FROM `$tabelle`";
-    $columnsResult = $db->query($columnsQuery);
-    $columns = array_filter($columnsResult, function($column) {
-        return $column['Extra'] !== 'auto_increment';
-    });
-    $columns = array_column($columns, 'Field');
-
-    // Build query to find duplicates
-    $columnsList = implode(", ", $columns);
-    $duplicatesQuery = "
-        SELECT id
-        FROM (
-            SELECT id, COUNT(*) OVER (PARTITION BY $columnsList) AS cnt
-            FROM `$tabelle` 
-        ) sub
-        WHERE cnt > 1 
-    ";
-    try {
-        $duplicatesResult = $db->query($duplicatesQuery);
-        $duplicateIds = array_column($duplicatesResult, 'id');
-        $response = ["status" => "success", "duplicates" => $duplicateIds];
-    } catch (Exception $e) {
-        $db->log("Check duplicates error: " . $e->getMessage());
-        $response = ["status" => "error", "message" => "Fehler beim Überprüfen auf doppelte Einträge."];
-    }
-    ob_end_clean();
-    echo json_encode($response);
-}
-
-// Importieren von Datensätzen
-if ($data['action'] == 'import') {
-    $tabelle = $data['tabelle'];
-    $header = $data['header'];
-    $values = $data['values'];
-    
-    try {
-        // Baue INSERT Query
-        $columns = implode(', ', $header);
-        $valueStrings = [];
-        
-        foreach($values as $row) {
-            $rowValues = array_map(function($val) {
-                if($val === '') return 'NULL';
-                return "'" . addslashes($val) . "'";
-            }, $row);
-            $valueStrings[] = '(' . implode(', ', $rowValues) . ')';
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $query = "DELETE FROM `$tabelle` WHERE `id` IN ($placeholders)";
+        try {
+            $result = $db->query($query, $ids);
+            $response = ["status" => "success"];
+        } catch (Exception $e) {
+            $db->log("Delete error: " . $e->getMessage());
+            $response = ["status" => "error", "message" => "Fehler beim Löschen der Daten."];
         }
+        ob_end_clean();
+        echo json_encode($response);
+        break;
+
+    case 'check_duplicates':
+        $tabelle = $data['tabelle'];
+
+        // Get columns excluding auto-increment columns
+        $columnsQuery = "SHOW COLUMNS FROM `$tabelle`";
+        $columnsResult = $db->query($columnsQuery);
+        $columns = array_filter($columnsResult, function($column) {
+            return $column['Extra'] !== 'auto_increment';
+        });
+        $columns = array_column($columns, 'Field');
+
+        // Build query to find duplicates
+        $columnsList = implode(", ", $columns);
+        $duplicatesQuery = "
+            SELECT id
+            FROM (
+                SELECT id, COUNT(*) OVER (PARTITION BY $columnsList) AS cnt
+                FROM `$tabelle` 
+            ) sub
+            WHERE cnt > 1 
+        ";
+        try {
+            $duplicatesResult = $db->query($duplicatesQuery);
+            $duplicateIds = array_column($duplicatesResult, 'id');
+            $response = ["status" => "success", "duplicates" => $duplicateIds];
+        } catch (Exception $e) {
+            $db->log("Check duplicates error: " . $e->getMessage());
+            $response = ["status" => "error", "message" => "Fehler beim Überprüfen auf doppelte Einträge."];
+        }
+        ob_end_clean();
+        echo json_encode($response);
+        break;
+
+    case 'import':
+        $tabelle = $data['tabelle'];
+        $header = $data['header'];
+        $values = $data['values'];
         
-        $valuesSql = implode(",\n", $valueStrings);
-        $query = "INSERT INTO $tabelle ($columns) VALUES $valuesSql";
+        try {
+            // Baue INSERT Query
+            $columns = implode(', ', $header);
+            $valueStrings = [];
+            
+            foreach($values as $row) {
+                $rowValues = array_map(function($val) {
+                    if($val === '') return 'NULL';
+                    return "'" . addslashes($val) . "'";
+                }, $row);
+                $valueStrings[] = '(' . implode(', ', $rowValues) . ')';
+            }
+            
+            $valuesSql = implode(",\n", $valueStrings);
+            $query = "INSERT INTO $tabelle ($columns) VALUES $valuesSql";
+            
+            $result = $db->query($query);
+            
+            if(isset($result['error'])) {
+                $response = ['status' => 'error', 'message' => $result['error']];
+            } else {
+                $count = count($values);
+                $response = ['status' => 'success', 'message' => "$count Datensätze wurden importiert"];
+            }
+        } catch(Exception $e) {
+            $response = ['status' => 'error', 'message' => $e->getMessage()];
+        }
+        ob_end_clean();
+        echo json_encode($response);
+        break;
+
+    case 'matchForeignKey':
+        $query = $data['query'] ?? '';
+        $value = $data['value'] ?? '';
         
-        $result = $db->query($query);
+        $matches = findForeignKeyMatches($db, $value, $query); // Neue Funktion verwenden
         
-        if(isset($result['error'])) {
-            $response = ['status' => 'error', 'message' => $result['error']];
+        if (empty($matches)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Keine Matches gefunden für: ' . htmlspecialchars($value)
+            ]);
+        } else if (count($matches) > 1) {
+            $matchDetails = array_map(function($match) {
+                return $match['anzeige'];
+            }, $matches);
+            
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Mehrere mögliche Matches gefunden für: ' . htmlspecialchars($value) . 
+                            '<br>Gefundene Matches: ' . implode(', ', $matchDetails)
+            ]);
         } else {
-            $count = count($values);
-            $response = ['status' => 'success', 'message' => "$count Datensätze wurden importiert"];
+            echo json_encode([
+                'status' => 'success',
+                'id' => $matches[0]['id']
+            ]);
         }
-    } catch(Exception $e) {
-        $response = ['status' => 'error', 'message' => $e->getMessage()];
+        break;
+
+    default:
+        echo json_encode(['status' => 'error', 'message' => 'Ungültige Aktion']);
+        break;
+}
+
+// Neue Funktion die alle Matches zurückgibt
+function findForeignKeyMatches($db, $searchValue, $referenzquery) {
+    $result = $db->query($referenzquery);
+    if (!isset($result['data'])) return [];
+
+    $searchTerms = array_filter(explode(' ', strtolower($searchValue)));
+    $matches = [];
+
+    foreach ($result['data'] as $row) {
+        $allFieldsMatch = true;
+        $allFields = strtolower(implode(' ', $row));
+        
+        foreach ($searchTerms as $term) {
+            if (strpos($allFields, $term) === false) {
+                $allFieldsMatch = false;
+                break;
+            }
+        }
+        
+        if ($allFieldsMatch) {
+            $matches[] = $row;
+        }
     }
-    ob_end_clean();
-    echo json_encode($response);
+
+    return $matches;
 }
 ?>
