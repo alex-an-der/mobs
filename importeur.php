@@ -370,12 +370,39 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                             </button>
                         </p>
                         <div class="collapse show" id="importHelpContent">
-                            <p class="mt-3"><strong>Ihre Tabelle verwendet folgende Spalten:</strong></p>
-                            <p>In der Kopfzeile können folgende Spalten verwendet werden:</p>
-                            <p><code><strong><?= implode(",", $tableColumns) ?></strong></code></p>
-                            <p class="mt-2">Beispiel mit fehlenden Werten:</p>
-                            <code>Anrede,Vorname,Nachname<br>Herr,,Meier<br>Frau,Lisa,</code>
-                            <p class="mt-2"><small>Im Beispiel bleiben die Felder 'Vorname' bzw. 'Nachname' leer (NULL)</small></p>
+                            <p class="mt-3"><strong>Anleitung zum Import:</strong></p>
+                            <ol>
+                                <p>1. Kopfzeile erstellen mit den Spalten:</p>
+                                <p><code><strong><?= implode(",", $tableColumns) ?></strong></code></p>
+                                
+                                <p>2. Daten einfügen:</p>
+                                <ul>
+                                    <li>Eine Zeile pro Datensatz</li>
+                                    <li>Spalten durch Komma trennen</li>
+                                    <li>Leere Felder: einfach nichts zwischen die Kommas schreiben</li>
+                                    <?php if($hasForeignKeys): ?>
+                                    <li>Bei Fremdschlüssel-Spalten (<?= implode(", ", $foreignKeyColumns) ?>):
+                                        <ul>
+                                            <li>Namen oder Bezeichnung eingeben (z.B. "Hans Müller" oder "Abteilung Nord")</li>
+                                            <li>Teilwörter reichen aus (z.B. "Hans" oder "Nord")</li>
+                                            <li>Groß/Kleinschreibung spielt keine Rolle</li>
+                                            <li>Die Eingabe muss eindeutig auf einen Datensatz passen</li>
+                                        </ul>
+                                    </li>
+                                    <?php endif; ?>
+                                </ul>
+                                
+                                <p>3. Beispiel mit Daten:</p>
+                                <?php if($hasForeignKeys): ?>
+                                <code>Vorname,Nachname,Abteilung<br>Hans,Meier,Nord<br>Lisa,Müller,Süd</code>
+                                <?php else: ?>
+                                <code>Anrede,Vorname,Nachname<br>Herr,,Meier<br>Frau,Lisa,</code>
+                                <?php endif; ?>
+
+                                <?php if($hasForeignKeys): ?>
+                                <p class="mt-2"><small>Hinweis: Bei Fremdschlüssel-Feldern werden die Eingaben automatisch in IDs umgewandelt, wenn sie eindeutig zugeordnet werden können.</small></p>
+                                <?php endif; ?>
+                            </ol>
                         </div>
                     </div>
 
