@@ -162,9 +162,16 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
             const textarea = document.getElementById('importData');
             const data = textarea.value.trim();
             const lines = data.split('\n');
+            let hasErrors = false;
             
             if(lines.length < 2) {
-                showValidationResult(false, 'Fehler: Mindestens Header und ein Datensatz erforderlich');
+                showValidationResult(false, {
+                    message: 'Fehler: Mindestens Header und ein Datensatz erforderlich',
+                    debug: {
+                        data: data,
+                        lineCount: lines.length
+                    }
+                });
                 return;
             }
 
@@ -173,7 +180,14 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
             // Prüfe nur ob die verwendeten Spalten gültig sind
             for(let col of header) {
                 if(!validColumns.includes(col)) {
-                    showValidationResult(false, 'Fehler: Ungültige Spalte im Header: ' + col + '<br>Erlaubte Spalten sind: ' + validColumns.join(', '));
+                    showValidationResult(false, {
+                        message: 'Fehler: Ungültige Spalte im Header: ' + col + '<br>Erlaubte Spalten sind: ' + validColumns.join(', '),
+                        debug: {
+                            invalidColumn: col,
+                            validColumns: validColumns,
+                            header: header
+                        }
+                    });
                     return;
                 }
             }
@@ -189,9 +203,10 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                 }
             }
 
-            // FK-Validierung hinzufügen
+            // FK-Validierung ändern
             if (hasForeignKeys) {
                 const referenzqueries = <?= json_encode($anzuzeigendeDaten[$selectedTableID]['referenzqueries'] ?? []) ?>;
+                let promises = [];
                 
                 for (let i = 1; i < lines.length; i++) {
                     if (lines[i].trim() === '') continue;
@@ -201,42 +216,87 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                         const column = header[j];
                         if (referenzqueries[column]) {
                             const value = fields[j];
-                            fetch('ajax.php', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    action: 'matchForeignKey',
-                                    query: referenzqueries[column],
-                                    value: value
+                            const lineNum = i;
+                            promises.push(
+                                fetch('ajax.php', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        action: 'matchForeignKey',
+                                        query: referenzqueries[column],
+                                        value: value
+                                    })
                                 })
-                            })
-                            .then(response => response.json())
-                            .then(result => {
-                                if (result.status === 'error') {
-                                    showValidationResult(false, `Zeile ${i+1}, Spalte ${column}: ${result.message}`);
-                                } else if (result.id) {
-                                    // Ersetze Wert durch gefundene ID
-                                    fields[j] = result.id;
-                                    lines[i] = fields.join(',');
-                                    textarea.value = lines.join('\n');
-                                }
-                            });
+                                .then(response => response.json())
+                                .then(result => {
+                                    if (result.status === 'error') {
+                                        // Hier die komplette result-Objekt übergeben
+                                        showValidationResult(false, {
+                                            message: `Zeile ${lineNum+1}, Spalte ${column}: ${result.message}`,
+                                            debug: result.debug
+                                        });
+                                        hasErrors = true;
+                                    }
+                                })
+                            );
                         }
                     }
                 }
+                
+                Promise.all(promises).then(() => {
+                    if (!hasErrors) {
+                        showValidationResult(true, {
+                            message: 'Datenformat ist korrekt! Der Import kann durchgeführt werden.',
+                            debug: {
+                                header: header,
+                                lineCount: lines.length - 1,
+                                hasForeignKeys: hasForeignKeys,
+                                foreignKeyColumns: referenzqueries ? Object.keys(referenzqueries) : []
+                            }
+                        });
+                    }
+                });
+                return;
             }
 
-            showValidationResult(true, 'Datenformat ist korrekt! Der Import kann durchgeführt werden.');
+            showValidationResult(true, {
+                message: 'Datenformat ist korrekt! Der Import kann durchgeführt werden.',
+                debug: {
+                    header: header,
+                    lineCount: lines.length - 1,
+                    hasForeignKeys: hasForeignKeys,
+                    foreignKeyColumns: referenzqueries ? Object.keys(referenzqueries) : []
+                }
+            });
         }
 
-        function showValidationResult(isValid, message) {
+        function showValidationResult(isValid, messageObj) {
             const resultDiv = document.getElementById('validationResult');
             const importButton = document.getElementById('importButton');
             const importHelpContent = document.getElementById('importHelpContent');
             
             resultDiv.style.display = 'block';
             resultDiv.className = 'alert ' + (isValid ? 'alert-success' : 'alert-danger');
-            resultDiv.innerHTML = message;
+            
+            let content = '';
+            
+            // Überprüfen ob messageObj ein String oder Objekt ist
+            if (typeof messageObj === 'string') {
+                content = messageObj;
+            } else {
+                content = `<div>${messageObj.message}</div>`;
+                if (messageObj.debug) {
+                    content += `
+                        <hr>
+                        <details>
+                            <summary>Debug-Informationen</summary>
+                            <pre style="font-size: 12px;">${JSON.stringify(messageObj.debug, null, 2)}</pre>
+                        </details>
+                    `;
+                }
+            }
+            
+            resultDiv.innerHTML = content;
             
             if (isValid) {
                 importButton.style.display = 'inline-block';

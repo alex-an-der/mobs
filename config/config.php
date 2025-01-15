@@ -202,6 +202,17 @@ $anzuzeigendeDaten[] = array(
                         where vbr.Verbandsberechtigter = $uid
                         ORDER BY anzeige;
         "
+    ),
+    "suchqueries" => array(
+        "Sparte" => "SELECT *
+                    from v_verbands_berechtigte_sparte
+                    where Verbandsberechtigter = $uid;
+        ",
+        "Mitglied" => "SELECT * 
+                        from b_mitglieder as m
+                        join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG
+                        where vbr.Verbandsberechtigter = $uid;
+        "
     )
 );
 

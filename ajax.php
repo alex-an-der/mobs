@@ -189,12 +189,21 @@ switch($action) {
         $query = $data['query'] ?? '';
         $value = $data['value'] ?? '';
         
-        $matches = findForeignKeyMatches($db, $value, $query); // Neue Funktion verwenden
+        // Debug-Informationen sammeln
+        $debugInfo = [
+            'query' => $query,
+            'searchValue' => $value,
+            'searchTerms' => array_filter(explode(' ', strtolower($value))),
+            'resultData' => []
+        ];
+        
+        $matches = findForeignKeyMatches($db, $value, $query, $debugInfo);
         
         if (empty($matches)) {
             echo json_encode([
                 'status' => 'error',
-                'message' => 'Keine Matches gefunden für: ' . htmlspecialchars($value)
+                'message' => 'Keine Matches gefunden für: ' . htmlspecialchars($value),
+                'debug' => $debugInfo
             ]);
         } else if (count($matches) > 1) {
             $matchDetails = array_map(function($match) {
@@ -204,12 +213,14 @@ switch($action) {
             echo json_encode([
                 'status' => 'error',
                 'message' => 'Mehrere mögliche Matches gefunden für: ' . htmlspecialchars($value) . 
-                            '<br>Gefundene Matches: ' . implode(', ', $matchDetails)
+                            '<br>Gefundene Matches: ' . implode(', ', $matchDetails),
+                'debug' => $debugInfo
             ]);
         } else {
             echo json_encode([
                 'status' => 'success',
-                'id' => $matches[0]['id']
+                'id' => $matches[0]['id'],
+                'debug' => $debugInfo
             ]);
         }
         break;
@@ -220,29 +231,43 @@ switch($action) {
 }
 
 // Neue Funktion die alle Matches zurückgibt
-function findForeignKeyMatches($db, $searchValue, $referenzquery) {
-    $result = $db->query($referenzquery);
-    if (!isset($result['data'])) return [];
-
-    $searchTerms = array_filter(explode(' ', strtolower($searchValue)));
-    $matches = [];
-
-    foreach ($result['data'] as $row) {
-        $allFieldsMatch = true;
-        $allFields = strtolower(implode(' ', $row));
-        
-        foreach ($searchTerms as $term) {
-            if (strpos($allFields, $term) === false) {
-                $allFieldsMatch = false;
-                break;
-            }
-        }
-        
-        if ($allFieldsMatch) {
-            $matches[] = $row;
-        }
-    }
-
+function findForeignKeyMatches($db, $searchValue, $referenzquery, &$debugInfo) {
+    
+    /*
+    $anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_mitglieder_in_sparten",
+    "auswahltext" => "Mitglieder in den Sparten",
+    "query" => "SELECT mis.id as id, mis.Sparte as Sparte, mis.Mitglied as Mitglied
+                from b_mitglieder_in_sparten as mis
+                left join v_verbands_berechtigte_sparte as vbs on vbs.Sparte = mis.Sparte
+                where vbs.Verbandsberechtigter = $uid or mis.Sparte is NULL 
+                order by mis.id desc;
+    ",
+    "referenzqueries" => array(
+        "Sparte" => "SELECT Sparte as id, Sparte_Name as anzeige
+                    from v_verbands_berechtigte_sparte
+                    where Verbandsberechtigter = $uid
+                    ORDER BY anzeige;
+        ",
+        "Mitglied" => "SELECT m.id as id, CONCAT(m.Nachname, ', ', m.Vorname, ' (', vbr.BSG_Name,')') as anzeige 
+                        from b_mitglieder as m
+                        join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG
+                        where vbr.Verbandsberechtigter = $uid
+                        ORDER BY anzeige;
+        "
+    ),
+    "suchqueries" => array(
+        "Sparte" => "SELECT *
+                    from v_verbands_berechtigte_sparte
+                    where Verbandsberechtigter = $uid;
+        ",
+        "Mitglied" => "SELECT * 
+                        from b_mitglieder as m
+                        join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG
+                        where vbr.Verbandsberechtigter = $uid;
+        "
+    )
+        */
     return $matches;
 }
 ?>
