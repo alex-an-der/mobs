@@ -214,35 +214,14 @@ switch($action) {
         echo json_encode(['status' => 'error', 'message' => 'Ungültige Aktion']);
         break;
 }
-/*
-// Neue Funktion die alle Matches zurückgibt
-function findForeignKeyMatches($db, $searchValue, $referenzquery) {
-    $result = $db->query($referenzquery);
-    if (!isset($result['data'])) return [];
-
-    $searchTerms = array_filter(explode(' ', strtolower($searchValue)));
-    $matches = [];
-
-    foreach ($result['data'] as $row) {
-        $allFieldsMatch = true;
-        $allFields = strtolower(implode(' ', $row));
-        
-        foreach ($searchTerms as $term) {
-            if (strpos($allFields, $term) === false) {
-                $allFieldsMatch = false;
-                break;
-            }
-        }
-        
-        if ($allFieldsMatch) {
-            $matches[] = $row;
-        }
-    }
-
-    return $matches;
-}*/
 function checkDaten($data, $db){
-    $importDatensätze = $data['rows'];
+    $importDatenzeilen = $data['rows'];
+
+    $importDatensätze = array_map(function($row) {
+        return explode(',', $row);
+    }, $importDatenzeilen);
+
+
     $suchQueries = $data['suchQueries'];
     $tabelle = $data['tabelle'];
     $suchStrings = [];
@@ -264,6 +243,7 @@ function checkDaten($data, $db){
         }
     }
         
+
     $spalten = array();
     $insertQuery = "INSERT INTO `$tabelle` (";
     foreach($importDatensätze[0] as $spalte)
@@ -322,8 +302,28 @@ function checkDaten($data, $db){
                 //Gehe jede einzelne ID durch und schaue, ob das passt
                 foreach($suchString as $id => $suchFeld)
                 {
-                    //$suchFeld = "#".$suchFeld; // Damit umgehe ich das Hindernis, dass 0 = false ist. 
-                    if(stripos($suchFeld, $importFeld)!==false){
+                    $words = array();
+                    // Match quoted strings first, then unquoted words
+                    $pattern = '/["\']([^"\']+)["\']|\S+/';
+                    preg_match_all($pattern, $importFeld, $matches);
+                    // Use only words from inside quotes or standalone words
+                    $words = $matches[1];  // Get quoted content
+                    $words = array_merge($words, array_diff($matches[0], array_map(function($w) { return "\"$w\""; }, $matches[1]))); // Add unquoted words
+                    $words = array_filter($words);
+                    
+                    /*$pattern = '/["\']([^"\']+)["\']|\S+/';
+                    if(preg_match_all($pattern, $importFeld, $matches)) {
+                        $words = array_merge($matches[1], array_diff($matches[0], $matches[1]));
+                    }
+                    $words = array_filter($words);*/
+                    $allWordsFound = true;
+                    foreach($words as $word) {
+                        if(stripos($suchFeld, $word) === false) {
+                            $allWordsFound = false;
+                            break;
+                        }
+                    }
+                    if($allWordsFound) {
                         if($ID_bereits_gefunden){
                             $ERROR = true;
                             $tmperr = "<p>Der Import <b>$importFeld</b> in Zeile $zeile ($spalte) liefert kein eindeutiges Ergebnis. Bitte pr&auml;zisieren.</p>";

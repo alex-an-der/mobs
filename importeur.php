@@ -172,11 +172,49 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
             min-height: 200px;
         }
     </style>
+
+    
     <script>
-        // Globale Variablen für PHP-Werte
+        // Globale Variablen für PHP-Werte 
         const validColumns = <?= json_encode($tableColumns ?? []) ?>;
         const hasForeignKeys = <?= json_encode($hasForeignKeys ?? false) ?>;  // Diese Zeile hinzufügen
         
+        /*function parseCSV(str) {
+            const arr = [];
+            let quote = false;  // 'true' means we're inside a quoted field
+
+            // Iterate over each character, keep track of current row and column (of the returned array)
+            for (let row = 0, col = 0, c = 0; c < str.length; c++) {
+                let cc = str[c], nc = str[c+1];        // Current character, next character
+                arr[row] = arr[row] || [];             // Create a new row if necessary
+                arr[row][col] = arr[row][col] || '';   // Create a new column (start with empty string) if necessary
+
+                // If the current character is a quotation mark, and we're inside a
+                // quoted field, and the next character is also a quotation mark,
+                // add a quotation mark to the current column and skip the next character
+                if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; continue; }
+
+                // If it's just one quotation mark, begin/end quoted field
+                if (cc == '"') { quote = !quote; continue; }
+
+                // If it's a comma and we're not in a quoted field, move on to the next column
+                if (cc == ',' && !quote) { ++col; continue; }
+
+                // If it's a newline (CRLF) and we're not in a quoted field, skip the next character
+                // and move on to the next row and move to column 0 of that new row
+                if (cc == '\r' && nc == '\n' && !quote) { ++row; col = 0; ++c; continue; }
+
+                // If it's a newline (LF or CR) and we're not in a quoted field,
+                // move on to the next row and move to column 0 of that new row
+                if (cc == '\n' && !quote) { ++row; col = 0; continue; }
+                if (cc == '\r' && !quote) { ++row; col = 0; continue; }
+
+                // Otherwise, append the current character to the current column
+                arr[row][col] += cc;
+            }
+            return arr;
+        }*/
+
         function validateImport(insert=false) {
             const textarea = document.getElementById('importData');
             const data = textarea.value.trim();
@@ -201,10 +239,12 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                 }
             }
 
+            allRows = [];
+            allRows.push(lines[0]);
             // Prüfe Datensätze
             for(let i = 1; i < lines.length; i++) {
                 if(lines[i].trim() === '') continue;
-                
+                allRows.push(lines[i]);
                 const fields = parseCSVLine(lines[i]);
                 if(fields.length !== header.length) {
                     showValidationResult(false, `Fehler: Zeile ${i+1} hat eine falsche Anzahl Felder (${fields.length} statt ${header.length})`);
@@ -214,7 +254,39 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
 
             // FK-Validierung hinzufügen
             if (hasForeignKeys) {
-                const allRows = lines.map(line => parseCSVLine(line));
+
+                //alert(lines);
+                //console.log(lines);
+                //const allRows = parseCSV(lines);
+                /*console.log("GEPARST:");
+                console.log(allRows[0]);
+                console.log(allRows[1]);*/
+                /*const allRows = lines.map(line => {
+                    let fields = parseCSVLine(line);
+                    console.log('Original fields:', fields); // Debug logging
+                    
+                    return fields.map(field => {
+                        console.log('Processing field:', field); // Debug logging
+                        
+                        // Explicitly preserve quotes
+                        if (field.startsWith('"') && field.endsWith('"')) {
+                            console.log('Keeping double quotes for:', field); // Debug logging
+                            return field;
+                        }
+                        if (field.startsWith("'") && field.endsWith("'")) {
+                            console.log('Keeping single quotes for:', field); // Debug logging
+                            return field;
+                        }
+                        
+                        // For fields that need quotes added
+                        if (field.includes(',') || field.includes(';')) {
+                            return `"${field}"`;
+                        }
+                        
+                        return field;
+                    });
+                });*/
+                
                 const queries = <?= json_encode($suchQueries)?>;
                 const tabelle = <?= json_encode($tabelle)?>
 
@@ -247,42 +319,6 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                     showValidationResult(false, 'Fehler bei der Fremdschlüssel-Validierung: ' + error.message);
                 });
             }
-            /*
-            if (hasForeignKeys) {
-                const referenzqueries = < ?= json_encode($anzuzeigendeDaten[$selectedTableID]['referenzqueries'] ?? []) ?>;
-                
-                for (let i = 1; i < lines.length; i++) {
-                    if (lines[i].trim() === '') continue;
-                    const fields = parseCSVLine(lines[i]);
-                    
-                    for (let j = 0; j < header.length; j++) {
-                        const column = header[j];
-                        if (referenzqueries[column]) {
-                            const value = fields[j];
-                            fetch('ajax.php', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    action: 'matchForeignKey',
-                                    query: referenzqueries[column],
-                                    value: value
-                                })
-                            })
-                            .then(response => response.json())
-                            .then(result => {
-                                if (result.status === 'error') {
-                                    showValidationResult(false, `Zeile ${i+1}, Spalte ${column}: ${result.message}`);
-                                } else if (result.id) {
-                                    // Ersetze Wert durch gefundene ID
-                                    fields[j] = result.id;
-                                    lines[i] = fields.join(',');
-                                    textarea.value = lines.join('\n');
-                                }
-                            });
-                        }
-                    }
-                }
-            }*/
 
             showValidationResult(true, 'Datenformat ist korrekt! Der Import kann durchgeführt werden.');
         }
