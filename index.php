@@ -726,6 +726,7 @@ function dieWithError($err, $file, $line, $stayAlive = false) {
 }
 
 function renderTableSelectBox($db) {
+    
     global $anzuzeigendeDaten;
     global $selectedTableID;
     
@@ -746,6 +747,7 @@ function renderTableSelectBox($db) {
 
     echo '</select>';
     echo '</form></p>';
+    
 }
 
 function renderTableHeaders($data) {

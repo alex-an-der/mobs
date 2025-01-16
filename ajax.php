@@ -186,6 +186,24 @@ switch($action) {
         break;
 
     case 'matchForeignKey':
+        $importDatensätze = $data['rows'];
+        $suchQueries = $data['suchQueries'];
+        
+        $suchStrings = [];
+        foreach ($suchQueries as $index => $query) { 
+            $result = $db->query($query);
+            foreach($result as $row){
+                foreach ($row as $item) {
+                    $id = $item['id'] ?? $item['ID'];
+                    unset($item['id'], $item['ID']);
+                    $suchStrings[$index][$id] = implode(' ', $item);
+                }
+            }
+        }
+        show($suchStrings);
+        break;
+        
+        /*
         $query = $data['query'] ?? '';
         $value = $data['value'] ?? '';
         
@@ -213,7 +231,7 @@ switch($action) {
             ]);
         }
         break;
-
+*/
     default:
         echo json_encode(['status' => 'error', 'message' => 'Ungültige Aktion']);
         break;

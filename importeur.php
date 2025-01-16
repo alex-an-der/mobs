@@ -9,6 +9,9 @@ $data = array();
 $hasForeignKeys = false;
 $foreignKeyColumns = array();
 
+
+
+
 if(isset($anzuzeigendeDaten[$selectedTableID])){
     // Tabellenname existiert?
     if(isset($anzuzeigendeDaten[$selectedTableID]['tabellenname'])){
@@ -29,6 +32,19 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
     if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])) {
         $hasForeignKeys = true;
         $foreignKeyColumns = array_keys($anzuzeigendeDaten[$selectedTableID]['referenzqueries']);
+
+        if (isset($anzuzeigendeDaten[$selectedTableID]['suchqueries'])) {
+            $suchQueries = $anzuzeigendeDaten[$selectedTableID]['suchqueries'];
+        } elseif (isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])) {
+            $suchQueries = $anzuzeigendeDaten[$selectedTableID]['referenzqueries'];
+        } else {
+            $suchQueries =  "";
+        }
+        $suchQueries = array_map(function($query) {
+            return preg_replace('/\s+/', ' ', trim($query));
+        }, $suchQueries);
+        // show($suchQueries);
+        
     }
 
     echo "<div class='container mt-4'>";
@@ -66,6 +82,7 @@ function dieWithError($err, $file, $line, $stayAlive = false) {
 }
 
 function renderTableSelectBox($db) {
+    
     global $anzuzeigendeDaten, $selectedTableID;
     $options = [];
     
@@ -110,7 +127,9 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
     }
 
     return count($matches) === 1 ? $matches[0] : null;
-}
+    }
+
+
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -191,7 +210,41 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
 
             // FK-Validierung hinzufügen
             if (hasForeignKeys) {
-                const referenzqueries = <?= json_encode($anzuzeigendeDaten[$selectedTableID]['referenzqueries'] ?? []) ?>;
+                const allRows = lines.map(line => parseCSVLine(line));
+                const queries = <?= json_encode($suchQueries)?>;
+                
+
+                if (!queries) {
+                    showValidationResult(false, 'Import wegen mangelnder Konfigurationseinstellungen nicht möglich');
+                    return;
+                }
+
+                fetch('ajax.php', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'matchForeignKey',
+                        rows: allRows,
+                        suchQueries: queries
+                    })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.status === 'error') {
+                        showValidationResult(false, result.message);
+                    } else {
+                        textarea.value = result.lines.join('\n');
+                        showValidationResult(true, 'Fremdschlüssel wurden erfolgreich zugeordnet.');
+                    }
+                })
+                .catch(error => {
+                    showValidationResult(false, 'Fehler bei der Fremdschlüssel-Validierung: ' + error.message);
+                });
+            }
+            /*
+            if (hasForeignKeys) {
+                const referenzqueries = < ?= json_encode($anzuzeigendeDaten[$selectedTableID]['referenzqueries'] ?? []) ?>;
                 
                 for (let i = 1; i < lines.length; i++) {
                     if (lines[i].trim() === '') continue;
@@ -224,7 +277,7 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                         }
                     }
                 }
-            }
+            }*/
 
             showValidationResult(true, 'Datenformat ist korrekt! Der Import kann durchgeführt werden.');
         }

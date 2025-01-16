@@ -204,15 +204,10 @@ $anzuzeigendeDaten[] = array(
         "
     ),
     "suchqueries" => array(
-        "Sparte" => "SELECT *
+        "Sparte" => "SELECT Sparte as id, Sparte_Name
                     from v_verbands_berechtigte_sparte
-                    where Verbandsberechtigter = $uid;
-        ",
-        "Mitglied" => "SELECT * 
-                        from b_mitglieder as m
-                        join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG
-                        where vbr.Verbandsberechtigter = $uid;
-        "
+                    where Verbandsberechtigter = $uid;",
+        "Mitglied" => "SELECT id, Vorname, Nachname, Mail from b_mitglieder as m join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG where vbr.Verbandsberechtigter = $uid;"
     )
 );
 
