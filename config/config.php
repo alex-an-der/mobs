@@ -186,8 +186,8 @@ $anzuzeigendeDaten[] = array(
     "auswahltext" => "Mitglieder in den Sparten",
     "query" => "SELECT mis.id as id, mis.Sparte as Sparte, mis.Mitglied as Mitglied
                 from b_mitglieder_in_sparten as mis
-                join v_verbands_berechtigte_sparte as vbs on vbs.Sparte = mis.Sparte
-                where vbs.Verbandsberechtigter = $uid 
+                left join v_verbands_berechtigte_sparte as vbs on vbs.Sparte = mis.Sparte
+                where vbs.Verbandsberechtigter = $uid or mis.Sparte is NULL 
                 order by mis.id desc;
     ",
     "referenzqueries" => array(
@@ -201,6 +201,17 @@ $anzuzeigendeDaten[] = array(
                         join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG
                         where vbr.Verbandsberechtigter = $uid
                         ORDER BY anzeige;
+        "
+    ),
+    "suchqueries" => array(
+        "Sparte" => "SELECT *
+                    from v_verbands_berechtigte_sparte
+                    where Verbandsberechtigter = $uid;
+        ",
+        "Mitglied" => "SELECT * 
+                        from b_mitglieder as m
+                        join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG
+                        where vbr.Verbandsberechtigter = $uid;
         "
     )
 );
