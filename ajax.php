@@ -190,19 +190,78 @@ switch($action) {
         $suchQueries = $data['suchQueries'];
         
         $suchStrings = [];
+        /*
         foreach ($suchQueries as $index => $query) { 
             $result = $db->query($query);
             foreach($result as $row){
                 foreach ($row as $item) {
-                    $id = $item['id'] ?? $item['ID'];
+                    $id = $item['id'] ?? $item['ID'] ?? null;
+                    if ($id === null) {
+                        $response = ["status" => "error", "message" => "Der Suchquery, der in der config definiert ist, muss ein Feld 'id' zurückliefern, damit das Suchergebnis zugewiesen werden kann."];
+                        ob_end_clean();
+                        echo json_encode($response);
+                        exit;
+                    }
                     unset($item['id'], $item['ID']);
                     $suchStrings[$index][$id] = implode(' ', $item);
                 }
             }
         }
-        show($suchStrings);
-        break;
+            */
+        $index = 0;
+        foreach ($suchQueries as $query) { 
+            $result = $db->query($query);
+            foreach($result as $row){
+                foreach ($row as $item) {
+                    $id = $item['id'] ?? $item['ID'] ?? null;
+                    if ($id === null) {
+                        $response = ["status" => "error", "message" => "Der Suchquery, der in der config definiert ist, muss ein Feld 'id' zurückliefern, damit das Suchergebnis zugewiesen werden kann."];
+                        ob_end_clean();
+                        echo json_encode($response);
+                        exit;
+                    }
+                    unset($item['id'], $item['ID']);
+                    $suchStrings[$index][$id] = implode(' ', $item);
+                }
+            }
+            $index++;
+        }
+
+
+        $spalten = array();
+        foreach($importDatensätze[0] as $spalte)
+        {
+            $spalten[] = $spalte;
+        }
+        unset($importDatensätze[0]);
         
+        echo "------------------";
+        show($importDatensätze);
+        echo "+++++++<br>";
+        show($suchStrings);
+
+        // Nachdem alles gesetzt ist (Was wird wo gesucht), gehe jetzt den Import Zeile für Zeile und Feld für Feld durch
+        foreach($importDatensätze as $importZeile)
+        {
+            foreach($importZeile as $importFeld)
+            {
+                // Suche in jedem Suchstring nach dem ImportFeld
+                foreach($suchStrings as $suchString)
+                {
+                    foreach($suchString as $id => $suchFeld)
+                    {
+                        if(strpos($suchFeld, $importFeld) !== false)
+                        {
+                            echo "Gefunden: $importFeld in $suchFeld<br>";
+                        }
+                    }
+                }
+            }
+        }
+
+
+        break;
+
         /*
         $query = $data['query'] ?? '';
         $value = $data['value'] ?? '';
