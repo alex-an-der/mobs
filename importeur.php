@@ -177,10 +177,14 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
         const validColumns = <?= json_encode($tableColumns ?? []) ?>;
         const hasForeignKeys = <?= json_encode($hasForeignKeys ?? false) ?>;  // Diese Zeile hinzufügen
         
-        function validateImport() {
+        function validateImport(insert=false) {
             const textarea = document.getElementById('importData');
             const data = textarea.value.trim();
             const lines = data.split('\n');
+            action = 'validate';
+            if(insert){
+                action = 'import';
+            }
             
             if(lines.length < 2) {
                 showValidationResult(false, 'Fehler: Mindestens Header und ein Datensatz erforderlich');
@@ -212,7 +216,7 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
             if (hasForeignKeys) {
                 const allRows = lines.map(line => parseCSVLine(line));
                 const queries = <?= json_encode($suchQueries)?>;
-                
+                const tabelle = <?= json_encode($tabelle)?>
 
                 if (!queries) {
                     showValidationResult(false, 'Import wegen mangelnder Konfigurationseinstellungen nicht möglich');
@@ -224,9 +228,10 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                     credentials: 'same-origin',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        action: 'matchForeignKey',
+                        action: action,
                         rows: allRows,
-                        suchQueries: queries
+                        suchQueries: queries,
+                        tabelle: tabelle
                     })
                 })
                 .then(response => response.json())
@@ -234,8 +239,8 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                     if (result.status === 'error') {
                         showValidationResult(false, result.message);
                     } else {
-                        textarea.value = result.lines.join('\n');
-                        showValidationResult(true, 'Fremdschlüssel wurden erfolgreich zugeordnet.');
+                        //textarea.value = result.lines.join('\n');
+                        showValidationResult(true, 'Die Daten k&ouml;nnen so importiert werden.');
                     }
                 })
                 .catch(error => {
@@ -301,13 +306,17 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
         }
 
         function importData() {
-            const textarea = document.getElementById('importData');
+            const allRows = lines.map(line => parseCSVLine(line));
+            const queries = <?= json_encode($suchQueries)?>;
+            const tabelle = <?= json_encode($tabelle)?>
+
+            /*const textarea = document.getElementById('importData');
             const data = textarea.value.trim();
             const lines = data.split('\n');
             const header = parseCSVLine(lines[0]);
             const values = lines.slice(1)
                 .filter(line => line.trim())
-                .map(line => parseCSVLine(line));
+                .map(line => parseCSVLine(line));*/
 
             const importButton = document.getElementById('importButton');
             importButton.disabled = true;
@@ -319,10 +328,15 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    action: 'import',
-                    tabelle: '<?= $tabelle ?>',
+                    /*action: 'import',
+                    tabelle: '< ?= $tabelle ?>',
                     header: header,
-                    values: values
+                    values: values*/
+
+                    action: 'import',
+                    rows: allRows,
+                    suchQueries: queries,
+                    tabelle: tabelle
                 })
             })
             .then(response => response.json())
@@ -471,7 +485,7 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                     <div id="validationResult" class="alert" style="display:none;"></div>
                     <div class="mb-3">  <!-- Hier neues div mit margin-bottom -->
                         <button onclick="validateImport()" class="btn btn-primary">Daten prüfen</button>
-                        <button onclick="importData()" class="btn btn-success ml-2" id="importButton" style="display:none;">Daten importieren</button>
+                        <button onclick="validateImport(true)" class="btn btn-success ml-2" id="importButton" style="display:none;">Daten importieren</button>
                     </div>
                 </div>
             <?php endif; ?>

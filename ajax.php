@@ -149,7 +149,7 @@ switch($action) {
         echo json_encode($response);
         break;
 
-    case 'import':
+    /*case 'import':
         $tabelle = $data['tabelle'];
         $header = $data['header'];
         $values = $data['values'];
@@ -183,119 +183,38 @@ switch($action) {
         }
         ob_end_clean();
         echo json_encode($response);
+        break;*/
+
+    case 'validate':
+        $response = checkDaten($data, $db);
+        ob_end_clean();
+        echo json_encode($response);
         break;
 
-    case 'matchForeignKey':
-        $importDatensätze = $data['rows'];
-        $suchQueries = $data['suchQueries'];
-        
-        $suchStrings = [];
-        /*
-        foreach ($suchQueries as $index => $query) { 
-            $result = $db->query($query);
-            foreach($result as $row){
-                foreach ($row as $item) {
-                    $id = $item['id'] ?? $item['ID'] ?? null;
-                    if ($id === null) {
-                        $response = ["status" => "error", "message" => "Der Suchquery, der in der config definiert ist, muss ein Feld 'id' zurückliefern, damit das Suchergebnis zugewiesen werden kann."];
-                        ob_end_clean();
-                        echo json_encode($response);
-                        exit;
-                    }
-                    unset($item['id'], $item['ID']);
-                    $suchStrings[$index][$id] = implode(' ', $item);
-                }
+    case 'import':
+        $response = checkDaten($data, $db);
+        if($response['status'] == "success"){
+            $insertQuery = $response['insert_query'];
+            $zaehler = 0;
+            foreach($response['args'] as $args){
+                $result = $db->query($insertQuery, $args);}
+                $zaehler ++;
             }
-        }
-            */
-        $index = 0;
-        foreach ($suchQueries as $query) { 
-            $result = $db->query($query);
-            foreach($result as $row){
-                foreach ($row as $item) {
-                    $id = $item['id'] ?? $item['ID'] ?? null;
-                    if ($id === null) {
-                        $response = ["status" => "error", "message" => "Der Suchquery, der in der config definiert ist, muss ein Feld 'id' zurückliefern, damit das Suchergebnis zugewiesen werden kann."];
-                        ob_end_clean();
-                        echo json_encode($response);
-                        exit;
-                    }
-                    unset($item['id'], $item['ID']);
-                    $suchStrings[$index][$id] = implode(' ', $item);
-                }
+            if($result['data']){
+                $response = ["status" => "success", "message" => "$zaehler Datensätze wurden importiert."];
+            }else{
+                $response = ["status" => "error", "message" => "Fehler beim Importieren der Daten. Bitte prüfen Sie die log-Tabelle in der Datenbank!"];
             }
-            $index++;
-        }
-
-
-        $spalten = array();
-        foreach($importDatensätze[0] as $spalte)
-        {
-            $spalten[] = $spalte;
-        }
-        unset($importDatensätze[0]);
-        
-        echo "------------------";
-        show($importDatensätze);
-        echo "+++++++<br>";
-        show($suchStrings);
-
-        // Nachdem alles gesetzt ist (Was wird wo gesucht), gehe jetzt den Import Zeile für Zeile und Feld für Feld durch
-        foreach($importDatensätze as $importZeile)
-        {
-            foreach($importZeile as $importFeld)
-            {
-                // Suche in jedem Suchstring nach dem ImportFeld
-                foreach($suchStrings as $suchString)
-                {
-                    foreach($suchString as $id => $suchFeld)
-                    {
-                        if(strpos($suchFeld, $importFeld) !== false)
-                        {
-                            echo "Gefunden: $importFeld in $suchFeld<br>";
-                        }
-                    }
-                }
-            }
-        }
-
-
+        ob_end_clean();
+        echo json_encode($response);
+        exit;
         break;
 
-        /*
-        $query = $data['query'] ?? '';
-        $value = $data['value'] ?? '';
-        
-        $matches = findForeignKeyMatches($db, $value, $query); // Neue Funktion verwenden
-        
-        if (empty($matches)) {
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Keine Matches gefunden für: ' . htmlspecialchars($value)
-            ]);
-        } else if (count($matches) > 1) {
-            $matchDetails = array_map(function($match) {
-                return $match['anzeige'];
-            }, $matches);
-            
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Mehrere mögliche Matches gefunden für: ' . htmlspecialchars($value) . 
-                            '<br>Gefundene Matches: ' . implode(', ', $matchDetails)
-            ]);
-        } else {
-            echo json_encode([
-                'status' => 'success',
-                'id' => $matches[0]['id']
-            ]);
-        }
-        break;
-*/
     default:
         echo json_encode(['status' => 'error', 'message' => 'Ungültige Aktion']);
         break;
 }
-
+/*
 // Neue Funktion die alle Matches zurückgibt
 function findForeignKeyMatches($db, $searchValue, $referenzquery) {
     $result = $db->query($referenzquery);
@@ -321,5 +240,122 @@ function findForeignKeyMatches($db, $searchValue, $referenzquery) {
     }
 
     return $matches;
+}*/
+function checkDaten($data, $db){
+    $importDatensätze = $data['rows'];
+    $suchQueries = $data['suchQueries'];
+    $tabelle = $data['tabelle'];
+    $suchStrings = [];
+    
+    foreach ($suchQueries as $index => $query) { 
+        $result = $db->query($query);
+        foreach($result as $row){
+            foreach ($row as $item) {
+                $id = $item['id'] ?? $item['ID'] ?? null;
+                if ($id === null) {
+                    $response = ["status" => "error", "message" => "Der Suchquery, der in der config definiert ist, muss ein Feld 'id' zurückliefern, damit das Suchergebnis zugewiesen werden kann."];
+                    ob_end_clean();
+                    echo json_encode($response);
+                    exit;
+                }
+                unset($item['id'], $item['ID']);
+                $suchStrings[$index][$id] = implode(' ', $item);
+            }
+        }
+    }
+        
+    $spalten = array();
+    $insertQuery = "INSERT INTO `$tabelle` (";
+    foreach($importDatensätze[0] as $spalte)
+    {
+        $insertQuery .= "`$spalte`, ";
+        $spalten[] = $spalte;
+    }
+    $insertQuery = rtrim($insertQuery, ", ");
+    $insertQuery .= ") VALUES (";
+    foreach($importDatensätze[0] as $spalte)
+    {
+        $insertQuery .= "?, ";
+    }
+    $insertQuery = rtrim($insertQuery, ", ");
+    $insertQuery .= ")";
+    
+    unset($importDatensätze[0]);
+    /*
+    echo "------------------";
+    show($spalten);
+    echo "+++++++<br>";
+    show($importDatensätze);
+    echo "+++++++<br>";
+    show($suchStrings);
+    */
+
+    /*
+    Sparte,Mitglied,Freitext
+    Fuß,Berecht, Hallo Welt
+    Fuß, Ditte, Mister 300
+    */
+    // Nachdem alles gesetzt ist (Was wird wo gesucht), gehe jetzt den Import Zeile für Zeile und Feld für Feld durch
+    
+    $ERROR = false;
+    $error_msg = "";
+    $alleArgs = array();
+    $zeile = 1; // Header-Zeile wird rausgeschnitten, daher beginnen die Daten bei Zeile 2
+    foreach($importDatensätze as $importZeile)
+    {
+        $zeile ++;
+
+        $Datensatz_kann_importiert_werden = true;
+        $ID_bereits_gefunden = false;
+        $datenSatzArgs = array();
+        
+        foreach($importZeile as $FeldIndex => $importFeld)
+        {
+            
+            // $zeile = $FeldIndex + 2; // +1 weil 0-basiert, +1 weil Header-Zeile weggeschnitten wurde
+            $ID_bereits_gefunden = false;
+            $spalte = $spalten[$FeldIndex];
+            // Ist es eine FK-Spalte?
+            if(isset($suchStrings[$spalte]))
+            {
+                $suchString = $suchStrings[$spalte];
+                //Gehe jede einzelne ID durch und schaue, ob das passt
+                foreach($suchString as $id => $suchFeld)
+                {
+                    //$suchFeld = "#".$suchFeld; // Damit umgehe ich das Hindernis, dass 0 = false ist. 
+                    if(stripos($suchFeld, $importFeld)!==false){
+                        if($ID_bereits_gefunden){
+                            $ERROR = true;
+                            $tmperr = "<p>Der Import <b>$importFeld</b> in Zeile $zeile ($spalte) liefert kein eindeutiges Ergebnis. Bitte pr&auml;zisieren.</p>";
+                            // Mehrfachausgaben vermeiden.
+                            if(strpos($error_msg, $tmperr) === false)
+                                $error_msg .= $tmperr;
+                        }else{
+                            $datenSatzArgs[] = $id;
+                            $ID_bereits_gefunden = true;
+                        }
+                    }
+                }
+                if(!$ID_bereits_gefunden){
+                    $ERROR = true;
+                    $error_msg .= "<p>Der Import <b>$importFeld</b> in Zeile $zeile ($spalte) liefert kein Ergebnis. Es muss zur gegebenen Auswahlmöglichkeit der Spalte $spalte passen. Bitte pr&uuml;fen.</p>";
+                }
+            }
+            else // Keine FK-Spalte (Einfach Inhalt importieren)
+            {
+                $datenSatzArgs[] = $importFeld;
+            }
+
+
+        }
+        $alleArgs[] = $datenSatzArgs;
+    }
+
+    if($ERROR){
+        $response = ["status" => "error", "message" => $error_msg];
+    }else{
+        $response = ["status" => "success", "insert_query" => $insertQuery, "args" => $alleArgs];
+    }
+    return $response;
 }
 ?>
