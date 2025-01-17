@@ -217,10 +217,66 @@ switch($action) {
 function checkDaten($data, $db){
     $importDatenzeilen = $data['rows'];
 
-    $importDatensätze = array_map(function($row) {
-        return explode(',', $row);
-    }, $importDatenzeilen);
+    //show($importDatenzeilen);
 
+    $importDatensaetze = array();
+    $zeilenNummer = 0;
+    $FK_Spalten = array();
+    foreach($importDatenzeilen as $zeile){
+        // Hinterer Trenner sorgt für sauberen Algorhithmus
+        $zeile = $zeile.",";
+        $currentField = '';
+        $inQuotes = false;
+        $quoteChar = '';
+        $feldNummer = 0;
+
+        for ($i = 0; $i < strlen($zeile); $i++) {
+            $char = $zeile[$i];
+
+            // Quote handling, nur für FK-Spalten
+            if (in_array($feldNummer,$FK_Spalten) && ($char === '"' || $char === "'") && ($i === 0 || $zeile[$i-1] !== '\\')) {
+                if (!$inQuotes) {
+                $inQuotes = true;
+                $quoteChar = $char;
+                } elseif ($char === $quoteChar) {
+                    $inQuotes = false;
+                }
+            }else{
+                // separator gefunden
+                // Fall 1: FK-Spalte, dann nur nich in Quotes und " " oder ","
+                // Fall 2: Nicht FK-Spalte, dann nur bei ",", Quotes egal.
+                if(in_array($feldNummer,$FK_Spalten) && !$inQuotes && ($char === ',' || ($char === ' ')) ||
+                (!in_array($feldNummer,$FK_Spalten) && $char === ',')){
+                 
+                    //if (!$inQuotes && ($char === ',' || ($char === ' ' && in_array($feldNummer,$FK_Spalten)))) {
+                        // Immer einen neuen Suchbegriff hinzufügen (der jetzige ist abgeschlossen)
+                        // Einzige Ausnahme: Leerzeichen hintereinander oder hinter dem Komma.
+                        // Nicht FK-Spalten überspringen, die Header aber immer mitnehmen.
+                        //&& ($zeilenNummer===0 || in_array($feldNummer,$FK_Spalten)))
+                        if(!($currentField === '' && $char===' ')){
+                            $importDatensaetze[$zeilenNummer][$feldNummer][] = trim($currentField);
+                        }
+                        
+                        // Bei einem Komme => neues Feld
+                        if($char === ','){
+                            // Im Header die FK-Spalten identifizieren (Indizes sammeln)
+                            if($zeilenNummer === 0 && isset($data['suchQueries'][$currentField])){
+                                $FK_Spalten[] = $feldNummer;
+                            }
+                            $feldNummer++;
+                        }
+                        $currentField = '';
+                    }else{
+                        // Weiter lesen
+                        $currentField .= $char;
+                    }
+            }
+        }
+        $zeilenNummer++;
+    }
+
+
+#####################################################
 
     $suchQueries = $data['suchQueries'];
     $tabelle = $data['tabelle'];
@@ -246,26 +302,31 @@ function checkDaten($data, $db){
 
     $spalten = array();
     $insertQuery = "INSERT INTO `$tabelle` (";
-    foreach($importDatensätze[0] as $spalte)
+    foreach($importDatensaetze[0] as $spalte)
     {
-        $insertQuery .= "`$spalte`, ";
-        $spalten[] = $spalte;
+        // Beim Header gibt es pro Spalte nur einen Wert - das ist 
+        // bei den Suchbegriffen anders, daher hier der Wert an [0].
+
+        $insertQuery .= "`$spalte[0]`, ";
+        $spalten[] = $spalte[0];
     }
     $insertQuery = rtrim($insertQuery, ", ");
     $insertQuery .= ") VALUES (";
-    foreach($importDatensätze[0] as $spalte)
+    foreach($importDatensaetze[0] as $spalte)
     {
         $insertQuery .= "?, ";
     }
     $insertQuery = rtrim($insertQuery, ", ");
     $insertQuery .= ")";
     
-    unset($importDatensätze[0]);
+    unset($importDatensaetze[0]);
+
+
     /*
     echo "------------------";
     show($spalten);
     echo "+++++++<br>";
-    show($importDatensätze);
+    show($importDatensaetze);
     echo "+++++++<br>";
     show($suchStrings);
     */
@@ -277,45 +338,83 @@ function checkDaten($data, $db){
     */
     // Nachdem alles gesetzt ist (Was wird wo gesucht), gehe jetzt den Import Zeile für Zeile und Feld für Feld durch
     
-    $ERROR = false;
+    
     $error_msg = "";
     $alleArgs = array();
     $zeile = 1; // Header-Zeile wird rausgeschnitten, daher beginnen die Daten bei Zeile 2
-    foreach($importDatensätze as $importZeile)
+    //unset($importDatenzeilen);
+    // Zeile für Zeile
+    foreach($importDatensaetze as $importZeile)
     {
+        
         $zeile ++;
+        
 
-        $Datensatz_kann_importiert_werden = true;
-        $ID_bereits_gefunden = false;
+        //$Datensatz_kann_importiert_werden = true;
         $datenSatzArgs = array();
         
-        foreach($importZeile as $FeldIndex => $importFeld)
+       // Spalte für Spalte
+        //foreach($importZeile as $FeldIndex => $importFeld)
+        foreach($spalten as $FeldIndex => $spalte)
         {
-            
-            // $zeile = $FeldIndex + 2; // +1 weil 0-basiert, +1 weil Header-Zeile weggeschnitten wurde
-            $ID_bereits_gefunden = false;
-            $spalte = $spalten[$FeldIndex];
+            $ERROR = false;
             // Ist es eine FK-Spalte?
             if(isset($suchStrings[$spalte]))
             {
                 $suchString = $suchStrings[$spalte];
                 //Gehe jede einzelne ID durch und schaue, ob das passt
+                
+                // Gehe jedes Heuhaufen-Feld in aus der Datenbank durch
                 foreach($suchString as $id => $suchFeld)
                 {
-                    $words = array();
+                    //$feldZaehler = 0;
+                    // Gehe jeden Import-Suchbegriff (Nadel) durch - alle Nadeln müssen gefunden werden
+                    foreach($importDatensaetze[$zeile-1][$FeldIndex] as $importWort){
+                        // Wird DIESES Wort im Suchstring (= eine ID) gefunden 
+                        if(strpos($suchFeld, $importWort) !== false){
+                            if(isset($datenSatzArgs[$FeldIndex]))
+                                if($datenSatzArgs[$FeldIndex] != $id){
+                                    $ERROR = true;
+                                    $error_msg .= "<p>Der Import <b>$importFeld</b> in Zeile $zeile ($spalte) liefert kein eindeutiges Ergebnis. Bitte pr&auml;zisieren.</p>";
+                                    break;
+                                }
+                                if(!$ERROR){
+                                    $datenSatzArgs[$FeldIndex] = $id;
+                                }
+                        }else{
+                            // Wort nicht gefunden => Diese ID kann es nicht sein
+                            // Wurde diese ID schon gesetzt?
+                            if(isset($datenSatzArgs[$FeldIndex]))
+                                if($datenSatzArgs[$FeldIndex] === $id)
+                                    unset($datenSatzArgs[$FeldIndex]);
+                            break;
+                        }
+                    }
+                } 
+                //$feldZaehler++;
+                // Alles durch, aber keine ID konnte zugewiesen werden
+                if(!isset($datenSatzArgs[$FeldIndex])){
+                    $ERROR = true;
+                    $error_msg .= "<p>In <b>Zeile $zeile ($spalte)</b> konnte kein Datensatz identifiziert werden, da die nicht alle Schl&uuml;sselworte gefunden wurden.</p>";
+                    //break;
+                }
+
+            }else{ // Keine FK-Spalte (Einfach Inhalt importieren)
+                $daten = $importDatensaetze[$zeile-1][$FeldIndex][0];
+                $datenSatzArgs[$FeldIndex] = $daten;
+            }
+
+
+                 /*   $words = array();
                     // Match quoted strings first, then unquoted words
                     $pattern = '/["\']([^"\']+)["\']|\S+/';
+                    //$pattern = '/(?:"[^"]*"|\'[^\']*\'|[^,]+)(?:,|$)/';
                     preg_match_all($pattern, $importFeld, $matches);
                     // Use only words from inside quotes or standalone words
                     $words = $matches[1];  // Get quoted content
                     $words = array_merge($words, array_diff($matches[0], array_map(function($w) { return "\"$w\""; }, $matches[1]))); // Add unquoted words
                     $words = array_filter($words);
-                    
-                    /*$pattern = '/["\']([^"\']+)["\']|\S+/';
-                    if(preg_match_all($pattern, $importFeld, $matches)) {
-                        $words = array_merge($matches[1], array_diff($matches[0], $matches[1]));
-                    }
-                    $words = array_filter($words);*/
+                 
                     $allWordsFound = true;
                     foreach($words as $word) {
                         if(stripos($suchFeld, $word) === false) {
@@ -335,18 +434,14 @@ function checkDaten($data, $db){
                             $ID_bereits_gefunden = true;
                         }
                     }
-                }
+                
                 if(!$ID_bereits_gefunden){
                     $ERROR = true;
                     $error_msg .= "<p>Der Import <b>$importFeld</b> in Zeile $zeile ($spalte) liefert kein Ergebnis. Es muss zur gegebenen Auswahlmöglichkeit der Spalte $spalte passen. Bitte pr&uuml;fen.</p>";
-                }
-            }
-            else // Keine FK-Spalte (Einfach Inhalt importieren)
-            {
-                $datenSatzArgs[] = $importFeld;
-            }
+                }*/
+            
 
-
+            
         }
         $alleArgs[] = $datenSatzArgs;
     }
