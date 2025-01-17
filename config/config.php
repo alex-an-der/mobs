@@ -1,4 +1,9 @@
 <?php 
+
+
+
+
+
 /*
 Ich möchte, dass du Änderungen im Codes zunächst mit mir besprichst jetzt. Jetzt geht es erst einmal um ein Konzept. Ich möchte nicht, dass der Nutzer etwas auswählen muss. Ich möchte hingegen lieber so vorgehen. Es gibt in der Datei config. Im Index Referenzcarreries stehen Abfragen an die Datenbank für die betroffene Spalte. Ich möchte den Input zu gestalten, dass der Nutzer. Die Daten wo? Wie gewohnt als Textpfeil in eine Textarea. Einfügt. Das Programm soll im. Einer Referenz. Spalte. Sehen. Ob es passende Datensätze findet? Mithilfe des Selekts im Index Referenzquare ist. Die auf die eingegebenen Schlagworte. Passen. Ich gebe dir ein Beispiel.
 
@@ -186,8 +191,8 @@ $anzuzeigendeDaten[] = array(
     "auswahltext" => "Mitglieder in den Sparten",
     "query" => "SELECT mis.id as id, mis.Sparte as Sparte, mis.Mitglied as Mitglied
                 from b_mitglieder_in_sparten as mis
-                join v_verbands_berechtigte_sparte as vbs on vbs.Sparte = mis.Sparte
-                where vbs.Verbandsberechtigter = $uid 
+                left join v_verbands_berechtigte_sparte as vbs on vbs.Sparte = mis.Sparte
+                where vbs.Verbandsberechtigter = $uid or mis.Sparte is NULL 
                 order by mis.id desc;
     ",
     "referenzqueries" => array(
@@ -202,6 +207,12 @@ $anzuzeigendeDaten[] = array(
                         where vbr.Verbandsberechtigter = $uid
                         ORDER BY anzeige;
         "
+    ),
+    "suchqueries" => array(
+        "Sparte" => "SELECT Sparte as id, Sparte_Name
+                    from v_verbands_berechtigte_sparte
+                    where Verbandsberechtigter = $uid;",
+        "Mitglied" => "SELECT id, Vorname, Nachname, Mail from b_mitglieder as m join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG where vbr.Verbandsberechtigter = $uid;"
     )
 );
 
@@ -376,7 +387,41 @@ $anzuzeigendeDaten[] = array(
         "Verband" => "SELECT id, `Name` as anzeige from bsv_1_verband order by Name;"
     )
 );
+
+Sparte,Mitglied,Freitext
+Fuß,Berecht, Hallo Welt
+Volley, Ditte, Hello World
+
+
 */
 
-
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "_b_dev_mitglieder_in_sparten",
+    "auswahltext" => "DEV  Mitglieder in den Sparten + Freitext",
+    "query" => "SELECT mis.id as id, mis.Sparte as Sparte, mis.Mitglied as Mitglied, Freitext
+                from _b_dev_mitglieder_in_sparten as mis
+                left join v_verbands_berechtigte_sparte as vbs on vbs.Sparte = mis.Sparte
+                where vbs.Verbandsberechtigter = $uid or mis.Sparte is NULL 
+                order by mis.id desc;
+    ",
+    "referenzqueries" => array(
+        "Sparte" => "SELECT Sparte as id, Sparte_Name as anzeige
+                    from v_verbands_berechtigte_sparte
+                    where Verbandsberechtigter = $uid
+                    ORDER BY anzeige;
+        ",
+        "Mitglied" => "SELECT m.id as id, CONCAT(m.Nachname, ', ', m.Vorname, ' (', vbr.BSG_Name,')') as anzeige 
+                        from b_mitglieder as m
+                        join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG
+                        where vbr.Verbandsberechtigter = $uid
+                        ORDER BY anzeige;
+        "
+    ),
+    "suchqueries" => array(
+        "Sparte" => "SELECT Sparte as id, Sparte_Name
+                    from v_verbands_berechtigte_sparte
+                    where Verbandsberechtigter = $uid;",
+        "Mitglied" => "SELECT id, Vorname, Nachname, Mail from b_mitglieder as m join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG where vbr.Verbandsberechtigter = $uid;"
+    )
+);
 ?>

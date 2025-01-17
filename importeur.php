@@ -1,4 +1,4 @@
-<?php
+<?php 
 require_once(__DIR__ . "/mods/all.head.php");
 require_once(__DIR__ . "/mods/index.head.php");
 require_once(__DIR__ . "/inc/include.php");
@@ -8,6 +8,7 @@ $selectedTableID = isset($_GET['tab']) ? $_GET['tab'] : "";
 $data = array();
 $hasForeignKeys = false;
 $foreignKeyColumns = array();
+
 
 if(isset($anzuzeigendeDaten[$selectedTableID])){
     // Tabellenname existiert?
@@ -29,6 +30,19 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
     if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])) {
         $hasForeignKeys = true;
         $foreignKeyColumns = array_keys($anzuzeigendeDaten[$selectedTableID]['referenzqueries']);
+
+        if (isset($anzuzeigendeDaten[$selectedTableID]['suchqueries'])) {
+            $suchQueries = $anzuzeigendeDaten[$selectedTableID]['suchqueries'];
+        } elseif (isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])) {
+            $suchQueries = $anzuzeigendeDaten[$selectedTableID]['referenzqueries'];
+        } else {
+            $suchQueries =  "";
+        }
+        $suchQueries = array_map(function($query) {
+            return preg_replace('/\s+/', ' ', trim($query));
+        }, $suchQueries);
+        // show($suchQueries);
+        
     }
 
     echo "<div class='container mt-4'>";
@@ -66,6 +80,7 @@ function dieWithError($err, $file, $line, $stayAlive = false) {
 }
 
 function renderTableSelectBox($db) {
+    
     global $anzuzeigendeDaten, $selectedTableID;
     $options = [];
     
@@ -110,7 +125,9 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
     }
 
     return count($matches) === 1 ? $matches[0] : null;
-}
+    }
+
+
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -153,18 +170,71 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
             min-height: 200px;
         }
     </style>
+
+    
     <script>
-        // Globale Variablen für PHP-Werte
+        // Globale Variablen für PHP-Werte 
         const validColumns = <?= json_encode($tableColumns ?? []) ?>;
         const hasForeignKeys = <?= json_encode($hasForeignKeys ?? false) ?>;  // Diese Zeile hinzufügen
         
-        function validateImport() {
+        /*function parseCSV(str) {
+            const arr = [];
+            let quote = false;  // 'true' means we're inside a quoted field
+
+            // Iterate over each character, keep track of current row and column (of the returned array)
+            for (let row = 0, col = 0, c = 0; c < str.length; c++) {
+                let cc = str[c], nc = str[c+1];        // Current character, next character
+                arr[row] = arr[row] || [];             // Create a new row if necessary
+                arr[row][col] = arr[row][col] || '';   // Create a new column (start with empty string) if necessary
+
+                // If the current character is a quotation mark, and we're inside a
+                // quoted field, and the next character is also a quotation mark,
+                // add a quotation mark to the current column and skip the next character
+                if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; continue; }
+
+                // If it's just one quotation mark, begin/end quoted field
+                if (cc == '"') { quote = !quote; continue; }
+
+                // If it's a comma and we're not in a quoted field, move on to the next column
+                if (cc == ',' && !quote) { ++col; continue; }
+
+                // If it's a newline (CRLF) and we're not in a quoted field, skip the next character
+                // and move on to the next row and move to column 0 of that new row
+                if (cc == '\r' && nc == '\n' && !quote) { ++row; col = 0; ++c; continue; }
+
+                // If it's a newline (LF or CR) and we're not in a quoted field,
+                // move on to the next row and move to column 0 of that new row
+                if (cc == '\n' && !quote) { ++row; col = 0; continue; }
+                if (cc == '\r' && !quote) { ++row; col = 0; continue; }
+
+                // Otherwise, append the current character to the current column
+                arr[row][col] += cc;
+            }
+            return arr;
+        }*/
+
+        function validateImport(insert=false) {
+            const validateButton = document.getElementById('validateButton');
+            const importButton = document.getElementById('importButton');
+            const originalText = insert ? importButton.innerHTML : validateButton.innerHTML;
+            const button = insert ? importButton : validateButton;
+
+            // Zeige den Spinner und deaktiviere den Button
+            button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ' + (insert ? 'Importiere...' : 'Prüfe...');
+            button.disabled = true;
+
             const textarea = document.getElementById('importData');
             const data = textarea.value.trim();
             const lines = data.split('\n');
+            action = 'validate';
+            if(insert){
+                action = 'import';
+            }
             
             if(lines.length < 2) {
                 showValidationResult(false, 'Fehler: Mindestens Header und ein Datensatz erforderlich');
+                button.innerHTML = originalText;
+                button.disabled = false;
                 return;
             }
 
@@ -174,59 +244,82 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
             for(let col of header) {
                 if(!validColumns.includes(col)) {
                     showValidationResult(false, 'Fehler: Ungültige Spalte im Header: ' + col + '<br>Erlaubte Spalten sind: ' + validColumns.join(', '));
+                    button.innerHTML = originalText;
+                    button.disabled = false;
                     return;
                 }
             }
 
+            allRows = [];
+            allRows.push(lines[0]);
             // Prüfe Datensätze
             for(let i = 1; i < lines.length; i++) {
                 if(lines[i].trim() === '') continue;
-                
+                allRows.push(lines[i]);
                 const fields = parseCSVLine(lines[i]);
                 if(fields.length !== header.length) {
                     showValidationResult(false, `Fehler: Zeile ${i+1} hat eine falsche Anzahl Felder (${fields.length} statt ${header.length})`);
+                    button.innerHTML = originalText;
+                    button.disabled = false;
                     return;
                 }
             }
 
             // FK-Validierung hinzufügen
             if (hasForeignKeys) {
-                const referenzqueries = <?= json_encode($anzuzeigendeDaten[$selectedTableID]['referenzqueries'] ?? []) ?>;
-                
-                for (let i = 1; i < lines.length; i++) {
-                    if (lines[i].trim() === '') continue;
-                    const fields = parseCSVLine(lines[i]);
-                    
-                    for (let j = 0; j < header.length; j++) {
-                        const column = header[j];
-                        if (referenzqueries[column]) {
-                            const value = fields[j];
-                            fetch('ajax.php', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    action: 'matchForeignKey',
-                                    query: referenzqueries[column],
-                                    value: value
-                                })
-                            })
-                            .then(response => response.json())
-                            .then(result => {
-                                if (result.status === 'error') {
-                                    showValidationResult(false, `Zeile ${i+1}, Spalte ${column}: ${result.message}`);
-                                } else if (result.id) {
-                                    // Ersetze Wert durch gefundene ID
-                                    fields[j] = result.id;
-                                    lines[i] = fields.join(',');
-                                    textarea.value = lines.join('\n');
-                                }
-                            });
+
+                const queries = <?= json_encode($suchQueries)?>;
+                const tabelle = <?= json_encode($tabelle)?>
+
+                if (!queries) {
+                    showValidationResult(false, 'Import wegen mangelnder Konfigurationseinstellungen nicht möglich');
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    return;
+                }
+
+                fetch('ajax.php', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: action,
+                        rows: allRows,
+                        suchQueries: queries,
+                        tabelle: tabelle
+                    })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.status === 'error') {
+                        ausgabe = result.message;
+                        if (typeof result.errors !== 'undefined'){ console.log(result.errors);
+                            ausgabe += "<p>" + JSON.stringify(result.errors) + "</p>";
+                        }
+                        showValidationResult(false, ausgabe);
+                    } else {
+                        if(insert){
+                            showValidationResult(true, result.message);
+                        }else{
+                            showValidationResult(true, 'Die Daten k&ouml;nnen so importiert werden.');
+
                         }
                     }
-                }
+                })
+                .catch(error => {
+                    showValidationResult(false, 'Fehler bei der Fremdschlüssel-Validierung: ' + error.message);
+                })
+                .finally(() => {
+                    // Button zurücksetzen
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                });
+            } else {
+                // Wenn keine FK-Validierung nötig ist, direkt Erfolg melden
+                showValidationResult(true, 'Datenformat ist korrekt! Der Import kann durchgeführt werden.');
+                button.innerHTML = originalText;
+                button.disabled = false;
             }
-
-            showValidationResult(true, 'Datenformat ist korrekt! Der Import kann durchgeführt werden.');
         }
 
         function showValidationResult(isValid, message) {
@@ -248,13 +341,17 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
         }
 
         function importData() {
-            const textarea = document.getElementById('importData');
+            const allRows = lines.map(line => parseCSVLine(line));
+            const queries = <?= json_encode($suchQueries)?>;
+            const tabelle = <?= json_encode($tabelle)?>
+
+            /*const textarea = document.getElementById('importData');
             const data = textarea.value.trim();
             const lines = data.split('\n');
             const header = parseCSVLine(lines[0]);
             const values = lines.slice(1)
                 .filter(line => line.trim())
-                .map(line => parseCSVLine(line));
+                .map(line => parseCSVLine(line));*/
 
             const importButton = document.getElementById('importButton');
             importButton.disabled = true;
@@ -266,10 +363,15 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    action: 'import',
-                    tabelle: '<?= $tabelle ?>',
+                    /*action: 'import',
+                    tabelle: '< ?= $tabelle ?>',
                     header: header,
-                    values: values
+                    values: values*/
+
+                    action: 'import',
+                    rows: allRows,
+                    suchQueries: queries,
+                    tabelle: tabelle
                 })
             })
             .then(response => response.json())
@@ -416,9 +518,9 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                     </div>
                     
                     <div id="validationResult" class="alert" style="display:none;"></div>
-                    <div class="mb-3">  <!-- Hier neues div mit margin-bottom -->
-                        <button onclick="validateImport()" class="btn btn-primary">Daten prüfen</button>
-                        <button onclick="importData()" class="btn btn-success ml-2" id="importButton" style="display:none;">Daten importieren</button>
+                    <div class="mb-3">
+                        <button id="validateButton" onclick="validateImport(false)" class="btn btn-primary">Daten prüfen</button>
+                        <button id="importButton" onclick="validateImport(true)" class="btn btn-success ml-2" style="display:none;">Daten importieren</button>
                     </div>
                 </div>
             <?php endif; ?>
