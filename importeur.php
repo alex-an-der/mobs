@@ -1,4 +1,4 @@
-<?php
+<?php 
 require_once(__DIR__ . "/mods/all.head.php");
 require_once(__DIR__ . "/mods/index.head.php");
 require_once(__DIR__ . "/inc/include.php");
@@ -8,8 +8,6 @@ $selectedTableID = isset($_GET['tab']) ? $_GET['tab'] : "";
 $data = array();
 $hasForeignKeys = false;
 $foreignKeyColumns = array();
-
-
 
 
 if(isset($anzuzeigendeDaten[$selectedTableID])){
@@ -255,38 +253,6 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
             // FK-Validierung hinzufügen
             if (hasForeignKeys) {
 
-                //alert(lines);
-                //console.log(lines);
-                //const allRows = parseCSV(lines);
-                /*console.log("GEPARST:");
-                console.log(allRows[0]);
-                console.log(allRows[1]);*/
-                /*const allRows = lines.map(line => {
-                    let fields = parseCSVLine(line);
-                    console.log('Original fields:', fields); // Debug logging
-                    
-                    return fields.map(field => {
-                        console.log('Processing field:', field); // Debug logging
-                        
-                        // Explicitly preserve quotes
-                        if (field.startsWith('"') && field.endsWith('"')) {
-                            console.log('Keeping double quotes for:', field); // Debug logging
-                            return field;
-                        }
-                        if (field.startsWith("'") && field.endsWith("'")) {
-                            console.log('Keeping single quotes for:', field); // Debug logging
-                            return field;
-                        }
-                        
-                        // For fields that need quotes added
-                        if (field.includes(',') || field.includes(';')) {
-                            return `"${field}"`;
-                        }
-                        
-                        return field;
-                    });
-                });*/
-                
                 const queries = <?= json_encode($suchQueries)?>;
                 const tabelle = <?= json_encode($tabelle)?>
 
@@ -309,10 +275,18 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                 .then(response => response.json())
                 .then(result => {
                     if (result.status === 'error') {
-                        showValidationResult(false, result.message);
+                        ausgabe = result.message;
+                        if (typeof result.errors !== 'undefined'){ console.log(result.errors);
+                            ausgabe += "<p>" + JSON.stringify(result.errors) + "</p>";
+                        }
+                        showValidationResult(false, ausgabe);
                     } else {
-                        //textarea.value = result.lines.join('\n');
-                        showValidationResult(true, 'Die Daten k&ouml;nnen so importiert werden.');
+                        if(insert){
+                            showValidationResult(true, result.message);
+                        }else{
+                            showValidationResult(true, 'Die Daten k&ouml;nnen so importiert werden.');
+
+                        }
                     }
                 })
                 .catch(error => {

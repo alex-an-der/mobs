@@ -149,41 +149,7 @@ switch($action) {
         echo json_encode($response);
         break;
 
-    /*case 'import':
-        $tabelle = $data['tabelle'];
-        $header = $data['header'];
-        $values = $data['values'];
-        
-        try {
-            // Baue INSERT Query
-            $columns = implode(', ', $header);
-            $valueStrings = [];
-            
-            foreach($values as $row) {
-                $rowValues = array_map(function($val) {
-                    if($val === '') return 'NULL';
-                    return "'" . addslashes($val) . "'";
-                }, $row);
-                $valueStrings[] = '(' . implode(', ', $rowValues) . ')';
-            }
-            
-            $valuesSql = implode(",\n", $valueStrings);
-            $query = "INSERT INTO $tabelle ($columns) VALUES $valuesSql";
-            
-            $result = $db->query($query);
-            
-            if(isset($result['error'])) {
-                $response = ['status' => 'error', 'message' => $result['error']];
-            } else {
-                $count = count($values);
-                $response = ['status' => 'success', 'message' => "$count Datensätze wurden importiert"];
-            }
-        } catch(Exception $e) {
-            $response = ['status' => 'error', 'message' => $e->getMessage()];
-        }
-        ob_end_clean();
-        echo json_encode($response);
-        break;*/
+   
 
     case 'validate':
         $response = checkDaten($data, $db);
@@ -194,20 +160,50 @@ switch($action) {
     case 'import':
         $response = checkDaten($data, $db);
         if($response['status'] == "success"){
-            $insertQuery = $response['insert_query'];
-            $zaehler = 0;
-            foreach($response['args'] as $args){
-                $result = $db->query($insertQuery, $args);}
-                $zaehler ++;
+            try {
+                $db->query("START TRANSACTION");
+                
+                $successCount = 0;
+                $errorCount = 0;
+                $errorLog = [];
+                $insertQuery = $response['insert_query'];
+
+                foreach($response['args'] as $index => $args) {
+                    try {
+                        $result = $db->query($insertQuery, $args);
+                        if(isset($result['error'])) {
+                            $errorCount++;
+                            $errorLog[] = ["row" => $index, "data" => $args, "error" => $result['error']];    
+                        } else {
+                            $successCount++;
+                        }
+                    } catch (Exception $e) {
+                        $errorCount++;
+                        $errorLog[] = ["row" => $index, "data" => $args, "error" => $e->getMessage()];
+                    }
+                }
+            
+                if($errorCount == 0) {
+                    $db->query("COMMIT");
+                    $response = ["status" => "success", "message" => "Alle $successCount Datensätze wurden importiert."];
+                } else {
+                    $db->query("ROLLBACK");
+                    $response = [
+                        "status" => "error", 
+                        "message" => "Fehler beim Import: $errorCount von ".($successCount + $errorCount)." Datensätzen fehlgeschlagen.",
+                        "errors" => json_encode($errorLog)
+                    ];
+                }
             }
-            if($result['data']){
-                $response = ["status" => "success", "message" => "$zaehler Datensätze wurden importiert."];
-            }else{
-                $response = ["status" => "error", "message" => "Fehler beim Importieren der Daten. Bitte prüfen Sie die log-Tabelle in der Datenbank!"];
+            catch (Exception $e) {
+                $db->query("ROLLBACK");
+                $response = ["status" => "error", "message" => "Schwerwiegender Fehler: " . $e->getMessage()];
             }
-        ob_end_clean();
-        echo json_encode($response);
-        exit;
+
+            ob_end_clean();
+            echo json_encode($response);
+            exit;
+        }
         break;
 
     default:
@@ -338,7 +334,7 @@ function checkDaten($data, $db){
     */
     // Nachdem alles gesetzt ist (Was wird wo gesucht), gehe jetzt den Import Zeile für Zeile und Feld für Feld durch
     
-    
+    $ERROR_OVER_ALL = false;
     $error_msg = "";
     $alleArgs = array();
     $zeile = 1; // Header-Zeile wird rausgeschnitten, daher beginnen die Daten bei Zeile 2
@@ -375,6 +371,7 @@ function checkDaten($data, $db){
                             if(isset($datenSatzArgs[$FeldIndex]))
                                 if($datenSatzArgs[$FeldIndex] != $id){
                                     $ERROR = true;
+                                    $ERROR_OVER_ALL = true;
                                     $error_msg .= "<p>Der Import <b>$importFeld</b> in Zeile $zeile ($spalte) liefert kein eindeutiges Ergebnis. Bitte pr&auml;zisieren.</p>";
                                     break;
                                 }
@@ -395,6 +392,7 @@ function checkDaten($data, $db){
                 // Alles durch, aber keine ID konnte zugewiesen werden
                 if(!isset($datenSatzArgs[$FeldIndex])){
                     $ERROR = true;
+                    $ERROR_OVER_ALL = true;
                     $error_msg .= "<p>In <b>Zeile $zeile ($spalte)</b> konnte kein Datensatz identifiziert werden, da die nicht alle Schl&uuml;sselworte gefunden wurden.</p>";
                     //break;
                 }
@@ -404,49 +402,12 @@ function checkDaten($data, $db){
                 $datenSatzArgs[$FeldIndex] = $daten;
             }
 
-
-                 /*   $words = array();
-                    // Match quoted strings first, then unquoted words
-                    $pattern = '/["\']([^"\']+)["\']|\S+/';
-                    //$pattern = '/(?:"[^"]*"|\'[^\']*\'|[^,]+)(?:,|$)/';
-                    preg_match_all($pattern, $importFeld, $matches);
-                    // Use only words from inside quotes or standalone words
-                    $words = $matches[1];  // Get quoted content
-                    $words = array_merge($words, array_diff($matches[0], array_map(function($w) { return "\"$w\""; }, $matches[1]))); // Add unquoted words
-                    $words = array_filter($words);
-                 
-                    $allWordsFound = true;
-                    foreach($words as $word) {
-                        if(stripos($suchFeld, $word) === false) {
-                            $allWordsFound = false;
-                            break;
-                        }
-                    }
-                    if($allWordsFound) {
-                        if($ID_bereits_gefunden){
-                            $ERROR = true;
-                            $tmperr = "<p>Der Import <b>$importFeld</b> in Zeile $zeile ($spalte) liefert kein eindeutiges Ergebnis. Bitte pr&auml;zisieren.</p>";
-                            // Mehrfachausgaben vermeiden.
-                            if(strpos($error_msg, $tmperr) === false)
-                                $error_msg .= $tmperr;
-                        }else{
-                            $datenSatzArgs[] = $id;
-                            $ID_bereits_gefunden = true;
-                        }
-                    }
-                
-                if(!$ID_bereits_gefunden){
-                    $ERROR = true;
-                    $error_msg .= "<p>Der Import <b>$importFeld</b> in Zeile $zeile ($spalte) liefert kein Ergebnis. Es muss zur gegebenen Auswahlmöglichkeit der Spalte $spalte passen. Bitte pr&uuml;fen.</p>";
-                }*/
-            
-
-            
+   
         }
         $alleArgs[] = $datenSatzArgs;
     }
 
-    if($ERROR){
+    if($ERROR_OVER_ALL){
         $response = ["status" => "error", "message" => $error_msg];
     }else{
         $response = ["status" => "success", "insert_query" => $insertQuery, "args" => $alleArgs];

@@ -1,5 +1,6 @@
 <?php
-
+//phpinfo();
+//die();
 require_once(__DIR__ . "/mods/all.head.php");
 require_once(__DIR__ . "/mods/index.head.php");
 require_once(__DIR__ . "/inc/include.php");
