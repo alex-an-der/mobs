@@ -254,8 +254,8 @@ $tabelle_upper = strtoupper($tabelle)
             const checkButton = document.getElementById('check-duplicates');
             const originalText = checkButton.innerHTML;
 
-            // Zeige den Spinner und deaktiviere den Button
-            checkButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            // Show spinner and disable button
+            checkButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Suche...';
             checkButton.disabled = true;
 
             fetch('ajax.php', {
@@ -282,7 +282,7 @@ $tabelle_upper = strtoupper($tabelle)
                 alert('Fehler beim Verarbeiten der Serverantwort.');
             })
             .finally(() => {
-                // Setze den Button zurück und aktiviere ihn wieder
+                // Reset button state
                 checkButton.innerHTML = originalText;
                 checkButton.disabled = false;
             });
@@ -451,8 +451,8 @@ $tabelle_upper = strtoupper($tabelle)
             const insertButton = document.getElementById('insertDefaultButton');
             const originalText = insertButton.innerHTML;
 
-            // Zeige den Spinner und deaktiviere den Button
-            insertButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            // Show spinner and disable button
+            insertButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Füge ein...';
             insertButton.disabled = true;
 
             const xhr = new XMLHttpRequest();
@@ -533,8 +533,8 @@ $tabelle_upper = strtoupper($tabelle)
             const confirmation = confirm('Sind Sie sicher, dass Sie die ausgewählten Daten löschen möchten?');
             if (!confirmation) return;
 
-            // Zeige den Spinner und deaktiviere den Button
-            deleteButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            // Show spinner and disable button
+            deleteButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Lösche...';
             deleteButton.disabled = true;
 
             const xhr = new XMLHttpRequest();
@@ -573,6 +573,13 @@ $tabelle_upper = strtoupper($tabelle)
         }
 
         function resetPage(){
+            const resetButton = document.getElementById('resetButton');
+            const originalText = resetButton.innerHTML;
+
+            // Show spinner and disable button
+            resetButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Lade...';
+            resetButton.disabled = true;
+
             caches.keys().then(function(names) {
                 for (let name of names) caches.delete(name);
             }).then(function() {
@@ -892,9 +899,9 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
     <?php if (!empty($tabelle) && $admin): ?>
     
         <button id="resetButton" class="btn btn-info mb-2" onclick="resetPage()">Daten neu laden</button>
-        <button id="insertDefaultButton" class="btn btn-success mb-2">Neuen Datensatz einfügen</button>
-        <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte Zeilen löschen</button>
-        <button id="check-duplicates" class="btn btn-success mb-2">Dubletten anzeigen</button>
+        <button id="insertDefaultButton" class="btn btn-success mb-2">Datensatz einfügen</button>
+        <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte löschen</button>
+        <button id="check-duplicates" class="btn btn-success mb-2">Dubletten suchen</button>
         <?php if (!isset($anzuzeigendeDaten[$selectedTableID]['import']) || $anzuzeigendeDaten[$selectedTableID]['import'] !== false): ?>
             <a href="importeur.php?tab=<?= $selectedTableID ?>" class="btn btn-info mb-2">Daten importieren</a>
         <?php endif; ?>

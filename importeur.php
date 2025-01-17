@@ -214,6 +214,15 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
         }*/
 
         function validateImport(insert=false) {
+            const validateButton = document.getElementById('validateButton');
+            const importButton = document.getElementById('importButton');
+            const originalText = insert ? importButton.innerHTML : validateButton.innerHTML;
+            const button = insert ? importButton : validateButton;
+
+            // Zeige den Spinner und deaktiviere den Button
+            button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ' + (insert ? 'Importiere...' : 'Prüfe...');
+            button.disabled = true;
+
             const textarea = document.getElementById('importData');
             const data = textarea.value.trim();
             const lines = data.split('\n');
@@ -224,6 +233,8 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
             
             if(lines.length < 2) {
                 showValidationResult(false, 'Fehler: Mindestens Header und ein Datensatz erforderlich');
+                button.innerHTML = originalText;
+                button.disabled = false;
                 return;
             }
 
@@ -233,6 +244,8 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
             for(let col of header) {
                 if(!validColumns.includes(col)) {
                     showValidationResult(false, 'Fehler: Ungültige Spalte im Header: ' + col + '<br>Erlaubte Spalten sind: ' + validColumns.join(', '));
+                    button.innerHTML = originalText;
+                    button.disabled = false;
                     return;
                 }
             }
@@ -246,6 +259,8 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                 const fields = parseCSVLine(lines[i]);
                 if(fields.length !== header.length) {
                     showValidationResult(false, `Fehler: Zeile ${i+1} hat eine falsche Anzahl Felder (${fields.length} statt ${header.length})`);
+                    button.innerHTML = originalText;
+                    button.disabled = false;
                     return;
                 }
             }
@@ -258,6 +273,8 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
 
                 if (!queries) {
                     showValidationResult(false, 'Import wegen mangelnder Konfigurationseinstellungen nicht möglich');
+                    button.innerHTML = originalText;
+                    button.disabled = false;
                     return;
                 }
 
@@ -291,10 +308,18 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                 })
                 .catch(error => {
                     showValidationResult(false, 'Fehler bei der Fremdschlüssel-Validierung: ' + error.message);
+                })
+                .finally(() => {
+                    // Button zurücksetzen
+                    button.innerHTML = originalText;
+                    button.disabled = false;
                 });
+            } else {
+                // Wenn keine FK-Validierung nötig ist, direkt Erfolg melden
+                showValidationResult(true, 'Datenformat ist korrekt! Der Import kann durchgeführt werden.');
+                button.innerHTML = originalText;
+                button.disabled = false;
             }
-
-            showValidationResult(true, 'Datenformat ist korrekt! Der Import kann durchgeführt werden.');
         }
 
         function showValidationResult(isValid, message) {
@@ -493,9 +518,9 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                     </div>
                     
                     <div id="validationResult" class="alert" style="display:none;"></div>
-                    <div class="mb-3">  <!-- Hier neues div mit margin-bottom -->
-                        <button onclick="validateImport()" class="btn btn-primary">Daten prüfen</button>
-                        <button onclick="validateImport(true)" class="btn btn-success ml-2" id="importButton" style="display:none;">Daten importieren</button>
+                    <div class="mb-3">
+                        <button id="validateButton" onclick="validateImport(false)" class="btn btn-primary">Daten prüfen</button>
+                        <button id="importButton" onclick="validateImport(true)" class="btn btn-success ml-2" style="display:none;">Daten importieren</button>
                     </div>
                 </div>
             <?php endif; ?>
