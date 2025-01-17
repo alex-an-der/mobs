@@ -270,6 +270,10 @@ $tabelle_upper = strtoupper($tabelle)
                 if (data.status === 'success') {
                     if (data.duplicates.length > 0) {
                         filterRowsById(data.duplicates);
+                        let text = 'Die Tabelle wurde gefiltert. Sie sehen nun alle Einträge, ' +
+                        'die mehrfach vorhanden sind. Um wieder alle Daten anzuzeigen, laden ' +
+                        'Sie die Daten neu.';
+                        alert(text);
                     } else {
                         alert('Es wurden keine doppelten Einträge gefunden.');
                     }

@@ -121,7 +121,7 @@ switch($action) {
 
         // Get columns excluding auto-increment columns
         $columnsQuery = "SHOW COLUMNS FROM `$tabelle`";
-        $columnsResult = $db->query($columnsQuery);
+        $columnsResult = $db->query($columnsQuery)['data'];
         $columns = array_filter($columnsResult, function($column) {
             return $column['Extra'] !== 'auto_increment';
         });
@@ -138,7 +138,7 @@ switch($action) {
             WHERE cnt > 1 
         ";
         try {
-            $duplicatesResult = $db->query($duplicatesQuery);
+            $duplicatesResult = $db->query($duplicatesQuery)['data'];
             $duplicateIds = array_column($duplicatesResult, 'id');
             $response = ["status" => "success", "duplicates" => $duplicateIds];
         } catch (Exception $e) {
