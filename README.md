@@ -16,6 +16,12 @@ INSERT INTO log (eintrag) VALUES ('Herzlich Willkommen!');
   
   - In einer Tabelle muss zunächst mindestens ein Datensatz existieren, bevor die Darstellung dieser Tabelle korrekt funktioniert.
 
+Für den Export nach pdf benötigt es dieser Module:
+```
+composer require tecnickcom/tcpdf
+composer require phpoffice/phpspreadsheet
+```
+
 ## Berechtigungsstruktur
 Es gilt der Grundsatz, dass immer eine Ebene nach unten berechtigt wird.
 

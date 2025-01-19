@@ -672,6 +672,52 @@ $tabelle_upper = strtoupper($tabelle)
             // Container bei Größenänderung anpassen
             window.addEventListener('resize', adjustContainer);
         });
+
+        function exportData(format) {
+            const filterInput = document.getElementById('tableFilter');
+            const isFiltered = filterInput && filterInput.value.trim() !== '';
+            let exportAll = true;
+
+            if (isFiltered) {
+                exportAll = !confirm('Die Daten sind gefiltert. Möchten Sie nur die gefilterten Daten exportieren?\n\nOK = Nur gefilterte Daten\nAbbrechen = Alle Daten');
+            }
+
+            const visibleRows = [];
+            if (!exportAll) {
+                document.querySelectorAll('table tbody tr').forEach(row => {
+                    if (row.style.display !== 'none') {
+                        visibleRows.push(row.getAttribute('data-id'));
+                    }
+                });
+            }
+
+            // Create form and submit it
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = 'export.php';
+            form.target = '_blank';
+
+            // Add parameters
+            const params = {
+                format: format,
+                tabelle: '<?=$tabelle?>',
+                tabid: '<?=$selectedTableID?>',
+                exportAll: exportAll ? '1' : '0',
+                ids: visibleRows.join(',')
+            };
+
+            for (const key in params) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = params[key];
+                form.appendChild(input);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        }
     
     </script>
 
@@ -906,6 +952,16 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
         <button id="insertDefaultButton" class="btn btn-success mb-2">Datensatz einfügen</button>
         <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte löschen</button>
         <button id="check-duplicates" class="btn btn-success mb-2">Dubletten suchen</button>
+        <div class="btn-group mb-2">
+            <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Exportieren
+            </button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="#" onclick="exportData('pdf')">Als PDF</a>
+                <a class="dropdown-item" href="#" onclick="exportData('csv')">Als CSV</a>
+                <a class="dropdown-item" href="#" onclick="exportData('excel')">Als Excel</a>
+            </div>
+        </div>
         <?php if (!isset($anzuzeigendeDaten[$selectedTableID]['import']) || $anzuzeigendeDaten[$selectedTableID]['import'] !== false): ?>
             <a href="importeur.php?tab=<?= $selectedTableID ?>" class="btn btn-info mb-2">Daten importieren</a>
         <?php endif; ?>
