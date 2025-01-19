@@ -138,8 +138,11 @@ switch($action) {
             WHERE cnt > 1 
         ";
         try {
-            $duplicatesResult = $db->query($duplicatesQuery)['data'];
-            $duplicateIds = array_column($duplicatesResult, 'id');
+            $duplicateIds = array();
+            if(isset($db->query($duplicatesQuery)['data'])){
+                $duplicatesResult = $db->query($duplicatesQuery)['data'];
+                $duplicateIds = array_column($duplicatesResult, 'id');
+            }
             $response = ["status" => "success", "duplicates" => $duplicateIds];
         } catch (Exception $e) {
             $db->log("Check duplicates error: " . $e->getMessage());
@@ -367,7 +370,7 @@ function checkDaten($data, $db){
                     // Gehe jeden Import-Suchbegriff (Nadel) durch - alle Nadeln müssen gefunden werden
                     foreach($importDatensaetze[$zeile-1][$FeldIndex] as $importWort){
                         // Wird DIESES Wort im Suchstring (= eine ID) gefunden 
-                        if(strpos($suchFeld, $importWort) !== false){
+                        if(stripos($suchFeld, $importWort) !== false){
                             if(isset($datenSatzArgs[$FeldIndex]))
                                 if($datenSatzArgs[$FeldIndex] != $id){
                                     $ERROR = true;
