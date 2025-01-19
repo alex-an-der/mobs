@@ -106,54 +106,88 @@ function exportPDF($data, $tabelle) {
         ob_clean();
         
         $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-        $pdf->SetCreator(PDF_CREATOR);
-        $pdf->SetTitle($filename);
-        $pdf->AddPage('L');
-        $pdf->SetFont('helvetica', '', 8);
         
-        // Berechne verfügbare Seitenbreite (in mm)
+        // PDF Metadaten und Einstellungen
+        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetAuthor('LBSV Niedersachsen');
+        $pdf->SetTitle($filename);
+        
+        // Kopf- und Fußzeile
+        $pdf->setHeaderFont(Array('helvetica', '', 10));
+        $pdf->setFooterFont(Array('helvetica', '', 8));
+        $pdf->SetHeaderData('', 0, TITEL, $filename . "\nExportiert am: " . date('d.m.Y H:i'));
+        
+        // Seitenränder
+        $pdf->SetMargins(15, 27, 15);
+        $pdf->SetHeaderMargin(5);
+        $pdf->SetFooterMargin(10);
+        
+        // Automatische Seitenumbrüche
+        $pdf->SetAutoPageBreak(TRUE, 25);
+        
+        $pdf->AddPage('L');  // Querformat
+        $pdf->SetFont('helvetica', '', 9);  // Etwas größere Schrift
+        
+        // Berechne verfügbare Breite
         $pageWidth = $pdf->getPageWidth();
         $margins = $pdf->getMargins();
         $availableWidth = $pageWidth - $margins['left'] - $margins['right'];
         
-        // Headers mit mehr Padding und Styling
+        // Tabellen-Styling
+        $html = '<style>
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            th {
+                background-color: #f5f5f5;
+                font-weight: bold;
+                text-align: left;
+                padding: 8px;
+                border: 1px solid #ddd;
+            }
+            td {
+                padding: 6px 8px;
+                border: 1px solid #ddd;
+            }
+            tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+        </style>';
+        
+        // Tabellenkopf
+        $html .= '<table cellpadding="4">';
         $headers = array_keys($data[0]);
         $visibleHeaders = array_filter($headers, function($header) {
             return strcasecmp($header, 'id') !== 0;
         });
         
-        // Berechne die optimale Spaltenbreite
+        // Spaltenbreiten berechnen
         $columnWidths = [];
         $totalContentWidth = 0;
         foreach ($visibleHeaders as $header) {
-            $maxWidth = strlen($header) * 2; // Startbreite basierend auf Header
-            
-            // Finde längsten Inhalt
+            $maxWidth = strlen($header) * 2.5;
             foreach ($data as $row) {
-                $len = strlen($row[$header]) * 2;
-                $maxWidth = max($maxWidth, $len);
+                $maxWidth = max($maxWidth, strlen($row[$header]) * 2.5);
             }
-            
             $columnWidths[$header] = $maxWidth;
             $totalContentWidth += $maxWidth;
         }
         
-        // Skaliere Spaltenbreiten wenn nötig
+        // Spaltenbreiten proportional anpassen
         if ($totalContentWidth > $availableWidth) {
-            $scale = $availableWidth / $totalContentWidth;
+            $ratio = $availableWidth / $totalContentWidth;
             foreach ($columnWidths as &$width) {
-                $width *= $scale;
+                $width *= $ratio;
             }
         }
         
-        // Erstelle die Tabelle
-        $html = '<table border="1" cellpadding="5" cellspacing="0">';
-        
         // Header-Zeile
-        $html .= '<tr style="background-color:#f5f5f5;">';
+        $html .= '<tr>';
         foreach ($visibleHeaders as $header) {
             $html .= sprintf(
-                '<th style="font-weight:bold; text-align:left; width:%.1fmm; white-space:nowrap;">%s</th>',
+                '<th style="width:%.1fmm">%s</th>',
                 $columnWidths[$header],
                 htmlspecialchars($header)
             );
@@ -166,7 +200,7 @@ function exportPDF($data, $tabelle) {
             foreach ($row as $key => $value) {
                 if (strcasecmp($key, 'id') !== 0) {
                     $html .= sprintf(
-                        '<td style="width:%.1fmm; white-space:nowrap;">%s</td>',
+                        '<td style="width:%.1fmm">%s</td>',
                         $columnWidths[$key],
                         htmlspecialchars($value)
                     );
