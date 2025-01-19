@@ -389,6 +389,18 @@ $tabelle_upper = strtoupper($tabelle)
                 }
             });
 
+            // Speichere Sortierung in Session
+            fetch('save_sort.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    column: column,
+                    order: order
+                })
+            });
+
             rows.forEach(row => table.appendChild(row));
 
             lastSortColumn = column;
@@ -673,7 +685,7 @@ $tabelle_upper = strtoupper($tabelle)
             window.addEventListener('resize', adjustContainer);
         });
 
-        function exportData(format) {
+        function exportData(format, spreadsheetFormat) {
             const filterInput = document.getElementById('tableFilter');
             const isFiltered = filterInput && filterInput.value.trim() !== '';
             let exportAll = true;
@@ -691,27 +703,28 @@ $tabelle_upper = strtoupper($tabelle)
                 });
             }
 
-            // Create form and submit it
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = 'export.php';
             form.target = '_blank';
 
-            // Add parameters
             const params = {
                 format: format,
                 tabelle: '<?=$tabelle?>',
                 tabid: '<?=$selectedTableID?>',
                 exportAll: exportAll ? '1' : '0',
-                ids: visibleRows.join(',')
+                ids: visibleRows.join(','),
+                spreadsheet_format: spreadsheetFormat
             };
 
             for (const key in params) {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = key;
-                input.value = params[key];
-                form.appendChild(input);
+                if (params[key]) {  // Nur nicht-leere Werte hinzufügen
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = params[key];
+                    form.appendChild(input);
+                }
             }
 
             document.body.appendChild(form);
@@ -959,7 +972,8 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
             <div class="dropdown-menu">
                 <a class="dropdown-item" href="#" onclick="exportData('pdf')">Als PDF</a>
                 <a class="dropdown-item" href="#" onclick="exportData('csv')">Als CSV</a>
-                <a class="dropdown-item" href="#" onclick="exportData('excel')">Als Excel</a>
+                <a class="dropdown-item" href="#" onclick="exportData('excel', 'Xlsx')">Als Excel</a>
+                <a class="dropdown-item" href="#" onclick="exportData('excel', 'Ods')">Als LibreOffice</a>
             </div>
         </div>
         <?php if (!isset($anzuzeigendeDaten[$selectedTableID]['import']) || $anzuzeigendeDaten[$selectedTableID]['import'] !== false): ?>
