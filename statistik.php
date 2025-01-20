@@ -1,7 +1,7 @@
 <?php
 require_once(__DIR__ . "/mods/all.head.php");
 require_once(__DIR__ . "/inc/include.php");
-require_once(__DIR__ . "/config.php");
+require_once(__DIR__ . "/config/config.php");
 
 // Hole Statistik-Auswahl aus config.php
 $selectedStat = isset($_GET['stat']) ? (int)$_GET['stat'] : 0;
@@ -65,8 +65,7 @@ $values = !empty($data) ? array_column($data, array_keys($data[0])[1]) : [];
                 <div class="text-right mb-3">
                     <button class="btn btn-info" onclick="exportStatistik()">Als PDF exportieren</button>
                 </div>
-                <!-- Großer Titel -->
-                <h2 class="text-center mb-4"><?= htmlspecialchars($stat['titel']) ?></h2>
+                <!-- Remove the duplicate title below -->
                 <div style="width: 66%; margin: auto;">
                     <canvas id="chartContainer"></canvas>
                 </div>
@@ -133,10 +132,37 @@ $values = !empty($data) ? array_column($data, array_keys($data[0])[1]) : [];
         const ctx = document.getElementById('chartContainer').getContext('2d');
         
         <?php
+        $stat = $statistik[$selectedStat];
         // Daten für Chart.js aufbereiten
-        $colors = array_map(function() {
-            return sprintf('hsl(%d, 70%%, 60%%)', rand(0, 360));
-        }, $labels);
+        
+        $colorPalette =[
+        '#383838', // Anthrazit
+        '#ff69b4', // Pink
+        '#8a8a8a', // warmes grau
+        '#7F0000', // Bordeaux rot
+        '#FFB6C1', // zartes Rosa
+        '#FFD700', // Gold
+        '#1b0d94', // Dunkelblau
+        '#FF5733', // Lebendiges Orange
+        '#57FF33', // Limettengrün
+        '#3357FF', // Blau
+        '#FF33F2', // Fuchsia
+        '#33FFF2'  // Türkis
+        ];
+
+        $colors = [];
+        $availableColors = $colorPalette;
+        $numColors = count($labels);
+
+        for ($i = 0; $i < $numColors; $i++) {
+            if (empty($availableColors)) {
+                $availableColors = $colorPalette;
+            }
+            $randomIndex = array_rand($availableColors);
+            $colors[] = $availableColors[$randomIndex];
+            unset($availableColors[$randomIndex]);
+        }
+
         
         echo "const data = {
             labels: " . json_encode($labels) . ",
@@ -159,7 +185,19 @@ $values = !empty($data) ? array_column($data, array_keys($data[0])[1]) : [];
                         },
                         title: {
                             display: true,
-                            text: " . json_encode($stat['titel']) . "
+                            text: " . json_encode($stat['titel']) . ",
+                            font: {
+                                size: 24
+                            }
+                        },
+                        tooltip: {
+                            titleFont: {
+                                size: 16
+                            },
+                            bodyFont: {
+                                size: 16
+                            },
+                            padding: 16
                         }
                     }
                 }

@@ -47,9 +47,9 @@ Dies ist der Hauptteil der Konfiguration. Über das Array `$anzuzeigendeDaten = 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "mitglieder",
     "auswahltext" => "Mitglieder Stammdaten",
-    "query" => "select Name, Vorname, Geschlecht, Unternehmen from mitglieder order by id desc;",
+    "query" => "SELECT Name, Vorname, Geschlecht, Unternehmen from mitglieder order by id desc;",
     "referenzqueries" => array(
-        "Geschlecht" => "select id, geschlecht as anzeige from geschlechter order by geschlecht desc;",
+        "Geschlecht" => "SELECT id, geschlecht as anzeige from geschlechter order by geschlecht desc;",
         "Unternehmen" => "SELECT id, CONCAT(Name, ', ', Stadt) as anzeige from unternehmen order by Name;"
     ),
     "spaltenbreiten" => array(
@@ -73,10 +73,10 @@ $anzuzeigendeDaten[] = array(
 ## Statistische Auswertungen
 Über das Array `$statistik = array();` können statistische Auswertungen festgelegt werden. Diese sind dann unter `Exportieren -> Statistiken` erreichbar.
 
-
+```php
 $statistik[] = array(
     "titel" => "Mitglieder in Sparten",
-    "query" => "select s.Sparte, count(mis.Mitglied) as Mitglieder
+    "query" => "SELECT s.Sparte, count(mis.Mitglied) as Mitglieder
                 from b_mitglieder_in_sparten as mis
                 join b_sparte as s on s.id = mis.Sparte
                 join v_verbands_berechtigte_sparte as r on r.Sparte = s.id 
@@ -85,7 +85,7 @@ $statistik[] = array(
                 ",
     "typ"   => "torte"
 );
-
+```
 
 
 # tabellenname => Nur hierein kann in dieser Ansicht ein insert oder update ausgeführt werden.

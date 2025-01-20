@@ -2,7 +2,7 @@
 ob_start(); // Start output buffering at the very beginning
 require_once(__DIR__ . "/mods/all.head.php");
 require_once(__DIR__ . "/inc/include.php");
-require_once(__DIR__ . "/config.php");
+require_once(__DIR__ . "/config/config.php");  // Changed from /config.php
 require_once(__DIR__ . '/vendor/autoload.php');
 
 // Clean any existing output
@@ -72,13 +72,13 @@ if (isset($_POST['chartImage'])) {
             unlink($tempFile);
 
             // Ausreichend Platz für das Bild + Abstand zur Tabelle
-            $pdf->Ln($height + 20); // 20mm Abstand nach dem Bild
+            $pdf->Ln($height + 5); // Reduziert auf 5mm Abstand nach dem Bild
         }
     }
 }
 
 // Füge die Tabelle unter dem Diagramm ein
-$pdf->Ln(120); // Fester Abstand statt $height + 10
+$pdf->Ln(5); // Reduziert auf 5mm Abstand
 
 // Tabelle
 $pdf->SetFont('helvetica', '', 10);
