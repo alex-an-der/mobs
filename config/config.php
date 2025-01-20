@@ -424,4 +424,35 @@ $anzuzeigendeDaten[] = array(
         "Mitglied" => "SELECT id, Vorname, Nachname, Mail from b_mitglieder as m join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG where vbr.Verbandsberechtigter = $uid;"
     )
 );
+
+###################################################################################
+##   Statistik                                                                   ##
+###################################################################################
+
+$statistik = array();
+
+$statistik[] = array(
+    "titel" => "Mitglieder in Sparten",
+    "query" => "select s.Sparte, count(mis.Mitglied) as Mitglieder
+                from b_mitglieder_in_sparten as mis
+                join b_sparte as s on s.id = mis.Sparte
+                join v_verbands_berechtigte_sparte as r on r.Sparte = s.id 
+                where r.Verbandsberechtigter = $uid
+                group by s.Sparte
+                ",
+    "typ"   => "torte"
+);
+
+$statistik[] = array(
+    "titel" => "Mitglieder in Sparten (Kopie)",
+    "query" => "select s.Sparte, count(mis.Mitglied) as Mitglieder
+                from b_mitglieder_in_sparten as mis
+                join b_sparte as s on s.id = mis.Sparte
+                join v_verbands_berechtigte_sparte as r on r.Sparte = s.id 
+                where r.Verbandsberechtigter = $uid
+                group by s.Sparte
+                ",
+    "typ"   => "torte"
+);
+
 ?>

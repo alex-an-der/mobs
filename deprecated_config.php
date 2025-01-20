@@ -156,8 +156,8 @@ $anzuzeigendeDaten[] = array(
 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "log",
-    "auswahltext" => "Log (zur Entwicklung)",
-    "query" => "SELECT id, id as Nr, zeit as Timestamp, eintrag as Log from log order by zeit desc;",
+    "auswahltext" => "xxLog (zur Entwicklung)",
+    "query" => "SELECT 'RO', id, id as Nr, zeit as Timestamp, eintrag as Log from log order by zeit desc;",
     "spaltenbreiten" => array(
         "Nr"       => "80",
         "Timestamp" => "220",
@@ -166,34 +166,6 @@ $anzuzeigendeDaten[] = array(
 );
 
 
-###################################################################################
-##   Statistik                                                                   ##
-###################################################################################
 
-$statistik = array();
-
-$statistik[] = array(
-    "titel" => "Mitglieder in Sparten",
-    "query" => "select s.Sparte, count(mis.Mitglied) as Mitglieder
-                from b_mitglieder_in_sparten as mis
-                join b_sparte as s on s.id = mis.Sparte
-                join v_verbands_berechtigte_sparte as r on r.Sparte = s.id 
-                where r.Verbandsberechtigter = $uid
-                group by s.Sparte
-                ",
-    "typ"   => "torte"
-);
-
-$statistik[] = array(
-    "titel" => "Mitglieder in Sparten (Kopie)",
-    "query" => "select s.Sparte, count(mis.Mitglied) as Mitglieder
-                from b_mitglieder_in_sparten as mis
-                join b_sparte as s on s.id = mis.Sparte
-                join v_verbands_berechtigte_sparte as r on r.Sparte = s.id 
-                where r.Verbandsberechtigter = $uid
-                group by s.Sparte
-                ",
-    "typ"   => "torte"
-);
 
 ?>
