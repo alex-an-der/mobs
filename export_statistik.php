@@ -54,24 +54,31 @@ $pdf->Ln(5);
 if (isset($_POST['chartImage'])) {
     $imgData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $_POST['chartImage']));
     
-    // Speichere temporär
-    $tempFile = tempnam(sys_get_temp_dir(), 'chart');
-    file_put_contents($tempFile, $imgData);
-    
-    // Berechne die Bildgröße (max 160mm breit für A4, proportionale Höhe)
-    $imgSize = getimagesize($tempFile);
-    $width = 160;
-    $height = ($width / $imgSize[0]) * $imgSize[1];
-    
-    // Zentriere das Bild
-    $x = ($pdf->getPageWidth() - $width) / 2;
-    
-    $pdf->Image($tempFile, $x, $pdf->GetY(), $width);
-    unlink($tempFile);
+    if ($imgData) {  // Prüfen ob Dekodierung erfolgreich
+        // Speichere temporär
+        $tempFile = tempnam(sys_get_temp_dir(), 'chart');
+        file_put_contents($tempFile, $imgData);
+        
+        // Berechne die Bildgröße (max 160mm breit für A4, proportionale Höhe)
+        $imgSize = getimagesize($tempFile);
+        if ($imgSize) {  // Prüfen ob es ein gültiges Bild ist
+            $width = 160;
+            $height = ($width / $imgSize[0]) * $imgSize[1];
+            
+            // Zentriere das Bild
+            $x = ($pdf->getPageWidth() - $width) / 2;
+            
+            $pdf->Image($tempFile, $x, $pdf->GetY(), $width);
+            unlink($tempFile);
+
+            // Ausreichend Platz für das Bild + Abstand zur Tabelle
+            $pdf->Ln($height + 20); // 20mm Abstand nach dem Bild
+        }
+    }
 }
 
 // Füge die Tabelle unter dem Diagramm ein
-$pdf->Ln($height + 10); // Abstand nach dem Diagramm
+$pdf->Ln(120); // Fester Abstand statt $height + 10
 
 // Tabelle
 $pdf->SetFont('helvetica', '', 10);

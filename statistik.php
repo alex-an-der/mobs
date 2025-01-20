@@ -101,6 +101,10 @@ $values = !empty($data) ? array_column($data, array_keys($data[0])[1]) : [];
     <script>
         // Exportfunktion
         function exportStatistik() {
+            // Chart als Base64-String holen
+            const canvas = document.getElementById('chartContainer');
+            const chartImage = canvas.toDataURL('image/png');
+
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = 'export_statistik.php';
@@ -108,7 +112,8 @@ $values = !empty($data) ? array_column($data, array_keys($data[0])[1]) : [];
 
             const params = {
                 stat: '<?= $selectedStat ?>',
-                format: 'pdf'
+                format: 'pdf',
+                chartImage: chartImage  // Hier fügen wir das Bild hinzu
             };
 
             for (const key in params) {
