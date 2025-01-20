@@ -223,43 +223,49 @@ function exportPDF($data, $tabelle) {
 function exportExcel($data, $tabelle) {
     global $filename;
     try {
-        // Debug: Prüfe Daten
-        if (empty($data)) {
-            die('Keine Daten zum Exportieren vorhanden');
-        }
+        if (empty($data)) die('Keine Daten zum Exportieren vorhanden');
 
-        // Erstelle neue Instanz
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         
-        // Debug: Log Datenstruktur
-        error_log('Export data structure: ' . print_r($data, true));
-        
-        // Headers (ohne ID) sammeln
+        // Headers ohne ID
         $headers = array_filter(array_keys($data[0]), function($header) {
             return strcasecmp($header, 'id') !== 0;
         });
-        $headers = array_values($headers); // Array neu indizieren
+        $headers = array_values($headers);
         
-        // Debug: Log Headers
-        error_log('Export headers: ' . print_r($headers, true));
+        // Formatierungsregeln erkennen
+        $columnFormats = [];
+        foreach ($headers as $header) {
+            $columnFormats[$header] = detectColumnFormat($data, $header);
+        }
         
-        // Headers schreiben
+        // Headers schreiben und formatieren
         foreach ($headers as $colIndex => $header) {
             $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 1);
+            
+            // Header-Zelle setzen
             $sheet->setCellValue($colLetter . '1', $header);
             
             // Header-Styling
             $sheet->getStyle($colLetter . '1')->applyFromArray([
-                'font' => [
-                    'bold' => true,
-                    'size' => 11
-                ],
+                'font' => ['bold' => true, 'size' => 11],
                 'fill' => [
                     'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                     'startColor' => ['rgb' => 'F5F5F5']
                 ]
             ]);
+            
+            // Spaltenformat basierend auf Datentyp
+            if ($columnFormats[$header]['type'] === 'number') {
+                $sheet->getStyle($colLetter . '2:' . $colLetter . (count($data) + 1))
+                    ->getNumberFormat()
+                    ->setFormatCode($columnFormats[$header]['format']);
+            } elseif ($columnFormats[$header]['type'] === 'date') {
+                $sheet->getStyle($colLetter . '2:' . $colLetter . (count($data) + 1))
+                    ->getNumberFormat()
+                    ->setFormatCode($columnFormats[$header]['format']);
+            }
         }
         
         // Daten schreiben
@@ -270,25 +276,32 @@ function exportExcel($data, $tabelle) {
                 $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
                 $value = $rowData[$header] ?? '';
                 
-                // Debug: Log jede Zelle
-                error_log("Setting cell {$colLetter}{$rowIndex} to: " . print_r($value, true));
+                // Wert entsprechend des erkannten Formats konvertieren
+                if ($columnFormats[$header]['type'] === 'date' && !empty($value)) {
+                    $value = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel(strtotime($value));
+                } elseif ($columnFormats[$header]['type'] === 'number') {
+                    $value = str_replace(',', '.', $value);
+                }
                 
-                // Setze Zellwert
                 $sheet->setCellValue($colLetter . $rowIndex, $value);
-                
-                // Überprüfe, ob der Wert geschrieben wurde
-                $actualValue = $sheet->getCell($colLetter . $rowIndex)->getValue();
-                error_log("Actual cell value {$colLetter}{$rowIndex}: " . print_r($actualValue, true));
-                
                 $colIndex++;
             }
             $rowIndex++;
         }
         
-        // Auto-size columns
+        // Intelligente Spaltenbreite
         foreach ($headers as $colIndex => $header) {
             $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 1);
-            $sheet->getColumnDimension($colLetter)->setAutoSize(true);
+            
+            // Maximale Breite basierend auf Inhalt (mit 10% Extra)
+            $maxLength = strlen($header);
+            foreach ($data as $row) {
+                $maxLength = max($maxLength, strlen($row[$header]));
+            }
+            
+            // Breite in Zeichen (mit Minimum und Maximum)
+            $width = min(max($maxLength * 1.1, 8), 50);
+            $sheet->getColumnDimension($colLetter)->setWidth($width);
         }
 
         // Format bestimmen und Writer erstellen
@@ -363,4 +376,48 @@ function sortData($data, $sortColumn = null, $sortOrder = 'asc') {
     });
     
     return $data;
+}
+
+// Neue Hilfsfunktion zum Erkennen des Spaltenformats
+function detectColumnFormat($data, $header) {
+    $format = ['type' => 'text', 'format' => '@'];
+    $allNumeric = true;
+    $allDates = true;
+    
+    foreach ($data as $row) {
+        $value = $row[$header] ?? '';
+        if (empty($value)) continue;
+        
+        // Prüfe auf Datum
+        $timestamp = strtotime($value);
+        if ($timestamp === false) {
+            $allDates = false;
+        }
+        
+        // Prüfe auf Zahl
+        if (!is_numeric(str_replace(',', '.', $value))) {
+            $allNumeric = false;
+        }
+        
+        if (!$allDates && !$allNumeric) break;
+    }
+    
+    if ($allDates) {
+        $format['type'] = 'date';
+        $format['format'] = 'DD.MM.YYYY';
+    } elseif ($allNumeric) {
+        $format['type'] = 'number';
+        // Prüfe auf Dezimalstellen
+        $hasDecimals = false;
+        foreach ($data as $row) {
+            $value = str_replace(',', '.', $row[$header] ?? '');
+            if (strpos($value, '.') !== false) {
+                $hasDecimals = true;
+                break;
+            }
+        }
+        $format['format'] = $hasDecimals ? '#,##0.00' : '#,##0';
+    }
+    
+    return $format;
 }
