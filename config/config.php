@@ -1,20 +1,4 @@
 <?php 
-
-
-
-
-
-/*
-Ich möchte, dass du Änderungen im Codes zunächst mit mir besprichst jetzt. Jetzt geht es erst einmal um ein Konzept. Ich möchte nicht, dass der Nutzer etwas auswählen muss. Ich möchte hingegen lieber so vorgehen. Es gibt in der Datei config. Im Index Referenzcarreries stehen Abfragen an die Datenbank für die betroffene Spalte. Ich möchte den Input zu gestalten, dass der Nutzer. Die Daten wo? Wie gewohnt als Textpfeil in eine Textarea. Einfügt. Das Programm soll im. Einer Referenz. Spalte. Sehen. Ob es passende Datensätze findet? Mithilfe des Selekts im Index Referenzquare ist. Die auf die eingegebenen Schlagworte. Passen. Ich gebe dir ein Beispiel.
-
-$anzuzeigendeDaten["referenzqueries"] = "SELECT ...." ergibt die Datensätze id, Vorname, Namname, Strasse 11, Hans, Christ, Hallerweg 12, Markus, Kummer, Jooballee 13, Christian, Meyer, Hubertusweg
-
-Eine Eingabe von "Chris Haller" liefert die id 11 "Markus" liefert 12 "Chris" liefert 11 und 13
-
-Sollte pro Zeile mehrere. Datensätze identifiziert werden, die passen könnten, soll das, was Importfehler angezeigt werden.
-
-Verstehst du, was ich meine? Hast du Fragen?
-*/
 require_once(__DIR__ . "/../mods/all.head.php");
 require_once(__DIR__ . "/../mods/config.head.php");
 # Datenbank-Zugangsdaten
@@ -67,6 +51,7 @@ Kovention: Spalten, die nur lesend angezeigt werden, wird zur Visualisierung fü
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_regionalverband",
     "auswahltext" => "Regionalverbände",
+    "writeaccess" => true,
     "query" => "select id, Verband, Kurzname, Internetadresse from b_regionalverband order by id desc;",
     "spaltenbreiten" => array(
         "Name"              => "350",
@@ -82,6 +67,7 @@ $uid=1  ;
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_sparte",
     "auswahltext" => "Sparten im Regionalverband",
+    "writeaccess" => true,
     "query" => "SELECT s.id as id, s.Verband as Verband, s.Sparte, s.Sportart as Sportart
         FROM b_sparte as s
         LEFT JOIN b_regionalverband_rechte as r on r.Verband = s.Verband
@@ -103,6 +89,7 @@ $anzuzeigendeDaten[] = array(
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_bsg",
     "auswahltext" => "BSG im Regionalverband",
+    "writeaccess" => true,
     "hinweis" => "<b>RE </b> = Rechnungsempfänger. In diese Spalten bitte eintragen, wohin eventuelle Rechnungen geschickt werden sollen.",
     "query" => "SELECT 
         b.id as id,
@@ -149,6 +136,7 @@ $anzuzeigendeDaten[] = array(
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
     "auswahltext" => "Mitglieder in der BSG",
+    "writeaccess" => true,
     "query" => "SELECT m.id as id, m.BSG, m.Vorname, m.Nachname, m.Mail
             from b_mitglieder as m
             LEFT JOIN b_bsg_rechte as r on r.BSG = m.BSG
@@ -169,6 +157,7 @@ $anzuzeigendeDaten[] = array(
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
     "auswahltext" => "Meine Daten",
+    "writeaccess" => true,
     "import" => false,
     "query" => "SELECT m.*
             FROM b_mitglieder as m 
@@ -189,6 +178,7 @@ $anzuzeigendeDaten[] = array(
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
     "auswahltext" => "Mitglieder in den Sparten",
+    "writeaccess" => true,
     "query" => "SELECT mis.id as id, mis.Sparte as Sparte, mis.Mitglied as Mitglied
                 from b_mitglieder_in_sparten as mis
                 left join v_verbands_berechtigte_sparte as vbs on vbs.Sparte = mis.Sparte
@@ -225,6 +215,7 @@ $anzuzeigendeDaten[] = array(
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_regionalverband_rechte",
     "auswahltext" => "Rechteverwaltung: Regionalverbände",
+    "writeaccess" => true,
     "hinweis" => "Berechtigt angemeldete Nutzer, Sparten und BSG eines Verbandes zu sehen und zu bearbeiten.",
     "query" => "SELECT r.id as id, r.Verband as Verband, r.Nutzer
                 FROM b_regionalverband_rechte as r 
@@ -243,6 +234,7 @@ $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_bsg_rechte",
     "auswahltext" => "Rechteverwaltung: BSG",
     "hinweis" => "Berechtigt angemeldete Nutzer, Mitglieder einer BSG zu sehen und zu bearbeiten.",
+    "writeaccess" => true,
     "query" => "SELECT br.id as id, br.BSG, br.Nutzer
                 from b_bsg_rechte as br
                 left join v_verbands_berechtigte_bsg as vrb on br.BSG = vrb.BSG
@@ -263,7 +255,7 @@ $anzuzeigendeDaten[] = array(
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "log",
     "auswahltext" => "Log (zur Entwicklung)",
-    "query" => "SELECT id, id as Nr, zeit as Timestamp, eintrag as Log from log order by zeit desc;",
+    "query" => "SELECT  id, id as Nr, zeit as Timestamp, eintrag as Log from log order by zeit desc;",
     "spaltenbreiten" => array(
         "Nr"       => "80",
         "Timestamp" => "220",
