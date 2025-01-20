@@ -267,8 +267,9 @@ $anzuzeigendeDaten[] = array(
 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "_b_dev_mitglieder_in_sparten",
-    "auswahltext" => "DEV  Mitglieder in den Sparten + Freitext",
-    "query" => "SELECT mis.id as id, mis.Sparte as Sparte, mis.Mitglied as Mitglied, Freitext
+    "auswahltext" => "DEV-Mitglieder in den Sparten",
+    "writeaccess" => true,
+    "query" => "SELECT mis.id as id, mis.Sparte as Sparte, mis.Mitglied as Mitglied
                 from _b_dev_mitglieder_in_sparten as mis
                 left join v_verbands_berechtigte_sparte as vbs on vbs.Sparte = mis.Sparte
                 where vbs.Verbandsberechtigter = $uid or mis.Sparte is NULL 

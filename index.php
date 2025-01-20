@@ -828,6 +828,25 @@ function renderTableSelectBox($db) {
     
 }
 
+function hatUserBerechtigungen(){
+    # Das sieht man, wenn die FK-Spalten etwas zurückliefern. FK-Select macht ein neuer Datensatz keinen Sinn.
+    global $anzuzeigendeDaten;
+    global $selectedTableID;
+    global $db;
+    
+    if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])){
+        $substitutionsQueries = $anzuzeigendeDaten[$selectedTableID]['referenzqueries'];
+        
+        foreach($substitutionsQueries as $SRC_ID => $query){
+            $result = $db->query($query);
+            if(isset($result['data'])) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 function renderTableHeaders($data) {
     global $anzuzeigendeDaten;
     global $selectedTableID;
@@ -966,7 +985,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
     ?>
 
 
-    <?php if (!empty($tabelle) && $readwrite): 
+    <?php if ((!empty($tabelle) && $readwrite) || hatUserBerechtigungen()): 
         $importErlaubt = true;
 
         if (isset($anzuzeigendeDaten[$selectedTableID]['import']))
@@ -976,7 +995,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
         ?>
     
         <button id="resetButton" class="btn btn-info mb-2" onclick="resetPage()">Daten neu laden</button>
-        <?php if ($importErlaubt):?>
+        <?php if ($importErlaubt || hatUserBerechtigungen()):?>
             <button id="insertDefaultButton" class="btn btn-success mb-2">Datensatz einfügen</button>
         <?php endif; ?>     
         <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte löschen</button>
