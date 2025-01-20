@@ -529,6 +529,7 @@ $tabelle_upper = strtoupper($tabelle)
             });
             source.classList.toggle('btn-outline-secondary');
             source.classList.toggle('btn-secondary');
+            source.blur(); // Remove focus from button after clicking
         }
 
         function toggleRowSelection(button) {
@@ -1020,3 +1021,4 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
 
 </body>
 </html>
+
