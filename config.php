@@ -1,6 +1,7 @@
-<?php 
-require_once(__DIR__ . "/../mods/all.head.php");
-require_once(__DIR__ . "/../mods/config.head.php");
+<?php
+@require_once(__DIR__ . "/mods/all.head.php");
+@require_once(__DIR__ . "/mods/config.head.php");
+
 # Datenbank-Zugangsdaten
 define("DB_NAME", "db_441127_14");
 define("DB_HOST", "x96.lima-db.de");
@@ -59,7 +60,7 @@ $anzuzeigendeDaten[] = array(
 );
 
 
-$uid=2  ;
+$uid=1  ;
 
 
 # Sparten (Verbandsansicht)
@@ -166,7 +167,7 @@ $anzuzeigendeDaten[] = array(
 
 
 ###################################################################################
-##   Statistik                                                                         ##
+##   Statistik                                                                   ##
 ###################################################################################
 
 $statistik = array();
@@ -177,11 +178,22 @@ $statistik[] = array(
                 from b_mitglieder_in_sparten as mis
                 join b_sparte as s on s.id = mis.Sparte
                 join v_verbands_berechtigte_sparte as r on r.Sparte = s.id 
-                where r.Verbandsberechtigter = 1
+                where r.Verbandsberechtigter = $uid
                 group by s.Sparte
                 ",
     "typ"   => "torte"
 );
 
+$statistik[] = array(
+    "titel" => "Mitglieder in Sparten (Kopie)",
+    "query" => "select s.Sparte, count(mis.Mitglied) as Mitglieder
+                from b_mitglieder_in_sparten as mis
+                join b_sparte as s on s.id = mis.Sparte
+                join v_verbands_berechtigte_sparte as r on r.Sparte = s.id 
+                where r.Verbandsberechtigter = $uid
+                group by s.Sparte
+                ",
+    "typ"   => "torte"
+);
 
 ?>

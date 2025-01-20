@@ -974,6 +974,8 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                 <a class="dropdown-item" href="#" onclick="exportData('csv')">Als CSV</a>
                 <a class="dropdown-item" href="#" onclick="exportData('excel', 'Xlsx')">Als Excel</a>
                 <a class="dropdown-item" href="#" onclick="exportData('excel', 'Ods')">Als LibreOffice</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="statistik.php">Statistiken</a>
             </div>
         </div>
         <?php if (!isset($anzuzeigendeDaten[$selectedTableID]['import']) || $anzuzeigendeDaten[$selectedTableID]['import'] !== false): ?>
