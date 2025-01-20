@@ -966,10 +966,19 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
     ?>
 
 
-    <?php if (!empty($tabelle) && $readwrite): ?>
+    <?php if (!empty($tabelle) && $readwrite): 
+        $importErlaubt = true;
+
+        if (isset($anzuzeigendeDaten[$selectedTableID]['import']))
+            if ($anzuzeigendeDaten[$selectedTableID]['import'] === false)
+                $importErlaubt = false;
+        
+        ?>
     
         <button id="resetButton" class="btn btn-info mb-2" onclick="resetPage()">Daten neu laden</button>
-        <button id="insertDefaultButton" class="btn btn-success mb-2">Datensatz einfügen</button>
+        <?php if ($importErlaubt):?>
+            <button id="insertDefaultButton" class="btn btn-success mb-2">Datensatz einfügen</button>
+        <?php endif; ?>     
         <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte löschen</button>
         <button id="check-duplicates" class="btn btn-success mb-2">Dubletten suchen</button>
         <div class="btn-group mb-2">
@@ -985,9 +994,9 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                 <a class="dropdown-item" href="statistik.php">Statistiken</a>
             </div>
         </div>
-        <?php if (!isset($anzuzeigendeDaten[$selectedTableID]['import']) || $anzuzeigendeDaten[$selectedTableID]['import'] !== false): ?>
+        <?php if ($importErlaubt):?>
             <a href="importeur.php?tab=<?= $selectedTableID ?>" class="btn btn-info mb-2">Daten importieren</a>
-        <?php endif; ?>
+        <?php endif; ?> 
    
     <?php endif; ?>
 

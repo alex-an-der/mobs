@@ -64,9 +64,21 @@ $anzuzeigendeDaten[] = array(
 );
 ```
 
+
+        <?php if (!isset($anzuzeigendeDaten[$selectedTableID]['import']) || $anzuzeigendeDaten[$selectedTableID]['import'] !== false): ?>
+            <a href="importeur.php?tab=<?= $selectedTableID ?>" class="btn btn-info mb-2">Daten importieren</a>
+        <?php endif; ?>
+
+
+        
+
 ### tabellenname
 ### auswahltext
 ### writeaccess
+### import
+NEIN: Import, einfügen
+JA: Löschen,
+ToDo: Sparte
 ### query
 ### referenzqueries
 ### spaltenbreiten
