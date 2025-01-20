@@ -364,21 +364,37 @@ function checkDaten($data, $db){
                 //Gehe jede einzelne ID durch und schaue, ob das passt
                 
                 // Gehe jedes Heuhaufen-Feld in aus der Datenbank durch
+                $maxTrefferpunkte = 0;
                 foreach($suchString as $id => $suchFeld)
                 {
-                    //$feldZaehler = 0;
+                    $maxTrefferpunkte = max($maxTrefferpunkte, $trefferpunkte); // Soviele Treffer hat der beste Datensatz
+                    $trefferpunkte = 0;
+                    
+                    # Wenn zwei Suchbegriffe angegeben wurden, werden bei einem Treffer beide gefunden
+                    # Das bedeutet, dass diese ID zwei trefferpunkte bekommt.
+                    # Stimmt bei einer anderen ID nun ein Begriff auch überein,
+                    # ist das noch kein alternativer Treffer, da noch nicht ALLE Suchbegriffe gefunden wurden.
+                    # Es wird daher zunächst nur ein trefferpunkt abgezogen.
+                    # Erst wenn trefferpunkte==0 ist, wird die ID als nicht eindeutig identifizier,
+                    # da dann ALLE Suchbegriffe ebenfalls gefunden wurden.
+
                     // Gehe jeden Import-Suchbegriff (Nadel) durch - alle Nadeln müssen gefunden werden
                     foreach($importDatensaetze[$zeile-1][$FeldIndex] as $importWort){
+
                         // Wird DIESES Wort im Suchstring (= eine ID) gefunden 
                         if(stripos($suchFeld, $importWort) !== false){
-                            if(isset($datenSatzArgs[$FeldIndex]))
-                                if($datenSatzArgs[$FeldIndex] != $id){
-                                    $ERROR = true;
-                                    $ERROR_OVER_ALL = true;
-                                    $error_msg .= "<p>Der Import <b>$importFeld</b> in Zeile $zeile ($spalte) liefert kein eindeutiges Ergebnis. Bitte pr&auml;zisieren.</p>";
-                                    break;
+                            $trefferpunkte++;
+                            $maxTrefferpunkte = max($maxTrefferpunkte, $trefferpunkte);
+                            if(isset($datenSatzArgs[$FeldIndex])) // Wurde diese ID schon gesetzt?
+                                if($datenSatzArgs[$FeldIndex] != $id){ // wurde es bereits für eine andere ID gefunden? (Um gesetzt zu sein MUSS maxTrefferpunkte der Anzahl der Suchbegriffe entsprechen, sonst unset)
+                                    if($trefferpunkte == $maxTrefferpunkte){ // eine ANDERE id mit gleich vielen Treffern
+                                        $ERROR = true;
+                                        $ERROR_OVER_ALL = true;
+                                        $error_msg .= "<p>Der Import <b>$importFeld</b> in Zeile $zeile ($spalte) liefert kein eindeutiges Ergebnis. Bitte pr&auml;zisieren.</p>";
+                                        break;
+                                    }
                                 }
-                                if(!$ERROR){
+                                if(!$ERROR && $trefferpunkte == $maxTrefferpunkte){
                                     $datenSatzArgs[$FeldIndex] = $id;
                                 }
                         }else{
