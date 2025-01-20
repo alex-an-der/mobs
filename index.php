@@ -529,7 +529,7 @@ $tabelle_upper = strtoupper($tabelle)
             });
             source.classList.toggle('btn-outline-secondary');
             source.classList.toggle('btn-secondary');
-            source.blur(); // Remove focus from button after clicking
+            document.body.focus(); // Set focus to body instead of blur
         }
 
         function toggleRowSelection(button) {
@@ -542,6 +542,7 @@ $tabelle_upper = strtoupper($tabelle)
                 button.classList.add('btn-outline-light');
                 button.innerText = 'X'
             }
+            document.body.focus(); // Set focus to body instead of blur
         }
 
         function deleteSelectedRows(tabelle) {
