@@ -66,6 +66,7 @@ $anzuzeigendeDaten[] = array(
 
 ### tabellenname
 ### auswahltext
+### writeaccess
 ### query
 ### referenzqueries
 ### spaltenbreiten

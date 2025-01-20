@@ -6,7 +6,7 @@ require_once(__DIR__ . "/mods/index.head.php");
 require_once(__DIR__ . "/inc/include.php");
 
 
-$admin = 1;
+$readwrite = 0;
 $selectedTableID = isset($_GET['tab']) ? $_GET['tab'] : "";
 $data = array();
 if(isset($anzuzeigendeDaten[$selectedTableID])){
@@ -24,6 +24,13 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
     }else{
         $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt keinen g&uuml;ltigen Tabellennamen oder existiert nicht.";
         dieWithError($err,__FILE__,__LINE__);
+    }
+
+    // Schreibrechte?
+    if(isset($anzuzeigendeDaten[$selectedTableID]['writeaccess'])){
+        $readwrite = $anzuzeigendeDaten[$selectedTableID]['writeaccess'];
+    }else{
+        $readwrite = 0;
     }
     
     // Query funktioniert?
@@ -845,7 +852,7 @@ function renderTableHeaders($data) {
     }
 }
 
-function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
+function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
     global $db;
     global $anzuzeigendeDaten;
     global $selectedTableID;
@@ -889,7 +896,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                         }
                     }
 
-                    if ($admin) {
+                    if ($readwrite) {
                         echo '<select class="form-control border-0" style="background-color: inherit;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0)">';
                         echo '<option value="0"' . (empty($value) ? ' selected' : '') . '>---</option>';  // Leere Option
                         foreach ($foreignKeys[$key] as $fk ) {
@@ -905,7 +912,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
                     }
 
                 } else {
-                    if ($admin) {
+                    if ($readwrite) {
                         $inputType = 'text';
                         $columnType = $columnTypes[$key];
                         if (strpos($columnType, 'date') !== false) {
@@ -959,7 +966,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
     ?>
 
 
-    <?php if (!empty($tabelle) && $admin): ?>
+    <?php if (!empty($tabelle) && $readwrite): ?>
     
         <button id="resetButton" class="btn btn-info mb-2" onclick="resetPage()">Daten neu laden</button>
         <button id="insertDefaultButton" class="btn btn-success mb-2">Datensatz einfügen</button>
@@ -994,7 +1001,7 @@ function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
             </thead>
             <tbody>
             <?php 
-                if (!empty($data)) renderTableRows($data, $admin, $tabelle, $FKdata);
+                if (!empty($data)) renderTableRows($data, $readwrite, $tabelle, $FKdata);
             ?>
             </tbody>
         </table>
