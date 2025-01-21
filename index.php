@@ -775,9 +775,13 @@ if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])){
             if(isset($result['data'])) $FKdarstellungAll = $result['data'];
             
             if (!$FKdarstellungAll) {
-                $err = "Die benötigte Konstante $FKname enthält kein gültiges SQL-Statement. (Eingelesener Query: $query)";
-                if(isset($result['error'])) $err .= "<p>".$result['error']."</p>";
-                dieWithError($err,__FILE__,__LINE__);
+                if(isset($result['error'])){
+                    $err = "Die benötigte Konstante $FKname enthält kein gültiges SQL-Statement. (Eingelesener Query: $query)";
+                    if(isset($result['error'])) $err .= "<p>".$result['error']."</p>";
+                    dieWithError($err,__FILE__,__LINE__);
+                }else{
+                    continue;
+                }
             } 
 
             if (count($FKdarstellungAll[0])!=2){
