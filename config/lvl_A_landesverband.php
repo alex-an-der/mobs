@@ -52,37 +52,6 @@ $anzuzeigendeDaten['log'] = array(
 
 
 
-$anzuzeigendeDaten['dev'] = array(
-    "tabellenname" => "_b_dev_mitglieder_in_sparten",
-    "auswahltext" => "DEV-Mitglieder in den Sparten",
-    "writeaccess" => true,
-    "query" => "SELECT mis.id as id, mis.Sparte as Sparte, mis.Mitglied as Mitglied
-                from _b_dev_mitglieder_in_sparten as mis
-                left join v_verbands_berechtigte_sparte as vbs on vbs.Sparte = mis.Sparte
-                where vbs.Verbandsberechtigter = $uid or mis.Sparte is NULL 
-                order by mis.id desc;
-    ",# Sparten im Regionalverband
-
-    "referenzqueries" => array(
-        "Sparte" => "SELECT Sparte as id, Sparte_Name as anzeige
-                    from v_verbands_berechtigte_sparte
-                    where Verbandsberechtigter = $uid
-                    ORDER BY anzeige;
-        ",
-        "Mitglied" => "SELECT m.id as id, CONCAT(m.Nachname, ', ', m.Vorname, ' (', vbr.BSG_Name,')') as anzeige 
-                        from b_mitglieder as m
-                        join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG
-                        where vbr.Verbandsberechtigter = $uid
-                        ORDER BY anzeige;
-        "
-    ),
-    "suchqueries" => array(
-        "Sparte" => "SELECT Sparte as id, Sparte_Name
-                    from v_verbands_berechtigte_sparte
-                    where Verbandsberechtigter = $uid;",
-        "Mitglied" => "SELECT id, Vorname, Nachname, Mail from b_mitglieder as m join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG where vbr.Verbandsberechtigter = $uid;"
-    )
-);
 
 
 ?>

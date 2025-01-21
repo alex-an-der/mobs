@@ -16,7 +16,7 @@ define("TITEL", "LBSV Nds. Mitgliederverwaltung");
 # Rechtemanagement (YPUM)
 $uid=0;
 if (isset($_SESSION['uid'])) $uid = $_SESSION['uid'];
-$uid=1;
+
 $anzuzeigendeDaten = array();
 $statistik = array();
 

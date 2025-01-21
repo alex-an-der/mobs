@@ -5,6 +5,11 @@ require_once(__DIR__ . "/mods/all.head.php");
 require_once(__DIR__ . "/mods/index.head.php");
 require_once(__DIR__ . "/inc/include.php");
 
+/*
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+*/
 
 $readwrite = 0;
 $selectedTableID = isset($_GET['tab']) ? $_GET['tab'] : "";

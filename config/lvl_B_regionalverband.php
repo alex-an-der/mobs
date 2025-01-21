@@ -1,36 +1,39 @@
 <?php 
 
 
-# Rechteverwaltung: BSG
+# Sparten im Regionalverband
 # Mitglieder in den Sparten 
 # BSG im Regionalverband
-# Sparten im Regionalverband
+# Rechteverwaltung: BSG
 
 # Statistik: Mitglieder in Sparten
 
 
 ######################################################################################################
 
-# BSG-Rechte - Wer darf die Mitglieder welcher BSG editieren? 
-# Ich sehe nur BSG von Verbänden, zu deren Ansicht ich berechtigt bin
+# Sparten im Regionalverband
 $anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_bsg_rechte",
-    "auswahltext" => "Rechteverwaltung: BSG",
-    "hinweis" => "Berechtigt angemeldete Nutzer, Mitglieder einer BSG zu sehen und zu bearbeiten.",
+    "tabellenname" => "b_sparte",
+    "auswahltext" => "Sparten im Regionalverband",
     "writeaccess" => true,
-    "query" => "SELECT br.id as id, br.BSG, br.Nutzer
-                from b_bsg_rechte as br
-                left join v_verbands_berechtigte_bsg as vrb on br.BSG = vrb.BSG
-                where vrb.Verbandsberechtigter = $uid OR br.BSG IS NULL;
-                ",
+    "query" => "SELECT s.id as id, s.Verband as Verband, s.Sparte, s.Sportart as Sportart
+        FROM b_sparte as s
+        LEFT JOIN b_regionalverband_rechte as r on r.Verband = s.Verband
+        WHERE r.Nutzer IS NULL OR r.Nutzer = $uid
+        order by id desc;
+    ",
     "referenzqueries" => array(
-        "BSG" => "SELECT BSG as id, BSG_Name as anzeige
-                    FROM v_verbands_berechtigte_bsg as vrb
-                    where vrb.Verbandsberechtigter = $uid 
-                    ORDER BY anzeige;",
-        "Nutzer" => "SELECT id, mail as anzeige from y_user ORDER BY anzeige;"
+        "Verband" => "SELECT v.id, v.Verband as anzeige
+        FROM b_regionalverband as v
+        JOIN b_regionalverband_rechte as r on r.Verband = v.id 
+        where r.Nutzer = $uid 
+        ORDER BY anzeige;
+        ",
+        "Sportart" => "SELECT id, CONCAT (Sportart,' (',Sportart_Nr,')') as anzeige from b___sportart ORDER BY anzeige;"
     )
 );
+
+
 
 # Mitglieder in den Sparten 
 $anzuzeigendeDaten[] = array(
@@ -112,25 +115,25 @@ $anzuzeigendeDaten[] = array(
     ) 
 );
 
-# Sparten im Regionalverband
+
+# BSG-Rechte - Wer darf die Mitglieder welcher BSG editieren? 
+# Ich sehe nur BSG von Verbänden, zu deren Ansicht ich berechtigt bin
 $anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_sparte",
-    "auswahltext" => "Sparten im Regionalverband",
+    "tabellenname" => "b_bsg_rechte",
+    "auswahltext" => "Rechteverwaltung: BSG",
+    "hinweis" => "Berechtigt angemeldete Nutzer, Mitglieder einer BSG zu sehen und zu bearbeiten.",
     "writeaccess" => true,
-    "query" => "SELECT s.id as id, s.Verband as Verband, s.Sparte, s.Sportart as Sportart
-        FROM b_sparte as s
-        LEFT JOIN b_regionalverband_rechte as r on r.Verband = s.Verband
-        WHERE r.Nutzer IS NULL OR r.Nutzer = $uid
-        order by id desc;
-    ",
+    "query" => "SELECT br.id as id, br.BSG, br.Nutzer
+                from b_bsg_rechte as br
+                left join v_verbands_berechtigte_bsg as vrb on br.BSG = vrb.BSG
+                where vrb.Verbandsberechtigter = $uid OR br.BSG IS NULL;
+                ",
     "referenzqueries" => array(
-        "Verband" => "SELECT v.id, v.Verband as anzeige
-        FROM b_regionalverband as v
-        JOIN b_regionalverband_rechte as r on r.Verband = v.id 
-        where r.Nutzer = $uid 
-        ORDER BY anzeige;
-        ",
-        "Sportart" => "SELECT id, CONCAT (Sportart,' (',Sportart_Nr,')') as anzeige from b___sportart ORDER BY anzeige;"
+        "BSG" => "SELECT BSG as id, BSG_Name as anzeige
+                    FROM v_verbands_berechtigte_bsg as vrb
+                    where vrb.Verbandsberechtigter = $uid 
+                    ORDER BY anzeige;",
+        "Nutzer" => "SELECT id, mail as anzeige from y_user ORDER BY anzeige;"
     )
 );
 
