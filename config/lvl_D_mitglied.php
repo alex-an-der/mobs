@@ -25,6 +25,31 @@ $anzuzeigendeDaten[] = array(
         where r.Nutzer = $uid 
         ORDER BY anzeige;
         "
-    )
+    ),
+    "spaltenbreiten" => array(
+        "BSG"                       => "600",
+        "Vorname"                   => "200",
+        "Nachname"                  => "200",
+        "Mail"                      => "200"
+    )  
 );
+
+# Meine Sparten
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_mitglieder_in_sparten",
+    "auswahltext" => "Meine Sparten",
+    "hinweis" => "An- und Abmeldung zu Sparten bitte über deine Betriebssportgemeinschaft vornehmen.",
+    "writeaccess" => false,
+    "import" => false,
+    "query" => "select y.id, s.Sparte as Sparte, b.BSG as BSG
+            from b_mitglieder_in_sparten as mis
+            join b_sparte as s on mis.Sparte = s.id
+            join b_mitglieder as m on m.id = mis.Mitglied
+            join b_bsg as b on b.id = m.BSG 
+            join y_user as y on y.mail = m.Mail
+            WHERE y.id = $uid;
+    "
+);
+
+
 ?>
