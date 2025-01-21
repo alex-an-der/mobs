@@ -26,4 +26,18 @@ $anzuzeigendeDaten[] = array(
         "
     )
 );
+
+# Statistik: Mitglieder in Sparten
+$statistik[] = array(
+    "titel" => "Mitglieder in Sparten in meinen BSG (ungetestet)",
+    "query" => "SELECT s.Sparte, count(mis.Mitglied) as Mitglieder
+                from b_mitglieder_in_sparten as mis
+                join b_sparte as s on s.id = mis.Sparte
+                join b_mitglieder as m on m.id = mis.Mitglied
+                join b_bsg_rechte as r on r.BSG = m.BSG
+                where r.Nutzer = $uid
+                group by s.Sparte
+                ",
+    "typ"   => "torte"
+);
 ?>

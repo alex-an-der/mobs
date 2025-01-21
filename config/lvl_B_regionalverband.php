@@ -139,7 +139,7 @@ $anzuzeigendeDaten[] = array(
 
 # Statistik: Mitglieder in Sparten
 $statistik[] = array(
-    "titel" => "Mitglieder in Sparten",
+    "titel" => "Mitglieder in Sparten im Regionalverband",
     "query" => "select s.Sparte, count(mis.Mitglied) as Mitglieder
                 from b_mitglieder_in_sparten as mis
                 join b_sparte as s on s.id = mis.Sparte

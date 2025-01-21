@@ -46,9 +46,9 @@ $pdf->SetAutoPageBreak(TRUE, 15);
 $pdf->AddPage();
 
 // Große Überschrift
-$pdf->SetFont('helvetica', 'B', 16);
+/*$pdf->SetFont('helvetica', 'B', 16);
 $pdf->Cell(0, 10, $stat['titel'], 0, 1, 'C');
-$pdf->Ln(5);
+$pdf->Ln(5);*/
 
 // Hole das Base64-Bild aus dem POST-Parameter und füge es ein
 if (isset($_POST['chartImage'])) {
