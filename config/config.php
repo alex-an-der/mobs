@@ -21,7 +21,10 @@ $anzuzeigendeDaten = array();
 $statistik = array();
 
 require_once(__DIR__ . "/lvl_A_landesverband.php");
+$anzuzeigendeDaten[] = array("trenner" => "-");
 require_once(__DIR__ . "/lvl_B_regionalverband.php");
+$anzuzeigendeDaten[] = array("trenner" => "-");
 require_once(__DIR__ . "/lvl_C_bsg.php");
+$anzuzeigendeDaten[] = array("trenner" => "-");
 require_once(__DIR__ . "/lvl_D_mitglied.php");
 ?>

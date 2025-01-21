@@ -814,15 +814,30 @@ function renderTableSelectBox($db) {
     if(!isset($anzuzeigendeDaten[$selectedTableID])){
         echo '<option value="">-- Tabelle wählen --</option>';
     }
-
+    $maxLaenge = 0;
+    $trennerindizies = array();
+    $options = array();
     foreach ($anzuzeigendeDaten as $index => $table) {
-        $tableName = htmlspecialchars($table['tabellenname']);
-        $tableComment = htmlspecialchars($table['auswahltext']);
-        $displayText = !empty($tableComment) ? "$tableComment" : $tableName;
-        $selected = ($index == $selectedTableID) ? 'selected' : '';
-        echo '<option value="' . $index . '" ' . $selected . '>' . $displayText . '</option>';
+        if(isset($table['trenner'])){
+            $trennerindizies[] = count($options);
+            $options[] = $table['trenner'];
+        }else{
+            $tableName = htmlspecialchars($table['tabellenname']);
+            $tableComment = htmlspecialchars($table['auswahltext']);
+            if(strlen($tableComment) > $maxLaenge) $maxLaenge = strlen($tableComment);
+            $displayText = !empty($tableComment) ? "$tableComment" : $tableName;
+            $selected = ($index == $selectedTableID) ? 'selected' : '';
+            $options[] = '<option value="' . $index . '" ' . $selected . '>' . $displayText . '</option>';
+        }
     }
 
+    foreach ($trennerindizies as $trennerindex) {
+        $firstChar = substr($options[$trennerindex], 0, 1);
+        $displayText = str_pad('', $maxLaenge, $firstChar);
+        $options[$trennerindex] = '<option disabled>' . $displayText . '</option>';
+    }
+
+    echo implode("\n", $options);
     echo '</select>';
     echo '</form></p>';
     
@@ -947,8 +962,10 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                               onfocus="clearCellColor(this)">';
                 
                     } else {
-                        if (strpos($columnType, 'decimal') !== false || strpos($columnType, 'float') !== false) {
-                            $value = number_format((float)$value, 2, '.', '');
+                        if(isset($columnType)){
+                            if (strpos($columnType, 'decimal') !== false || strpos($columnType, 'float') !== false) {
+                                $value = number_format((float)$value, 2, '.', '');
+                            }
                         }
                         echo htmlspecialchars($value);
                     }
