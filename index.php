@@ -127,6 +127,9 @@ $tabelle_upper = strtoupper($tabelle)
             white-space: nowrap;
             min-width: fit-content;
         }
+        td {
+        vertical-align: middle !important;
+        }
     </style>
 
     <script>

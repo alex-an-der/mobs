@@ -27,10 +27,10 @@ $anzuzeigendeDaten[] = array(
         "
     ),
     "spaltenbreiten" => array(
-        "BSG"                       => "600",
+        "BSG"                       => "300",
         "Vorname"                   => "200",
         "Nachname"                  => "200",
-        "Mail"                      => "200"
+        "Mail"                      => "250"
     )  
 );
 
@@ -48,6 +48,26 @@ $anzuzeigendeDaten[] = array(
             join b_bsg as b on b.id = m.BSG 
             join y_user as y on y.mail = m.Mail
             WHERE y.id = $uid;
+    "
+);
+
+# Meine Berechtigungen
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_regionalverband_rechte",
+    "auswahltext" => "Meine Berechtigungen",
+    "hinweis" => "Um Berechtigungen zu ändern, wende dich bitte an den Vorstand deines Regionalverbands.",
+    "writeaccess" => false,
+    "import" => false,
+    "query" => "SELECT vr.id as id, 'Regionalverband' as Ebene, v.Verband as 'Berechtigt für'
+                from b_regionalverband_rechte as vr
+                join b_regionalverband v on vr.Verband = v.id
+                where vr.Nutzer=$uid
+                union
+
+                select br.id as id, 'Betriebssportgemeinschaft' as Ebene, b.BSG  as 'Berechtigt für'
+                from b_bsg_rechte as br
+                join b_bsg as b on br.BSG=b.id
+                where br.Nutzer=$uid;
     "
 );
 
