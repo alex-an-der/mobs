@@ -81,7 +81,7 @@ $anzuzeigendeDaten[] = array(
     ) 
 );
 
-# Mitglieder in den Sparten 
+# Mitglieder in den Sparten (Verbandsebene)
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
     "auswahltext" => "Mitglieder in den Sparten",
@@ -112,7 +112,31 @@ $anzuzeigendeDaten[] = array(
         "Mitglied" => "SELECT id, Vorname, Nachname, Mail from b_mitglieder as m join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG where vbr.Verbandsberechtigter = $uid;"
     )
 );
-
+/*
+# Sekundärmitgliedschaften in BSG (Basisbeitrag nur in den Primärmitgliedschaften)
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_zusaetzliche_bsg_mitgliedschaften",
+    "auswahltext" => "Zusätzliche Mitgliedschaften in anderen BSG",
+    "writeaccess" => true,
+    "import" => false,
+    "query" => "SELECT id, BSG, Mitglied from b_zusaetzliche_bsg_mitgliedschaften;
+                order by id desc;
+    ",
+    "referenzqueries" => array(
+        "BSG" => "SELECT BSG as id, BSG_Name as anzeige
+                    FROM v_verbands_berechtigte_bsg as vrb
+                    where vrb.Verbandsberechtigter = $uid 
+                    ORDER BY anzeige;
+        ",
+        "Mitglied" => "SELECT m.id as id, CONCAT(m.Nachname, ', ', m.Vorname, ' (', vbr.BSG_Name,')') as anzeige 
+                        from b_mitglieder as m
+                        join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG
+                        where vbr.Verbandsberechtigter = $uid
+                        ORDER BY anzeige;
+        "
+    )
+);
+*/
 
 # BSG-Rechte - Wer darf die Mitglieder welcher BSG editieren? 
 # Ich sehe nur BSG von Verbänden, zu deren Ansicht ich berechtigt bin

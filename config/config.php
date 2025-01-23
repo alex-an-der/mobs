@@ -1,4 +1,5 @@
 <?php 
+use ypum\yauth;
 require_once(__DIR__ . "/../mods/all.head.php");
 require_once(__DIR__ . "/../mods/config.head.php");
 /*
@@ -14,17 +15,27 @@ define("DB_PASS", "BallBierBertha42");
 define("TITEL", "LBSV Nds. Mitgliederverwaltung");
 
 # Rechtemanagement (YPUM)
+// $berechtigung = $ypum->getUserData();
 $uid=0;
 if (isset($_SESSION['uid'])) $uid = $_SESSION['uid'];
-$uid=15;
+
 $anzuzeigendeDaten = array();
 $statistik = array();
 
-require_once(__DIR__ . "/lvl_A_landesverband.php");
-$anzuzeigendeDaten[] = array("trenner" => "-");
-require_once(__DIR__ . "/lvl_B_regionalverband.php");
-$anzuzeigendeDaten[] = array("trenner" => "-");
-require_once(__DIR__ . "/lvl_C_bsg.php");
-$anzuzeigendeDaten[] = array("trenner" => "-");
-require_once(__DIR__ . "/lvl_D_mitglied.php");
+if($ypum->isBerechtigt(64)){
+    $anzuzeigendeDaten[] = array("trenner" => "-");
+    require_once(__DIR__ . "/lvl_A_landesverband.php");
+}
+if($ypum->isBerechtigt(32)){
+    $anzuzeigendeDaten[] = array("trenner" => "-");
+    require_once(__DIR__ . "/lvl_B_regionalverband.php");
+}
+if($ypum->isBerechtigt(16)){
+    $anzuzeigendeDaten[] = array("trenner" => "-");
+    require_once(__DIR__ . "/lvl_C_bsg.php");
+}
+if($ypum->isBerechtigt(8)){
+    $anzuzeigendeDaten[] = array("trenner" => "-");
+    require_once(__DIR__ . "/lvl_D_mitglied.php");
+}
 ?>
