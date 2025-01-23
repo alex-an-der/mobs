@@ -51,7 +51,15 @@ WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0
 
 
 
+*//*
+CREATE VIEW v_mitglieder_in_bsg_gesamt as
+SELECT z.Mitglied as id , z.BSG as BSG
+FROM b_zusaetzliche_bsg_mitgliedschaften as z
+union
+SELECT m.id as id, m.BSG as bsg
+FROM b_mitglieder as m
 */
+
 /*
 DROP FUNCTION IF EXISTS berechtigte_elemente;
 DELIMITER //
@@ -62,7 +70,7 @@ DETERMINISTIC
 READS SQL DATA
 BEGIN
     DECLARE result TEXT DEFAULT '';
-    
+
     IF target = 'verband' THEN
         SELECT GROUP_CONCAT(DISTINCT verband_id) INTO result
         FROM (
@@ -114,8 +122,8 @@ BEGIN
             JOIN b_regionalverband as v on v.id = b_bsg.Verband
         ) b_und_v
         
-        WHERE (FIND_IN_SET(b_und_v.BSG, berechtigte_elemente(15, 'BSG')) > 0) 
-        OR (FIND_IN_SET(b_und_v.Verband, berechtigte_elemente(15, 'verband')) > 0);
+        WHERE (FIND_IN_SET(b_und_v.BSG, berechtigte_elemente_sub1(uid, 'BSG')) > 0) 
+        OR (FIND_IN_SET(b_und_v.Verband, berechtigte_elemente_sub1(uid, 'verband')) > 0);
     END IF;
     
     
@@ -123,5 +131,79 @@ BEGIN
 END //
 
 DELIMITER ;
+
+
+
+DROP FUNCTION IF EXISTS berechtigte_elemente_sub1;
+DELIMITER //
+
+CREATE FUNCTION berechtigte_elemente_sub1(uid INT, target VARCHAR(50))
+RETURNS TEXT
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    DECLARE result TEXT DEFAULT '';
+
+    IF target = 'verband' THEN
+        SELECT GROUP_CONCAT(DISTINCT verband_id) INTO result
+        FROM (
+            SELECT v.id as verband_id, r.Nutzer
+            FROM b_regionalverband as v
+            JOIN b_regionalverband_rechte as r on r.Verband = v.id 
+            WHERE r.Nutzer = uid
+        ) berechtigungen;
+    END IF;
+    
+    IF target = 'bsg' THEN
+        SELECT GROUP_CONCAT(DISTINCT bsg_id) INTO result
+        FROM (
+            SELECT b.id as bsg_id, b.BSG, Nutzer
+            FROM b_bsg as b
+            LEFT JOIN b_bsg_rechte as br ON b.id = br.BSG
+            JOIN y_user as y ON Nutzer = y.id
+            WHERE y.id = uid
+            UNION
+            SELECT b.id as bsg_id, b.BSG, Nutzer
+            FROM b_bsg as b
+            LEFT JOIN b_regionalverband_rechte as vr ON b.Verband = vr.Verband
+            WHERE Nutzer = uid
+        ) berechtigungen;
+    END IF;
+    
+    IF target = 'sparte' THEN
+        SELECT GROUP_CONCAT(DISTINCT sparte_id) INTO result
+        FROM (
+            select s.id as sparte_id, s.Sparte, s.Verband
+            from b_sparte as s
+            join b_regionalverband_rechte r on s.Verband = r.Verband
+            where r.Nutzer=uid
+        ) berechtigungen;
+    END IF;
+    
+    IF target = 'mitglied' THEN
+        SELECT GROUP_CONCAT(DISTINCT ID) INTO result 
+        FROM (
+            SELECT member_bsg.id as ID, member_bsg.bsg as BSG, v.id as Verband 
+            FROM(
+                SELECT z.Mitglied as id , z.BSG as bsg
+                FROM b_zusaetzliche_bsg_mitgliedschaften as z
+                union
+                SELECT m.id as id, m.BSG as bsg
+                FROM b_mitglieder as m
+            ) member_bsg
+            JOIN b_bsg on b_bsg.id = member_bsg.bsg
+            JOIN b_regionalverband as v on v.id = b_bsg.Verband
+        ) b_und_v
+        
+        WHERE (FIND_IN_SET(b_und_v.BSG, berechtigte_elemente(uid, 'BSG')) > 0) 
+        OR (FIND_IN_SET(b_und_v.Verband, berechtigte_elemente(uid, 'verband')) > 0);
+    END IF;
+    
+    
+    RETURN COALESCE(result, '');
+END //
+
+DELIMITER ;
+
 */
 ?>

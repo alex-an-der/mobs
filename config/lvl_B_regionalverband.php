@@ -49,30 +49,26 @@ $anzuzeigendeDaten[] = array(
         RE_Strasse2,
         RE_PLZ_Ort
         FROM b_bsg as b
-        -- LEFT JOIN b_regionalverband_rechte as r on r.Verband = b.Verband
         WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0
-        -- WHERE b.Verband  IS NULL OR Nutzer = $uid
         order by id desc;
     ",
     "referenzqueries" => array(
         "Verband" => "SELECT v.id, v.Verband as anzeige
         from b_regionalverband as v
-
-        -- join b_regionalverband_rechte as r on r.Verband = v.id 
-        -- where r.Nutzer = $uid 
+        WHERE FIND_IN_SET(v.id, berechtigte_elemente($uid, 'verband')) > 0
         ORDER BY anzeige;
         ",
         "Ansprechpartner" => "SELECT m.id, CONCAT(Nachname, ', ', Vorname) as anzeige 
                                 from b_mitglieder as m
                                 join b_bsg as b on b.id=m.BSG
-                                join b_regionalverband_rechte as vr on b.Verband = vr.Verband
-                                where vr.Nutzer = $uid
+                                
+                                WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'mitglied')) > 0
                                 order by anzeige;"
     ),
     "spaltenbreiten" => array(
-        "Verband"                       => "200",
-        "BSG"                           => "200",  
-        "Ansprechpartner"               => "400",  
+        "Verband"                       => "380",
+        "BSG"                           => "320",  
+        "Ansprechpartner"               => "200",  
         "RE_Name"                       => "200",  
         "RE_Name2"                      => "200",  
         "RE_Strasse_Nr"                 => "200",  
@@ -81,37 +77,7 @@ $anzuzeigendeDaten[] = array(
     ) 
 );
 
-# Mitglieder in den Sparten (Verbandsebene)
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_mitglieder_in_sparten",
-    "auswahltext" => "Mitglieder in den Sparten",
-    "writeaccess" => true,
-    "query" => "SELECT mis.id as id, mis.Sparte as Sparte, mis.Mitglied as Mitglied
-                from b_mitglieder_in_sparten as mis
-                left join v_verbands_berechtigte_sparte as vbs on vbs.Sparte = mis.Sparte
-                where vbs.Verbandsberechtigter = $uid or mis.Sparte is NULL 
-                order by mis.id desc;
-    ",
-    "referenzqueries" => array(
-        "Sparte" => "SELECT Sparte as id, Sparte_Name as anzeige
-                    from v_verbands_berechtigte_sparte
-                    where Verbandsberechtigter = $uid
-                    ORDER BY anzeige;
-        ",
-        "Mitglied" => "SELECT m.id as id, CONCAT(m.Nachname, ', ', m.Vorname, ' (', vbr.BSG_Name,')') as anzeige 
-                        from b_mitglieder as m
-                        join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG
-                        where vbr.Verbandsberechtigter = $uid
-                        ORDER BY anzeige;
-        "
-    ),
-    "suchqueries" => array(
-        "Sparte" => "SELECT Sparte as id, Sparte_Name
-                    from v_verbands_berechtigte_sparte
-                    where Verbandsberechtigter = $uid;",
-        "Mitglied" => "SELECT id, Vorname, Nachname, Mail from b_mitglieder as m join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG where vbr.Verbandsberechtigter = $uid;"
-    )
-);
+
 /*
 # Sekundärmitgliedschaften in BSG (Basisbeitrag nur in den Primärmitgliedschaften)
 $anzuzeigendeDaten[] = array(
@@ -148,7 +114,7 @@ $anzuzeigendeDaten[] = array(
     "query" => "SELECT br.id as id, br.BSG, br.Nutzer
                 from b_bsg_rechte as br 
                 left join b_bsg as b on br.BSG = b.id
-                WHERE FIND_IN_SET(b.id, berechtigte_elemente(15, 'BSG')) > 0;
+                WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0;
                 ",
     "referenzqueries" => array(
         "BSG" => "SELECT b.id as id, b.BSG as anzeige
@@ -164,12 +130,11 @@ $anzuzeigendeDaten[] = array(
 # Statistik: Mitglieder in Sparten
 $statistik[] = array(
     "titel" => "Mitglieder in Sparten im Regionalverband",
-    "query" => "select s.Sparte, count(mis.Mitglied) as Mitglieder
+    "query" => "SELECT s.Sparte, count(mis.Mitglied) as Mitglieder
                 from b_mitglieder_in_sparten as mis
                 join b_sparte as s on s.id = mis.Sparte
-                join v_verbands_berechtigte_sparte as r on r.Sparte = s.id 
-                where r.Verbandsberechtigter = $uid
-                group by s.Sparte
+                WHERE FIND_IN_SET(s.id, berechtigte_elemente($uid, 'sparte')) > 0
+                group by s.Sparte;
                 ",
     "typ"   => "torte"
 );

@@ -169,6 +169,19 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
             padding-bottom: 0.5rem;
             min-height: 200px;
         }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: url('./inc/img/body_red.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
     </style>
 
     

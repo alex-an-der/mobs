@@ -13,15 +13,15 @@ $anzuzeigendeDaten[] = array(
     "writeaccess" => true,
     "query" => "SELECT m.id as id, m.BSG, m.Vorname, m.Nachname, m.Mail
             from b_mitglieder as m
-            -- LEFT JOIN b_bsg_rechte as r on r.BSG = m.BSG
-            -- WHERE m.BSG  IS NULL OR Nutzer = $uid
+           -- WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'mitglied')) > 0
+             LEFT JOIN b_bsg_rechte as r on r.BSG = m.BSG
+             WHERE m.BSG  IS NULL OR Nutzer = $uid
             order by id desc;
     ",
     "referenzqueries" => array(
         "BSG" => "SELECT b.id, b.BSG as anzeige
         from b_bsg as b
-        join b_bsg_rechte as r on r.BSG = b.id 
-        where r.Nutzer = $uid 
+        WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0
         ORDER BY anzeige;
         "
     )
@@ -37,34 +37,40 @@ join b_bsg as b on b.BSG = m.BSG
 join b_bsg_rechte as r on r.;
 */
 
+# Mitglieder in den Sparten 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
     "auswahltext" => "Mitglieder in den Sparten",
     "writeaccess" => true,
     "query" => "SELECT mis.id as id, mis.Sparte as Sparte, mis.Mitglied as Mitglied
-                from b_mitglieder_in_sparten as mis
-                left join v_verbands_berechtigte_sparte as vbs on vbs.Sparte = mis.Sparte
-                where vbs.Verbandsberechtigter = $uid or mis.Sparte is NULL 
+                from b_mitglieder_in_sparten as mis 
+                WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'mitglied')) > 0 OR mis.Sparte IS NULL
                 order by mis.id desc;
     ",
     "referenzqueries" => array(
-        "Sparte" => "SELECT Sparte as id, Sparte_Name as anzeige
-                    from v_verbands_berechtigte_sparte
-                    where Verbandsberechtigter = $uid
+        "Sparte" => "SELECT s.id as id, concat (s.Sparte, ' (',v.Kurzname,')') as anzeige
+                    from b_sparte as s
+                    join b_regionalverband as v on s.Verband = v.id
+                    WHERE FIND_IN_SET(s.id, berechtigte_elemente($uid, 'sparte')) > 0
                     ORDER BY anzeige;
         ",
-        "Mitglied" => "SELECT m.id as id, CONCAT(m.Nachname, ', ', m.Vorname, ' (', vbr.BSG_Name,')') as anzeige 
-                        from b_mitglieder as m
-                        join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG
-                        where vbr.Verbandsberechtigter = $uid
+        "Mitglied" => "SELECT mis.id as id , CONCAT(m.Nachname, ', ', m.Vorname, ' (', b.BSG,')') as anzeige 
+                        from v_mitglieder_in_bsg_gesamt as mis
+                        join b_mitglieder as m on m.id = mis.id
+                        join b_bsg as b on mis.BSG = b.id
+                        WHERE FIND_IN_SET(mis.id, berechtigte_elemente($uid, 'mitglied')) > 0
                         ORDER BY anzeige;
         "
     ),
     "suchqueries" => array(
-        "Sparte" => "SELECT Sparte as id, Sparte_Name
-                    from v_verbands_berechtigte_sparte
-                    where Verbandsberechtigter = $uid;",
-        "Mitglied" => "SELECT id, Vorname, Nachname, Mail from b_mitglieder as m join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG where vbr.Verbandsberechtigter = $uid;"
+        "Sparte" => "SELECT s.id, s.Sparte, v.Verband, v.Kurzname
+                    from b_sparte as s
+                    join b_regionalverband as v on s.Verband = v.id
+                    WHERE FIND_IN_SET(s.id, berechtigte_elemente($uid, 'sparte')) > 0",
+        "Mitglied" => "SELECT id, Vorname, Nachname, Mail 
+                        from b_mitglieder as m 
+                        WHERE FIND_IN_SET(id, berechtigte_elemente($uid, 'mitglied')) > 0
+        "
     )
 );
 
