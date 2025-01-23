@@ -47,7 +47,7 @@ if($ypum->isBerechtigt(8)){
 
 BSG
 ---
-WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0;
+WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0
 
 
 
@@ -98,6 +98,26 @@ BEGIN
             where r.Nutzer=uid
         ) berechtigungen;
     END IF;
+    
+    IF target = 'mitglied' THEN
+        SELECT GROUP_CONCAT(DISTINCT ID) INTO result 
+        FROM (
+            SELECT member_bsg.id as ID, member_bsg.bsg as BSG, v.id as Verband 
+            FROM(
+                SELECT z.Mitglied as id , z.BSG as bsg
+                FROM b_zusaetzliche_bsg_mitgliedschaften as z
+                union
+                SELECT m.id as id, m.BSG as bsg
+                FROM b_mitglieder as m
+            ) member_bsg
+            JOIN b_bsg on b_bsg.id = member_bsg.bsg
+            JOIN b_regionalverband as v on v.id = b_bsg.Verband
+        ) b_und_v
+        
+        WHERE (FIND_IN_SET(b_und_v.BSG, berechtigte_elemente(15, 'BSG')) > 0) 
+        OR (FIND_IN_SET(b_und_v.Verband, berechtigte_elemente(15, 'verband')) > 0);
+    END IF;
+    
     
     RETURN COALESCE(result, '');
 END //

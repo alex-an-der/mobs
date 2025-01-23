@@ -18,14 +18,13 @@ $anzuzeigendeDaten[] = array(
     "writeaccess" => true,
     "query" => "SELECT s.id as id, s.Verband as Verband, s.Sparte, s.Sportart as Sportart
         FROM b_sparte as s
-        LEFT JOIN b_regionalverband_rechte as r on r.Verband = s.Verband
-        WHERE r.Nutzer IS NULL OR r.Nutzer = $uid
+        WHERE FIND_IN_SET(s.id, berechtigte_elemente($uid, 'sparte')) > 0
         order by id desc;
     ",
     "referenzqueries" => array(
         "Verband" => "SELECT v.id, v.Verband as anzeige
         FROM b_regionalverband as v
-        WHERE FIND_IN_SET(v.id, berechtigte_elemente($uid, 'verband')) > 0;
+        WHERE FIND_IN_SET(v.id, berechtigte_elemente($uid, 'verband')) > 0
         ORDER BY anzeige;
         ",
         "Sportart" => "SELECT id, CONCAT (Sportart,' (',Sportart_Nr,')') as anzeige from b___sportart ORDER BY anzeige;"
@@ -51,15 +50,16 @@ $anzuzeigendeDaten[] = array(
         RE_PLZ_Ort
         FROM b_bsg as b
         -- LEFT JOIN b_regionalverband_rechte as r on r.Verband = b.Verband
-        WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0;
+        WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0
         -- WHERE b.Verband  IS NULL OR Nutzer = $uid
         order by id desc;
     ",
     "referenzqueries" => array(
         "Verband" => "SELECT v.id, v.Verband as anzeige
         from b_regionalverband as v
-        join b_regionalverband_rechte as r on r.Verband = v.id 
-        where r.Nutzer = $uid 
+
+        -- join b_regionalverband_rechte as r on r.Verband = v.id 
+        -- where r.Nutzer = $uid 
         ORDER BY anzeige;
         ",
         "Ansprechpartner" => "SELECT m.id, CONCAT(Nachname, ', ', Vorname) as anzeige 
