@@ -53,6 +53,7 @@ WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0;
 
 */
 /*
+DROP FUNCTION IF EXISTS berechtigte_elemente;
 DELIMITER //
 
 CREATE FUNCTION berechtigte_elemente(uid INT, target VARCHAR(50))
@@ -68,8 +69,7 @@ BEGIN
             SELECT v.id as verband_id, r.Nutzer
             FROM b_regionalverband as v
             JOIN b_regionalverband_rechte as r on r.Verband = v.id 
-            JOIN y_user as y ON r.Nutzer = y.id
-            WHERE y.id = uid
+            WHERE r.Nutzer = uid
         ) berechtigungen;
     END IF;
     
@@ -85,8 +85,17 @@ BEGIN
             SELECT b.id as bsg_id, b.BSG, Nutzer
             FROM b_bsg as b
             LEFT JOIN b_regionalverband_rechte as vr ON b.Verband = vr.Verband
-            JOIN y_user as y ON Nutzer = y.id
-            WHERE y.id = uid
+            WHERE Nutzer = uid
+        ) berechtigungen;
+    END IF;
+    
+    IF target = 'sparte' THEN
+        SELECT GROUP_CONCAT(DISTINCT sparte_id) INTO result
+        FROM (
+            select s.id as sparte_id, s.Sparte, s.Verband
+            from b_sparte as s
+            join b_regionalverband_rechte r on s.Verband = r.Verband
+            where r.Nutzer=uid
         ) berechtigungen;
     END IF;
     

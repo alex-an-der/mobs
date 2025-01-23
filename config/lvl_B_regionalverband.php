@@ -25,8 +25,7 @@ $anzuzeigendeDaten[] = array(
     "referenzqueries" => array(
         "Verband" => "SELECT v.id, v.Verband as anzeige
         FROM b_regionalverband as v
-        JOIN b_regionalverband_rechte as r on r.Verband = v.id 
-        where r.Nutzer = $uid 
+        WHERE FIND_IN_SET(v.id, berechtigte_elemente($uid, 'verband')) > 0;
         ORDER BY anzeige;
         ",
         "Sportart" => "SELECT id, CONCAT (Sportart,' (',Sportart_Nr,')') as anzeige from b___sportart ORDER BY anzeige;"
