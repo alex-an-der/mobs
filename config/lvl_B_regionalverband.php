@@ -51,8 +51,9 @@ $anzuzeigendeDaten[] = array(
         RE_Strasse2,
         RE_PLZ_Ort
         FROM b_bsg as b
-        LEFT JOIN b_regionalverband_rechte as r on r.Verband = b.Verband
-        WHERE b.Verband  IS NULL OR Nutzer = $uid
+        -- LEFT JOIN b_regionalverband_rechte as r on r.Verband = b.Verband
+        WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0;
+        -- WHERE b.Verband  IS NULL OR Nutzer = $uid
         order by id desc;
     ",
     "referenzqueries" => array(
@@ -146,14 +147,14 @@ $anzuzeigendeDaten[] = array(
     "hinweis" => "Berechtigt angemeldete Nutzer, Mitglieder einer BSG zu sehen und zu bearbeiten.",
     "writeaccess" => true,
     "query" => "SELECT br.id as id, br.BSG, br.Nutzer
-                from b_bsg_rechte as br
-                left join v_verbands_berechtigte_bsg as vrb on br.BSG = vrb.BSG
-                where vrb.Verbandsberechtigter = $uid OR br.BSG IS NULL;
+                from b_bsg_rechte as br 
+                left join b_bsg as b on br.BSG = b.id
+                WHERE FIND_IN_SET(b.id, berechtigte_elemente(15, 'BSG')) > 0;
                 ",
     "referenzqueries" => array(
-        "BSG" => "SELECT BSG as id, BSG_Name as anzeige
-                    FROM v_verbands_berechtigte_bsg as vrb
-                    where vrb.Verbandsberechtigter = $uid 
+        "BSG" => "SELECT b.id as id, b.BSG as anzeige
+                    FROM b_bsg as b
+                    WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0
                     ORDER BY anzeige;",
         "Nutzer" => "SELECT id, mail as anzeige from y_user ORDER BY anzeige;"
     )

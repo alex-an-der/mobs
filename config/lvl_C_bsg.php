@@ -13,8 +13,8 @@ $anzuzeigendeDaten[] = array(
     "writeaccess" => true,
     "query" => "SELECT m.id as id, m.BSG, m.Vorname, m.Nachname, m.Mail
             from b_mitglieder as m
-            LEFT JOIN b_bsg_rechte as r on r.BSG = m.BSG
-            WHERE m.BSG  IS NULL OR Nutzer = $uid
+            -- LEFT JOIN b_bsg_rechte as r on r.BSG = m.BSG
+            -- WHERE m.BSG  IS NULL OR Nutzer = $uid
             order by id desc;
     ",
     "referenzqueries" => array(
