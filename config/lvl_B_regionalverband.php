@@ -18,7 +18,7 @@ $anzuzeigendeDaten[] = array(
     "writeaccess" => true,
     "query" => "SELECT s.id as id, s.Verband as Verband, s.Sparte, s.Sportart as Sportart
         FROM b_sparte as s
-        WHERE FIND_IN_SET(s.id, berechtigte_elemente($uid, 'sparte')) > 0
+        WHERE FIND_IN_SET(s.id, berechtigte_elemente($uid, 'sparte')) > 0 or Verband IS NULL
         order by id desc;
     ",
     "referenzqueries" => array(
@@ -49,7 +49,7 @@ $anzuzeigendeDaten[] = array(
         RE_Strasse2,
         RE_PLZ_Ort
         FROM b_bsg as b
-        WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0
+        WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0 or Verband IS NULL
         order by id desc;
     ",
     "referenzqueries" => array(
@@ -78,32 +78,6 @@ $anzuzeigendeDaten[] = array(
 );
 
 
-/*
-# Sekundärmitgliedschaften in BSG (Basisbeitrag nur in den Primärmitgliedschaften)
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_zusaetzliche_bsg_mitgliedschaften",
-    "auswahltext" => "Zusätzliche Mitgliedschaften in anderen BSG",
-    "writeaccess" => true,
-    "import" => false,
-    "query" => "SELECT id, BSG, Mitglied from b_zusaetzliche_bsg_mitgliedschaften;
-                order by id desc;
-    ",
-    "referenzqueries" => array(
-        "BSG" => "SELECT BSG as id, BSG_Name as anzeige
-                    FROM v_verbands_berechtigte_bsg as vrb
-                    where vrb.Verbandsberechtigter = $uid 
-                    ORDER BY anzeige;
-        ",
-        "Mitglied" => "SELECT m.id as id, CONCAT(m.Nachname, ', ', m.Vorname, ' (', vbr.BSG_Name,')') as anzeige 
-                        from b_mitglieder as m
-                        join v_verbands_berechtigte_bsg as vbr on m.BSG = vbr.BSG
-                        where vbr.Verbandsberechtigter = $uid
-                        ORDER BY anzeige;
-        "
-    )
-);
-*/
-
 # BSG-Rechte - Wer darf die Mitglieder welcher BSG editieren? 
 # Ich sehe nur BSG von Verbänden, zu deren Ansicht ich berechtigt bin
 $anzuzeigendeDaten[] = array(
@@ -114,7 +88,7 @@ $anzuzeigendeDaten[] = array(
     "query" => "SELECT br.id as id, br.BSG, br.Nutzer
                 from b_bsg_rechte as br 
                 left join b_bsg as b on br.BSG = b.id
-                WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0;
+                WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0 OR Nutzer IS NULL;
                 ",
     "referenzqueries" => array(
         "BSG" => "SELECT b.id as id, b.BSG as anzeige

@@ -7,7 +7,7 @@
 ######################################################################################################
 
 # Meine Mitglieder-Daten
-$anzuzeigendeDaten[] = array(
+/*$anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
     "auswahltext" => "Meine Daten",
     "writeaccess" => true,
@@ -32,12 +32,32 @@ $anzuzeigendeDaten[] = array(
         "Nachname"                  => "200",
         "Mail"                      => "250"
     )  
+);*/
+
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_mitglieder",
+    "auswahltext" => "Meine Daten",
+    "writeaccess" => true,
+    "import" => false,
+    "query" => "SELECT m.id, m.Vorname, m.Nachname, m.Mail
+            FROM b_mitglieder as m 
+            join y_user as y on y.mail = m.Mail
+            WHERE y.id = $uid
+            order by m.id desc;
+    ",
+    "spaltenbreiten" => array(
+        "BSG"                       => "300",
+        "Vorname"                   => "200",
+        "Nachname"                  => "200",
+        "Mail"                      => "250"
+    )  
 );
+
 
 # Meine Sparten
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
-    "auswahltext" => "Meine Sparten",
+    "auswahltext" => "ÜBERARBEITEN! Meine Sparten",
     "hinweis" => "An- und Abmeldung zu Sparten bitte über deine Betriebssportgemeinschaft vornehmen.",
     "writeaccess" => false,
     "import" => false,

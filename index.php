@@ -125,19 +125,6 @@ $tabelle_upper = strtoupper($tabelle)
         td {
             vertical-align: middle !important;
         }
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background-image: url('./inc/img/body.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
     </style>
 
     <script>
@@ -780,8 +767,13 @@ if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])){
         $FKname = '$anzeigeSubstitutionen'."['$tabelle']['$SRC_ID']";
             
             $result = $db->query($query);
-            $FKdarstellungAll = false;
-            if(isset($result['data'])) $FKdarstellungAll = $result['data'];
+            if(!isset($result['data'])){
+                $result = array();
+                $result['data'][0]['id'] = 0;
+                $result['data'][0]['anzeige'] = "Keine Daten vorhanden";            
+            }
+            $FKdarstellungAll = $result['data'];
+
             
             if (!$FKdarstellungAll) {
                 if(isset($result['error'])){
@@ -1030,13 +1022,18 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
             if ($anzuzeigendeDaten[$selectedTableID]['import'] === false)
                 $importErlaubt = false;
         
+        // Wenn keine Schreibrechte, dann auch keinen Import 
+        if(!$readwrite) $importErlaubt = false;
         ?>
-    
+        
         <button id="resetButton" class="btn btn-info mb-2" onclick="resetPage()">Daten neu laden</button>
-        <?php if ($importErlaubt || hatUserBerechtigungen()):?>
+
+        <!--?php if ($readwrite  || hatUserBerechtigungen()):?-->
+        <?php if ($readwrite):?>
             <button id="insertDefaultButton" class="btn btn-success mb-2">Datensatz einfügen</button>
-        <?php endif; ?>     
-        <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte löschen</button>
+            <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte löschen</button>
+        <?php endif; ?>  
+
         <button id="check-duplicates" class="btn btn-success mb-2">Dubletten suchen</button>
         <div class="btn-group mb-2">
             <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -1051,7 +1048,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                 <a class="dropdown-item" href="statistik.php">Statistiken</a>
             </div>
         </div>
-        <?php if ($importErlaubt):?>
+        <?php if ($importErlaubt && $readwrite):?>
             <a href="importeur.php?tab=<?= $selectedTableID ?>" class="btn btn-info mb-2">Daten importieren</a>
         <?php endif; ?> 
    

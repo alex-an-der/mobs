@@ -27,18 +27,16 @@ class Datenbank {
 
         $stmt = $this->pdo->prepare($query);
         try{
-            //$this->log("QUERY: $query" );
             $success = $stmt->execute($arguments);
         } catch (PDOException $e) {
             $errmsg = $e->getMessage();
             $this->log("Query error in ".__FILE__.": " . $errmsg);
             return ['error' => "Ein Fehler ist aufgetreten: <b>$errmsg</b>"];
         }
-        // Prüfen, ob die Abfrage ein SELECT oder SHOW ist
-
+        // Prüfen, ob die Abfrage ein SELECT oder SHOW ist - dann mit return raus
         if (stripos(trim($query), 'SELECT') === 0 || stripos(trim($query), 'SHOW') === 0) {
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            // DBI
+           
             if ($result === false) {
                 // Ein Fehler ist aufgetreten
                 return ['error' => 'Ein unbekannter Fehler ist aufgetreten'];
@@ -54,9 +52,11 @@ class Datenbank {
         
         // UPDATE, INSERT, DELETE – Anzahl der betroffenen Zeilen zurückgeben
         foreach ($arguments as $argument) {
+            // Prepared Statements einsetzen 
             $query = preg_replace('/\?/', $argument, $query, 1);
         }
-        $this->log( $query);
+        // $this->log( $query); // Mit den Fehlermeldungen, damit man das besser nachvollziehen kann
+        $this->log_for_rollback( $query); // Nur für Rollbacks (BU einspielen und dann auf den richtigen Stand bringen
         return $success ? $stmt->rowCount() : false;
     }
 
@@ -67,6 +67,19 @@ class Datenbank {
             $stmt = $this->pdo->prepare($query);
             $stmt->bindParam(':eintrag', $eintrag, PDO::PARAM_STR);
             $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Log error: " . $e->getMessage());
+        }
+    }
+
+    public function log_for_rollback($originalquery) {
+        $autor = "";
+        require_once(__DIR__ . "/../../mods/before_log_for_rollback.php");
+        try {
+            $args = array($autor, $originalquery);
+            $query = "INSERT INTO rollback (autor, eintrag) VALUES (?, ?)";
+            $stmt = $this->pdo->prepare($query);
+            $stmt->execute($args);
         } catch (PDOException $e) {
             error_log("Log error: " . $e->getMessage());
         }

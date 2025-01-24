@@ -47,7 +47,19 @@ $anzuzeigendeDaten['log'] = array(
         "Timestamp" => "220",
         "Log"       => "1620"
     )
-);# Sparten im Regionalverband
+);
+$anzuzeigendeDaten['rollback'] = array(
+    "tabellenname" => "log",
+    "auswahltext" => "Rollback",
+    "query" => "SELECT  id, id as Nr, zeit as Timestamp, autor as Autor, eintrag as Query 
+                from `rollback` order by zeit desc;",
+    "spaltenbreiten" => array(
+        "Nr"        => "80",
+        "Timestamp" => "220",
+        "Autor"     => "220",
+        "Log"       => "600"
+    )
+);
 
 
 
