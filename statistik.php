@@ -44,7 +44,7 @@ $values = !empty($data) ? array_column($data, array_keys($data[0])[1]) : [];
         }
     </script>
     <style>
-                body::before {
+            body::before {
             content: "";
             position: fixed;
             top: 0;
