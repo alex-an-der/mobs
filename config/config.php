@@ -8,7 +8,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 */
 # Datenbank-Zugangsdaten
-define("DB_NAME", "db_441127_12");
+define("DB_NAME", "db_441127_14");
 define("DB_USER", "USER441127");
 define("DB_HOST", "x96.lima-db.de");
 
@@ -123,8 +123,8 @@ BEGIN
             FROM (
                 SELECT member_bsg.id as ID, member_bsg.bsg as BSG, v.id as Verband 
                 FROM(
-                    SELECT z.Mitglied as id , z.BSG as bsg
-                    FROM b_zusaetzliche_bsg_mitgliedschaften as z
+                    SELECT mis.Mitglied as id , mis.BSG as bsg
+                    FROM b_mitglieder_in_sparten as mis
                     union
                     SELECT m.id as id, m.BSG as bsg
                     FROM b_mitglieder as m

@@ -34,6 +34,10 @@ $anzuzeigendeDaten[] = array(
     "referenzqueries" => array(
         "Verband" => "SELECT id, Verband as anzeige from b_regionalverband ORDER BY anzeige;",
         "Nutzer" => "SELECT id, mail as anzeige from y_user ORDER BY anzeige;"
+    ),
+    "spaltenbreiten" => array(
+        "Verband"                       => "300",
+        "Nutzer"                        => "300"
     )
 );
 

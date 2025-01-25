@@ -28,6 +28,11 @@ $anzuzeigendeDaten[] = array(
         ORDER BY anzeige;
         ",
         "Sportart" => "SELECT id, CONCAT (Sportart,' (',Sportart_Nr,')') as anzeige from b___sportart ORDER BY anzeige;"
+    ),
+    "spaltenbreiten" => array(
+        "Verband"                       => "380",
+        "Sparte"                        => "250",  
+        "Sportart"                      => "250"
     )
 );
 
@@ -49,7 +54,10 @@ $anzuzeigendeDaten[] = array(
         RE_Strasse2,
         RE_PLZ_Ort
         FROM b_bsg as b
-        WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0 or Verband IS NULL
+        WHERE (
+            FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0 AND
+            FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0 )
+        or Verband IS NULL
         order by id desc;
     ",
     "referenzqueries" => array(
@@ -96,6 +104,10 @@ $anzuzeigendeDaten[] = array(
                     WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0
                     ORDER BY anzeige;",
         "Nutzer" => "SELECT id, mail as anzeige from y_user ORDER BY anzeige;"
+    ),
+    "spaltenbreiten" => array(
+        "BSG"                       => "300",
+        "Nutzer"                    => "300"
     )
 );
 

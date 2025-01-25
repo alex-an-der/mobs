@@ -821,6 +821,7 @@ if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])){
     }
 } 
 
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function dieWithError($err, $file, $line, $stayAlive = false) {
     global $db;
@@ -892,7 +893,7 @@ function renderTableHeaders($data) {
     global $anzuzeigendeDaten;
     global $selectedTableID;
     global $readwrite;
-
+    
     if (!empty($data)) {
         if($readwrite)
             echo "<th style='width: 60px'><button type='button' class='btn p-0 b-0 btn-outline-secondary btn-sm toggle-btn toggle-btn-header' id='selectAll' onclick='toggleSelectAll(this)'>X</button></th>"; // Toggle button for selecting all rows
