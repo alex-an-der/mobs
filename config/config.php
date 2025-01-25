@@ -245,4 +245,29 @@ END //
 DELIMITER ;
 
 */
+
+/*
+DELIMITER //
+
+CREATE TRIGGER tr_user_first_login 
+AFTER UPDATE ON y_user
+FOR EACH ROW
+BEGIN
+    IF OLD.lastlogin IS NULL AND NEW.lastlogin IS NOT NULL THEN
+        INSERT INTO b_mitglieder (y_id, Mail, Vorname, Nachname)
+        SELECT 
+            NEW.id,
+            NEW.mail,
+            ud.vname,
+            ud.nname
+        FROM y_v_userdata ud
+        WHERE ud.userID = NEW.id;
+    END IF;
+END;//
+
+DELIMITER ;
+
+
+https://friendlycaptcha.com/signup/
+*/
 ?>

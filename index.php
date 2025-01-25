@@ -921,7 +921,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
     global $selectedTableID;
 
     // Eingabemethode (z.B. Date-Picker) nach Datentyp wählen.
-    $columns = $db->query("SHOW COLUMNS FROM $tabelle"); // This is where the SHOW COLUMNS query is fired
+    $columns = $db->query("SHOW COLUMNS FROM $tabelle"); 
     $columnTypes = [];
     foreach ($columns['data'] as $column) {
         $columnTypes[$column['Field']] = $column['Type'];
@@ -930,28 +930,25 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
     foreach ($data as $row) {
         echo '<tr data-id="' . $row['id'] . '">';
         if($readwrite)
-            echo '<td><button type="button" class="btn btn-outline-light btn-sm toggle-btn" data-id="' . $row['id'] . '" onclick="toggleRowSelection(this)">X</button></td>'; // Toggle button for each row
-        // Gehe alle Datensätze durch. 
-        // $key = Name der Spalte, 
-        // $value = der Wert, wie er in der Datenbank steht
+            echo '<td><button type="button" class="btn btn-outline-light btn-sm toggle-btn" data-id="' . $row['id'] . '" onclick="toggleRowSelection(this)">X</button></td>';
+        
         foreach ($row as $key => $value) {
             if ($value === null) {
                 $value = "";
             }
-            // id überspringen, 
             if (strcasecmp($key, 'id') !== 0) {
-                $style = "";
+                $style = "style='";
                 if(isset($anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$key])) {
-                    $style = "style='width: ".$anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$key]."px;'";
+                    $style .= "width: ".$anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$key]."px;";
                 }
+                // Add word-wrap styles
+                $style .= "word-wrap: break-word; white-space: normal;'";
+                
                 echo '<td data-field="' . $key . '" ' . $style . '>';
                 $data_fk_ID_key = "";
                 $data_fk_ID_value = "";
                
-                
-                // Gibt es zu dieser Spalte eine Substitutionsanweisung?
                 if(isset($foreignKeys[$key])) { 
-                    // Suche die Anzeige mit der korrekten ['id’]:
                     foreach($foreignKeys[$key] as $fk){
                         if($fk['id'] == $value){
                             $data_fk_ID_key = $fk['id'];
@@ -961,8 +958,8 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                     }
 
                     if ($readwrite) {
-                        echo '<select class="form-control border-0" style="background-color: inherit;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0)">';
-                        echo '<option value="0"' . (empty($value) ? ' selected' : '') . '>---</option>';  // Leere Option
+                        echo '<select class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0)">';
+                        echo '<option value="0"' . (empty($value) ? ' selected' : '') . '>---</option>';
                         foreach ($foreignKeys[$key] as $fk ) {
                             $fk_value = $fk['id'];
                             $fk_display = $fk['anzeige'];
@@ -987,7 +984,12 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                                 $inputType = 'date';
                             }
                         }
-                        echo '<input data-type="'.$columnType.'" data-fkIDkey="' . htmlspecialchars($data_fk_ID_key) . '" data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value) . '" type="' . $inputType . '" class="form-control border-0" style="background-color: inherit;" value="' . htmlspecialchars($value) . '"
+                        echo '<input data-type="'.$columnType.'" data-fkIDkey="' . htmlspecialchars($data_fk_ID_key) . '" 
+                              data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value) . '" 
+                              type="' . $inputType . '" 
+                              class="form-control border-0" 
+                              style="background-color: inherit; word-wrap: break-word; white-space: normal;" 
+                              value="' . htmlspecialchars($value) . '"
                               onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, \'' . $columnType . '\')"
                               onfocus="clearCellColor(this)">';
                 
@@ -997,7 +999,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                                 $value = number_format((float)$value, 2, '.', '');
                             }
                         }
-                        echo htmlspecialchars($value);
+                        echo '<div style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars($value) . '</div>';
                     }
                 }
                 echo '</td>';

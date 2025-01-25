@@ -41,7 +41,7 @@ $anzuzeigendeDaten[] = array(
     "import" => false,
     "query" => "SELECT m.id, m.Vorname, m.Nachname, m.Mail
             FROM b_mitglieder as m 
-            join y_user as y on y.mail = m.Mail
+            join y_user as y on y.id = m.y_id
             WHERE y.id = $uid
             order by m.id desc;
     ",
@@ -55,9 +55,15 @@ $anzuzeigendeDaten[] = array(
 
 
 # Meine Sparten
+/*select * 
+from b_mitglieder_in_sparten as mis
+join b_mitglieder as m on m.id=mis.Mitglied
+join b_bsg as b on b.id=mis.BSG
+join 
+*/
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
-    "auswahltext" => "ÜBERARBEITEN! Meine Sparten",
+    "auswahltext" => "ÜBERARBEITEN!! Meine Sparten",
     "hinweis" => "An- und Abmeldung zu Sparten bitte über deine Betriebssportgemeinschaft vornehmen.",
     "writeaccess" => false,
     "import" => false,
