@@ -2,7 +2,7 @@
 ob_start(); // Start output buffering at the very beginning
 require_once(__DIR__ . "/mods/all.head.php");
 require_once(__DIR__ . "/inc/include.php");
-require_once(__DIR__ . "/config/config.php");  // Changed from /config.php
+require_once(__DIR__ . "/config.php");
 require_once(__DIR__ . '/vendor/autoload.php');
 
 // Clean any existing output
@@ -46,9 +46,9 @@ $pdf->SetAutoPageBreak(TRUE, 15);
 $pdf->AddPage();
 
 // Große Überschrift
-/*$pdf->SetFont('helvetica', 'B', 16);
+$pdf->SetFont('helvetica', 'B', 16);
 $pdf->Cell(0, 10, $stat['titel'], 0, 1, 'C');
-$pdf->Ln(5);*/
+$pdf->Ln(5);
 
 // Hole das Base64-Bild aus dem POST-Parameter und füge es ein
 if (isset($_POST['chartImage'])) {
@@ -72,13 +72,13 @@ if (isset($_POST['chartImage'])) {
             unlink($tempFile);
 
             // Ausreichend Platz für das Bild + Abstand zur Tabelle
-            $pdf->Ln($height + 5); // Reduziert auf 5mm Abstand nach dem Bild
+            $pdf->Ln($height + 20); // 20mm Abstand nach dem Bild
         }
     }
 }
 
 // Füge die Tabelle unter dem Diagramm ein
-$pdf->Ln(5); // Reduziert auf 5mm Abstand
+$pdf->Ln(120); // Fester Abstand statt $height + 10
 
 // Tabelle
 $pdf->SetFont('helvetica', '', 10);

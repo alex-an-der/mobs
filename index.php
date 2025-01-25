@@ -6,7 +6,7 @@ require_once(__DIR__ . "/mods/index.head.php");
 require_once(__DIR__ . "/inc/include.php");
 
 
-$readwrite = 0;
+$admin = 1;
 $selectedTableID = isset($_GET['tab']) ? $_GET['tab'] : "";
 $data = array();
 if(isset($anzuzeigendeDaten[$selectedTableID])){
@@ -24,13 +24,6 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
     }else{
         $err = "Die Konstante \$anzuzeigendeDaten[$selectedTableID]['query'] enth&auml;lt keinen g&uuml;ltigen Tabellennamen oder existiert nicht.";
         dieWithError($err,__FILE__,__LINE__);
-    }
-
-    // Schreibrechte?
-    if(isset($anzuzeigendeDaten[$selectedTableID]['writeaccess'])){
-        $readwrite = $anzuzeigendeDaten[$selectedTableID]['writeaccess'];
-    }else{
-        $readwrite = 0;
     }
     
     // Query funktioniert?
@@ -122,23 +115,6 @@ $tabelle_upper = strtoupper($tabelle)
             white-space: nowrap;
             min-width: fit-content;
         }
-        td {
-            vertical-align: middle !important;
-        }
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background-image: url('./inc/img/body.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
-
     </style>
 
     <script>
@@ -781,22 +757,13 @@ if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])){
         $FKname = '$anzeigeSubstitutionen'."['$tabelle']['$SRC_ID']";
             
             $result = $db->query($query);
-            if(!isset($result['data'])){
-                $result = array();
-                $result['data'][0]['id'] = 0;
-                $result['data'][0]['anzeige'] = "Keine Daten vorhanden";            
-            }
-            $FKdarstellungAll = $result['data'];
-
+            $FKdarstellungAll = false;
+            if(isset($result['data'])) $FKdarstellungAll = $result['data'];
             
             if (!$FKdarstellungAll) {
-                if(isset($result['error'])){
-                    $err = "Die benötigte Konstante $FKname enthält kein gültiges SQL-Statement. (Eingelesener Query: $query)";
-                    if(isset($result['error'])) $err .= "<p>".$result['error']."</p>";
-                    dieWithError($err,__FILE__,__LINE__);
-                }else{
-                    continue;
-                }
+                $err = "Die benötigte Konstante $FKname enthält kein gültiges SQL-Statement. (Eingelesener Query: $query)";
+                if(isset($result['error'])) $err .= "<p>".$result['error']."</p>";
+                dieWithError($err,__FILE__,__LINE__);
             } 
 
             if (count($FKdarstellungAll[0])!=2){
@@ -821,7 +788,6 @@ if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])){
     }
 } 
 
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function dieWithError($err, $file, $line, $stayAlive = false) {
     global $db;
@@ -841,62 +807,26 @@ function renderTableSelectBox($db) {
     if(!isset($anzuzeigendeDaten[$selectedTableID])){
         echo '<option value="">-- Tabelle wählen --</option>';
     }
-    $maxLaenge = 0;
-    $trennerindizies = array();
-    $options = array();
+
     foreach ($anzuzeigendeDaten as $index => $table) {
-        if(isset($table['trenner'])){
-            $trennerindizies[] = count($options);
-            $options[] = $table['trenner'];
-        }else{
-            $tableName = htmlspecialchars($table['tabellenname']);
-            $tableComment = htmlspecialchars($table['auswahltext']);
-            if(strlen($tableComment) > $maxLaenge) $maxLaenge = strlen($tableComment);
-            $displayText = !empty($tableComment) ? "$tableComment" : $tableName;
-            $selected = ($index == $selectedTableID) ? 'selected' : '';
-            $options[] = '<option value="' . $index . '" ' . $selected . '>' . $displayText . '</option>';
-        }
+        $tableName = htmlspecialchars($table['tabellenname']);
+        $tableComment = htmlspecialchars($table['auswahltext']);
+        $displayText = !empty($tableComment) ? "$tableComment" : $tableName;
+        $selected = ($index == $selectedTableID) ? 'selected' : '';
+        echo '<option value="' . $index . '" ' . $selected . '>' . $displayText . '</option>';
     }
 
-    foreach ($trennerindizies as $trennerindex) {
-        $firstChar = substr($options[$trennerindex], 0, 1);
-        $displayText = str_pad('', $maxLaenge, $firstChar);
-        $options[$trennerindex] = '<option disabled>' . $displayText . '</option>';
-    }
-
-    echo implode("\n", $options);
     echo '</select>';
     echo '</form></p>';
     
 }
 
-function hatUserBerechtigungen(){
-    # Das sieht man, wenn die FK-Spalten etwas zurückliefern. FK-Select macht ein neuer Datensatz keinen Sinn.
-    global $anzuzeigendeDaten;
-    global $selectedTableID;
-    global $db;
-    
-    if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])){
-        $substitutionsQueries = $anzuzeigendeDaten[$selectedTableID]['referenzqueries'];
-        
-        foreach($substitutionsQueries as $SRC_ID => $query){
-            $result = $db->query($query);
-            if(isset($result['data'])) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 function renderTableHeaders($data) {
     global $anzuzeigendeDaten;
     global $selectedTableID;
-    global $readwrite;
-    
+
     if (!empty($data)) {
-        if($readwrite)
-            echo "<th style='width: 60px'><button type='button' class='btn p-0 b-0 btn-outline-secondary btn-sm toggle-btn toggle-btn-header' id='selectAll' onclick='toggleSelectAll(this)'>X</button></th>"; // Toggle button for selecting all rows
+        echo "<th style='width: 60px'><button type='button' class='btn p-0 b-0 btn-outline-secondary btn-sm toggle-btn toggle-btn-header' id='selectAll' onclick='toggleSelectAll(this)'>X</button></th>"; // Toggle button for selecting all rows
         foreach (array_keys($data[0]) as $header) {
             $style = "";
             if(isset($anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header])) {
@@ -915,7 +845,7 @@ function renderTableHeaders($data) {
     }
 }
 
-function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
+function renderTableRows($data, $admin, $tabelle, $foreignKeys) {
     global $db;
     global $anzuzeigendeDaten;
     global $selectedTableID;
@@ -929,8 +859,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
 
     foreach ($data as $row) {
         echo '<tr data-id="' . $row['id'] . '">';
-        if($readwrite)
-            echo '<td><button type="button" class="btn btn-outline-light btn-sm toggle-btn" data-id="' . $row['id'] . '" onclick="toggleRowSelection(this)">X</button></td>'; // Toggle button for each row
+        echo '<td><button type="button" class="btn btn-outline-light btn-sm toggle-btn" data-id="' . $row['id'] . '" onclick="toggleRowSelection(this)">X</button></td>'; // Toggle button for each row
         // Gehe alle Datensätze durch. 
         // $key = Name der Spalte, 
         // $value = der Wert, wie er in der Datenbank steht
@@ -960,7 +889,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                         }
                     }
 
-                    if ($readwrite) {
+                    if ($admin) {
                         echo '<select class="form-control border-0" style="background-color: inherit;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0)">';
                         echo '<option value="0"' . (empty($value) ? ' selected' : '') . '>---</option>';  // Leere Option
                         foreach ($foreignKeys[$key] as $fk ) {
@@ -976,7 +905,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                     }
 
                 } else {
-                    if ($readwrite) {
+                    if ($admin) {
                         $inputType = 'text';
                         $columnType = $columnTypes[$key];
                         if (strpos($columnType, 'date') !== false) {
@@ -992,10 +921,8 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                               onfocus="clearCellColor(this)">';
                 
                     } else {
-                        if(isset($columnType)){
-                            if (strpos($columnType, 'decimal') !== false || strpos($columnType, 'float') !== false) {
-                                $value = number_format((float)$value, 2, '.', '');
-                            }
+                        if (strpos($columnType, 'decimal') !== false || strpos($columnType, 'float') !== false) {
+                            $value = number_format((float)$value, 2, '.', '');
                         }
                         echo htmlspecialchars($value);
                     }
@@ -1030,25 +957,13 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
     }
     
     ?>
-    <?php if ((!empty($tabelle) && $readwrite) || hatUserBerechtigungen()): 
-        $importErlaubt = true;
 
-        if (isset($anzuzeigendeDaten[$selectedTableID]['import']))
-            if ($anzuzeigendeDaten[$selectedTableID]['import'] === false)
-                $importErlaubt = false;
-        
-        // Wenn keine Schreibrechte, dann auch keinen Import 
-        if(!$readwrite) $importErlaubt = false;
-        ?>
-        
+
+    <?php if (!empty($tabelle) && $admin): ?>
+    
         <button id="resetButton" class="btn btn-info mb-2" onclick="resetPage()">Daten neu laden</button>
-
-        <!--?php if ($readwrite  || hatUserBerechtigungen()):?-->
-        <?php if ($readwrite):?>
-            <button id="insertDefaultButton" class="btn btn-success mb-2">Datensatz einfügen</button>
-            <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte löschen</button>
-        <?php endif; ?>  
-
+        <button id="insertDefaultButton" class="btn btn-success mb-2">Datensatz einfügen</button>
+        <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte löschen</button>
         <button id="check-duplicates" class="btn btn-success mb-2">Dubletten suchen</button>
         <div class="btn-group mb-2">
             <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -1063,9 +978,9 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                 <a class="dropdown-item" href="statistik.php">Statistiken</a>
             </div>
         </div>
-        <?php if ($importErlaubt && $readwrite):?>
+        <?php if (!isset($anzuzeigendeDaten[$selectedTableID]['import']) || $anzuzeigendeDaten[$selectedTableID]['import'] !== false): ?>
             <a href="importeur.php?tab=<?= $selectedTableID ?>" class="btn btn-info mb-2">Daten importieren</a>
-        <?php endif; ?> 
+        <?php endif; ?>
    
     <?php endif; ?>
 
@@ -1079,7 +994,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
             </thead>
             <tbody>
             <?php 
-                if (!empty($data)) renderTableRows($data, $readwrite, $tabelle, $FKdata);
+                if (!empty($data)) renderTableRows($data, $admin, $tabelle, $FKdata);
             ?>
             </tbody>
         </table>

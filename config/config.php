@@ -62,14 +62,15 @@ CREATE TABLE `rollback` (
 )
 ENGINE = InnoDB;
 
-
-DROP VIEW IF EXISTS v_mitglieder_in_bsg_gesamt;
-CREATE VIEW v_mitglieder_in_bsg_gesamt as
-SELECT z.Mitglied as mitglied , z.BSG as BSG
-FROM b_zusaetzliche_bsg_mitgliedschaften as z
-union
-SELECT m.id as mitglied, m.BSG as bsg
-FROM b_mitglieder as m
+###  DEPRECATED  ###
+    DROP VIEW IF EXISTS v_mitglieder_in_bsg_gesamt;
+    CREATE VIEW v_mitglieder_in_bsg_gesamt as
+    SELECT z.Mitglied as mitglied , z.BSG as BSG
+    FROM b_zusaetzliche_bsg_mitgliedschaften as z
+    union
+    SELECT m.id as mitglied, m.BSG as bsg
+    FROM b_mitglieder as m
+###  DEPRECATED  ###
 */
 
 /*
@@ -209,8 +210,8 @@ BEGIN
             FROM (
                 SELECT member_bsg.id as ID, member_bsg.bsg as BSG, v.id as Verband 
                 FROM(
-                    SELECT z.Mitglied as id , z.BSG as bsg
-                    FROM b_zusaetzliche_bsg_mitgliedschaften as z
+                    SELECT mis.Mitglied as id , mis.BSG as bsg
+                    FROM b_mitglieder_in_sparten as mis
                     union
                     SELECT m.id as id, m.BSG as bsg
                     FROM b_mitglieder as m
