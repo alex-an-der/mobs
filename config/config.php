@@ -18,6 +18,8 @@ define("DB_HOST", "x96.lima-db.de");
 
 define("DB_PASS", "BallBierBertha42");
 define("TITEL", "LBSV Nds. Mitgliederverwaltung");
+# Wie sollen NULL-Werte (=keine Zuordnung) dargestellt werden?
+define("NULL_WERT", "---");
 
 # Rechtemanagement (YPUM)
 // $berechtigung = $ypum->getUserData();

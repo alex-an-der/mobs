@@ -244,7 +244,7 @@ $tabelle_upper = strtoupper($tabelle)
                     }
 
                     if (select) {
-                        const dbValue = dbRow[field] === null ? "" : dbRow[field];  // NULL wird zu ""
+                        const dbValue = dbRow[field] === null ? "NULL" : dbRow[field];  // NULL wird zu ""
                         if (dbValue == select.value) {
                             td.style.backgroundColor = 'lightgreen';
                         } else {
@@ -958,7 +958,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
 
                     if ($readwrite) {
                         echo '<select class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0)">';
-                        echo '<option value="NULL"' . (empty($value) ? ' selected' : '') . '>---</option>';
+                        echo '<option value="NULL"' . (empty($value) ? ' selected' : '') . '>'.NULL_WERT.'</option>';
                         foreach ($foreignKeys[$key] as $fk ) {
                             $fk_value = $fk['id'];
                             $fk_display = $fk['anzeige'];
