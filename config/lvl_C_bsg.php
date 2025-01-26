@@ -58,9 +58,9 @@ $anzuzeigendeDaten[] = array(
     "writeaccess" => true,
     "query" => "SELECT id,  Mitglied, BSG, Sparte
                 from b_mitglieder_in_sparten as mis
-                WHERE FIND_IN_SET(Mitglied, berechtigte_elemente(15, 'mitglied')) > 0
-                OR FIND_IN_SET(Sparte, berechtigte_elemente(15, 'sparte')) > 0
-                OR FIND_IN_SET(BSG, berechtigte_elemente(15, 'BSG')) > 0
+                WHERE FIND_IN_SET(Mitglied, berechtigte_elemente($uid, 'mitglied')) > 0
+                OR FIND_IN_SET(Sparte, berechtigte_elemente($uid, 'sparte')) > 0
+                OR FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0
                 OR mis.Sparte IS NULL
                 order by mis.id desc;
     ",
@@ -77,7 +77,7 @@ $anzuzeigendeDaten[] = array(
                     from b_bsg as b
                     join b_regionalverband as v on v.id = b.Verband
                     WHERE
-                        FIND_IN_SET(b.id, berechtigte_elemente(15, 'BSG')) > 0;
+                        FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0;
         ",
         "Sparte" => "SELECT s.id as id, concat (v.Kurzname,': ', s.Sparte) as anzeige
                     from b_sparte as s
