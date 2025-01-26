@@ -207,7 +207,7 @@ $tabelle_upper = strtoupper($tabelle)
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     try {
-                        const response = JSON.parse(xhr.responseText); console.log(response);
+                        const response = JSON.parse(xhr.responseText); $stmt->rowCount()
                         if (response.status === "success" && response.row) {
                             updateRowColors(response.row, id, field);
                         }
@@ -959,7 +959,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
 
                     if ($readwrite) {
                         echo '<select class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0)">';
-                        echo '<option value="0"' . (empty($value) ? ' selected' : '') . '>---</option>';
+                        echo '<option value="NULL"' . (empty($value) ? ' selected' : '') . '>---</option>';
                         foreach ($foreignKeys[$key] as $fk ) {
                             $fk_value = $fk['id'];
                             $fk_display = $fk['anzeige'];
@@ -1046,7 +1046,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
         <button id="resetButton" class="btn btn-info mb-2" onclick="resetPage()">Daten neu laden</button>
 
         <!--?php if ($readwrite  || hatUserBerechtigungen()):?-->
-        <?php if ($readwrite):?>
+        <?php if ($readwrite && $importErlaubt):?>
             <button id="insertDefaultButton" class="btn btn-success mb-2">Datensatz einfügen</button>
             <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte löschen</button>
         <?php endif; ?>  

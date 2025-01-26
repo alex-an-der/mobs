@@ -11,6 +11,7 @@ $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
     "auswahltext" => "Mitglieder nach Stamm-BSG",
     "writeaccess" => true,
+    "import" => false,
     "query" => "SELECT m.id as id, BSG, Vorname, Nachname, Mail
                 from b_mitglieder as m
                 WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'stammmitglied')) > 0 or BSG IS NULL

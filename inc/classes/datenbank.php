@@ -26,8 +26,18 @@ class Datenbank {
         require_once(__DIR__ . "/../../mods/before_sending_query.php");
 
         $stmt = $this->pdo->prepare($query);
+
+        // Handle NULL values
+        foreach ($arguments as $key => $value) {
+            if ($value == "NULL") {
+                $stmt->bindValue($key+1, NULL, PDO::PARAM_NULL);
+            }else{
+                $stmt->bindValue($key+1, $value);
+            }
+        }
+
         try{
-            $success = $stmt->execute($arguments);
+            $success = $stmt->execute();
         } catch (PDOException $e) {
             $errmsg = $e->getMessage();
             $this->log("Query error in ".__FILE__.": " . $errmsg);

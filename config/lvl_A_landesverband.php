@@ -55,6 +55,7 @@ $anzuzeigendeDaten['log'] = array(
 $anzuzeigendeDaten['rollback'] = array(
     "tabellenname" => "log",
     "auswahltext" => "Rollback",
+    "hinweis" => "Das Löschen und Anlegen neuer Mitglieder ist nicht im Rollback enthalten. Dies geschieht über den Berechtigungsmanager. Über die normale Schnittstelle sollten keine Mitglieder gelöscht werden können.",
     "query" => "SELECT  id, id as Nr, zeit as Timestamp, autor as Autor, eintrag as Query 
                 from `rollback` order by zeit desc;",
     "spaltenbreiten" => array(
