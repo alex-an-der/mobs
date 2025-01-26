@@ -1,3 +1,7 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+
 <?php
 //phpinfo();
 //die();
@@ -66,9 +70,7 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
 $tabelle_upper = strtoupper($tabelle)
 ?>
 
-<!DOCTYPE html>
-<html lang="de">
-<head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?=TITEL?></title>
@@ -138,6 +140,7 @@ $tabelle_upper = strtoupper($tabelle)
             background-position: center;
             background-repeat: no-repeat;
         }
+ 
 
     </style>
 
@@ -755,6 +758,35 @@ $tabelle_upper = strtoupper($tabelle)
             document.body.removeChild(form);
         }
     
+        function filter_that(selectElement, typ){
+            
+            switch(typ){
+                case 'select':
+                    var selectedText = selectElement.options[selectElement.selectedIndex].text;
+                    break;
+                case 'input':
+                    var selectedText = selectElement.value;
+                    break;
+            }
+
+            if(document.getElementById('tableFilter').value==selectedText){
+                selectedText = "";
+            }
+
+            event.preventDefault();
+            document.getElementById('tableFilter').value = selectedText;
+            filterTable();
+            
+        }
+
+        function clearFilter() {
+            const filterInput = document.getElementById('tableFilter');
+            if (filterInput) {
+                filterInput.value = '';
+                filterTable();
+            }
+        }
+
     </script>
 
 </head>
@@ -762,10 +794,9 @@ $tabelle_upper = strtoupper($tabelle)
  
 <?php
 // Manche Spalten sind per ID via Fremdschlüssel zu anderen Tabellen verknüpft. Die ID anzuzeigen (und zu bearbeiten) 
-// bringt dem Anwender wenig. Es muss daher der unbequeme Weg gegangen werden, die FK 8foreign keys) zu erkennen und
-// die Daten zu parsen, um den generischen Ansatz weiter verfolgen zu können. Die schema-Tabellen sind leider recht
-// unzuverlässig (eigene Erfahrung). Daher wird hier der CREATE TABLE-String der Tabelle ausgelesen und die Fremdschlüssel
-// per Regex ermittelt. Die Fremdschlüssel werden in einem Array gespeichert, um später die Anzeige zu verbessern.
+// bringt dem Anwender wenig. Es muss daher in config pro FK eine Referenzquery definiert werden, die die ID in eine für den
+// Anwender nützliche Information umwandelt. Diese Information wird dann in einer Select-Box angezeigt. 
+// Der Query muss genau zwei Dinge liefern: id (zur Verknüpfung, ist dann der Value der Option) und anzeige (der Text der Option).
 
 
 /////////////////////////////////////////////////////////////////////
@@ -957,14 +988,14 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                     }
 
                     if ($readwrite) {
-                        echo '<select class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0)">';
-                        echo '<option value="NULL"' . (empty($value) ? ' selected' : '') . '>'.NULL_WERT.'</option>';
+                        echo '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0)">';
+                        echo '<option  value="NULL"' . (empty($value) ? ' selected' : '') . '>'.NULL_WERT.'</option>';
                         foreach ($foreignKeys[$key] as $fk ) {
                             $fk_value = $fk['id'];
                             $fk_display = $fk['anzeige'];
 
                             $selected = ($fk_value == $value) ? 'selected' : '';
-                            echo '<option value="' . htmlspecialchars($fk_value) . '" ' . $selected . '>' . htmlspecialchars($fk_display) . '</option>\n';
+                            echo '<option  value="' . htmlspecialchars($fk_value) . '" ' . $selected . '>' . htmlspecialchars($fk_display) . '</option>\n';
                         }
                         echo '</select>';
                     } else {
@@ -983,7 +1014,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                                 $inputType = 'date';
                             }
                         }
-                        echo '<input data-type="'.$columnType.'" data-fkIDkey="' . htmlspecialchars($data_fk_ID_key) . '" 
+                        echo '<input oncontextmenu="filter_that(this, \'input\');" data-type="'.$columnType.'" data-fkIDkey="' . htmlspecialchars($data_fk_ID_key) . '" 
                               data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value) . '" 
                               type="' . $inputType . '" 
                               class="form-control border-0" 
@@ -1026,7 +1057,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
     <?php 
     if($tabelle!=""){
     //echo "<div class='container mt-2'>";
-    echo "    <p><input type='text' id='tableFilter' class='form-control' placeholder='Filter...'></p>";
+    echo "    <p><input type='text' id='tableFilter' class='form-control' placeholder='Filtern entweder durch manuelle Eingabe oder Rechtsklick auf ein Datenfeld.'></p>";
     //echo "</div>";
     }
     
@@ -1041,7 +1072,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
         // Wenn keine Schreibrechte, dann auch keinen Import 
         if(!$readwrite) $importErlaubt = false;
         ?>
-        
+        <button id='clearFilterButton' class='btn btn-info mb-2' onclick='clearFilter()'>Filter löschen</button>
         <button id="resetButton" class="btn btn-info mb-2" onclick="resetPage()">Daten neu laden</button>
 
         <!--?php if ($readwrite  || hatUserBerechtigungen()):?-->
