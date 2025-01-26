@@ -767,6 +767,9 @@ $tabelle_upper = strtoupper($tabelle)
                 case 'input':
                     var selectedText = selectElement.value;
                     break;
+                case 'div':
+                    var selectedText = selectElement.innerHTML;
+                    break;
             }
 
             if(document.getElementById('tableFilter').value==selectedText){
@@ -999,7 +1002,8 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                         }
                         echo '</select>';
                     } else {
-                        echo htmlspecialchars($data_fk_ID_value);
+                        //echo htmlspecialchars($data_fk_ID_value);
+                        echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars($data_fk_ID_value) . '</div>';
                     }
 
                 } else {
@@ -1029,7 +1033,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                                 $value = number_format((float)$value, 2, '.', '');
                             }
                         }
-                        echo '<div style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars($value) . '</div>';
+                        echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars($value) . '</div>';
                     }
                 }
                 echo '</td>';
