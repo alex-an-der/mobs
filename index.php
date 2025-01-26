@@ -140,7 +140,15 @@ $tabelle_upper = strtoupper($tabelle)
             background-position: center;
             background-repeat: no-repeat;
         }
- 
+        .btn-group-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .btn-group-container .btn {
+            flex: 1;
+            margin: 5px;
+        }
 
     </style>
 
@@ -1076,33 +1084,34 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
         // Wenn keine Schreibrechte, dann auch keinen Import 
         if(!$readwrite) $importErlaubt = false;
         ?>
-        <button id='clearFilterButton' class='btn btn-info mb-2' onclick='clearFilter()'>Filter löschen</button>
-        <button id="resetButton" class="btn btn-info mb-2" onclick="resetPage()">Daten neu laden</button>
+        <div class="btn-group-container">
+            <button id='clearFilterButton' class='btn btn-info mb-2' onclick='clearFilter()'>Filter löschen</button>
+            <button id="resetButton" class="btn btn-info mb-2" onclick="resetPage()">Daten neu laden</button>
 
-        <!--?php if ($readwrite  || hatUserBerechtigungen()):?-->
-        <?php if ($readwrite && $importErlaubt):?>
-            <button id="insertDefaultButton" class="btn btn-success mb-2">Datensatz einfügen</button>
-            <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte löschen</button>
-        <?php endif; ?>  
+            <!--?php if ($readwrite  || hatUserBerechtigungen()):?-->
+            <?php if ($readwrite && $importErlaubt):?>
+                <button id="insertDefaultButton" class="btn btn-success mb-2">Datensatz einfügen</button>
+                <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte löschen</button>
+            <?php endif; ?>  
 
-        <button id="check-duplicates" class="btn btn-success mb-2">Dubletten suchen</button>
-        <div class="btn-group mb-2">
-            <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Exportieren
-            </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item" href="#" onclick="exportData('pdf')">Als PDF</a>
-                <a class="dropdown-item" href="#" onclick="exportData('csv')">Als CSV</a>
-                <a class="dropdown-item" href="#" onclick="exportData('excel', 'Xlsx')">Als Excel</a>
-                <a class="dropdown-item" href="#" onclick="exportData('excel', 'Ods')">Als LibreOffice</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="statistik.php">Statistiken</a>
+            <button id="check-duplicates" class="btn btn-success mb-2">Dubletten suchen</button>
+            <?php if ($importErlaubt && $readwrite):?>
+                <a href="importeur.php?tab=<?= $selectedTableID ?>" class="btn btn-info mb-2">Daten importieren</a>
+            <?php endif; ?> 
+            <div class="btn-group mb-2">
+                <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Exportieren
+                </button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#" onclick="exportData('pdf')">Als PDF</a>
+                    <a class="dropdown-item" href="#" onclick="exportData('csv')">Als CSV</a>
+                    <a class="dropdown-item" href="#" onclick="exportData('excel', 'Xlsx')">Als Excel</a>
+                    <a class="dropdown-item" href="#" onclick="exportData('excel', 'Ods')">Als LibreOffice</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="statistik.php">Statistiken</a>
+                </div>
             </div>
         </div>
-        <?php if ($importErlaubt && $readwrite):?>
-            <a href="importeur.php?tab=<?= $selectedTableID ?>" class="btn btn-info mb-2">Daten importieren</a>
-        <?php endif; ?> 
-   
     <?php endif; ?>
 
     </div>
