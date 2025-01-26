@@ -207,7 +207,7 @@ $tabelle_upper = strtoupper($tabelle)
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     try {
-                        const response = JSON.parse(xhr.responseText); $stmt->rowCount()
+                        const response = JSON.parse(xhr.responseText);
                         if (response.status === "success" && response.row) {
                             updateRowColors(response.row, id, field);
                         }
@@ -224,7 +224,7 @@ $tabelle_upper = strtoupper($tabelle)
             const row = document.querySelector(`tr[data-id='${id}']`);
             if (row) {
                 const td = row.querySelector(`td[data-field='${field}']`);
-                if (td) {
+                if (td) { 
                     const input = td.querySelector('input');
                     const select = td.querySelector('select');
 
@@ -319,7 +319,6 @@ $tabelle_upper = strtoupper($tabelle)
         function filterRowsById(desiredIds) {
             const table = document.querySelector('table'); // Passe den Selektor bei Bedarf an
             const rows = table.querySelectorAll('tr[data-id]');
-            2
             rows.forEach(row => {
                 const id = parseInt(row.getAttribute('data-id'), 10); // 10 steht für das Dezimalsystem
                 if (desiredIds.includes(id)) {
