@@ -1096,15 +1096,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
         <div class="btn-group-container">
             <button id='clearFilterButton' class='btn btn-info mb-2' onclick='clearFilter()'>Filter löschen</button>
             <button id="resetButton" class="btn btn-info mb-2" onclick="resetPage()">Daten neu laden</button>
-        <div class="btn-group-container">
-            <button id='clearFilterButton' class='btn btn-info mb-2' onclick='clearFilter()'>Filter löschen</button>
-            <button id="resetButton" class="btn btn-info mb-2" onclick="resetPage()">Daten neu laden</button>
 
-            <!--?php if ($readwrite  || hatUserBerechtigungen()):?-->
-            <?php if ($readwrite && $importErlaubt):?>
-                <button id="insertDefaultButton" class="btn btn-success mb-2">Datensatz einfügen</button>
-                <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte löschen</button>
-            <?php endif; ?>  
             <!--?php if ($readwrite  || hatUserBerechtigungen()):?-->
             <?php if ($readwrite && $importErlaubt):?>
                 <button id="insertDefaultButton" class="btn btn-success mb-2">Datensatz einfügen</button>
