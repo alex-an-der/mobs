@@ -149,14 +149,17 @@ $tabelle_upper = strtoupper($tabelle)
             flex: 1;
             margin: 5px;
         }
-        .btn-group-container {
+        .checkbox-container {
             display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
         }
-        .btn-group-container .btn {
-            flex: 1;
-            margin: 5px;
+        .form-check-input {
+            width: 1.5rem;
+            height: 1.5rem;
+            margin: 0;
+            padding: 0;
         }
 
     </style>
@@ -549,41 +552,21 @@ $tabelle_upper = strtoupper($tabelle)
         }
 
         function toggleSelectAll(source) {
-            const buttons = document.querySelectorAll('.toggle-btn');
-            const rows = document.querySelectorAll('table tbody tr');
-            rows.forEach(row => {
-                if (row.style.display !== 'none') {
-                    const button = row.querySelector('.toggle-btn');
-                    if (source.classList.contains('btn-outline-secondary')) {
-                        button.classList.add('btn-light');
-                        button.classList.remove('btn-outline-light');
-                    } else {
-                        button.classList.remove('btn-light');
-                        button.classList.add('btn-outline-light');
-                    }
-                }
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = source.checked;
             });
-            source.classList.toggle('btn-outline-secondary');
-            source.classList.toggle('btn-secondary');
         }
 
-        function toggleRowSelection(button) {
-            if (button.classList.contains('btn-outline-light')) {
-                button.classList.add('btn-light');
-                button.classList.remove('btn-outline-light');
-                button.innerText = 'X' // Selektierte
-            } else {
-                button.classList.remove('btn-light');
-                button.classList.add('btn-outline-light');
-                button.innerText = 'X'
-            }
+        function toggleRowSelection(checkbox) {
+            // Funktionalität kann hier erweitert werden, falls nötig
         }
 
         function deleteSelectedRows(tabelle) {
             const deleteButton = document.getElementById('deleteSelectedButton');
             const originalText = deleteButton.innerHTML;
 
-            const selectedIds = Array.from(document.querySelectorAll('.toggle-btn.btn-light')).map(btn => btn.getAttribute('data-id'));
+            const selectedIds = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => cb.getAttribute('data-id'));
             if (selectedIds.length === 0) {
                 alert('Keine Zeilen ausgewählt.');
                 return;
@@ -964,7 +947,7 @@ function renderTableHeaders($data) {
     
     if (!empty($data)) {
         if($readwrite)
-            echo "<th style='width: 60px'><button type='button' class='btn p-0 b-0 btn-outline-secondary btn-sm toggle-btn toggle-btn-header' id='selectAll' onclick='toggleSelectAll(this)'>X</button></th>"; // Toggle button for selecting all rows
+            echo "<th style='width: 60px'><div class='checkbox-container'><input type='checkbox' class='form-check-input' onclick='toggleSelectAll(this)'></div></th>"; // Checkbox for selecting all rows
         foreach (array_keys($data[0]) as $header) {
             $style = "";
             if(isset($anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header])) {
@@ -998,7 +981,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
     foreach ($data as $row) {
         echo '<tr data-id="' . $row['id'] . '">';
         if($readwrite)
-            echo '<td><button type="button" class="btn btn-outline-light btn-sm toggle-btn" data-id="' . $row['id'] . '" onclick="toggleRowSelection(this)">X</button></td>';
+            echo '<td><div class="checkbox-container"><input type="checkbox" class="form-check-input row-checkbox" data-id="' . $row['id'] . '" onclick="toggleRowSelection(this)"></div></td>';
         
         foreach ($row as $key => $value) {
             if ($value === null) {
