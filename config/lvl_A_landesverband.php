@@ -16,8 +16,9 @@ $anzuzeigendeDaten[] = array(
     "writeaccess" => true,
     "query" => "select id, Verband, Kurzname, Internetadresse from b_regionalverband order by id desc;",
     "spaltenbreiten" => array(
-        "Name"              => "350",
-        "Kurzname"          => "250",
+        "Name"              => "400",
+        "Kurzname"          => "200",
+        "Internetadresse"   => "400"
     )
 );
 

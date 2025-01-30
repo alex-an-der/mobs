@@ -36,7 +36,31 @@ $anzuzeigendeDaten[] = array(
     )
 );
 
+# BSG im Regionalverband
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_bsg",
+    "auswahltext" => "BSG im Regionalverband",
+    "writeaccess" => true,
+    "query" => "SELECT 
+        id, Verband, BSG 
+        from b_bsg as b
+        WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0  or Verband IS NULL
+        order by id desc;
+    ",
+    "referenzqueries" => array(
+        "Verband" => "SELECT v.id, v.Verband as anzeige
+        from b_regionalverband as v
+        WHERE FIND_IN_SET(v.id, berechtigte_elemente($uid, 'verband')) > 0
+        ORDER BY anzeige;
+        "
+    ),
+    "spaltenbreiten" => array(
+        "Verband"                       => "380",
+        "BSG"                           => "320"
+    ) 
+);
 
+/*
 # BSG im Regionalverband
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_bsg",
@@ -55,7 +79,7 @@ $anzuzeigendeDaten[] = array(
         RE_PLZ_Ort
         FROM b_bsg as b
         WHERE (
-            FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0 AND
+            FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0 OR
             FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0 )
         or Verband IS NULL
         order by id desc;
@@ -83,7 +107,7 @@ $anzuzeigendeDaten[] = array(
         "RE_Strasse2"                   => "200",  
         "RE_PLZ_Ort"                    => "200"
     ) 
-);
+);*/
 
 
 # BSG-Rechte - Wer darf die Mitglieder welcher BSG editieren? 
