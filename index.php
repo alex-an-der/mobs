@@ -364,7 +364,7 @@ $tabelle_upper = strtoupper($tabelle)
                 let bText = bCell.innerText.trim();
 
                 const aInput = aCell.querySelector('input, select');
-                const bInput = bCell.querySelector('input, select');
+                const bInput = b.querySelector('input, select');
 
                 if (aInput) {
                     if (aInput.tagName.toLowerCase() === 'select') {
@@ -693,6 +693,21 @@ $tabelle_upper = strtoupper($tabelle)
             }
         }
 
+        function setButtonHeights() {
+            const referenceButton = document.getElementById('check-duplicates');
+            if (referenceButton) {
+                const height = referenceButton.offsetHeight + 'px';
+                const buttons = document.querySelectorAll('.btn-group-container .btn, .btn-group-container .btn-group .btn');
+                buttons.forEach(button => {
+                    button.style.height = height;
+                });
+                const exportButton = document.querySelector('.btn-group .btn.dropdown-toggle');
+                if (exportButton) {
+                    exportButton.style.height = (referenceButton.offsetHeight - 1) + 'px';
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             // Warte kurz bis Layout stabil ist
             setTimeout(adjustContainer, 100);
@@ -726,6 +741,9 @@ $tabelle_upper = strtoupper($tabelle)
             
             // Container bei Größenänderung anpassen
             window.addEventListener('resize', adjustContainer);
+
+            // Set button heights
+            setButtonHeights();
         });
 
         function exportData(format, spreadsheetFormat) {
@@ -1093,31 +1111,33 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
         // Wenn keine Schreibrechte, dann auch keinen Import 
         if(!$readwrite) $importErlaubt = false;
         ?>
-        <div class="btn-group-container">
-            <button id='clearFilterButton' class='btn btn-info mb-2' onclick='clearFilter()'>Filter löschen</button>
-            <button id="resetButton" class="btn btn-info mb-2" onclick="resetPage()">Daten neu laden</button>
+        <div class="row">
+            <div class="btn-group-container">
+                <button id='clearFilterButton' class='btn btn-info' onclick='clearFilter()'>Filter löschen</button>
+                <button id="resetButton" class="btn btn-info" onclick="resetPage()">Aktualisieren</button>
 
-            <!--?php if ($readwrite  || hatUserBerechtigungen()):?-->
-            <?php if ($readwrite && $importErlaubt):?>
-                <button id="insertDefaultButton" class="btn btn-success mb-2">Datensatz einfügen</button>
-                <button id="deleteSelectedButton" class="btn btn-danger mb-2">Ausgewählte löschen</button>
-            <?php endif; ?>  
+                <!--?php if ($readwrite  || hatUserBerechtigungen()):?-->
+                <?php if ($readwrite && $importErlaubt):?>
+                    <button id="insertDefaultButton" class="btn btn-success">Datensatz einfügen</button>
+                    <button id="deleteSelectedButton" class="btn btn-danger">Ausgewählte löschen</button>
+                <?php endif; ?>  
 
-            <button id="check-duplicates" class="btn btn-info mb-2">Dubletten suchen</button>
-            <?php if ($importErlaubt && $readwrite):?>
-                <a href="importeur.php?tab=<?= $selectedTableID ?>" class="btn btn-info mb-2">Daten importieren</a>
-            <?php endif; ?> 
-            <div class="btn-group mb-2">
-                <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Exportieren
-                </button>
-                <div class="dropdown-menu">
-                    <a class="dropdown-item" href="#" onclick="exportData('pdf')">Als PDF</a>
-                    <a class="dropdown-item" href="#" onclick="exportData('csv')">Als CSV</a>
-                    <a class="dropdown-item" href="#" onclick="exportData('excel', 'Xlsx')">Als Excel</a>
-                    <a class="dropdown-item" href="#" onclick="exportData('excel', 'Ods')">Als LibreOffice</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="statistik.php">Statistiken</a>
+                <button id="check-duplicates" class="btn btn-info">Dubletten suchen</button>
+                <?php if ($importErlaubt && $readwrite):?>
+                    <a href="importeur.php?tab=<?= $selectedTableID ?>" class="btn btn-info">Daten importieren</a>
+                <?php endif; ?> 
+                <div class="btn-group mb-2">
+                    <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Exportieren
+                    </button>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="#" onclick="exportData('pdf')">Als PDF</a>
+                        <a class="dropdown-item" href="#" onclick="exportData('csv')">Als CSV</a>
+                        <a class="dropdown-item" href="#" onclick="exportData('excel', 'Xlsx')">Als Excel</a>
+                        <a class="dropdown-item" href="#" onclick="exportData('excel', 'Ods')">Als LibreOffice</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="statistik.php">Statistiken</a>
+                    </div>
                 </div>
             </div>
         </div>
