@@ -60,16 +60,16 @@ $anzuzeigendeDaten[] = array(
     ) 
 );
 
-/*
+
 # BSG im Regionalverband
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_bsg",
-    "auswahltext" => "BSG im Regionalverband",
-    "writeaccess" => true,
+    "auswahltext" => "BSG: Ansprechpartner und Rechnungsdaten",
+    "import" => false,
+    "writeaccess" => false,
     "hinweis" => "<b>RE </b> = Rechnungsempfänger. In diese Spalten bitte eintragen, wohin eventuelle Rechnungen geschickt werden sollen.",
     "query" => "SELECT 
         b.id as id,
-        b.Verband as Verband,
         b.BSG as BSG,
         Ansprechpartner,
         RE_Name,
@@ -78,23 +78,15 @@ $anzuzeigendeDaten[] = array(
         RE_Strasse2,
         RE_PLZ_Ort
         FROM b_bsg as b
-        WHERE (
-            FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0 OR
-            FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0 )
-        or Verband IS NULL
+        WHERE 
+            FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0 
         order by id desc;
     ",
     "referenzqueries" => array(
-        "Verband" => "SELECT v.id, v.Verband as anzeige
-        from b_regionalverband as v
-        WHERE FIND_IN_SET(v.id, berechtigte_elemente($uid, 'verband')) > 0
-        ORDER BY anzeige;
-        ",
         "Ansprechpartner" => "SELECT m.id, CONCAT(Nachname, ', ', Vorname) as anzeige 
                                 from b_mitglieder as m
                                 join b_bsg as b on b.id=m.BSG
-                                
-                                WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'mitglied')) > 0
+                                -- WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'mitglied')) > 0
                                 order by anzeige;"
     ),
     "spaltenbreiten" => array(
@@ -107,14 +99,14 @@ $anzuzeigendeDaten[] = array(
         "RE_Strasse2"                   => "200",  
         "RE_PLZ_Ort"                    => "200"
     ) 
-);*/
+);
 
 
 # BSG-Rechte - Wer darf die Mitglieder welcher BSG editieren? 
 # Ich sehe nur BSG von Verbänden, zu deren Ansicht ich berechtigt bin
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_bsg_rechte",
-    "auswahltext" => "Rechteverwaltung: BSG",
+    "auswahltext" => "BSG: Rechteverwaltung",
     "hinweis" => "Berechtigt angemeldete Nutzer, Mitglieder einer BSG zu sehen und zu bearbeiten.",
     "writeaccess" => true,
     "query" => "SELECT br.id as id, br.BSG, br.Nutzer

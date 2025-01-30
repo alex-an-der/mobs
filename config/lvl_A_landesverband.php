@@ -25,7 +25,7 @@ $anzuzeigendeDaten[] = array(
 # Alle Verbände werden angezeigt
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_regionalverband_rechte",
-    "auswahltext" => "Rechteverwaltung: Regionalverbände",
+    "auswahltext" => "Regionalverbände: Rechteverwaltung",
     "writeaccess" => true,
     "hinweis" => "Berechtigt angemeldete Nutzer, Sparten und BSG eines Verbandes zu sehen und zu bearbeiten.",
     "query" => "SELECT r.id as id, r.Verband as Verband, r.Nutzer
