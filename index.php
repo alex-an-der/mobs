@@ -578,7 +578,31 @@ $tabelle_upper = strtoupper($tabelle)
                 return;
             }
 
-            const confirmation = confirm('Sind Sie sicher, dass Sie die ausgewählten Daten löschen möchten?');
+            // Collect data to display in confirmation dialog
+            const selectedData = selectedIds.map(id => {
+                const row = document.querySelector(`tr[data-id='${id}']`);
+                if (row) {
+                    const cells = Array.from(row.querySelectorAll('td')).slice(1).map(td => { // Exclude the first column (checkbox)
+                        const input = td.querySelector('input');
+                        const select = td.querySelector('select');
+                        if (input) {
+                            return input.value.trim();
+                        } else if (select) {
+                            return select.options[select.selectedIndex].text.trim();
+                        } else {
+                            return td.innerText.trim();
+                        }
+                    });
+                    return cells.join(' | ');
+                }
+                return '';
+            });
+
+            const displayData = selectedData.slice(0, 5).join('\n');
+            const additionalCount = selectedData.length > 5 ? `\n...und ${selectedData.length - 5} weitere` : '';
+            const confirmationMessage = `Wollen Sie diese ${selectedData.length} Datensätze löschen?\n\n${displayData}${additionalCount}`;
+
+            const confirmation = confirm(confirmationMessage);
             if (!confirmation) return;
 
             // Show spinner and disable button
