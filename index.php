@@ -161,6 +161,12 @@ $tabelle_upper = strtoupper($tabelle)
             margin: 0;
             padding: 0;
         }
+        .checkbox-header-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
 
     </style>
 
@@ -947,7 +953,7 @@ function renderTableHeaders($data) {
     
     if (!empty($data)) {
         if($readwrite)
-            echo "<th style='width: 60px'><div class='checkbox-container'><input type='checkbox' class='form-check-input' onclick='toggleSelectAll(this)'></div></th>"; // Checkbox for selecting all rows
+            echo "<th style='width: 60px'><div class='checkbox-header-container p-2'><input type='checkbox' class='form-check-input' onclick='toggleSelectAll(this)'></div></th>"; // Checkbox for selecting all rows
         foreach (array_keys($data[0]) as $header) {
             $style = "";
             if(isset($anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header])) {
