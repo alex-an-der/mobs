@@ -103,18 +103,17 @@ $anzuzeigendeDaten[] = array(
     "writeaccess" => true,
     "query" => "SELECT id,  Mitglied, BSG, Sparte 
                     from b_mitglieder_in_sparten as mis
-                    WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente(33, 'individuelle_mitglieder')) > 0 or Sparte is null
+                    WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 or Sparte is null
                     order by mis.id desc;
     ",
     "referenzqueries" => array(
-        "Mitglied" => "SELECT m.id as id, concat(m.Vorname,' ', m.Nachname, ' (Stamm: ', b.BSG,')') as anzeige
+        "Mitglied" => "SELECT m.id as id, concat(m.Vorname,' ', m.Nachname, ' (Stamm: ', b.BSG,')') as anzeige 
                         from b_mitglieder as m
-                        join b_bsg as b on b.id = m.BSG
-                        WHERE
-                            FIND_IN_SET(m.id, berechtigte_elemente($uid, 'mitglied')) > 0 AND
-                            FIND_IN_SET(m.BSG, berechtigte_elemente($uid, 'BSG')) > 0
+                        join b_bsg as b on m.BSG = b.id 
+                        WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 
+                        AND m.BSG is not null
                         ORDER BY anzeige;
-        ",
+        ", // BSG is not null => Erst die Stamm BSG, dann die Sparten
         "BSG" => "SELECT b.id as id, concat(b.BSG,' (',v.Kurzname,')') as anzeige
                     from b_bsg as b
                     join b_regionalverband as v on v.id = b.Verband
