@@ -1,22 +1,12 @@
 <?php
-ob_start();  // Ausgabe-Pufferung starten vor allen includes
+ob_start();
 require_once(__DIR__ . "/mods/all.head.php");
 require_once(__DIR__ . "/mods/ajax.head.php");
 require_once(__DIR__ . "/inc/include.php");
-ob_clean();  // Löschen aller bisherigen Ausgaben
-
-// Debug-Logging
-error_log('Request received: ' . print_r($_POST, true));
-error_log('Raw input: ' . file_get_contents('php://input'));
+ob_clean();
 
 $data = json_decode(file_get_contents('php://input'), true);
 $action = $data['action'] ?? '';
-
-// Debug-Logging
-error_log('Action: ' . $action);
-error_log('Decoded data: ' . print_r($data, true));
-
-// Get selectedTableID from the request data
 $selectedTableID = isset($_GET['tab']) ? $_GET['tab'] : "";
 
 switch($action) {
@@ -164,12 +154,8 @@ switch($action) {
         break;
 
     case 'get_table_structure':
-        error_log('Getting structure for table: ' . $data['tabelle']);
-        
         $tabelle = $data['tabelle'];
         $columns = $db->query("SHOW COLUMNS FROM $tabelle");
-        
-        error_log('Columns found: ' . print_r($columns, true));
         
         // Get foreign key data
         $foreignKeys = array();
@@ -182,17 +168,11 @@ switch($action) {
             }
         }
         
-        error_log('Foreign keys found: ' . print_r($foreignKeys, true));
-        
-        $response = [
+        echo json_encode([
             'status' => 'success',
             'columns' => $columns['data'],
             'foreignKeys' => $foreignKeys
-        ];
-        
-        error_log('Sending response: ' . print_r($response, true));
-        ob_end_clean();
-        echo json_encode($response);
+        ]);
         break;
 
     case 'insert_record':

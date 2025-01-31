@@ -519,27 +519,21 @@ $tabelle_upper = strtoupper($tabelle)
         }
 
         function insertDefaultRecord(tabelle) {
-            console.log('Starting insertDefaultRecord for table:', tabelle);
-            
             const xhr = new XMLHttpRequest();
-            xhr.open("POST", "ajax.php?tab=<?=$selectedTableID?>", true); // Add selectedTableID to URL
+            xhr.open("POST", "ajax.php?tab=<?=$selectedTableID?>", true);
             xhr.setRequestHeader("Content-Type", "application/json");
 
             const data = {
                 action: 'get_table_structure',
                 tabelle: tabelle,
-                selectedTableID: '<?=$selectedTableID?>' // Add selectedTableID to request data
+                selectedTableID: '<?=$selectedTableID?>'
             };
-
-            console.log('Sending request:', data);
 
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
-                    console.log('Response received:', xhr.responseText);
                     if (xhr.status === 200) {
                         try {
                             const response = JSON.parse(xhr.responseText);
-                            console.log('Parsed response:', response);
                             if (response.status === "success") {
                                 populateInsertModal(response.columns, response.foreignKeys);
                                 $('#insertModal').modal('show');
@@ -547,11 +541,9 @@ $tabelle_upper = strtoupper($tabelle)
                                 alert("Fehler beim Laden der Tabellenstruktur.");
                             }
                         } catch (e) {
-                            console.error('Parse error:', e);
                             alert("Fehler beim Verarbeiten der Serverantwort.");
                         }
                     } else {
-                        console.error('HTTP error:', xhr.status);
                         alert("Serverfehler beim Laden der Tabellenstruktur.");
                     }
                 }
