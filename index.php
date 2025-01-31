@@ -1221,7 +1221,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
         ?>
         <div class="row">
             <div class="btn-group-container">
-                <button id="resetButton" class="btn btn-info" onclick="resetPage()">Aktualisieren</button>
+                <button id="resetButton" class="btn btn-success" onclick="resetPage()">Aktualisieren</button>
                 <button id='clearFilterButton' class='btn btn-info' onclick='clearFilter()'>Filter löschen</button>
                 <!--?php if ($readwrite  || hatUserBerechtigungen()):?-->
                 <?php if ($readwrite && $importErlaubt):?>

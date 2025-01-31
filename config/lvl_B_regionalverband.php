@@ -112,12 +112,12 @@ $anzuzeigendeDaten[] = array(
     "query" => "SELECT br.id as id, br.BSG, br.Nutzer
                 from b_bsg_rechte as br 
                 left join b_bsg as b on br.BSG = b.id
-                WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0 OR Nutzer IS NULL;
+                WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0 OR Nutzer IS NULL;
                 ",
     "referenzqueries" => array(
         "BSG" => "SELECT b.id as id, b.BSG as anzeige
                     FROM b_bsg as b
-                    WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0
+                    WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0
                     ORDER BY anzeige;",
         "Nutzer" => "SELECT id, mail as anzeige from y_user ORDER BY anzeige;"
     ),
