@@ -556,53 +556,62 @@ $tabelle_upper = strtoupper($tabelle)
             const form = document.getElementById('insertForm');
             form.innerHTML = '';
 
-            columns.forEach(column => {
-                if (column.Field !== 'id') {
-                    const div = document.createElement('div');
-                    div.className = 'form-group';
+            // Hole die Reihenfolge der Spalten aus der Tabelle
+            const headers = Array.from(document.querySelectorAll('table thead th'))
+                .map(th => th.getAttribute('data-field'))
+                .filter(field => field); // Entferne null/undefined (Checkbox-Spalte)
+
+            // Erstelle Map der Spalten für schnellen Zugriff
+            const columnMap = new Map(columns.map(col => [col.Field, col]));
+
+            // Erstelle Formularfelder in der Reihenfolge der Tabelle
+            headers.forEach(fieldName => {
+                const column = columnMap.get(fieldName);
+                if (!column || column.Field === 'id') return;
+
+                const div = document.createElement('div');
+                div.className = 'form-group';
+                
+                const label = document.createElement('label');
+                label.textContent = column.Field;
+                div.appendChild(label);
+
+                if (foreignKeys && foreignKeys[column.Field]) {
+                    // Create select for foreign keys
+                    const select = document.createElement('select');
+                    select.className = 'form-control';
+                    select.name = column.Field;
                     
-                    const label = document.createElement('label');
-                    label.textContent = column.Field;
-                    div.appendChild(label);
+                    const nullOption = document.createElement('option');
+                    nullOption.value = "NULL";
+                    nullOption.textContent = "<?=NULL_WERT?>";
+                    select.appendChild(nullOption);
 
-                    if (foreignKeys && foreignKeys[column.Field]) {
-                        // Create select for foreign keys
-                        const select = document.createElement('select');
-                        select.className = 'form-control';
-                        select.name = column.Field;
-                        
-                        // NULL Option mit NULL_WERT Konstante
-                        const nullOption = document.createElement('option');
-                        nullOption.value = "NULL";
-                        nullOption.textContent = "<?=NULL_WERT?>";
-                        select.appendChild(nullOption);
+                    foreignKeys[column.Field].forEach(fk => {
+                        const option = document.createElement('option');
+                        option.value = fk.id;
+                        option.textContent = fk.anzeige;
+                        select.appendChild(option);
+                    });
 
-                        foreignKeys[column.Field].forEach(fk => {
-                            const option = document.createElement('option');
-                            option.value = fk.id;
-                            option.textContent = fk.anzeige;
-                            select.appendChild(option);
-                        });
-
-                        div.appendChild(select);
+                    div.appendChild(select);
+                } else {
+                    // Create input for normal fields
+                    const input = document.createElement('input');
+                    input.className = 'form-control';
+                    input.name = column.Field;
+                    input.placeholder = "<?=NULL_WERT?>";
+                    
+                    if (column.Type.includes('date')) {
+                        input.type = column.Type.includes('datetime') ? 'datetime-local' : 'date';
                     } else {
-                        // Create input for normal fields
-                        const input = document.createElement('input');
-                        input.className = 'form-control';
-                        input.name = column.Field;
-                        input.placeholder = "<?=NULL_WERT?>"; // Platzhalter für leere Felder
-                        
-                        if (column.Type.includes('date')) {
-                            input.type = column.Type.includes('datetime') ? 'datetime-local' : 'date';
-                        } else {
-                            input.type = 'text';
-                        }
-
-                        div.appendChild(input);
+                        input.type = 'text';
                     }
 
-                    form.appendChild(div);
+                    div.appendChild(input);
                 }
+
+                form.appendChild(div);
             });
         }
 
