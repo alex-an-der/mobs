@@ -767,43 +767,25 @@ $tabelle_upper = strtoupper($tabelle)
             const containerParent = container.parentElement;
             
             if (!table || !container || !containerParent) return;
-
-            // Bootstrap breakpoints
-            const containerMaxWidth = {
-                sm: 540,
-                md: 720,
-                lg: 960,
-                xl: 1140
-            };
             
-            // Aktuelle Viewport-Breite
-            const viewportWidth = window.innerWidth;
-            
-            // Temporär container für korrekte Messung
+            // Start with container
             containerParent.classList.remove('container-fluid');
             containerParent.classList.add('container');
+            container.style.overflowX = 'auto';
             
             // Force layout recalculation
             void containerParent.offsetWidth;
             
-            // Tatsächliche Tabellenbreite messen
-            const tableWidth = table.offsetWidth;
+            // Check if there's a horizontal scrollbar
+            const hasScrollbar = container.scrollWidth > container.clientWidth;
             
-            // Aktuelle effektive Container-Breite ermitteln
-            let currentMaxWidth = containerMaxWidth.xl;
-            if (viewportWidth < 1200) currentMaxWidth = containerMaxWidth.lg;
-            if (viewportWidth < 992) currentMaxWidth = containerMaxWidth.md;
-            if (viewportWidth < 768) currentMaxWidth = containerMaxWidth.sm;
-            
-            // Entscheidung: container oder container-fluid
-            if (tableWidth > currentMaxWidth - 30) {
+            // Switch to container-fluid if there's a scrollbar
+            if (hasScrollbar) {
                 containerParent.classList.remove('container');
                 containerParent.classList.add('container-fluid');
-                container.style.overflowX = 'auto';
             } else {
                 containerParent.classList.remove('container-fluid');
                 containerParent.classList.add('container');
-                container.style.overflowX = 'visible';
             }
         }
 
