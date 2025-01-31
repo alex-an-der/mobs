@@ -135,7 +135,6 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?=TITEL?></title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .textarea-container {
             display: flex;
@@ -336,7 +335,7 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
         }
 
         function showValidationResult(isValid, message) {
-            const resultDiv = document.getElementById('validationResult');
+            const resultDiv = document.getElementId('validationResult');
             const importButton = document.getElementById('importButton');
             const importHelpContent = document.getElementById('importHelpContent');
             
@@ -454,7 +453,7 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
         <div class="container mt-4">
             <!-- Table Select -->
             <form method="get" class="d-flex align-items-center">
-                <select name="tab" class="form-control mr-2" onchange="this.form.submit()">
+                <select name="tab" class="form-control me-2" onchange="this.form.submit()">
                     <?php foreach(renderTableSelectBox($db) as $option): ?>
                         <option value="<?= htmlspecialchars($option['value']) ?>" 
                                 <?= $option['selected'] ? 'selected' : '' ?>>
@@ -480,7 +479,7 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                     <!-- Import Rules -->
                     <div class="alert alert-warning" id="importHelp">
                         <p class="mb-0">
-                            <button class="btn btn-link p-0" type="button" data-toggle="collapse" data-target="#importHelpContent">
+                            <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#importHelpContent">
                                 Hilfe zum Import anzeigen/ausblenden
                             </button>
                         </p>

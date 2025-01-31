@@ -35,9 +35,9 @@ $values = !empty($data) ? array_column($data, array_keys($data[0])[1]) : [];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?=TITEL?> - Statistik</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <!-- Chart.js für die Diagramme -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script>
         function goBack() {
             window.location.href = 'index.php';
@@ -63,7 +63,7 @@ $values = !empty($data) ? array_column($data, array_keys($data[0])[1]) : [];
     <div class="container mt-4">
         <!-- Zurück-Button wie im Importeur -->
         <form method="get" class="d-flex align-items-center mb-4">
-            <select name="stat" class="form-control mr-2" onchange="this.form.submit()">
+            <select name="stat" class="form-control me-2" onchange="this.form.submit()">
                 <?php foreach ($statistik as $index => $stat): ?>
                     <option value="<?= $index ?>" <?= $selectedStat == $index ? 'selected' : '' ?>>
                         <?= htmlspecialchars($stat['titel']) ?>
@@ -77,7 +77,7 @@ $values = !empty($data) ? array_column($data, array_keys($data[0])[1]) : [];
         <div class="card">
             <div class="card-body">
                 <!-- Export Button -->
-                <div class="text-right mb-3">
+                <div class="text-end mb-3">
                     <button class="btn btn-info" onclick="exportStatistik()">Als PDF exportieren</button>
                 </div>
                 <!-- Remove the duplicate title below -->
