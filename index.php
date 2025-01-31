@@ -535,8 +535,14 @@ $tabelle_upper = strtoupper($tabelle)
                         try {
                             const response = JSON.parse(xhr.responseText);
                             if (response.status === "success") {
-                                populateInsertModal(response.columns, response.foreignKeys);
-                                $('#insertModal').modal('show');
+                                // Use DB columns if table is empty
+                                const columns = response.columns || response.dbColumns;
+                                if (columns) {
+                                    populateInsertModal(columns, response.foreignKeys);
+                                    $('#insertModal').modal('show');
+                                } else {
+                                    alert("Fehler: Keine Spalteninformationen verfügbar.");
+                                }
                             } else {
                                 alert("Fehler beim Laden der Tabellenstruktur.");
                             }
@@ -556,38 +562,45 @@ $tabelle_upper = strtoupper($tabelle)
             const form = document.getElementById('insertForm');
             form.innerHTML = '';
 
-            // Hole die Reihenfolge der Spalten aus der Tabelle
-            const headers = Array.from(document.querySelectorAll('table thead th'))
+            // If we have table headers, use them for order
+            let headers = Array.from(document.querySelectorAll('table thead th'))
                 .map(th => th.getAttribute('data-field'))
-                .filter(field => field); // Entferne null/undefined (Checkbox-Spalte)
+                .filter(field => field); // Remove null/undefined
 
-            // Erstelle Map der Spalten für schnellen Zugriff
-            const columnMap = new Map(columns.map(col => [col.Field, col]));
+            // If table is empty, create order from columns
+            if (headers.length === 0) {
+                headers = columns.map(col => col.Field || col);
+            }
 
-            // Erstelle Formularfelder in der Reihenfolge der Tabelle
+            // Create Map for column types
+            const columnMap = new Map(columns.map(col => [col.Field || col, col]));
+
+            // Create form fields in the order of headers
             headers.forEach(fieldName => {
+                if (fieldName === 'id') return;
+
                 const column = columnMap.get(fieldName);
-                if (!column || column.Field === 'id') return;
+                if (!column) return;
 
                 const div = document.createElement('div');
                 div.className = 'form-group';
                 
                 const label = document.createElement('label');
-                label.textContent = column.Field;
+                label.textContent = fieldName;
                 div.appendChild(label);
 
-                if (foreignKeys && foreignKeys[column.Field]) {
+                if (foreignKeys && foreignKeys[fieldName]) {
                     // Create select for foreign keys
                     const select = document.createElement('select');
                     select.className = 'form-control';
-                    select.name = column.Field;
+                    select.name = fieldName;
                     
                     const nullOption = document.createElement('option');
                     nullOption.value = "NULL";
                     nullOption.textContent = "<?=NULL_WERT?>";
                     select.appendChild(nullOption);
 
-                    foreignKeys[column.Field].forEach(fk => {
+                    foreignKeys[fieldName].forEach(fk => {
                         const option = document.createElement('option');
                         option.value = fk.id;
                         option.textContent = fk.anzeige;
@@ -599,11 +612,12 @@ $tabelle_upper = strtoupper($tabelle)
                     // Create input for normal fields
                     const input = document.createElement('input');
                     input.className = 'form-control';
-                    input.name = column.Field;
+                    input.name = fieldName;
                     input.placeholder = "<?=NULL_WERT?>";
                     
-                    if (column.Type.includes('date')) {
-                        input.type = column.Type.includes('datetime') ? 'datetime-local' : 'date';
+                    const columnType = column.Type || 'text';
+                    if (columnType.includes('date')) {
+                        input.type = columnType.includes('datetime') ? 'datetime-local' : 'date';
                     } else {
                         input.type = 'text';
                     }
