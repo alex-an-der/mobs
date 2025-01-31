@@ -81,6 +81,9 @@ $tabelle_upper = strtoupper($tabelle)
     ?>
 
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <style>
         .form-control.border-0 {
@@ -516,20 +519,113 @@ $tabelle_upper = strtoupper($tabelle)
         }
 
         function insertDefaultRecord(tabelle) {
-            const insertButton = document.getElementById('insertDefaultButton');
-            const originalText = insertButton.innerHTML;
+            console.log('Starting insertDefaultRecord for table:', tabelle);
+            
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "ajax.php?tab=<?=$selectedTableID?>", true); // Add selectedTableID to URL
+            xhr.setRequestHeader("Content-Type", "application/json");
 
-            // Show spinner and disable button
-            insertButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Füge ein...';
-            insertButton.disabled = true;
+            const data = {
+                action: 'get_table_structure',
+                tabelle: tabelle,
+                selectedTableID: '<?=$selectedTableID?>' // Add selectedTableID to request data
+            };
+
+            console.log('Sending request:', data);
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    console.log('Response received:', xhr.responseText);
+                    if (xhr.status === 200) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            console.log('Parsed response:', response);
+                            if (response.status === "success") {
+                                populateInsertModal(response.columns, response.foreignKeys);
+                                $('#insertModal').modal('show');
+                            } else {
+                                alert("Fehler beim Laden der Tabellenstruktur.");
+                            }
+                        } catch (e) {
+                            console.error('Parse error:', e);
+                            alert("Fehler beim Verarbeiten der Serverantwort.");
+                        }
+                    } else {
+                        console.error('HTTP error:', xhr.status);
+                        alert("Serverfehler beim Laden der Tabellenstruktur.");
+                    }
+                }
+            };
+
+            xhr.send(JSON.stringify(data));
+        }
+
+        function populateInsertModal(columns, foreignKeys) {
+            const form = document.getElementById('insertForm');
+            form.innerHTML = '';
+
+            columns.forEach(column => {
+                if (column.Field !== 'id') {
+                    const div = document.createElement('div');
+                    div.className = 'form-group';
+                    
+                    const label = document.createElement('label');
+                    label.textContent = column.Field;
+                    div.appendChild(label);
+
+                    if (foreignKeys && foreignKeys[column.Field]) {
+                        // Create select for foreign keys
+                        const select = document.createElement('select');
+                        select.className = 'form-control';
+                        select.name = column.Field;
+                        
+                        const nullOption = document.createElement('option');
+                        nullOption.value = "NULL";
+                        nullOption.textContent = "NULL";
+                        select.appendChild(nullOption);
+
+                        foreignKeys[column.Field].forEach(fk => {
+                            const option = document.createElement('option');
+                            option.value = fk.id;
+                            option.textContent = fk.anzeige;
+                            select.appendChild(option);
+                        });
+
+                        div.appendChild(select);
+                    } else {
+                        // Create input for normal fields
+                        const input = document.createElement('input');
+                        input.className = 'form-control';
+                        input.name = column.Field;
+                        
+                        if (column.Type.includes('date')) {
+                            input.type = column.Type.includes('datetime') ? 'datetime-local' : 'date';
+                        } else {
+                            input.type = 'text';
+                        }
+
+                        div.appendChild(input);
+                    }
+
+                    form.appendChild(div);
+                }
+            });
+        }
+
+        function saveNewRecord() {
+            const form = document.getElementById('insertForm');
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((value, key) => data[key] = value === "" ? null : value);
 
             const xhr = new XMLHttpRequest();
             xhr.open("POST", "ajax.php", true);
             xhr.setRequestHeader("Content-Type", "application/json");
 
-            const data = JSON.stringify({
-                action: 'insert_default',
-                tabelle: tabelle
+            const requestData = JSON.stringify({
+                action: 'insert_record',
+                tabelle: '<?=$tabelle?>',
+                data: data
             });
 
             xhr.onreadystatechange = function () {
@@ -537,24 +633,20 @@ $tabelle_upper = strtoupper($tabelle)
                     try {
                         const response = JSON.parse(xhr.responseText);
                         if (response.status === "success") {
-                            resetPage(); // Reload the page to see the new record
+                            $('#insertModal').modal('hide');
+                            resetPage();
                         } else {
-                            alert("Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!");
+                            alert("Fehler beim Speichern" + (response.message ? ": " + response.message : ""));
                         }
                     } catch (e) {
+                        console.error('Parse error:', e);
+                        console.log('Response text:', xhr.responseText);
                         alert("Fehler beim Verarbeiten der Serverantwort.");
                     }
-                } else if (xhr.readyState === 4 && xhr.status !== 200) {
-                    alert("Serverfehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!");
                 }
-
-                // Setze den Button zurück und aktiviere ihn wieder
-                // Automatisch nach reload.
-                //insertButton.innerHTML = originalText;
-                //insertButton.disabled = false;
             };
 
-            xhr.send(data);
+            xhr.send(requestData);
         }
 
         function toggleSelectAll(source) {
@@ -1171,6 +1263,29 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
         </table>
     </div>  
 
+</div>
+
+<!-- Insert Modal -->
+<div class="modal fade" id="insertModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Neuen Datensatz erstellen</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="insertForm">
+                    <!-- Felder werden dynamisch eingefügt -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
+                <button type="button" class="btn btn-primary" onclick="saveNewRecord()">Speichern</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 </body>

@@ -5,8 +5,19 @@ require_once(__DIR__ . "/mods/ajax.head.php");
 require_once(__DIR__ . "/inc/include.php");
 ob_clean();  // Löschen aller bisherigen Ausgaben
 
+// Debug-Logging
+error_log('Request received: ' . print_r($_POST, true));
+error_log('Raw input: ' . file_get_contents('php://input'));
+
 $data = json_decode(file_get_contents('php://input'), true);
 $action = $data['action'] ?? '';
+
+// Debug-Logging
+error_log('Action: ' . $action);
+error_log('Decoded data: ' . print_r($data, true));
+
+// Get selectedTableID from the request data
+$selectedTableID = isset($_GET['tab']) ? $_GET['tab'] : "";
 
 switch($action) {
     case 'update':
@@ -152,7 +163,77 @@ switch($action) {
         echo json_encode($response);
         break;
 
-   
+    case 'get_table_structure':
+        error_log('Getting structure for table: ' . $data['tabelle']);
+        
+        $tabelle = $data['tabelle'];
+        $columns = $db->query("SHOW COLUMNS FROM $tabelle");
+        
+        error_log('Columns found: ' . print_r($columns, true));
+        
+        // Get foreign key data
+        $foreignKeys = array();
+        if(isset($anzuzeigendeDaten[$selectedTableID]['referenzqueries'])) {
+            foreach($anzuzeigendeDaten[$selectedTableID]['referenzqueries'] as $field => $query) {
+                $result = $db->query($query);
+                if(isset($result['data'])) {
+                    $foreignKeys[$field] = $result['data'];
+                }
+            }
+        }
+        
+        error_log('Foreign keys found: ' . print_r($foreignKeys, true));
+        
+        $response = [
+            'status' => 'success',
+            'columns' => $columns['data'],
+            'foreignKeys' => $foreignKeys
+        ];
+        
+        error_log('Sending response: ' . print_r($response, true));
+        ob_end_clean();
+        echo json_encode($response);
+        break;
+
+    case 'insert_record':
+        $tabelle = $data['tabelle'];
+        $recordData = (array)$data['data'];
+        
+        $fields = array_keys($recordData);
+        $values = array_values($recordData);
+        
+        // Convert "NULL" strings to actual NULL
+        $values = array_map(function($val) {
+            return $val === "NULL" ? null : $val;
+        }, $values);
+        
+        $placeholders = array_fill(0, count($fields), '?');
+        
+        $sql = "INSERT INTO $tabelle (" . implode(',', $fields) . ") VALUES (" . implode(',', $placeholders) . ")";
+        
+        try {
+            $result = $db->query($sql, $values);
+            if (isset($result['error'])) {
+                ob_end_clean();
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => $result['error']
+                ]);
+            } else {
+                ob_end_clean();
+                echo json_encode([
+                    'status' => 'success'
+                ]);
+            }
+        } catch (Exception $e) {
+            $db->log("Insert error: " . $e->getMessage());
+            ob_end_clean();
+            echo json_encode([
+                'status' => 'error',
+                'message' => "Datenbankfehler: " . $e->getMessage()
+            ]);
+        }
+        break;
 
     case 'validate':
         $response = checkDaten($data, $db);
