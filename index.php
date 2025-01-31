@@ -1194,106 +1194,102 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
 
 ?>
 
-    <div class="container-fluid mt-4">
-    <!--h2><?=$tabelle_upper?><h2-->
-    <div class="container mt-4" >
-        <?php renderTableSelectBox($db); ?>
-    
-
-    <?php 
-    if(isset($anzuzeigendeDaten[$selectedTableID]['hinweis'])){
-        echo "<div class='alert alert-info'>";
-        echo $anzuzeigendeDaten[$selectedTableID]['hinweis'];
-        echo "</div>";
-    }?>
-    
-    <?php 
-    if($tabelle!=""){
-    //echo "<div class='container mt-2'>";
-    echo "    <p><input type='text' id='tableFilter' class='form-control' placeholder='Filtern entweder durch manuelle Eingabe oder Rechtsklick auf ein Datenfeld.'></p>";
-    //echo "</div>";
-    }
-    
-    ?>
-    <?php if ((!empty($tabelle) && $readwrite) || hatUserBerechtigungen()): 
-        $importErlaubt = true;
-
-        if (isset($anzuzeigendeDaten[$selectedTableID]['import']))
-            if ($anzuzeigendeDaten[$selectedTableID]['import'] === false)
-                $importErlaubt = false;
+    <div class="container mt-4">
+        <div class="container mt-4">
+            <?php renderTableSelectBox($db); ?>
         
-        // Wenn keine Schreibrechte, dann auch keinen Import 
-        if(!$readwrite) $importErlaubt = false;
-        ?>
-        <div class="row">
-            <div class="btn-group-container">
-                <button id="resetButton" class="btn btn-success" onclick="resetPage()">Aktualisieren</button>
-                <button id='clearFilterButton' class='btn btn-info' onclick='clearFilter()'>Filter löschen</button>
-                <!--?php if ($readwrite  || hatUserBerechtigungen()):?-->
-                <?php if ($readwrite && $importErlaubt):?>
-                    <button id="insertDefaultButton" class="btn btn-success">Datensatz einfügen</button>
-                    <button id="deleteSelectedButton" class="btn btn-danger">Ausgewählte löschen</button>
-                <?php endif; ?>  
 
-                <button id="check-duplicates" class="btn btn-info">Dubletten suchen</button>
-                <?php if ($importErlaubt && $readwrite):?>
-                    <a href="importeur.php?tab=<?= $selectedTableID ?>" class="btn btn-info">Daten importieren</a>
-                <?php endif; ?> 
-                <div class="btn-group mb-2">
-                    <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                        Exportieren
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#" onclick="exportData('pdf')">Als PDF</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="exportData('csv')">Als CSV</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="exportData('excel', 'Xlsx')">Als Excel</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="exportData('excel', 'Ods')">Als LibreOffice</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="statistik.php">Statistiken</a></li>
-                    </ul>
+            <?php 
+            if(isset($anzuzeigendeDaten[$selectedTableID]['hinweis'])){
+                echo "<div class='alert alert-info'>";
+                echo $anzuzeigendeDaten[$selectedTableID]['hinweis'];
+                echo "</div>";
+            }?>
+            
+            <?php 
+            if($tabelle!=""){
+                echo "<p><input type='text' id='tableFilter' class='form-control' placeholder='Filtern entweder durch manuelle Eingabe oder Rechtsklick auf ein Datenfeld.'></p>";
+            }
+            ?>
+            <?php if ((!empty($tabelle) && $readwrite) || hatUserBerechtigungen()): 
+                $importErlaubt = true;
+
+                if (isset($anzuzeigendeDaten[$selectedTableID]['import']))
+                    if ($anzuzeigendeDaten[$selectedTableID]['import'] === false)
+                        $importErlaubt = false;
+                
+                // Wenn keine Schreibrechte, dann auch keinen Import 
+                if(!$readwrite) $importErlaubt = false;
+                ?>
+                <div class="row">
+                    <div class="btn-group-container">
+                        <button id="resetButton" class="btn btn-success" onclick="resetPage()">Aktualisieren</button>
+                        <button id='clearFilterButton' class='btn btn-info' onclick='clearFilter()'>Filter löschen</button>
+                        <!--?php if ($readwrite  || hatUserBerechtigungen()):?-->
+                        <?php if ($readwrite && $importErlaubt):?>
+                            <button id="insertDefaultButton" class="btn btn-success">Datensatz einfügen</button>
+                            <button id="deleteSelectedButton" class="btn btn-danger">Ausgewählte löschen</button>
+                        <?php endif; ?>  
+
+                        <button id="check-duplicates" class="btn btn-info">Dubletten suchen</button>
+                        <?php if ($importErlaubt && $readwrite):?>
+                            <a href="importeur.php?tab=<?= $selectedTableID ?>" class="btn btn-info">Daten importieren</a>
+                        <?php endif; ?> 
+                        <div class="btn-group mb-2">
+                            <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                Exportieren
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="exportData('pdf')">Als PDF</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('csv')">Als CSV</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('excel', 'Xlsx')">Als Excel</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('excel', 'Ods')">Als LibreOffice</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="statistik.php">Statistiken</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+        </div>
+        <div class="container table-container">
+            <table class="table table-striped table-bordered">
+                <thead> 
+                    <tr>
+                        <?php renderTableHeaders($data); ?>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php 
+                    if (!empty($data)) renderTableRows($data, $readwrite, $tabelle, $FKdata);
+                ?>
+                </tbody>
+            </table>
+        </div>  
+
+    </div>
+
+    <!-- Insert Modal -->
+    <div class="modal fade" id="insertModal" tabindex="-1" aria-labelledby="insertModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="insertModalLabel">Neuen Datensatz erstellen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="insertForm">
+                        <!-- Felder werden dynamisch eingefügt -->
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                    <button type="button" class="btn btn-primary" onclick="saveNewRecord()">Speichern</button>
                 </div>
             </div>
         </div>
-    <?php endif; ?>
-
     </div>
-    <div class="container-fluid table-container">
-        <table class="table table-striped table-bordered">
-            <thead> 
-                <tr>
-                    <?php renderTableHeaders($data); ?>
-                </tr>
-            </thead>
-            <tbody>
-            <?php 
-                if (!empty($data)) renderTableRows($data, $readwrite, $tabelle, $FKdata);
-            ?>
-            </tbody>
-        </table>
-    </div>  
-
-</div>
-
-<!-- Insert Modal -->
-<div class="modal fade" id="insertModal" tabindex="-1" aria-labelledby="insertModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="insertModalLabel">Neuen Datensatz erstellen</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="insertForm">
-                    <!-- Felder werden dynamisch eingefügt -->
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
-                <button type="button" class="btn btn-primary" onclick="saveNewRecord()">Speichern</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 </body>
 </html>
