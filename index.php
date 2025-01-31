@@ -579,9 +579,10 @@ $tabelle_upper = strtoupper($tabelle)
                         select.className = 'form-control';
                         select.name = column.Field;
                         
+                        // NULL Option mit NULL_WERT Konstante
                         const nullOption = document.createElement('option');
                         nullOption.value = "NULL";
-                        nullOption.textContent = "NULL";
+                        nullOption.textContent = "<?=NULL_WERT?>";
                         select.appendChild(nullOption);
 
                         foreignKeys[column.Field].forEach(fk => {
@@ -597,6 +598,7 @@ $tabelle_upper = strtoupper($tabelle)
                         const input = document.createElement('input');
                         input.className = 'form-control';
                         input.name = column.Field;
+                        input.placeholder = "<?=NULL_WERT?>"; // Platzhalter für leere Felder
                         
                         if (column.Type.includes('date')) {
                             input.type = column.Type.includes('datetime') ? 'datetime-local' : 'date';
