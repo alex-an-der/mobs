@@ -1278,5 +1278,28 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
     </div>
 
     </body>
+    
+    <script>
+// Add tooltip on hover for table cells
+document.addEventListener('mouseover', function(e) {
+    var td = e.target.closest('td');
+    if (td) {
+        var text = "";
+        var input = td.querySelector('input');
+        if (input) {
+            text = input.value;
+        } else {
+            var select = td.querySelector('select');
+            if (select) {
+                text = select.options[select.selectedIndex].text;
+            } else {
+                text = td.innerText.trim();
+            }
+        }
+        td.title = text;
+    }
+});
+    </script>
     <script language="javascript" type="text/javascript" src="./mods/index_document_ready.js"></script>
+    
 </html>
