@@ -103,7 +103,7 @@ $anzuzeigendeDaten[] = array(
     "writeaccess" => true,
     "query" => "SELECT id,  Mitglied, BSG, Sparte 
                     from b_mitglieder_in_sparten as mis
-                    WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 or Sparte is null
+                    WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 
                     order by mis.id desc;
     ",
     "referenzqueries" => array(

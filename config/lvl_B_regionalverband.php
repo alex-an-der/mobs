@@ -44,7 +44,7 @@ $anzuzeigendeDaten[] = array(
     "query" => "SELECT 
         id, Verband, BSG 
         from b_bsg as b
-        WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0  or Verband IS NULL
+        WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0 
         order by id desc;
     ",
     "referenzqueries" => array(
@@ -112,7 +112,7 @@ $anzuzeigendeDaten[] = array(
     "query" => "SELECT br.id as id, br.BSG, br.Nutzer
                 from b_bsg_rechte as br 
                 left join b_bsg as b on br.BSG = b.id
-                WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0 OR Nutzer IS NULL;
+                WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0;
                 ",
     "referenzqueries" => array(
         "BSG" => "SELECT b.id as id, b.BSG as anzeige
