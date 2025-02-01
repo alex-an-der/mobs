@@ -29,19 +29,19 @@ composer require phpoffice/phpspreadsheet
 
 Die Datei wird von den php-Seiten über ein require_once eingebunden. Andersherum lassen sich in der config.php natürlich andere Seiten z.B. eines Berechtigungsmanagements über diesen Mechanismus einbinden.
 
-## Datenbankzugang 
+### Datenbankzugang 
 ```
 define("DB_NAME", "entenhausen");
 define("DB_HOST", "user12.lima-db.de");
 define("DB_USER", "db_user_734");
 define("DB_PASS", "PW123456");
 ```
-## Seitentitel
+### Seitentitel
 Der _TITEL_ wird in den angezeigten php-Seiten als Titel übernommen.
 ```
 define("TITEL", "Mietgliederverwaltung Entenhausener Gänseclub e.V.");
 ```
-## Angezeigte Tabellen
+### Angezeigte Tabellen
 Dies ist der Hauptteil der Konfiguration. Über das Array `$anzuzeigendeDaten = array();` werden die angezeigten Daten gesteuert. Jeder Eintrag in diesem Array ist eine Ansicht, die in der Auswahlliste erscheint und ausgewählt werden kann. Ein kompletter Satz mit allen optionalen Parameter könnte so aussehen:
 
 ```php
@@ -73,18 +73,18 @@ $anzuzeigendeDaten[] = array(
 
         
 
-### tabellenname
-### auswahltext
-### writeaccess
-### import
+#### tabellenname
+#### auswahltext
+#### writeaccess
+#### import
 NEIN: Import, einfügen
 JA: Löschen,
 ToDo: Sparte
-### query
-### referenzqueries
-### spaltenbreiten
-### Sonderfall: READ.ONLY
-## Statistische Auswertungen
+#### query
+#### referenzqueries
+#### spaltenbreiten
+#### Sonderfall: READ.ONLY
+### Statistische Auswertungen
 Über das Array `$statistik = array();` können statistische Auswertungen festgelegt werden. Diese sind dann unter `Exportieren -> Statistiken` erreichbar.
 
 ```php
@@ -101,6 +101,9 @@ $statistik[] = array(
 );
 ```
 
+# LOP ab hier
+
+
 
 # tabellenname => Nur hierein kann in dieser Ansicht ein insert oder update ausgeführt werden.
 #              => Basistabelle für Referenzierung in anderen Tabellen
@@ -114,10 +117,16 @@ $statistik[] = array(
 #
 /*
 
-
+# auch noch LOP
 
 
 ## Berechtigungsstruktur
+Zwei Berechtigungen:
+- Daten über Landes- und Regionalverband
+- Ansichten über YPUM
+
+
+
 Es gilt der Grundsatz, dass immer eine Ebene nach unten berechtigt wird.
 
 ### Definition
@@ -134,7 +143,7 @@ Dann gilt:
 (4) Als Sonderfall: M => M
 offen (5) B => M->S
 
-(1) Nur der Verband kann seine BSG anlegen und (z.B. ANsprechpartner) ändern.
+(1) Nur der Verband kann seine BSG anlegen und (z.B. Ansprechpartner) ändern.
 (2) Nur (außer (5)) BSG kann seine Mitglieder anlegen und ändern.
 (3) Nur der Verband kann seine Sparten anlegen oder ändern.
 (4) Als Sonderfall kann ein Mitglied seine eigenen Daten ändern.
