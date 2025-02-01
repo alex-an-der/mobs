@@ -84,7 +84,7 @@ $anzuzeigendeDaten[] = array(
     "hinweis" => "Um Berechtigungen zu ändern, wende dich bitte an den Vorstand deines Regionalverbands.",
     "writeaccess" => true,
     "import" => true,
-    "query" => "SELECT ib.id as id, ib.BSG
+    "query" => "SELECT ib.id as id, m.id as Mitglied, ib.BSG as BSG
                 from b_individuelle_berechtigungen as ib
                 join b_mitglieder as m on ib.Mitglied=m.id
                 join b_bsg as b on ib.BSG = b.id 
@@ -92,6 +92,9 @@ $anzuzeigendeDaten[] = array(
                 ORDER BY b.BSG asc;
     ",
     "referenzqueries" => array(
+        "Mitglied" => "SELECT id, concat(Vorname,' ',Nachname) as anzeige
+                        from b_mitglieder WHERE y_id = $uid;
+        ",
         "BSG" => "SELECT b.id, concat(b.BSG, ' (',v.Kurzname,')') as anzeige
             from b_bsg as b
             join b_regionalverband as v on b.Verband = v.id
