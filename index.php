@@ -760,8 +760,9 @@ $tabelle_upper = strtoupper($tabelle)
             });
         }
 
-        // Neue Funktion für Container-Management
-        function adjustContainer() {
+        // Neue Funktion für Container-Management 
+        // Scrollbars werden entdeckt, aber die Klasse wird nicht auf fluid geändert.
+        function adjustContainer() {/*
             const table = document.querySelector('.table');
             const container = document.querySelector('.table-container');
             const containerParent = container.parentElement;
@@ -780,13 +781,15 @@ $tabelle_upper = strtoupper($tabelle)
             const hasScrollbar = container.scrollWidth > container.clientWidth;
             
             // Switch to container-fluid if there's a scrollbar
-            if (hasScrollbar) {
-                containerParent.classList.remove('container');
-                containerParent.classList.add('container-fluid');
+            if (hasScrollbar) {alert("hasScrollbar");
+                $('#haupttabelle').removeClass('container');
+                $('#haupttabelle').addClass('container-fluid');
+                //containerParent.classList.remove('container');
+                //containerParent.classList.add('container-fluid');
             } else {
                 containerParent.classList.remove('container-fluid');
                 containerParent.classList.add('container');
-            }
+            }*/
         }
 
         function setButtonHeights() {
@@ -1235,7 +1238,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
             <?php endif; ?>
 
         </div>
-        <div class="container table-container">
+        <div id='haupttabelle' class="container table-container">
             <table class="table table-striped table-bordered">
                 <thead> 
                     <tr>
@@ -1273,5 +1276,5 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
         </div>
     </div>
 
-</body>
+    </body>
 </html>
