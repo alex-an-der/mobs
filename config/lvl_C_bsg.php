@@ -99,7 +99,7 @@ $anzuzeigendeDaten[] = array(
 # Mitglieder in den Sparten 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
-    "auswahltext" => "Mitglieder nach Sparten",
+    "auswahltext" => "BSG: Spartenzuweisung",
     "writeaccess" => true,
     "query" => "SELECT id,  Mitglied, BSG, Sparte 
                     from b_mitglieder_in_sparten as mis
@@ -142,6 +142,28 @@ $anzuzeigendeDaten[] = array(
         "Sparte"                    => "300"
     )
 );
+
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_mitglieder_in_sparten",
+    "auswahltext" => "BSG: Übersicht",
+    "writeaccess" => false,
+    "query" => "SELECT mis.id, concat(Vorname,' ', Nachname) as Mitglied , stamm.BSG as Stamm_BSG , s.Sparte as Sparte, b.BSG as Sparten_BSG
+                from b_mitglieder_in_sparten as mis
+                join b_mitglieder as m on mis.Mitglied = m.id
+                join b_bsg as b on mis.BSG = b.id
+                join b_regionalverband as v on b.Verband = v.id
+                join b_sparte as s on mis.Sparte = s.id
+                join b_bsg as stamm on m.BSG = stamm.id
+                WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0
+    ",
+    "spaltenbreiten" => array(
+        "Mitglied"                  => "400",
+        "Stamm-BSG"                 => "400",
+        "Sparte"                    => "300",
+        "Sparten-BSG"               => "400",
+    )
+);
+
 
 ######################################################################################################
 
