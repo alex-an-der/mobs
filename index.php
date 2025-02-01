@@ -1158,7 +1158,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                               type="' . $inputType . '" 
                               class="form-control border-0" 
                               style="background-color: inherit; word-wrap: break-word; white-space: normal;" 
-                              value="' . htmlspecialchars($value) . '"
+                              value="' . $value . '"
                               onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, \'' . $columnType . '\')"
                               onfocus="clearCellColor(this)">';
                 
