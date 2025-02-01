@@ -1133,7 +1133,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                             $fk_display = $fk['anzeige'];
 
                             $selected = ($fk_value == $value) ? 'selected' : '';
-                            echo '<option  value="' . htmlspecialchars($fk_value) . '" ' . $selected . '>' . htmlspecialchars($fk_display) . '</option>\n';
+                            echo '<option  value="' . htmlspecialchars($fk_value) . '" ' . $selected . '>' . $fk_display . '</option>\n';
                         }
                         echo '</select>';
                     } else {
