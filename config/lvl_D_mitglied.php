@@ -67,7 +67,7 @@ $anzuzeigendeDaten[] = array(
     "hinweis" => "An- und Abmeldung zu Sparten bitte über deine Betriebssportgemeinschaft vornehmen.",
     "writeaccess" => false,
     "import" => false,
-    "query" => "select y.id, s.Sparte as Sparte, b.BSG as BSG
+    "query" => "SELECT y.id, s.Sparte as Sparte, b.BSG as BSG
             from b_mitglieder_in_sparten as mis
             join b_sparte as s on mis.Sparte = s.id
             join b_mitglieder as m on m.id = mis.Mitglied
@@ -76,11 +76,34 @@ $anzuzeigendeDaten[] = array(
             WHERE y.id = $uid;
     "
 );
+#  Wer darf meine Daten sehen?
 
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_individuelle_berechtigungen",
+    "auswahltext" => "Wer darf meine Daten sehen?",
+    "hinweis" => "Um Berechtigungen zu ändern, wende dich bitte an den Vorstand deines Regionalverbands.",
+    "writeaccess" => true,
+    "import" => true,
+    "query" => "SELECT ib.id as id, ib.BSG
+                from b_individuelle_berechtigungen as ib
+                join b_mitglieder as m on ib.Mitglied=m.id
+                join b_bsg as b on ib.BSG = b.id 
+                WHERE m.y_id = $uid 
+                ORDER BY b.BSG asc;
+    ",
+    "referenzqueries" => array(
+        "BSG" => "SELECT b.id, concat(b.BSG, ' (',v.Kurzname,')') as anzeige
+            from b_bsg as b
+            join b_regionalverband as v on b.Verband = v.id
+            ORDER BY anzeige asc;
+        "
+    )
+);
+/*
 # Meine Berechtigungen
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_regionalverband_rechte",
-    "auswahltext" => "Meine Berechtigungen",
+    "auswahltext" => "Erhaltene Berechtigungen",
     "hinweis" => "Um Berechtigungen zu ändern, wende dich bitte an den Vorstand deines Regionalverbands.",
     "writeaccess" => false,
     "import" => false,
@@ -95,7 +118,7 @@ $anzuzeigendeDaten[] = array(
                 join b_bsg as b on br.BSG=b.id
                 where br.Nutzer=$uid;
     "
-);
+);*/
 
 
 ?>
