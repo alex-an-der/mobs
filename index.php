@@ -166,6 +166,7 @@ $tabelle_upper = strtoupper($tabelle)
     </style>
 
     <script>
+
         function updateField(tabelle, id, field, value, datatype) {
             if(datatype){
                 if (datatype.startsWith("decimal")) {
@@ -1003,7 +1004,7 @@ function renderTableSelectBox($db) {
     global $selectedTableID;
     
     echo '<p><form method="get">';
-    echo '<select name="tab" class="form-control" onchange="this.form.submit()">';
+    echo '<select id="tableSelectBox" name="tab" class="form-control" onchange="this.form.submit()">';
 
     if(!isset($anzuzeigendeDaten[$selectedTableID])){
         echo '<option value="">-- Tabelle wählen --</option>';
@@ -1277,4 +1278,5 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
     </div>
 
     </body>
+    <script language="javascript" type="text/javascript" src="./mods/index_document_ready.js"></script>
 </html>
