@@ -63,7 +63,7 @@ join
 */
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
-    "auswahltext" => "ÜBERARBEITEN!! Meine Sparten",
+    "auswahltext" => "Meine Sparten",
     "hinweis" => "An- und Abmeldung zu Sparten bitte über deine Betriebssportgemeinschaft vornehmen.",
     "writeaccess" => false,
     "import" => false,

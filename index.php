@@ -1213,7 +1213,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                         <button id='clearFilterButton' class='btn btn-info' onclick='clearFilter()'>Filter löschen</button>
                         <!--?php if ($readwrite  || hatUserBerechtigungen()):?-->
                         <?php if ($readwrite && $importErlaubt):?>
-                            <button id="insertDefaultButton" class="btn btn-success">Datensatz einfügen</button>
+                            <button id="insertDefaultButton" class="btn btn-success">Einfügen</button>
                             <button id="deleteSelectedButton" class="btn btn-danger">Ausgewählte löschen</button>
                         <?php endif; ?>  
 
@@ -1301,5 +1301,5 @@ document.addEventListener('mouseover', function(e) {
 });
     </script>
     <script language="javascript" type="text/javascript" src="./mods/index_document_ready.js"></script>
-    
+
 </html>

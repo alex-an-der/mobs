@@ -7,7 +7,7 @@
 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_bsg",
-    "auswahltext" => "Meine BSG (Rechnungsdaten)",
+    "auswahltext" => "BSG: Stammdaten",
     "import" => false,
     "writeaccess" => true,
     "hinweis" => "<b>RE </b> = Rechnungsempfänger. In diese Spalten bitte eintragen, wohin eventuelle Rechnungen geschickt werden sollen.",
@@ -52,7 +52,7 @@ $anzuzeigendeDaten[] = array(
 # Mitglieder in der Stamm-BSG
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
-    "auswahltext" => "Stamm-BSG: Mitgliederdaten",
+    "auswahltext" => "BSG: Mitgliederdaten",
     "writeaccess" => true,
     "import" => false,
     "query" => "SELECT m.id as id, BSG, Vorname, Nachname, Mail

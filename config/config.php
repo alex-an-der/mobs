@@ -2,6 +2,8 @@
 use ypum\yauth;
 require_once(__DIR__ . "/../mods/all.head.php");
 require_once(__DIR__ . "/../mods/config.head.php");
+require_once(__DIR__ . "/../inc/classes/datenbank.php");
+
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -14,11 +16,16 @@ define("DB_HOST", "x96.lima-db.de");
 #define("DB_HOST", "localhost");
 
 
-
 define("DB_PASS", "BallBierBertha42");
 define("TITEL", "LBSV Nds. Mitgliederverwaltung");
 # Wie sollen NULL-Werte (=keine Zuordnung) dargestellt werden?
 define("NULL_WERT", "---");
+
+
+
+# DB direkt hier einbinden
+$db = new Datenbank();
+
 
 # Rechtemanagement (YPUM)
 // $berechtigung = $ypum->getUserData();
@@ -28,15 +35,28 @@ if (isset($_SESSION['uid'])) $uid = $_SESSION['uid'];
 $anzuzeigendeDaten = array();
 $statistik = array();
 
+// Auf der poberste Ebene muss ich über YPUM berechtigen
 if($ypum->isBerechtigt(64)){
     $anzuzeigendeDaten[] = array("trenner" => "-");
     require_once(__DIR__ . "/lvl_A_landesverband.php");
 }
-if($ypum->isBerechtigt(32)){
+
+// Anzeige nach Berechtigungen - habe ich eine, sehe ich was
+$countRechteQ = $db->query("SELECT count(*) as count FROM b_regionalverband_rechte WHERE Nutzer = $uid");
+if(isset($countRechteQ['data'][0]['count'])) $countRechte = $countRechteQ['data'][0]['count'];
+else                                         $countRechte = 0;  
+
+if($countRechte > 0){
     $anzuzeigendeDaten[] = array("trenner" => "-");
     require_once(__DIR__ . "/lvl_B_regionalverband.php");
 }
-if($ypum->isBerechtigt(16)){
+
+// Anzeige nach Berechtigungen - habe ich eine, sehe ich was
+$countRechteQ = $db->query("SELECT count(*) as count FROM b_bsg_rechte WHERE Nutzer = $uid");
+if(isset($countRechteQ['data'][0]['count'])) $countRechte = $countRechteQ['data'][0]['count'];
+else                                         $countRechte = 0;  
+
+if($countRechte > 0){
     $anzuzeigendeDaten[] = array("trenner" => "-");
     require_once(__DIR__ . "/lvl_C_bsg.php");
 }
