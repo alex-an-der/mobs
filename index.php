@@ -369,13 +369,13 @@ $tabelle_upper = strtoupper($tabelle)
                 let bText = bCell.innerText.trim();
 
                 const aInput = aCell.querySelector('input, select');
-                const bInput = b.querySelector('input, select');
+                const bInput = bCell.querySelector('input, select');
 
                 if (aInput) {
                     if (aInput.tagName.toLowerCase() === 'select') {
                         aText = aInput.options[aInput.selectedIndex].text.trim();
                     } else {
-                        aText = aInput.value.trim();
+                        aText = aInput.value.trim(); // Ergänzt
                     }
                 }
 
@@ -383,7 +383,7 @@ $tabelle_upper = strtoupper($tabelle)
                     if (bInput.tagName.toLowerCase() === 'select') {
                         bText = bInput.options[bInput.selectedIndex].text.trim();
                     } else {
-                        bText = bInput.value.trim();
+                        bText = bInput.value.trim(); // Ergänzt
                     }
                 }
 
@@ -415,7 +415,7 @@ $tabelle_upper = strtoupper($tabelle)
                     if (aLastInput.tagName.toLowerCase() === 'select') {
                         aLastText = aLastInput.options[aLastInput.selectedIndex].text.trim();
                     } else {
-                        aLastText = aLastInput.value.trim();
+                        aLastText = aLastInput.value.trim(); // Ergänzt
                     }
                 }
 
@@ -423,7 +423,7 @@ $tabelle_upper = strtoupper($tabelle)
                     if (bLastInput.tagName.toLowerCase() === 'select') {
                         bLastText = bLastInput.options[bLastInput.selectedIndex].text.trim();
                     } else {
-                        bLastText = bLastInput.value.trim();
+                        bLastText = bLastInput.value.trim(); // Ergänzt
                     }
                 }
 
