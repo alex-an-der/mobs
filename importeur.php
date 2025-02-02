@@ -187,43 +187,9 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
     <script>
         // Globale Variablen für PHP-Werte 
         const validColumns = <?= json_encode($tableColumns ?? []) ?>;
-        const hasForeignKeys = <?= json_encode($hasForeignKeys ?? false) ?>;  // Diese Zeile hinzufügen
-        
-        /*function parseCSV(str) {
-            const arr = [];
-            let quote = false;  // 'true' means we're inside a quoted field
-
-            // Iterate over each character, keep track of current row and column (of the returned array)
-            for (let row = 0, col = 0, c = 0; c < str.length; c++) {
-                let cc = str[c], nc = str[c+1];        // Current character, next character
-                arr[row] = arr[row] || [];             // Create a new row if necessary
-                arr[row][col] = arr[row][col] || '';   // Create a new column (start with empty string) if necessary
-
-                // If the current character is a quotation mark, and we're inside a
-                // quoted field, and the next character is also a quotation mark,
-                // add a quotation mark to the current column and skip the next character
-                if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; continue; }
-
-                // If it's just one quotation mark, begin/end quoted field
-                if (cc == '"') { quote = !quote; continue; }
-
-                // If it's a comma and we're not in a quoted field, move on to the next column
-                if (cc == ',' && !quote) { ++col; continue; }
-
-                // If it's a newline (CRLF) and we're not in a quoted field, skip the next character
-                // and move on to the next row and move to column 0 of that new row
-                if (cc == '\r' && nc == '\n' && !quote) { ++row; col = 0; ++c; continue; }
-
-                // If it's a newline (LF or CR) and we're not in a quoted field,
-                // move on to the next row and move to column 0 of that new row
-                if (cc == '\n' && !quote) { ++row; col = 0; continue; }
-                if (cc == '\r' && !quote) { ++row; col = 0; continue; }
-
-                // Otherwise, append the current character to the current column
-                arr[row][col] += cc;
-            }
-            return arr;
-        }*/
+        const hasForeignKeys = <?= json_encode($hasForeignKeys ?? false) ?>;
+        const suchQueries = <?= json_encode($suchQueries ?? null) ?>;
+        const tabelle = <?= json_encode($tabelle ?? '') ?>;
 
         function validateImport(insert=false) {
             const validateButton = document.getElementById('validateButton');
@@ -279,11 +245,7 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
 
             // FK-Validierung hinzufügen
             if (hasForeignKeys) {
-
-                const queries = <?= json_encode($suchQueries)?>;
-                const tabelle = <?= json_encode($tabelle)?>
-
-                if (!queries) {
+                if (!suchQueries) {
                     showValidationResult(false, 'Import wegen mangelnder Konfigurationseinstellungen nicht möglich');
                     button.innerHTML = originalText;
                     button.disabled = false;
@@ -297,7 +259,7 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                     body: JSON.stringify({
                         action: action,
                         rows: allRows,
-                        suchQueries: queries,
+                        suchQueries: suchQueries,
                         tabelle: tabelle
                     })
                 })
@@ -335,7 +297,7 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
         }
 
         function showValidationResult(isValid, message) {
-            const resultDiv = document.getElementId('validationResult');
+            const resultDiv = document.getElementById('validationResult');
             const importButton = document.getElementById('importButton');
             const importHelpContent = document.getElementById('importHelpContent');
             
@@ -353,17 +315,10 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
         }
 
         function importData() {
-            const allRows = lines.map(line => parseCSVLine(line));
-            const queries = <?= json_encode($suchQueries)?>;
-            const tabelle = <?= json_encode($tabelle)?>
-
-            /*const textarea = document.getElementById('importData');
+            const textarea = document.getElementById('importData');
             const data = textarea.value.trim();
             const lines = data.split('\n');
-            const header = parseCSVLine(lines[0]);
-            const values = lines.slice(1)
-                .filter(line => line.trim())
-                .map(line => parseCSVLine(line));*/
+            const allRows = lines.map(line => parseCSVLine(line));
 
             const importButton = document.getElementById('importButton');
             importButton.disabled = true;
@@ -375,14 +330,9 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    /*action: 'import',
-                    tabelle: '< ?= $tabelle ?>',
-                    header: header,
-                    values: values*/
-
                     action: 'import',
                     rows: allRows,
-                    suchQueries: queries,
+                    suchQueries: suchQueries,
                     tabelle: tabelle
                 })
             })
