@@ -81,7 +81,7 @@ function dieWithError($err, $file, $line, $stayAlive = false) {
 
 function renderTableSelectBox($db) {
     
-    global $anzuzeigendeDaten, $selectedTableID;
+    /*global $anzuzeigendeDaten, $selectedTableID;
     $options = [];
     
     if(!isset($anzuzeigendeDaten[$selectedTableID])){
@@ -124,7 +124,7 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
         }
     }
 
-    return count($matches) === 1 ? $matches[0] : null;
+    return count($matches) === 1 ? $matches[0] : null;*/
     }
 
 
@@ -404,12 +404,12 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
             <!-- Table Select -->
             <form method="get" class="d-flex align-items-center">
                 <select name="tab" class="form-control me-2" onchange="this.form.submit()">
-                    <?php foreach(renderTableSelectBox($db) as $option): ?>
+                    <?php /*foreach(renderTableSelectBox($db) as $option): ?>
                         <option value="<?= htmlspecialchars($option['value']) ?>" 
                                 <?= $option['selected'] ? 'selected' : '' ?>>
                             <?= htmlspecialchars($option['text']) ?>
                         </option>
-                    <?php endforeach; ?>
+                    <?php endforeach; */?>
                 </select>
                 <a href="index.php?tab=<?= $selectedTableID ?>" class="btn btn-secondary">Zurück</a>
             </form>
