@@ -191,7 +191,7 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
         const suchQueries = <?= json_encode($suchQueries ?? null) ?>;
         const tabelle = <?= json_encode($tabelle ?? '') ?>;
 
-        function validateImport(insert=false) {
+        function validateImport(insert=false) { 
             const validateButton = document.getElementById('validateButton');
             const importButton = document.getElementById('importButton');
             const originalText = insert ? importButton.innerHTML : validateButton.innerHTML;
@@ -244,14 +244,13 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
             }
 
             // FK-Validierung hinzufügen
-            if (hasForeignKeys) {
-                if (!suchQueries) {
+            if (hasForeignKeys || insert) {
+                if (hasForeignKeys && !suchQueries) {
                     showValidationResult(false, 'Import wegen mangelnder Konfigurationseinstellungen nicht möglich');
                     button.innerHTML = originalText;
                     button.disabled = false;
                     return;
                 }
-
                 fetch('ajax.php', {
                     method: 'POST',
                     credentials: 'same-origin',

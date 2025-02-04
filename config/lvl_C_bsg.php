@@ -65,6 +65,7 @@ $anzuzeigendeDaten[] = array(
         "BSG" => "SELECT b.id, b.BSG as anzeige
         from b_bsg as b
         WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0
+        
         ORDER BY anzeige;
         "
     ),
