@@ -167,6 +167,7 @@ $tabelle_upper = strtoupper($tabelle)
 
     <script>
 
+
         function updateField(tabelle, id, field, value, datatype) {
             if(datatype){
                 if (datatype.startsWith("decimal")) {
@@ -588,10 +589,17 @@ $tabelle_upper = strtoupper($tabelle)
                     select.className = 'form-control';
                     select.name = fieldName;
                     
-                    const nullOption = document.createElement('option');
-                    nullOption.value = "NULL";
-                    nullOption.textContent = "<?=NULL_WERT?>";
-                    select.appendChild(nullOption);
+                    anzahlElemente = 0;
+                    if (foreignKeys[fieldName]) {
+                        var anzahlElemente = foreignKeys[fieldName].length;
+                    }
+
+                    if(anzahlElemente>1){
+                        const nullOption = document.createElement('option');
+                        nullOption.value = "NULL";
+                        nullOption.textContent = "<?=NULL_WERT?>";
+                        select.appendChild(nullOption);
+                    }
 
                     foreignKeys[fieldName].forEach(fk => {
                         const option = document.createElement('option');
