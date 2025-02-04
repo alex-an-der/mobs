@@ -66,19 +66,33 @@ join b_mitglieder as m on m.id=mis.Mitglied
 join b_bsg as b on b.id=mis.BSG
 join 
 */
+# Stamm-BSG
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_mitglieder",
+    "auswahltext" => "Meine Stamm-BSG",
+    "hinweis" => "Die Stamm-BSG führt den Basis-Beitrag ab. Um die Stamm-BSG zu wechseln, muss zuerst die alte BSG von der BSG-Verwaltung ausgetragen werden.
+    Sparten können auch über andere BSG besucht werden. Bitte im Bedarfsfall vorher abklären, ob das im individuellen Fall möglich ist.",
+    "writeaccess" => false,
+    "import" => false,
+    "query" => "SELECT m.y_id as id, concat (m.Vorname, ' ', m.Nachname) as Name, b.BSG as `Stamm-BSG`
+            from b_mitglieder as m
+            join b_bsg as b on b.id = m.BSG
+            WHERE m.y_id = $uid;
+    "
+);
+
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
     "auswahltext" => "Meine Sparten",
     "hinweis" => "An- und Abmeldung zu Sparten bitte über deine Betriebssportgemeinschaft vornehmen.",
     "writeaccess" => false,
     "import" => false,
-    "query" => "SELECT y.id, s.Sparte as Sparte, b.BSG as BSG
+    "query" => "SELECT m.y_id , s.Sparte as Sparte, b.BSG as BSG
             from b_mitglieder_in_sparten as mis
             join b_sparte as s on mis.Sparte = s.id
             join b_mitglieder as m on m.id = mis.Mitglied
             join b_bsg as b on b.id = m.BSG 
-            join y_user as y on y.mail = m.Mail
-            WHERE y.id = $uid;
+            WHERE m.y_id = $uid;
     "
 );
 #  Wer darf meine Daten sehen?

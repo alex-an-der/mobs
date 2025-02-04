@@ -55,7 +55,7 @@ $anzuzeigendeDaten[] = array(
     "auswahltext" => "BSG: Mitgliederdaten",
     "writeaccess" => true,
     "import" => false,
-    "query" => "SELECT m.id as id, BSG, Vorname, Nachname, Mail
+    "query" => "SELECT m.id as id, BSG, Vorname, Nachname, Mail, m.Geschlecht, m.Geburtsdatum
                 from b_mitglieder as m
                 WHERE FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 or 
                 ( BSG IS NULL AND FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0)
@@ -65,8 +65,10 @@ $anzuzeigendeDaten[] = array(
         "BSG" => "SELECT b.id, b.BSG as anzeige
         from b_bsg as b
         WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0
-        
         ORDER BY anzeige;
+        ",
+        "Geschlecht" => "SELECT id, auswahl as anzeige
+                        from b___geschlecht;
         "
     ),
     "spaltenbreiten" => array(
