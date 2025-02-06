@@ -11,6 +11,7 @@ require_once(__DIR__ . "/inc/include.php");
 
 
 $readwrite = 0;
+$deleteAnyway = 0;
 $selectedTableID = isset($_GET['tab']) ? $_GET['tab'] : "";
 $data = array();
 if(isset($anzuzeigendeDaten[$selectedTableID])){
@@ -35,6 +36,13 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
         $readwrite = $anzuzeigendeDaten[$selectedTableID]['writeaccess'];
     }else{
         $readwrite = 0;
+    }
+
+    // Ausnahmsweise Delete-Rechte?
+    if(isset($anzuzeigendeDaten[$selectedTableID]['deleteanyway'])){
+        $deleteAnyway = $anzuzeigendeDaten[$selectedTableID]['deleteanyway'];
+    }else{
+        $deleteAnyway = 0;
     }
     
     // Query funktioniert?
@@ -1069,9 +1077,10 @@ function renderTableHeaders($data) {
     global $anzuzeigendeDaten;
     global $selectedTableID;
     global $readwrite;
+    global $deleteAnyway;
     
     if (!empty($data)) {
-        if($readwrite)
+        if($readwrite || $deleteAnyway)
             echo "<th style='width: 60px'><div class='checkbox-header-container p-2'><input type='checkbox' class='form-check-input' onclick='toggleSelectAll(this)'></div></th>"; // Checkbox for selecting all rows
         foreach (array_keys($data[0]) as $header) {
             $style = "";
@@ -1091,7 +1100,7 @@ function renderTableHeaders($data) {
     }
 }
 
-function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
+function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKeys) {
     global $db;
     global $anzuzeigendeDaten;
     global $selectedTableID;
@@ -1105,7 +1114,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
 
     foreach ($data as $row) {
         echo '<tr data-id="' . $row['id'] . '">';
-        if($readwrite)
+        if($readwrite || $deleteAnyway)
             echo '<td><div class="checkbox-container"><input type="checkbox" class="form-check-input row-checkbox" data-id="' . $row['id'] . '" onclick="toggleRowSelection(this)"></div></td>';
         
         foreach ($row as $key => $value) {
@@ -1133,7 +1142,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                         }
                     }
 
-                    if ($readwrite) {
+                    if ($readwrite || $deleteAnyway) {
                         echo '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0)">';
                         echo '<option  value="NULL"' . (empty($value) ? ' selected' : '') . '>'.NULL_WERT.'</option>';
                         foreach ($foreignKeys[$key] as $fk ) {
@@ -1205,7 +1214,9 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                 echo "<p><input type='text' id='tableFilter' class='form-control' placeholder='Filtern entweder durch manuelle Eingabe oder Rechtsklick auf ein Datenfeld.'></p>";
             }
             ?>
-            <?php if ((!empty($tabelle) && $readwrite) || hatUserBerechtigungen()): 
+            <?php 
+            
+            if ((!empty($tabelle) && $readwrite) || hatUserBerechtigungen() || $deleteAnyway): 
                 $importErlaubt = true;
 
                 if (isset($anzuzeigendeDaten[$selectedTableID]['import']))
@@ -1222,6 +1233,8 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                         <!--?php if ($readwrite  || hatUserBerechtigungen()):?-->
                         <?php if ($readwrite && $importErlaubt):?>
                             <button id="insertDefaultButton" class="btn btn-success">Einfügen</button>
+                        <?php endif; ?> 
+                        <?php if (($readwrite && $importErlaubt) || $deleteAnyway):?>
                             <button id="deleteSelectedButton" class="btn btn-danger">Ausgewählte löschen</button>
                         <?php endif; ?>  
 
@@ -1256,7 +1269,7 @@ function renderTableRows($data, $readwrite, $tabelle, $foreignKeys) {
                 </thead>
                 <tbody>
                 <?php 
-                    if (!empty($data)) renderTableRows($data, $readwrite, $tabelle, $FKdata);
+                    if (!empty($data)) renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $FKdata);
                 ?>
                 </tbody>
             </table>

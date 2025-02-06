@@ -76,6 +76,7 @@ $anzuzeigendeDaten[] = array(
 #### tabellenname
 #### auswahltext
 #### writeaccess
+#### deleteonly
 #### import
 NEIN: Import, einfügen
 JA: Löschen,

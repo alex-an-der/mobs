@@ -121,6 +121,21 @@ $anzuzeigendeDaten[] = array(
         "
     )
 );
+
+# Selbst aus y_user löschen
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "y_user",
+    "auswahltext" => "Lösche meine Daten",
+    "hinweis" => "Hier kannst du alle Daten von dir löschen. Das Löschen ist unwiderruflich. Wähle dazu deinen Datensatz aus und klicke auf 'Löschen'.",
+    "writeaccess" => false,
+    "deleteanyway" => true,
+    "import" => false,
+    "query" => "select id, mail
+        from y_user
+        WHERE id = $uid;
+    "
+);
+
 /*
 # Meine Berechtigungen
 $anzuzeigendeDaten[] = array(
