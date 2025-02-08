@@ -26,11 +26,11 @@ $anzuzeigendeDaten[] = array(
     ",
     "referenzqueries" => array(
         "Ansprechpartner" => "SELECT m.id, CONCAT(Nachname, ', ', Vorname) as anzeige 
-                                from b_mitglieder as m
-                                join b_bsg as b on b.id=m.BSG
-                                
-                                WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'mitglied')) > 0
-                                order by anzeige;"
+            from b_mitglieder as m
+            left join b_bsg as b on b.id=m.BSG
+            WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'mitglied')) > 0 OR
+            FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0
+            order by anzeige;"
     ),
     "spaltenbreiten" => array(
         "Verband"                       => "380",
@@ -79,25 +79,6 @@ $anzuzeigendeDaten[] = array(
     )
 );
 
-# Alle Mitglieder
-/*
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_mitglieder",
-    "auswahltext" => "Mitglieder nach BSG (lesend)",
-    "hinweis" => "Hier werden alle Mitglieder angezeigt, die in einer BSG sind, auf die du direkt oder über den Verband berechtigt bist.",
-    "writeaccess" => false,
-    "query" => "SELECT m.id as id, BSG, Vorname, Nachname, Mail
-                from b_mitglieder as m
-                WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'stammmitglied')) > 0
-                order by id desc;
-    ",
-    "referenzqueries" => array(
-        "BSG" => "SELECT b.id, b.BSG as anzeige
-        from b_bsg as b
-        "
-    )
-);
-*/
 
 # Mitglieder in den Sparten 
 $anzuzeigendeDaten[] = array(
@@ -106,7 +87,8 @@ $anzuzeigendeDaten[] = array(
     "writeaccess" => true,
     "query" => "SELECT id,  Mitglied, BSG, Sparte 
                     from b_mitglieder_in_sparten as mis
-                    WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 
+                    WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 and
+                    FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0
                     order by mis.id desc;
     ",
     "referenzqueries" => array(

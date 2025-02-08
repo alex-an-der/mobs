@@ -36,6 +36,21 @@ $anzuzeigendeDaten[] = array(
     )
 );
 
+# Mitglieder in Sparten
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_mitglieder_in_sparten",
+    "auswahltext" => "Sparten und ihre Mitglieder",
+    "writeaccess" => false,
+    "query" => "SELECT mis.id as id, v.Kurzname as Verband, s.Sparte as Sparte, b.BSG as BSG, concat (m.Vorname,' ',m.Nachname) as Mitglied
+                from b_mitglieder_in_sparten as mis
+                join b_sparte as s on mis.Sparte = s.id
+                join b_regionalverband as v on s.Verband = v.id
+                join b_mitglieder as m on mis.Mitglied = m.id
+                join b_bsg as b on mis.BSG = b.id
+                WHERE FIND_IN_SET(v.id, berechtigte_elemente ($uid, 'verband')) > 0
+                order by Verband, Sparte, BSG, Mitglied;"
+);
+
 # BSG im Regionalverband
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_bsg",
