@@ -1,0 +1,1 @@
+ALTER TABLE `y_user` ADD  `run_trigger` BOOL NOT NULL DEFAULT 1 ;
