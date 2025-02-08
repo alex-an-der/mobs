@@ -1,7 +1,7 @@
 <?php 
 use ypum\yauth;
-require_once(__DIR__ . "/../mods/all.head.php");
-require_once(__DIR__ . "/../mods/config.head.php");
+require_once(__DIR__ . "/../user_includes/all.head.php");
+require_once(__DIR__ . "/../user_includes/config.head.php");
 require_once(__DIR__ . "/../inc/classes/datenbank.php");
 
 

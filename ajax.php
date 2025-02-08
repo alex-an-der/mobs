@@ -1,7 +1,7 @@
 <?php
 ob_start();
-require_once(__DIR__ . "/mods/all.head.php");
-require_once(__DIR__ . "/mods/ajax.head.php");
+require_once(__DIR__ . "/user_includes/all.head.php");
+require_once(__DIR__ . "/user_includes/ajax.head.php");
 require_once(__DIR__ . "/inc/include.php");
 ob_clean();
 

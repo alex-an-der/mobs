@@ -1,6 +1,6 @@
 <?php
-@require_once(__DIR__ . "/mods/all.head.php");
-@require_once(__DIR__ . "/mods/config.head.php");
+@require_once(__DIR__ . "/user_includes/all.head.php");
+@require_once(__DIR__ . "/user_includes/config.head.php");
 
 # Datenbank-Zugangsdaten
 define("DB_NAME", "db_441127_14");

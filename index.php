@@ -23,8 +23,8 @@ Das muss im Trigger z.B. eingebaut werden - geht das überhaupt?
 */
 //phpinfo();
 //die();
-require_once(__DIR__ . "/mods/all.head.php");
-require_once(__DIR__ . "/mods/index.head.php");
+require_once(__DIR__ . "/user_includes/all.head.php");
+require_once(__DIR__ . "/user_includes/index.head.php");
 require_once(__DIR__ . "/inc/include.php");
 
 
@@ -1339,6 +1339,6 @@ document.addEventListener('mouseover', function(e) {
     }
 });
     </script>
-    <script language="javascript" type="text/javascript" src="./mods/index_document_ready.js"></script>
+    <script language="javascript" type="text/javascript" src="./user_includes/index_document_ready.js"></script>
 
 </html>

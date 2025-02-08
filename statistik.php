@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__ . "/mods/all.head.php");
+require_once(__DIR__ . "/user_includes/all.head.php");
 require_once(__DIR__ . "/inc/include.php");
 require_once(__DIR__ . "/config/config.php");
 

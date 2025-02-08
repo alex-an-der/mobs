@@ -23,7 +23,7 @@ class Datenbank {
 
     // Führt pdo-Query aus und liefert das Ergebnis als Array zurück
     public function query($query, $arguments = array()) {
-        require_once(__DIR__ . "/../../mods/before_sending_query.php");
+        require_once(__DIR__ . "/../../user_includes/before_sending_query.php");
 
         $stmt = $this->pdo->prepare($query);
 
@@ -71,7 +71,7 @@ class Datenbank {
     }
 
     public function log($eintrag) {
-        require_once(__DIR__ . "/../../mods/before_logging.php");
+        require_once(__DIR__ . "/../../user_includes/before_logging.php");
         try {
             $query = "INSERT INTO log (eintrag) VALUES (:eintrag)";
             $stmt = $this->pdo->prepare($query);
@@ -84,7 +84,7 @@ class Datenbank {
 
     public function log_for_rollback($originalquery) {
         $autor = "";
-        require_once(__DIR__ . "/../../mods/before_log_for_rollback.php");
+        require_once(__DIR__ . "/../../user_includes/before_log_for_rollback.php");
         try {
             $args = array($autor, $originalquery);
             $query = "INSERT INTO rollback (autor, eintrag) VALUES (?, ?)";
