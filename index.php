@@ -797,7 +797,7 @@ $tabelle_upper = strtoupper($tabelle)
 
         // Neue Funktion für Container-Management 
         // Scrollbars werden entdeckt, aber die Klasse wird nicht auf fluid geändert.
-        function adjustContainer() {/*
+        function adjustContainer() {
             const table = document.querySelector('.table');
             const container = document.querySelector('.table-container');
             const containerParent = container.parentElement;
@@ -816,15 +816,15 @@ $tabelle_upper = strtoupper($tabelle)
             const hasScrollbar = container.scrollWidth > container.clientWidth;
             
             // Switch to container-fluid if there's a scrollbar
-            if (hasScrollbar) {alert("hasScrollbar");
-                $('#haupttabelle').removeClass('container');
-                $('#haupttabelle').addClass('container-fluid');
+            if (hasScrollbar) {//alert("hasScrollbar");
+                $('.flex-container ').removeClass('container');
+                $('.flex-container ').addClass('container-fluid');
                 //containerParent.classList.remove('container');
                 //containerParent.classList.add('container-fluid');
             } else {
                 containerParent.classList.remove('container-fluid');
                 containerParent.classList.add('container');
-            }*/
+            }
         }
 
         function setButtonHeights() {
@@ -871,7 +871,7 @@ $tabelle_upper = strtoupper($tabelle)
             }
 
             // Container beim Laden anpassen
-            adjustContainer();
+            // adjustContainer();
             
             // Container bei Größenänderung anpassen
             window.addEventListener('resize', adjustContainer);
@@ -1215,7 +1215,7 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
 
 ?>
 
-    <div class="container mt-4">
+    <div class="flex-container container mt-4">
         <div class="container mt-4">
             <?php renderTableSelectBox($db); ?>
         
@@ -1278,8 +1278,8 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
             <?php endif; ?>
 
         </div>
-        <div id='haupttabelle' class="container table-container">
-            <table class="table table-striped table-bordered">
+        <div class="flex-container container table-container">
+            <table  class="table table-striped table-bordered">
                 <thead> 
                     <tr>
                         <?php renderTableHeaders($data); ?>
