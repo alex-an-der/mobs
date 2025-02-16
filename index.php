@@ -3,26 +3,7 @@
 <head>
 
 <?php
-/*
 
-LOP!
-https://stackoverflow.com/questions/13598155/how-to-disable-triggers-in-mysql
-
-Durch Programmfehler kann es passieren, dass y_user und b_mitglieder nicht mehr synchron sind.
-Dies lässt sich leicht manuell nachziehen, dazu muss aber der Trigger deaktiviert werden, sonst
-dreht man sich im Kreis (bzw. es funktioniert einfach nicht).
-
-Option 1:
-Über eine globale Variable lässt sich das lösen (s. link) Dazu muss im Wartungsfall aber auch die Seite gesperrt werden.
-
-Option 2:
-Ggf. lässt sich auch eine Spalte "Trigger aktiv" in b_Mitglieder einbauen, die default 1 ist
-und vom Trigge abgefragt wird. Dann kann man ggf. pro Datensatz den Trigger temporär deaktivieren.
-Das muss im Trigger z.B. eingebaut werden - geht das überhaupt?
-
-*/
-//phpinfo();
-//die();
 require_once(__DIR__ . "/user_includes/all.head.php");
 require_once(__DIR__ . "/user_includes/index.head.php");
 require_once(__DIR__ . "/inc/include.php");
