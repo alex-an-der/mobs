@@ -1216,7 +1216,11 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
             }
             ?>
             <?php 
+            // Neuer Ansatz, wenn es notwendig ist, Buttons immer zu zeigen:
+            // $noReadWriteDisabling = "disabled";
+            // $noInsertDisabling = "disabled";
             
+           
             if ((!empty($tabelle) && $readwrite) || hatUserBerechtigungen() || $deleteAnyway): 
                 $importErlaubt = true;
 
@@ -1258,7 +1262,7 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                         </div>
                     </div>
                 </div>
-            <?php endif; ?>
+            <?php endif;?>
 
         </div>
         <div class="flex-container container table-container">

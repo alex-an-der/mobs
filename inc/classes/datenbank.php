@@ -86,7 +86,7 @@ class Datenbank {
         $autor = "";
         require_once(__DIR__ . "/../../user_includes/before_log_for_rollback.php");
         try {
-            $args = array($autor, $originalquery);
+            $args = array($autor, $originalquery.";");
             $query = "INSERT INTO rollback (autor, eintrag) VALUES (?, ?)";
             $stmt = $this->pdo->prepare($query);
             $stmt->execute($args);
