@@ -52,7 +52,7 @@ $anzuzeigendeDaten[] = array(
 # Mitglieder in der Stamm-BSG
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
-    "auswahltext" => "BSG: Mitgliederdaten",
+    "auswahltext" => "BSG: Mitgliederdaten (Stammmitglieder)",
     "writeaccess" => true,
     "import" => false,
     "query" => "SELECT m.id as id, BSG, Vorname, Nachname, Mail, m.Geschlecht, m.Geburtsdatum
