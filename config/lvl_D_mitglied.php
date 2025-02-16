@@ -91,7 +91,7 @@ $anzuzeigendeDaten[] = array(
             from b_mitglieder_in_sparten as mis
             join b_sparte as s on mis.Sparte = s.id
             join b_mitglieder as m on m.id = mis.Mitglied
-            join b_bsg as b on b.id = m.BSG 
+            join b_bsg as b on b.id = mis.BSG 
             WHERE m.y_id = $uid;
     "
 );
