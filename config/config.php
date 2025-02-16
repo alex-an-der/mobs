@@ -4,16 +4,31 @@ require_once(__DIR__ . "/../user_includes/all.head.php");
 require_once(__DIR__ . "/../user_includes/config.head.php");
 require_once(__DIR__ . "/../inc/classes/datenbank.php");
 
+# ------------------------------------------------------------------------------------------------
+# Stage-Konfiguration
+# ------------------------------------------------------------------------------------------------
 
+$LOCAL_DB_HOST = 0;
+$DEBUG = 0;
+
+# ------------------------------------------------------------------------------------------------
+
+
+if($DEBUG){
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+}
 
 # Datenbank-Zugangsdaten
 define("DB_NAME", "db_441127_14");
 define("DB_USER", "USER441127");
-define("DB_HOST", "x96.lima-db.de");
-#define("DB_HOST", "localhost");
+if($LOCAL_DB_HOST){
+    define("DB_HOST", "localhost");
+}else{
+    define("DB_HOST", "x96.lima-db.de");
+}
+
 
 
 define("DB_PASS", "BallBierBertha42");
