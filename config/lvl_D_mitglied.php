@@ -87,7 +87,7 @@ $anzuzeigendeDaten[] = array(
     "hinweis" => "An- und Abmeldung zu Sparten bitte über deine Betriebssportgemeinschaft vornehmen.",
     "writeaccess" => false,
     "import" => false,
-    "query" => "SELECT m.y_id , s.Sparte as Sparte, b.BSG as BSG
+    "query" => "SELECT m.y_id as id, s.Sparte as Sparte, b.BSG as BSG
             from b_mitglieder_in_sparten as mis
             join b_sparte as s on mis.Sparte = s.id
             join b_mitglieder as m on m.id = mis.Mitglied
