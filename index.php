@@ -87,6 +87,12 @@ $tabelle_upper = strtoupper($tabelle)
     <?php ?>
 
     <style>
+        .container {
+            min-height: 100px; /* Stellen Sie sicher, dass der Container genügend Höhe hat */
+        }
+        .form-control {
+            overflow: hidden; /* Verhindert das Anzeigen von Scrollleisten */
+        }
         .form-control.border-0 {
             background-color:rgba(0,0,0,0) !important;
         }
