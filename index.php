@@ -87,12 +87,7 @@ $tabelle_upper = strtoupper($tabelle)
     <?php ?>
 
     <style>
-        .container {
-            min-height: 100px; /* Stellen Sie sicher, dass der Container genügend Höhe hat */
-        }
-        .form-control {
-            overflow: hidden; /* Verhindert das Anzeigen von Scrollleisten */
-        }
+
         .form-control.border-0 {
             background-color:rgba(0,0,0,0) !important;
         }
@@ -1102,7 +1097,8 @@ function renderTableHeaders($data) {
         if ($selectedTableID !== "") {
             echo "<div class='container mt-4'><div class='alert alert-light' role='alert'>Es gibt keine Datensätze, für die Sie ein Leserecht haben.</div></div>";
         } else {
-            echo "<div class='container mt-4'><div class='alert alert-light' role='alert'>Bitte wählen Sie eine Tabelle aus.</div></div>";
+            //echo "<div class='container mt-4'><div class='alert alert-light' role='alert'>Bitte wählen Sie eine Tabelle aus.</div></div>";
+            echo "<div class='container mt-4' style='overflow-y: hidden;'><div class='alert alert-light' role='alert'>Bitte wählen Sie eine Tabelle aus.</div></div>";
         }
     }
 }
