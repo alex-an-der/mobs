@@ -342,7 +342,6 @@ $tabelle_upper = strtoupper($tabelle)
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
                 alert('Fehler beim Verarbeiten der Serverantwort.');
             })
             .finally(() => {
@@ -380,7 +379,7 @@ $tabelle_upper = strtoupper($tabelle)
                 let bText = bCell.innerText.trim();
 
                 const aInput = aCell.querySelector('input, select');
-                const bInput = bCell.querySelector('input, select');
+                const bInput = b.querySelector('input, select');
 
                 if (aInput) {
                     if (aInput.tagName.toLowerCase() === 'select') {
@@ -392,7 +391,7 @@ $tabelle_upper = strtoupper($tabelle)
 
                 if (bInput) {
                     if (bInput.tagName.toLowerCase() === 'select') {
-                        bText = bInput.options[bInput.selectedIndex].text.trim();
+                        bText = bInput.options[b.selectedIndex].text.trim();
                     } else {
                         bText = bInput.value.trim(); // Ergänzt
                     }
@@ -523,116 +522,230 @@ $tabelle_upper = strtoupper($tabelle)
         }
 
         function insertDefaultRecord(tabelle) {
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", "ajax.php?tab=<?=$selectedTableID?>", true);
-            xhr.setRequestHeader("Content-Type", "application/json");
+            // Show a loading indicator
+            const insertButton = document.getElementById('insertDefaultButton');
+            if (insertButton) {
+                insertButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Lade...';
+                insertButton.disabled = true;
+            }
 
-            const data = {
+            // Create error handler function
+            const handleError = (message) => {
+                if (insertButton) {
+                    insertButton.innerHTML = 'Einfügen';
+                    insertButton.disabled = false;
+                }
+                alert(message);
+            };
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "ajax.php", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            
+            // Set timeout to avoid infinite waiting
+            xhr.timeout = 30000; // 30 seconds
+            
+            xhr.ontimeout = function() {
+                handleError("Die Anfrage hat zu lange gedauert und wurde abgebrochen.");
+            };
+            
+            xhr.onerror = function() {
+                handleError("Netzwerkfehler beim Laden der Tabellenstruktur.");
+            };
+
+            const data = JSON.stringify({
                 action: 'get_table_structure',
                 tabelle: tabelle,
                 selectedTableID: '<?=$selectedTableID?>'
-            };
+            });
 
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
+                    // Reset button state
+                    if (insertButton) {
+                        insertButton.innerHTML = 'Einfügen';
+                        insertButton.disabled = false;
+                    }
+
                     if (xhr.status === 200) {
                         try {
-                            const response = JSON.parse(xhr.responseText);
+                            // Try to safely parse the response
+                            let responseText = xhr.responseText.trim();
+                            if (!responseText) {
+                                throw new Error("Empty response from server");
+                            }
+                            
+                            const response = JSON.parse(responseText);
+                            
                             if (response.status === "success") {
-                                // Use DB columns if table is empty
-                                const columns = response.columns || response.dbColumns;
-                                if (columns) {
-                                    populateInsertModal(columns, response.foreignKeys);
+                                // Check if columns are available
+                                if (response.columns && response.columns.length > 0) {
+                                    populateInsertModal(response.columns, response.foreignKeys || {}, response.configQuery);
                                     $('#insertModal').modal('show');
                                 } else {
-                                    alert("Fehler: Keine Spalteninformationen verfügbar.");
+                                    // If we have a config query but no columns, try to extract them on the client side
+                                    const configQuery = response.configQuery;
+                                    if (configQuery) {
+                                        // Simple regex to extract column names from the SELECT part
+                                        const selectMatch = configQuery.match(/SELECT\s+(.+?)\s+FROM/i);
+                                        if (selectMatch) {
+                                            const selectPart = selectMatch[1];
+                                            const columnNames = selectPart.split(',')
+                                                .map(item => {
+                                                    // Try to extract column name or alias
+                                                    const asMatch = item.match(/\s+[Aa][Ss]\s+[`'"]?([a-zA-Z0-9_]+)[`'"]?\s*$/);
+                                                    if (asMatch) return asMatch[1];
+                                                    
+                                                    const dotMatch = item.match(/\.([`'"]?)([a-zA-Z0-9_]+)\1\s*$/);
+                                                    if (dotMatch) return dotMatch[2];
+                                                    
+                                                    const simpleMatch = item.match(/([`'"]?)([a-zA-Z0-9_]+)\1\s*$/);
+                                                    if (simpleMatch) return simpleMatch[2];
+                                                    
+                                                    return null;
+                                                })
+                                                .filter(name => name && name.toLowerCase() !== 'id')
+                                                .map(name => ({ Field: name, Type: 'text' }));
+                                            
+                                            if (columnNames.length > 0) {
+                                                populateInsertModal(columnNames, response.foreignKeys || {}, configQuery);
+                                                $('#insertModal').modal('show');
+                                                return;
+                                            }
+                                        }
+                                    }
+                                    
+                                    // If we still didn't get columns, show an error
+                                    handleError("Konnte keine Spalteninformationen aus der Abfrage extrahieren.");
                                 }
                             } else {
-                                alert("Fehler beim Laden der Tabellenstruktur.");
+                                handleError("Fehler beim Laden der Tabellenstruktur: " + (response.message || "Unbekannter Fehler"));
                             }
                         } catch (e) {
-                            alert("Fehler beim Verarbeiten der Serverantwort.");
+                            handleError("Fehler beim Verarbeiten der Serverantwort: " + e.message);
                         }
                     } else {
-                        alert("Serverfehler beim Laden der Tabellenstruktur.");
+                        handleError("Serverfehler beim Laden der Tabellenstruktur. Status: " + xhr.status);
                     }
                 }
             };
 
-            xhr.send(JSON.stringify(data));
+            try {
+                xhr.send(data);
+            } catch (e) {
+                handleError("Fehler beim Senden der Anfrage: " + e.message);
+            }
         }
 
-        function populateInsertModal(columns, foreignKeys) {
+        function populateInsertModal(columns, foreignKeys, configQuery) {
             const form = document.getElementById('insertForm');
+            if (!form) {
+                alert("Insert form not found");
+                return;
+            }
+            
             form.innerHTML = '';
 
-            // If we have table headers, use them for order
-            let headers = Array.from(document.querySelectorAll('table thead th'))
-                .map(th => th.getAttribute('data-field'))
-                .filter(field => field); // Remove null/undefined
-
-            // If table is empty, create order from columns
-            if (headers.length === 0) {
-                headers = columns.map(col => col.Field || col);
+            // Determine the order of fields by looking at the table headers
+            // which are derived from the query in config.php
+            let headers = [];
+            const tableHeaders = document.querySelectorAll('table thead th[data-field]');
+            
+            if (tableHeaders && tableHeaders.length > 0) {
+                headers = Array.from(tableHeaders)
+                    .map(th => th.getAttribute('data-field'))
+                    .filter(field => field && field !== 'id');
+            } else {
+                // If no table headers exist (empty result), use column definitions
+                headers = columns.map(col => col.Field || col.field || col.name || col.Name)
+                    .filter(field => field && field !== 'id');
             }
 
-            // Create Map for column types
-            const columnMap = new Map(columns.map(col => [col.Field || col, col]));
+            if (headers.length === 0) {
+                alert("Fehler: Keine Feldnamen gefunden.");
+                return;
+            }
 
-            // Create form fields in the order of headers
+            // Create a map for easier lookup of column data types
+            const columnMap = new Map();
+            columns.forEach(col => {
+                const fieldName = col.Field || col.field || col.name || col.Name;
+                if (fieldName) {
+                    columnMap.set(fieldName, col);
+                }
+            });
+
+            // Process fields in the order they appear in the headers (from query)
             headers.forEach(fieldName => {
-                if (fieldName === 'id') return;
-
-                const column = columnMap.get(fieldName);
-                if (!column) return;
-
                 const div = document.createElement('div');
-                div.className = 'form-group';
+                div.className = 'form-group mb-3';
                 
                 const label = document.createElement('label');
+                label.className = 'form-label';
                 label.textContent = fieldName;
                 div.appendChild(label);
 
+                // Check if this is a foreign key field defined in referenzqueries
                 if (foreignKeys && foreignKeys[fieldName]) {
-                    // Create select for foreign keys
+                    // Create select dropdown for foreign key fields
                     const select = document.createElement('select');
                     select.className = 'form-control';
                     select.name = fieldName;
                     
-                    anzahlElemente = 0;
-                    if (foreignKeys[fieldName]) {
-                        var anzahlElemente = foreignKeys[fieldName].length;
+                    // Add NULL option
+                    const nullOption = document.createElement('option');
+                    nullOption.value = "NULL";
+                    nullOption.textContent = "<?=NULL_WERT?>";
+                    select.appendChild(nullOption);
+                    
+                    // Count valid options
+                    const validOptions = [];
+                    
+                    // Add all foreign key options
+                    if (foreignKeys[fieldName] && foreignKeys[fieldName].length > 0) {
+                        foreignKeys[fieldName].forEach(fk => {
+                            if (fk && fk.id !== undefined && fk.anzeige !== undefined) {
+                                const option = document.createElement('option');
+                                option.value = fk.id;
+                                option.textContent = fk.anzeige;
+                                select.appendChild(option);
+                                validOptions.push(option);
+                            }
+                        });
                     }
-
-                    if(anzahlElemente>1){
-                        const nullOption = document.createElement('option');
-                        nullOption.value = "NULL";
-                        nullOption.textContent = "<?=NULL_WERT?>";
-                        select.appendChild(nullOption);
+                    
+                    // If there's only one valid option (besides NULL), automatically select it
+                    if (validOptions.length === 1) {
+                        validOptions[0].selected = true;
                     }
-
-                    foreignKeys[fieldName].forEach(fk => {
-                        const option = document.createElement('option');
-                        option.value = fk.id;
-                        option.textContent = fk.anzeige;
-                        select.appendChild(option);
-                    });
 
                     div.appendChild(select);
                 } else {
-                    // Create input for normal fields
+                    // Create input field for regular columns
                     const input = document.createElement('input');
                     input.className = 'form-control';
                     input.name = fieldName;
                     input.placeholder = "<?=NULL_WERT?>";
                     
-                    const columnType = column.Type || 'text';
-                    if (columnType.includes('date')) {
-                        input.type = columnType.includes('datetime') ? 'datetime-local' : 'date';
+                    // Set appropriate input type based on column data type
+                    const column = columnMap.get(fieldName);
+                    if (column) {
+                        const columnType = column.Type || column.type || 'text';
+                        
+                        if (columnType.includes('date')) {
+                            input.type = columnType.includes('datetime') ? 'datetime-local' : 'date';
+                        } else if (columnType.includes('int') || columnType.includes('decimal') || columnType.includes('float') || columnType.includes('double')) {
+                            input.type = 'number';
+                            if (columnType.includes('decimal') || columnType.includes('float') || columnType.includes('double')) {
+                                input.step = '0.01'; // Allow decimal values
+                            }
+                        } else {
+                            input.type = 'text';
+                        }
                     } else {
-                        input.type = 'text';
+                        input.type = 'text'; // Default
                     }
-
+                    
                     div.appendChild(input);
                 }
 
@@ -667,8 +780,6 @@ $tabelle_upper = strtoupper($tabelle)
                             alert("Fehler beim Speichern" + (response.message ? ": " + response.message : ""));
                         }
                     } catch (e) {
-                        console.error('Parse error:', e);
-                        console.log('Response text:', xhr.responseText);
                         alert("Fehler beim Verarbeiten der Serverantwort.");
                     }
                 }
