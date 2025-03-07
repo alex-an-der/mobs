@@ -85,6 +85,7 @@ $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
     "auswahltext" => "BSG: Spartenzuweisung",
     "writeaccess" => true,
+
     "query" => "SELECT id,  Mitglied, BSG, Sparte 
                     from b_mitglieder_in_sparten as mis
                     WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 and
@@ -105,11 +106,20 @@ $anzuzeigendeDaten[] = array(
                     WHERE
                         FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0;
         ",
-        "Sparte" => "SELECT s.id as id, concat (v.Kurzname,': ', s.Sparte) as anzeige
+        "Sparte" => "SELECT s.id as id, concat (s.Sparte, ' (',r.Kurzname,')') as anzeige
+                    FROM b_bsg_rechte as br
+                    JOIN b_bsg as b ON br.BSG = b.id  
+                    JOIN b_regionalverband as r ON r.id = b.Verband
+                    JOIN b_sparte as s ON s.Verband = r.id
+                    WHERE Nutzer = $uid;
+                    "
+        /*"Sparte" => "SELECT s.id as id, concat (v.Kurzname,': ', s.Sparte) as anzeige
                     from b_sparte as s
                     join b_regionalverband as v on s.Verband = v.id
+                    WHERE
+                        FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0
                     ORDER BY anzeige;
-        "
+        "*/
     ),
     "suchqueries" => array(
         "Sparte" => "SELECT s.id, s.Sparte, v.Verband, v.Kurzname
