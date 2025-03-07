@@ -375,28 +375,44 @@ $tabelle_upper = strtoupper($tabelle)
                 const aCell = a.querySelector(`td[data-field='${column}']`);
                 const bCell = b.querySelector(`td[data-field='${column}']`);
 
-                let aText = aCell.innerText.trim();
-                let bText = bCell.innerText.trim();
+                let aText, bText;
 
-                const aInput = aCell.querySelector('input, select');
-                const bInput = b.querySelector('input, select');
-
-                if (aInput) {
-                    if (aInput.tagName.toLowerCase() === 'select') {
-                        aText = aInput.options[aInput.selectedIndex].text.trim();
+                // Get displayed text from cells
+                if (aCell) {
+                    const aSelect = aCell.querySelector('select');
+                    const aInput = aCell.querySelector('input');
+                    if (aSelect) {
+                        // For select boxes, get the selected option text
+                        aText = aSelect.options[aSelect.selectedIndex] ? aSelect.options[aSelect.selectedIndex].text : '';
+                    } else if (aInput) {
+                        aText = aInput.value;
                     } else {
-                        aText = aInput.value.trim(); // Ergänzt
+                        aText = aCell.innerText;
                     }
+                } else {
+                    aText = '';
                 }
 
-                if (bInput) {
-                    if (bInput.tagName.toLowerCase() === 'select') {
-                        bText = bInput.options[b.selectedIndex].text.trim();
+                if (bCell) {
+                    const bSelect = bCell.querySelector('select');
+                    const bInput = bCell.querySelector('input');
+                    if (bSelect) {
+                        // For select boxes, get the selected option text
+                        bText = bSelect.options[bSelect.selectedIndex] ? bSelect.options[bSelect.selectedIndex].text : '';
+                    } else if (bInput) {
+                        bText = bInput.value;
                     } else {
-                        bText = bInput.value.trim(); // Ergänzt
+                        bText = bCell.innerText;
                     }
+                } else {
+                    bText = '';
                 }
 
+                // Trim the text values
+                aText = aText.trim();
+                bText = bText.trim();
+
+                // Check if values are numbers for numeric sorting
                 const aNumber = parseFloat(aText.replace(',', '.'));
                 const bNumber = parseFloat(bText.replace(',', '.'));
 
@@ -404,7 +420,9 @@ $tabelle_upper = strtoupper($tabelle)
                 if (!isNaN(aNumber) && !isNaN(bNumber)) {
                     primaryComparison = order === 'asc' ? aNumber - bNumber : bNumber - aNumber;
                 } else {
-                    primaryComparison = order === 'asc' ? aText.localeCompare(bText, undefined, { numeric: true }) : bText.localeCompare(aText, undefined, { numeric: true });
+                    primaryComparison = order === 'asc' ? 
+                        aText.localeCompare(bText, undefined, { numeric: true, sensitivity: 'base' }) : 
+                        bText.localeCompare(aText, undefined, { numeric: true, sensitivity: 'base' });
                 }
 
                 if (primaryComparison !== 0 || lastSortColumn === null) {
@@ -415,35 +433,51 @@ $tabelle_upper = strtoupper($tabelle)
                 const aLastCell = a.querySelector(`td[data-field='${lastSortColumn}']`);
                 const bLastCell = b.querySelector(`td[data-field='${lastSortColumn}']`);
 
-                let aLastText = aLastCell.innerText.trim();
-                let bLastText = bLastCell.innerText.trim();
+                let aLastText, bLastText;
 
-                const aLastInput = aLastCell.querySelector('input, select');
-                const bLastInput = bLastCell.querySelector('input, select');
-
-                if (aLastInput) {
-                    if (aLastInput.tagName.toLowerCase() === 'select') {
-                        aLastText = aLastInput.options[aLastInput.selectedIndex].text.trim();
+                // Get displayed text from last sorted cells
+                if (aLastCell) {
+                    const aLastSelect = aLastCell.querySelector('select');
+                    const aLastInput = aLastCell.querySelector('input');
+                    if (aLastSelect) {
+                        aLastText = aLastSelect.options[aLastSelect.selectedIndex] ? aLastSelect.options[aLastSelect.selectedIndex].text : '';
+                    } else if (aLastInput) {
+                        aLastText = aLastInput.value;
                     } else {
-                        aLastText = aLastInput.value.trim(); // Ergänzt
+                        aLastText = aLastCell.innerText;
                     }
+                } else {
+                    aLastText = '';
                 }
 
-                if (bLastInput) {
-                    if (bLastInput.tagName.toLowerCase() === 'select') {
-                        bLastText = bLastInput.options[bLastInput.selectedIndex].text.trim();
+                if (bLastCell) {
+                    const bLastSelect = bLastCell.querySelector('select');
+                    const bLastInput = bLastCell.querySelector('input');
+                    if (bLastSelect) {
+                        bLastText = bLastSelect.options[bLastSelect.selectedIndex] ? bLastSelect.options[bLastSelect.selectedIndex].text : '';
+                    } else if (bLastInput) {
+                        bLastText = bLastInput.value;
                     } else {
-                        bLastText = bLastInput.value.trim(); // Ergänzt
+                        bLastText = bLastCell.innerText;
                     }
+                } else {
+                    bLastText = '';
                 }
 
+                // Trim the text values
+                aLastText = aLastText.trim();
+                bLastText = bLastText.trim();
+
+                // Check if values are numbers for numeric sorting
                 const aLastNumber = parseFloat(aLastText.replace(',', '.'));
                 const bLastNumber = parseFloat(bLastText.replace(',', '.'));
 
                 if (!isNaN(aLastNumber) && !isNaN(bLastNumber)) {
                     return lastSortOrder === 'asc' ? aLastNumber - bLastNumber : bLastNumber - aLastNumber;
                 } else {
-                    return lastSortOrder === 'asc' ? aLastText.localeCompare(bLastText, undefined, { numeric: true }) : bLastText.localeCompare(aLastText, undefined, { numeric: true });
+                    return lastSortOrder === 'asc' ?
+                        aLastText.localeCompare(bLastText, undefined, { numeric: true, sensitivity: 'base' }) :
+                        bLastText.localeCompare(aLastText, undefined, { numeric: true, sensitivity: 'base' });
                 }
             });
 
