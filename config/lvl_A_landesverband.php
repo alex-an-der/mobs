@@ -14,9 +14,10 @@ $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_regionalverband",
     "auswahltext" => "Regionalverbände",
     "writeaccess" => true,
-    "query" => "select id, Verband, Kurzname, Internetadresse from b_regionalverband order by id desc;",
+    "query" => "select id, BKV, Verband, Kurzname, Internetadresse from b_regionalverband order by id desc;",
     "spaltenbreiten" => array(
-        "Name"              => "400",
+        "BKV"               => "100",
+        "Verband"           => "400",
         "Kurzname"          => "200",
         "Internetadresse"   => "400"
     )

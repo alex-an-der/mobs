@@ -25,8 +25,6 @@ BEGIN
 END;//
 DELIMITER ;
 
-
-
 -- -----------------------------------------------------------------------------------
 
 DROP FUNCTION IF EXISTS berechtigte_elemente;

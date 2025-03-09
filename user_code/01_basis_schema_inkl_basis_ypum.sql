@@ -51,20 +51,22 @@ CREATE TABLE `b___sportart` (
 DROP TABLE IF EXISTS `b_bsg`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `b_bsg` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `Verband` bigint unsigned NOT NULL,
-  `BSG` varchar(100) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'NEU',
-  `Ansprechpartner` bigint unsigned DEFAULT NULL,
-  `RE_Name` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `RE_Name2` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `RE_Strasse_Nr` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `RE_Strasse2` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `RE_PLZ_Ort` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_bsg_verband` (`Verband`),
-  CONSTRAINT `FK_bsg_verband` FOREIGN KEY (`Verband`) REFERENCES `b_regionalverband` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `b_bsg` ( 
+  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `Verband` BIGINT UNSIGNED NOT NULL,
+  `BSG` VARCHAR(100) NOT NULL DEFAULT 'NEU' ,
+  `Ansprechpartner` BIGINT UNSIGNED NULL,
+  `RE_Name` VARCHAR(100) NULL,
+  `RE_Name2` VARCHAR(100) NULL,
+  `RE_Strasse_Nr` VARCHAR(100) NULL,
+  `RE_Strasse2` VARCHAR(100) NULL,
+  `RE_PLZ_Ort` VARCHAR(100) NULL,
+  `VKZ` SMALLINT UNSIGNED NULL,
+   PRIMARY KEY (`id`),
+  CONSTRAINT `FK_bsg_verband` FOREIGN KEY (`Verband`) REFERENCES `b_regionalverband` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `VKZ_pro_Verband_unique` UNIQUE (`Verband`, `VKZ`)
+)
+ENGINE = InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -158,15 +160,18 @@ CREATE TABLE `b_mitglieder_in_sparten` (
 DROP TABLE IF EXISTS `b_regionalverband`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `b_regionalverband` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `Verband` varchar(100) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'NEU',
-  `Kurzname` varchar(50) COLLATE utf8mb4_general_ci DEFAULT 'NEU',
-  `Internetadresse` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_verband` (`Verband`)
-) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Ortsverbände des niedersächsischen Landes-BSV';
+CREATE TABLE `b_regionalverband` ( 
+  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `Verband` VARCHAR(100) NOT NULL DEFAULT 'NEU' ,
+  `Kurzname` VARCHAR(50) NULL DEFAULT 'NEU' ,
+  `Internetadresse` VARCHAR(100) NULL,
+  `BKV` SMALLINT UNSIGNED NULL,
+   PRIMARY KEY (`id`),
+  CONSTRAINT `BKV_unique` UNIQUE (`BKV`)
+)
+ENGINE = InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
 
 --
 -- Table structure for table `b_regionalverband_rechte`

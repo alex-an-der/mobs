@@ -61,7 +61,7 @@ $anzuzeigendeDaten[] = array(
     "auswahltext" => "BSG im Regionalverband",
     "writeaccess" => true,
     "query" => "SELECT 
-        id, Verband, BSG 
+        id, Verband, VKZ, BSG 
         from b_bsg as b
         WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0 
         order by id desc;
@@ -75,6 +75,7 @@ $anzuzeigendeDaten[] = array(
     ),
     "spaltenbreiten" => array(
         "Verband"                       => "380",
+        "VKZ"                           => "100",
         "BSG"                           => "320"
     ) 
 );
