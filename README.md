@@ -101,6 +101,8 @@ $statistik[] = array(
     "typ"   => "torte"
 );
 ```
+## registrierung.php
+Die Datei ypum-Datei **registrierung.php** muss individuell angepast werden. Daher verweisen die Dateier **user_code/register.php** und **ypum/yfront/register.php** per Hardlink auf die gleiche Datei.
 
 # LOP ab hier
 
