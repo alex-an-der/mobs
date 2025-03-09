@@ -1,4 +1,4 @@
-DROP TRIGGER IF EXISTS tr_user_first_login;
+/*DROP TRIGGER IF EXISTS tr_user_first_login;
 DELIMITER //
 CREATE TRIGGER tr_user_first_login 
 AFTER UPDATE ON y_user
@@ -15,7 +15,36 @@ BEGIN
         WHERE ud.userID = NEW.id;
     END IF;
 END;//
+DELIMITER ;*/
+
+DROP TRIGGER IF EXISTS tr_user_first_login;
+DELIMITER //
+CREATE TRIGGER tr_user_first_login 
+AFTER UPDATE ON y_user
+FOR EACH ROW
+BEGIN
+    IF OLD.lastlogin IS NULL AND NEW.lastlogin IS NOT NULL AND NEW.run_trigger = 1 THEN
+        INSERT INTO b_mitglieder (y_id, Mail, Vorname, Nachname, Geschlecht, Geburtsdatum)
+            SELECT 
+                NEW.id,
+                NEW.mail,
+                ud.vname,
+                ud.nname,
+                (select fieldvalue
+                from y_user_details as d
+                join y_user_fields as f on d.fieldID = f.ID 
+                WHERE userID = NEW.id and fieldname = 'geschlecht'),
+                (select fieldvalue
+                from y_user_details as d
+                join y_user_fields as f on d.fieldID = f.ID 
+                WHERE userID = NEW.id and fieldname = 'gebdatum')
+            FROM y_v_userdata ud
+            WHERE ud.userID = NEW.id;
+    END IF;
+END;//
 DELIMITER ;
+
+
 
 -- -----------------------------------------------------------------------------------
 
