@@ -14,30 +14,21 @@ require_once(__DIR__.'/../yback/include/inc_main.php')
 <form method='post'>
 	<p>Mailadresse<br><input required class='form-control' required type='email' name='mail' value='<?= isset($_POST['mail']) ? $_POST['mail'] : '' ?>'/></p>
 	<p>Vorname<br><input required class='form-control' type='text' name='vname' value='<?= isset($_POST['vname']) ? $_POST['vname'] : '' ?>' /></p>
+	<p>Nachname<br><input required class='form-control' type='text' name='nname' value='<?= isset($_POST['nname']) ? $_POST['nname'] : '' ?>' /></p>
 	<?php
-	require_once(__DIR__.'/../yback/include/db_connection.php');
+	require_once(__DIR__."/../../config/db_connect.php");
 	$options = '';
 	$query = "SELECT id, auswahl FROM b___geschlecht";
 	$result = $db->query($query);
-	if ($result->num_rows > 0) {
-		while ($row = $result->fetch_assoc()) {
-			$options .= "<option value='{$row['id']}'>{$row['auswahl']}</option>";
-		}
+	foreach ($result['data'] as $row) {
+		//$options .= "<option value='{$row['id']}'>{$row['auswahl']}</option>";
+		$options .= "<option value='".$row['id']."'>".$row['auswahl']."</option>";
 	}
 	?>
 	<p>Geschlecht<br>
 		<select required class='form-control' name='geschlecht'>
 			<option value='' disabled selected>Bitte wählen...</option>
 			<?= $options ?>
-		</select>
-	</p>
-	<p>Nachname<br><input required class='form-control' type='text' name='nname' value='<?= isset($_POST['nname']) ? $_POST['nname'] : '' ?>' /></p>
-	<p>Geschlecht<br>
-		<select required class='form-control' name='geschlecht'>
-			<option value='' disabled selected>Bitte wählen...</option>
-			<option value='d'>divers</option>
-			<option value='m'>männlich</option>
-			<option value='w'>weiblich</option>
 		</select>
 	</p>
 	<p>Geburtsdatum<br><input required class='form-control' type='date' name='gebdatum' value='<?= isset($_POST['geburtsdatum']) ? $_POST['geburtsdatum'] : '' ?>' /></p>
