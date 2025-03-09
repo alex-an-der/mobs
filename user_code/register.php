@@ -21,7 +21,6 @@ require_once(__DIR__.'/../yback/include/inc_main.php')
 	$query = "SELECT id, auswahl FROM b___geschlecht";
 	$result = $db->query($query);
 	foreach ($result['data'] as $row) {
-		//$options .= "<option value='{$row['id']}'>{$row['auswahl']}</option>";
 		$options .= "<option value='".$row['id']."'>".$row['auswahl']."</option>";
 	}
 	?>
