@@ -31,6 +31,14 @@ require_once(__DIR__.'/../yback/include/inc_main.php')
 		</select>
 	</p>
 	<p>Geburtsdatum<br><input required class='form-control' type='date' name='gebdatum' value='<?= isset($_POST['geburtsdatum']) ? $_POST['geburtsdatum'] : '' ?>' /></p>
+	<p>
+		<div class="form-check">
+			<input class="form-check-input" type="checkbox" name="okformail" value="1" id="okformail" checked>
+			<label class="form-check-label" for="okformail">
+				Ich bin einverstanden, &uuml;ber Veranstaltungen und relevante Turniere per Mail vom Betriebssportverband unterrichtet zu werden. Diese Einstellung kann ich jederzeit &auml;ndern.
+			</label>
+		</div>
+	</p>
 	<p><button type='submit' class='btn btn-success btn-block' name='saveandmail'>Speichern und Bestätigungsmail senden</button></p>
 </form>
 </div></div>
