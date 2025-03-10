@@ -31,6 +31,33 @@ DELIMITER ;
 
 -- -----------------------------------------------------------------------------------
 
+DROP TRIGGER IF EXISTS before_delete_b_mitglieder;
+
+DELIMITER //
+
+CREATE TRIGGER before_delete_b_mitglieder
+BEFORE DELETE ON b_mitglieder
+FOR EACH ROW
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        -- Signal an error to prevent deletion
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error inserting into b_mitglieder_deleted';
+    END;
+
+    -- Insert the data into b_mitglieder_deleted
+    INSERT INTO b_mitglieder_deleted (
+        id, y_id, BSG, Vorname, Nachname, Mail, Geschlecht, Geburtsdatum, Mailbenachrichtigung, delete_date
+    ) VALUES (
+        OLD.id, OLD.y_id, OLD.BSG, OLD.Vorname, OLD.Nachname, OLD.Mail, OLD.Geschlecht, OLD.Geburtsdatum, OLD.Mailbenachrichtigung, NOW()
+    );
+END;
+//
+
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------
+
 DROP FUNCTION IF EXISTS berechtigte_elemente;
 DELIMITER //
 

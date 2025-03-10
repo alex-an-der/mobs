@@ -148,8 +148,31 @@ CREATE INDEX `FK_mitglieder_Mailbenachrichtigung`
 ON `b_mitglieder` (
   `Mailbenachrichtigung` ASC
 );
-
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `b_mitglieder_deleted`
+--
+
+DROP TABLE IF EXISTS `b_mitglieder_deleted`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `b_mitglieder_deleted` ( 
+  `id` BIGINT UNSIGNED NOT NULL,
+  `y_id` BIGINT UNSIGNED NULL,
+  `BSG` BIGINT UNSIGNED NULL,
+  `Vorname` VARCHAR(100) NULL,
+  `Nachname` VARCHAR(100) NULL,
+  `Mail` VARCHAR(50) NULL,
+  `Geschlecht` INT UNSIGNED NULL,
+  `Geburtsdatum` DATE NOT NULL,
+  `Mailbenachrichtigung` TINYINT UNSIGNED NULL,
+  `delete_date` DATETIME NULL,
+   PRIMARY KEY (`id`)
+)
+ENGINE = InnoDB;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
 
 --
 -- Table structure for table `b_mitglieder_in_sparten`
