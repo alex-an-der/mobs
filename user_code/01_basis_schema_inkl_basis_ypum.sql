@@ -15,6 +15,15 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
+CREATE TABLE `b___an_aus` ( 
+  `id` TINYINT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `wert` VARCHAR(250) NULL,
+   PRIMARY KEY (`id`)
+)
+ENGINE = InnoDB;
+
+
+
 --
 -- Table structure for table `b___geschlecht`
 --
@@ -114,21 +123,32 @@ CREATE TABLE `b_individuelle_berechtigungen` (
 DROP TABLE IF EXISTS `b_mitglieder`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `b_mitglieder` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `BSG` bigint unsigned DEFAULT NULL,
-  `Vorname` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `Nachname` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `Mail` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'y_user - Verknüpfung',
-  `y_id` bigint unsigned DEFAULT NULL,
-  `Geschlecht` int unsigned DEFAULT NULL,
-  `Geburtsdatum` date NOT NULL DEFAULT '1980-07-01',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `y_id` (`y_id`),
-  KEY `FK_mitglieder_bsg` (`BSG`),
+CREATE TABLE `b_mitglieder` ( 
+  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `y_id` BIGINT UNSIGNED NULL,
+  `BSG` BIGINT UNSIGNED NULL,
+  `Vorname` VARCHAR(100) NULL,
+  `Nachname` VARCHAR(100) NULL,
+  `Mail` VARCHAR(50) NULL COMMENT 'y_user - Verknüpfung' ,
+  `Geschlecht` INT UNSIGNED NULL,
+  `Geburtsdatum` DATE NOT NULL DEFAULT '1980-07-01' ,
+  `Mailbenachrichtigung` TINYINT UNSIGNED NULL,
+   PRIMARY KEY (`id`),
   CONSTRAINT `FK_mitglieder_bsg` FOREIGN KEY (`BSG`) REFERENCES `b_bsg` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `FK_mitglieder_yuser` FOREIGN KEY (`y_id`) REFERENCES `y_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  CONSTRAINT `FK_mitglieder_Mailbenachrichtigung` FOREIGN KEY (`Mailbenachrichtigung`) REFERENCES `b___an_aus` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_mitglieder_yuser` FOREIGN KEY (`y_id`) REFERENCES `y_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `y_id` UNIQUE (`y_id`)
+)
+ENGINE = InnoDB;
+CREATE INDEX `FK_mitglieder_bsg` 
+ON `b_mitglieder` (
+  `BSG` ASC
+);
+CREATE INDEX `FK_mitglieder_Mailbenachrichtigung` 
+ON `b_mitglieder` (
+  `Mailbenachrichtigung` ASC
+);
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

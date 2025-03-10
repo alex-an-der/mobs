@@ -39,7 +39,7 @@ $anzuzeigendeDaten[] = array(
     "auswahltext" => "Meine Daten",
     "writeaccess" => true,
     "import" => false,
-    "query" => "SELECT m.id, m.Vorname, m.Nachname, m.Mail, m.Geschlecht, m.Geburtsdatum
+    "query" => "SELECT m.id, m.Vorname, m.Nachname, m.Mail, m.Geschlecht, m.Geburtsdatum, m.Mailbenachrichtigung
             FROM b_mitglieder as m 
             join y_user as y on y.id = m.y_id
             WHERE y.id = $uid
@@ -48,13 +48,19 @@ $anzuzeigendeDaten[] = array(
     "referenzqueries" => array(
         "Geschlecht" => "SELECT id, auswahl as anzeige
                         from b___geschlecht;
+        ",
+        "Mailbenachrichtigung" => "SELECT id, wert as anzeige
+                        from b___an_aus;
         "
     ),
     "spaltenbreiten" => array(
         "BSG"                       => "300",
         "Vorname"                   => "200",
         "Nachname"                  => "200",
-        "Mail"                      => "250"
+        "Mail"                      => "250",
+        "Geschlecht"                => "120",
+        "Geburtsdatum"              => "150",
+        "Mailbenachrichtigung"      => "100"
     )  
 );
 

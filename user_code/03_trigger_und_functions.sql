@@ -5,7 +5,7 @@ AFTER UPDATE ON y_user
 FOR EACH ROW
 BEGIN
     IF OLD.lastlogin IS NULL AND NEW.lastlogin IS NOT NULL AND NEW.run_trigger = 1 THEN
-        INSERT INTO b_mitglieder (y_id, Mail, Vorname, Nachname, Geschlecht, Geburtsdatum)
+        INSERT INTO b_mitglieder (y_id, Mail, Vorname, Nachname, Geschlecht, Geburtsdatum, Mailbenachrichtigung)
             SELECT 
                 NEW.id,
                 NEW.mail,
@@ -18,7 +18,11 @@ BEGIN
                 (select fieldvalue
                 from y_user_details as d
                 join y_user_fields as f on d.fieldID = f.ID 
-                WHERE userID = NEW.id and fieldname = 'gebdatum')
+                WHERE userID = NEW.id and fieldname = 'gebdatum'),
+                (select fieldvalue
+                from y_user_details as d
+                join y_user_fields as f on d.fieldID = f.ID 
+                WHERE userID = NEW.id and fieldname = 'okformail')
             FROM y_v_userdata ud
             WHERE ud.userID = NEW.id;
     END IF;
