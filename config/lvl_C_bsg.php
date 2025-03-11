@@ -55,7 +55,7 @@ $anzuzeigendeDaten[] = array(
     "auswahltext" => "BSG: Mitgliederdaten (Stammmitglieder)",
     "writeaccess" => true,
     "import" => false,
-    "query" => "SELECT m.id as id, BSG, Vorname, Nachname, Mail, m.Geschlecht, m.Geburtsdatum
+    "query" => "SELECT m.id as id, BSG, Vorname, Nachname, Mail, m.Geschlecht, m.Geburtsdatum, aktiv
                 from b_mitglieder as m
                 WHERE FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 or 
                 ( BSG IS NULL AND FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0)
@@ -69,6 +69,9 @@ $anzuzeigendeDaten[] = array(
         ",
         "Geschlecht" => "SELECT id, auswahl as anzeige
                         from b___geschlecht;
+        ",
+        "aktiv" => "SELECT id, wert as anzeige
+                        from b___an_aus;
         "
     ),
     "spaltenbreiten" => array(
@@ -86,7 +89,7 @@ $anzuzeigendeDaten[] = array(
     "auswahltext" => "BSG: Spartenzuweisung",
     "writeaccess" => true,
 
-    "query" => "SELECT id,  Mitglied, BSG, Sparte 
+    "query" => "SELECT id, Mitglied, BSG, Sparte 
                     from b_mitglieder_in_sparten as mis
                     WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 and
                     FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0
@@ -112,14 +115,7 @@ $anzuzeigendeDaten[] = array(
                     JOIN b_regionalverband as r ON r.id = b.Verband
                     JOIN b_sparte as s ON s.Verband = r.id
                     WHERE Nutzer = $uid;
-                    "
-        /*"Sparte" => "SELECT s.id as id, concat (v.Kurzname,': ', s.Sparte) as anzeige
-                    from b_sparte as s
-                    join b_regionalverband as v on s.Verband = v.id
-                    WHERE
-                        FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0
-                    ORDER BY anzeige;
-        "*/
+        "
     ),
     "suchqueries" => array(
         "Sparte" => "SELECT s.id, s.Sparte, v.Verband, v.Kurzname

@@ -33,13 +33,12 @@ require_once(__DIR__.'/../yback/include/inc_main.php')
 	<p>Geburtsdatum<br><input required class='form-control' type='date' name='gebdatum' value='<?= isset($_POST['geburtsdatum']) ? $_POST['geburtsdatum'] : '' ?>' /></p>
 	<?php
 	$options_an_aus = '';
-	$query_an_aus = "SELECT id, wert FROM b___an_aus ORDER BY id DESC";
+	$query_an_aus = "SELECT id, wert FROM b___an_aus ORDER BY id ASC";
 	$result_an_aus = $db->query($query_an_aus);
-	$preselected_id = null;
+	$preselected_id = 1;
 	foreach ($result_an_aus['data'] as $row) {
-		$selected = ($preselected_id === null) ? 'selected' : '';
+		$selected = ($row['id'] == $preselected_id) ? 'selected' : '';
 		$options_an_aus .= "<option value='".$row['id']."' $selected>".$row['wert']."</option>";
-		$preselected_id = $row['id'];
 	}
 
 	?>
