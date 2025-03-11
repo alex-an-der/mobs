@@ -59,8 +59,8 @@ $anzuzeigendeDaten[] = array(
         "Nachname"                  => "200",
         "Mail"                      => "250",
         "Geschlecht"                => "120",
-        "Geburtsdatum"              => "150",
-        "Mailbenachrichtigung"      => "100"
+        "Geburtsdatum"              => "200",
+        "Mailbenachrichtigung"      => "150"
     )  
 );
 

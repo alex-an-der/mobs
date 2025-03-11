@@ -31,38 +31,41 @@ DELIMITER ;
 
 -- -----------------------------------------------------------------------------------
 
-DROP TRIGGER IF EXISTS before_delete_b_mitglieder;
+DROP TRIGGER IF EXISTS before_delete_y_user;
 DELIMITER //
-
-CREATE TRIGGER before_delete_b_mitglieder
-
-BEFORE DELETE ON b_mitglieder
+CREATE TRIGGER before_delete_y_user
+BEFORE DELETE ON `y_user`
 FOR EACH ROW
 BEGIN
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    -- Declare variables for error handling
+    DECLARE success BOOLEAN DEFAULT TRUE;
+    DECLARE error_msg VARCHAR(255);
     
+    -- Use exception handler
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
     BEGIN
-        -- Log the error in the log table
-        INSERT INTO log (eintrag) VALUES (CONCAT('Error inserting into b_mitglieder_deleted for id: ', OLD.id));
-        -- Signal an error to prevent deletion
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error inserting into b_mitglieder_deleted';
+        -- Set error flag and message
+        SET success = FALSE;
+        SET error_msg = CONCAT('Error occurred while backing up user data for deletion. User ID: ', OLD.id);
+        
+        -- Log the error to the existing log table
+        INSERT INTO `log` (`zeit`, `eintrag`) 
+        VALUES (NOW(), error_msg);
+        
+        -- Signal to prevent the delete operation
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = error_msg;
     END;
-
-    -- Log entry before attempting to insert into b_mitglieder_deleted
-    INSERT INTO log (eintrag) VALUES (CONCAT('Attempting to insert into b_mitglieder_deleted for id: ', OLD.id));
-
-    -- Insert the data into b_mitglieder_deleted
-    INSERT INTO b_mitglieder_deleted (
-        id, y_id, BSG, Vorname, Nachname, Mail, Geschlecht, Geburtsdatum, Mailbenachrichtigung, delete_date
-    ) VALUES (
-        OLD.id, OLD.y_id, OLD.BSG, OLD.Vorname, OLD.Nachname, OLD.Mail, OLD.Geschlecht, OLD.Geburtsdatum, OLD.Mailbenachrichtigung, NOW()
-    );
-
-    -- Log entry to indicate successful insertion
-    INSERT INTO log (eintrag) VALUES (CONCAT('Successfully inserted into b_mitglieder_deleted for id: ', OLD.id));
-END;
-//
-
+    
+    -- Try to insert into deleted users table
+    INSERT INTO `y_deleted_users` (`y_id`, `mail`, `delete_date`)
+    VALUES (OLD.id, OLD.mail, NOW());
+    
+    -- Log successful backup before deletion
+    INSERT INTO `log` (`zeit`, `eintrag`)
+    VALUES (NOW(), CONCAT('User with ID: ', OLD.id, ' and email: ', OLD.mail, ' will be deleted. Data backed up.'));
+    
+END //
 DELIMITER ;
 
 -- -----------------------------------------------------------------------------------

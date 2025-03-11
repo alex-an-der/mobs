@@ -33,15 +33,17 @@ require_once(__DIR__.'/../yback/include/inc_main.php')
 	<p>Geburtsdatum<br><input required class='form-control' type='date' name='gebdatum' value='<?= isset($_POST['geburtsdatum']) ? $_POST['geburtsdatum'] : '' ?>' /></p>
 	<?php
 	$options_an_aus = '';
-	$query_an_aus = "SELECT id, wert FROM b___an_aus";
+	$query_an_aus = "SELECT id, wert FROM b___an_aus ORDER BY id DESC LIMIT 1";
 	$result_an_aus = $db->query($query_an_aus);
+	$preselected_id = null;
 	foreach ($result_an_aus['data'] as $row) {
 		$options_an_aus .= "<option value='".$row['id']."'>".$row['wert']."</option>";
+		$preselected_id = $row['id'];
 	}
 	?>
 	<p>Ich bin einverstanden, &uuml;ber Veranstaltungen und relevante Turniere per Mail vom Betriebssportverband unterrichtet zu werden. Diese Einstellung kann ich jederzeit &auml;ndern. <br>
 		<select required class='form-control' name='okformail'>
-			<option value='' disabled selected>Bitte wählen...</option>
+			<option value='' disabled>Bitte wählen...</option>
 			<?= $options_an_aus ?>
 		</select>
 	</p>
@@ -56,12 +58,17 @@ ini_set('display_startup_errors', 1);
 
 if(isset($_POST['saveandmail'])){
 	$datensatz = array();
-try{
-	$usm->writeUserData($_POST, false, true);
-	$conf->redirect('registermail_sent.php');
-}catch(Exception  $e){
-	echo('<b>Fehler! </b>'.$e->getMessage());
-}}?>
+	try{
+		// Ensure the geschlecht value (ID) is correctly handled
+		$geschlecht = isset($_POST['geschlecht']) ? (int)$_POST['geschlecht'] : null;
+		 $okformail = isset($_POST['okformail']) ? (int)$_POST['okformail'] : $preselected_id;
+		$usm->writeUserData(array_merge($_POST, ['geschlecht' => $geschlecht, 'okformail' => $okformail]), false, true);
+		$conf->redirect('registermail_sent.php');
+	}catch(Exception  $e){
+		echo('<b>Fehler! </b>'.$e->getMessage());
+	}
+}
+?>
 
 </body>
 </html>
