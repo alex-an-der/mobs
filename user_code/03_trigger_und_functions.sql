@@ -32,18 +32,24 @@ DELIMITER ;
 -- -----------------------------------------------------------------------------------
 
 DROP TRIGGER IF EXISTS before_delete_b_mitglieder;
-
 DELIMITER //
 
 CREATE TRIGGER before_delete_b_mitglieder
+
 BEFORE DELETE ON b_mitglieder
 FOR EACH ROW
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    
     BEGIN
+        -- Log the error in the log table
+        INSERT INTO log (eintrag) VALUES (CONCAT('Error inserting into b_mitglieder_deleted for id: ', OLD.id));
         -- Signal an error to prevent deletion
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error inserting into b_mitglieder_deleted';
     END;
+
+    -- Log entry before attempting to insert into b_mitglieder_deleted
+    INSERT INTO log (eintrag) VALUES (CONCAT('Attempting to insert into b_mitglieder_deleted for id: ', OLD.id));
 
     -- Insert the data into b_mitglieder_deleted
     INSERT INTO b_mitglieder_deleted (
@@ -51,6 +57,9 @@ BEGIN
     ) VALUES (
         OLD.id, OLD.y_id, OLD.BSG, OLD.Vorname, OLD.Nachname, OLD.Mail, OLD.Geschlecht, OLD.Geburtsdatum, OLD.Mailbenachrichtigung, NOW()
     );
+
+    -- Log entry to indicate successful insertion
+    INSERT INTO log (eintrag) VALUES (CONCAT('Successfully inserted into b_mitglieder_deleted for id: ', OLD.id));
 END;
 //
 
