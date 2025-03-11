@@ -33,17 +33,18 @@ require_once(__DIR__.'/../yback/include/inc_main.php')
 	<p>Geburtsdatum<br><input required class='form-control' type='date' name='gebdatum' value='<?= isset($_POST['geburtsdatum']) ? $_POST['geburtsdatum'] : '' ?>' /></p>
 	<?php
 	$options_an_aus = '';
-	$query_an_aus = "SELECT id, wert FROM b___an_aus ORDER BY id DESC LIMIT 1";
+	$query_an_aus = "SELECT id, wert FROM b___an_aus ORDER BY id DESC";
 	$result_an_aus = $db->query($query_an_aus);
 	$preselected_id = null;
 	foreach ($result_an_aus['data'] as $row) {
-		$options_an_aus .= "<option value='".$row['id']."'>".$row['wert']."</option>";
+		$selected = ($preselected_id === null) ? 'selected' : '';
+		$options_an_aus .= "<option value='".$row['id']."' $selected>".$row['wert']."</option>";
 		$preselected_id = $row['id'];
 	}
+
 	?>
 	<p>Ich bin einverstanden, &uuml;ber Veranstaltungen und relevante Turniere per Mail vom Betriebssportverband unterrichtet zu werden. Diese Einstellung kann ich jederzeit &auml;ndern. <br>
 		<select required class='form-control' name='okformail'>
-			<option value='' disabled>Bitte wählen...</option>
 			<?= $options_an_aus ?>
 		</select>
 	</p>

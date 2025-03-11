@@ -60,7 +60,7 @@ $anzuzeigendeDaten[] = array(
         "Mail"                      => "250",
         "Geschlecht"                => "120",
         "Geburtsdatum"              => "200",
-        "Mailbenachrichtigung"      => "150"
+        "Mailbenachrichtigung"      => "200"
     )  
 );
 
