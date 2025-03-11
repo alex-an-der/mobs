@@ -78,6 +78,27 @@ CREATE TABLE `b_bsg` (
 ENGINE = InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+DROP TABLE IF EXISTS `b_bsg_deleted`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `b_bsg_deleted` ( 
+  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `Verband` BIGINT UNSIGNED NOT NULL,
+  `BSG` VARCHAR(100) NOT NULL DEFAULT 'NEU' ,
+  `Ansprechpartner` BIGINT UNSIGNED NULL,
+  `RE_Name` VARCHAR(100) NULL,
+  `RE_Name2` VARCHAR(100) NULL,
+  `RE_Strasse_Nr` VARCHAR(100) NULL,
+  `RE_Strasse2` VARCHAR(100) NULL,
+  `RE_PLZ_Ort` VARCHAR(100) NULL,
+  `VKZ` SMALLINT UNSIGNED NULL,
+  `delete_date` DATETIME NULL,
+   PRIMARY KEY (`id`)
+)
+ENGINE = InnoDB;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
 --
 -- Table structure for table `b_bsg_rechte`
 --
