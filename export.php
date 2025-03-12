@@ -28,17 +28,75 @@ $query = $anzuzeigendeDaten[$tabid]['query'];
 if (!$exportAll && !empty($ids)) {
     $idArray = explode(',', $ids);
     $idList = implode(',', array_map('intval', $idArray));
-    $query = preg_replace('/WHERE/i', "WHERE id IN ($idList) AND ", $query, 1);
-    if (stripos($query, 'WHERE') === false) {
-        $query .= " WHERE id IN ($idList)";
+    
+    // Debug logging
+    error_log("Original query: $query");
+    error_log("Filtered IDs: $idList");
+    
+    // Der wahrscheinliche Fehler: IDs werden möglicherweise falsch in den Query eingebaut
+    // Statt generischer Anpassung, sollten wir die Tabellenstruktur genauer analysieren
+    
+    // Bestimme den richtigen Tabellennamen und ID-Feld aus der Query
+    $tableInfo = extractTableInfo($query);
+    $idField = $tableInfo['idField'];
+    
+    error_log("Using ID field: $idField for filtered query");
+    
+    if (stripos($query, 'WHERE') !== false) {
+        // WHERE bereits vorhanden - füge AND id IN hinzu
+        $query = preg_replace('/WHERE/i', "WHERE $idField IN ($idList) AND ", $query, 1);
+    } else if (stripos($query, 'GROUP BY') !== false) {
+        // Füge WHERE vor GROUP BY ein
+        $query = preg_replace('/(GROUP BY)/i', "WHERE $idField IN ($idList) $1", $query, 1);
+    } else if (stripos($query, 'ORDER BY') !== false) {
+        // Füge WHERE vor ORDER BY ein
+        $query = preg_replace('/(ORDER BY)/i', "WHERE $idField IN ($idList) $1", $query, 1);
+    } else {
+        // Füge WHERE am Ende hinzu
+        $query .= " WHERE $idField IN ($idList)";
+    }
+    
+    error_log("Modified filtered query: $query");
+}
+
+// Execute query with error reporting
+try {
+    error_log("Executing query: " . substr($query, 0, 500) . (strlen($query) > 500 ? "..." : ""));
+    $result = $db->query($query);
+    
+    // Log result information for debugging
+    if (isset($result['data'])) {
+        error_log("Query returned " . count($result['data']) . " rows");
+        if (count($result['data']) > 0) {
+            $sample = json_encode(array_slice($result['data'], 0, 1));
+            error_log("Sample data: $sample");
+        }
+    } else {
+        error_log("Query returned no data array");
+        if (isset($result['error'])) {
+            error_log("Database error: " . $result['error']);
+        }
+    }
+} catch (Exception $e) {
+    error_log("Exception in database query: " . $e->getMessage());
+    if ($format === 'maillist') {
+        $result = ['data' => []];
+    } else {
+        die('Database error: ' . $e->getMessage());
     }
 }
 
-$result = $db->query($query);
-if (!isset($result['data'])) {
-    die('No data available');
+// Verbesserte Fehlerbehandlung
+if (!isset($result['data']) || !is_array($result['data']) || empty($result['data'])) {
+    if ($format === 'maillist') {
+        // Für Maillist-Format zeige leere Liste an, anstatt zu sterben
+        $data = [];
+    } else {
+        die('No data available');
+    }
+} else {
+    $data = $result['data'];
 }
-$data = $result['data'];
 
 // Process foreign key references
 $FKdata = array();
@@ -52,10 +110,12 @@ if (isset($anzuzeigendeDaten[$tabid]['referenzqueries'])) {
 }
 
 // Replace foreign keys with their display values
-foreach ($data as &$row) {
-    foreach ($row as $key => &$value) {
-        if (isset($FKdata[$key]) && isset($FKdata[$key][$value])) {
-            $value = $FKdata[$key][$value];
+if (!empty($data)) {
+    foreach ($data as &$row) {
+        foreach ($row as $key => &$value) {
+            if (isset($FKdata[$key]) && isset($FKdata[$key][$value])) {
+                $value = $FKdata[$key][$value];
+            }
         }
     }
 }
@@ -68,7 +128,9 @@ $sortColumn = $_SESSION['sortColumn'] ?? null;
 $sortOrder = $_SESSION['sortOrder'] ?? 'asc';
 
 // Daten sortieren
-$data = sortData($data, $sortColumn, $sortOrder);
+if (!empty($data)) {
+    $data = sortData($data, $sortColumn, $sortOrder);
+}
 
 // Export based on format
 switch ($format) {
@@ -427,53 +489,88 @@ function detectColumnFormat($data, $header) {
 
 // Neue Funktion für den Export von Mail-Verteilerlisten
 function exportMailList($data, $tabelle) {
-    global $filename;
+    global $filename, $exportAll, $ids, $db, $query;
     
-    if (empty($data)) {
-        die('Keine Daten zum Exportieren vorhanden');
+    // Debug information
+    error_log("exportMailList called with " . count($data) . " records");
+    error_log("exportAll = " . ($exportAll ? "true" : "false") . ", ids = $ids");
+    
+    // Überprüfe, ob wir bei gefilterten Daten tatsächlich die richtigen Daten haben
+    if (!$exportAll && empty($data)) {
+        error_log("No data found for filtered export. Original query: $query");
     }
     
     // Buffer leeren und Headers setzen
     ob_end_clean();
     header('Content-Type: text/html; charset=utf-8');
-    // Ändern von attachment zu inline, damit der Browser die Datei anzeigt anstatt herunterzuladen
     header('Content-Disposition: inline; filename=' . $filename . '_Mailverteiler.html');
     
-    // Gehe durch alle Spalten und prüfe auf E-Mail-Adressen (früher als im vorherigen Code)
+    // Gehe durch alle Spalten und prüfe auf E-Mail-Adressen
     $emailColumns = [];
+    $emailCount = 0;
     
-    // Hole alle Spaltenüberschriften
-    $headers = array_keys($data[0]);
+    // Hole alle Spaltenüberschriften - mit Fehlerprüfung
+    if (empty($data)) {
+        $headers = [];
+        error_log("No data available for mail list");
+    } else {
+        $headers = array_keys($data[0]);
+        error_log("Processing columns: " . implode(", ", $headers));
+    }
     
+    // First, scan all data to find potential email columns
+    $potentialEmailColumns = [];
     foreach ($headers as $header) {
+        foreach ($data as $row) {
+            $value = isset($row[$header]) && $row[$header] !== null ? (string)$row[$header] : '';
+            $value = trim($value);
+            
+            if (!empty($value) && filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                $potentialEmailColumns[$header] = true;
+                break;
+            }
+        }
+    }
+    
+    error_log("Potential email columns found: " . implode(", ", array_keys($potentialEmailColumns)));
+    
+    // Now process all email columns we found
+    foreach (array_keys($potentialEmailColumns) as $header) {
         $validEmails = [];
-        $hasValidEmails = false;
         
         // Prüfe alle Zeilen in dieser Spalte
         foreach ($data as $row) {
-            // Fix for deprecated warning: Ensure $value is a string before calling trim()
             $value = isset($row[$header]) && $row[$header] !== null ? (string)$row[$header] : '';
             $value = trim($value);
             
             // Prüfe, ob die Zelle eine gültige E-Mail-Adresse enthält
             if (!empty($value) && filter_var($value, FILTER_VALIDATE_EMAIL)) {
                 $validEmails[] = $value;
-                $hasValidEmails = true;
+                $emailCount++;
             }
         }
         
         // Wenn die Spalte E-Mail-Adressen enthält, speichere sie
-        if ($hasValidEmails) {
+        if (!empty($validEmails)) {
             // Entferne Duplikate
             $validEmails = array_unique($validEmails);
             $emailColumns[$header] = $validEmails;
         }
     }
     
+    error_log("Total valid emails found: $emailCount");
+    error_log("Email columns with valid emails: " . count($emailColumns));
+    
     // Dynamischer Titel basierend auf der Anzahl der gefundenen Mailinglisten
     $pageTitle = count($emailColumns) === 1 ? 
-        "Mailingliste der gefilterten Tabellenansicht" : 
-        "Mailinglisten der gefilterten Tabellenansicht";
+        "Mailingliste der Tabellenansicht" : 
+        "Mailinglisten der Tabellenansicht";
+        
+    if (!$exportAll) {
+        $pageTitle = count($emailColumns) === 1 ? 
+            "Mailingliste der gefilterten Tabellenansicht" : 
+            "Mailinglisten der gefilterten Tabellenansicht";
+    }
     
     echo '<!DOCTYPE html>
 <html>
@@ -524,6 +621,13 @@ function exportMailList($data, $tabelle) {
             top: 20px;
             right: 20px;
         }
+        .filtered-info {
+            background-color: #FFF3CD;
+            color: #856404;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
     </style>
     <script>
         function copyToClipboard(elementId) {
@@ -552,9 +656,28 @@ function exportMailList($data, $tabelle) {
     <button class="close-button" onclick="closePage()">Seite schließen</button>
     <h1>' . $pageTitle . '</h1>';
 
+    // Info anzeigen, wenn gefilterte Daten vorhanden sind
+    if (!$exportAll && !empty($ids)) {
+        echo '<div class="filtered-info">
+            <strong>Hinweis:</strong> Es werden nur E-Mail-Adressen aus den gefilterten Datensätzen angezeigt.
+            <br>Anzahl der Datensätze: ' . count($data) . '
+        </div>';
+    }
+
     // Wenn keine E-Mail-Spalten gefunden wurden
     if (empty($emailColumns)) {
-        echo '<p class="no-emails">Es wurden keine E-Mail-Adressen in den Daten gefunden.</p>';
+        if (empty($data)) {
+            echo '<p class="no-emails">Es wurden keine Datensätze zur Anzeige gefunden.</p>';
+        } else {
+            echo '<p class="no-emails">Es wurden keine E-Mail-Adressen in den ' . count($data) . ' gefilterten Datensätzen gefunden.</p>';
+            
+            // Debugging für Benutzer anzeigen
+            echo '<div class="filtered-info">
+                <strong>Debug-Info:</strong><br>
+                Verfügbare Spalten: ' . implode(', ', $headers) . '<br>
+                Prüfen Sie, ob die E-Mail-Spalte korrekt formatierte E-Mail-Adressen enthält.
+            </div>';
+        }
     } else {
         // Für jede E-Mail-Spalte die Verteilerliste ausgeben
         foreach ($emailColumns as $header => $emails) {
@@ -573,4 +696,43 @@ function exportMailList($data, $tabelle) {
 </html>';
     
     exit();
+}
+
+// Neue Funktion zur präzisen Extraktion der Tabelleninformation
+function extractTableInfo($query) {
+    $result = ['table' => '', 'alias' => '', 'idField' => 'id'];
+    
+    // Überprüfe, ob ein direkter Tabellenzugriff erfolgt
+    if (preg_match('/FROM\s+(\w+)(?:\s+AS)?(?:\s+(\w+))?/i', $query, $matches)) {
+        $result['table'] = $matches[1];
+        $result['alias'] = isset($matches[2]) ? $matches[2] : '';
+    }
+    
+    // Versuche den Primärschlüssel zu bestimmen
+    if (preg_match('/SELECT.*?(\w+)\.id.*?FROM/is', $query, $matches)) {
+        // Wenn ein Alias explizit für id verwendet wird
+        $result['idField'] = $matches[1] . '.id';
+    } else if ($result['alias']) {
+        // Wenn ein Tabellen-Alias existiert, verwende ihn
+        $result['idField'] = $result['alias'] . '.id';
+    } else if ($result['table']) {
+        // Wenn eine Tabelle ohne Alias gefunden wurde
+        $result['idField'] = $result['table'] . '.id';
+    }
+    
+    // Fallback: Wenn nichts gefunden wird, verwende einfach 'id'
+    return $result;
+}
+
+// Hilfsfunktion zur Überprüfung einer Spalte auf E-Mail-Adressen
+function columnContainsEmails($data, $header) {
+    foreach ($data as $row) {
+        $value = isset($row[$header]) && $row[$header] !== null ? (string)$row[$header] : '';
+        $value = trim($value);
+        
+        if (!empty($value) && filter_var($value, FILTER_VALIDATE_EMAIL)) {
+            return true;
+        }
+    }
+    return false;
 }
