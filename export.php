@@ -95,6 +95,9 @@ switch ($format) {
     case 'csv':
         exportCSV($data, $tabelle);
         break;
+    case 'maillist':
+        exportMailList($data, $tabelle);
+        break;
     default:
         die('Invalid format');
 }
@@ -420,4 +423,154 @@ function detectColumnFormat($data, $header) {
     }
     
     return $format;
+}
+
+// Neue Funktion für den Export von Mail-Verteilerlisten
+function exportMailList($data, $tabelle) {
+    global $filename;
+    
+    if (empty($data)) {
+        die('Keine Daten zum Exportieren vorhanden');
+    }
+    
+    // Buffer leeren und Headers setzen
+    ob_end_clean();
+    header('Content-Type: text/html; charset=utf-8');
+    // Ändern von attachment zu inline, damit der Browser die Datei anzeigt anstatt herunterzuladen
+    header('Content-Disposition: inline; filename=' . $filename . '_Mailverteiler.html');
+    
+    // Gehe durch alle Spalten und prüfe auf E-Mail-Adressen (früher als im vorherigen Code)
+    $emailColumns = [];
+    
+    // Hole alle Spaltenüberschriften
+    $headers = array_keys($data[0]);
+    
+    foreach ($headers as $header) {
+        $validEmails = [];
+        $hasValidEmails = false;
+        
+        // Prüfe alle Zeilen in dieser Spalte
+        foreach ($data as $row) {
+            // Fix for deprecated warning: Ensure $value is a string before calling trim()
+            $value = isset($row[$header]) && $row[$header] !== null ? (string)$row[$header] : '';
+            $value = trim($value);
+            
+            // Prüfe, ob die Zelle eine gültige E-Mail-Adresse enthält
+            if (!empty($value) && filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                $validEmails[] = $value;
+                $hasValidEmails = true;
+            }
+        }
+        
+        // Wenn die Spalte E-Mail-Adressen enthält, speichere sie
+        if ($hasValidEmails) {
+            // Entferne Duplikate
+            $validEmails = array_unique($validEmails);
+            $emailColumns[$header] = $validEmails;
+        }
+    }
+    
+    // Dynamischer Titel basierend auf der Anzahl der gefundenen Mailinglisten
+    $pageTitle = count($emailColumns) === 1 ? 
+        "Mailingliste der gefilterten Tabellenansicht" : 
+        "Mailinglisten der gefilterten Tabellenansicht";
+    
+    echo '<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>' . $pageTitle . '</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        h2 { color: #555; margin-top: 20px; }
+        .email-list { 
+            background-color: #f5f5f5; 
+            padding: 10px; 
+            border-radius: 5px;
+            word-wrap: break-word;
+            margin-bottom: 20px;
+        }
+        .no-emails {
+            color: #999;
+            font-style: italic;
+        }
+        .copy-button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .close-button {
+            background-color: #f44336;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+    </style>
+    <script>
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            const text = element.innerText;
+            navigator.clipboard.writeText(text).then(
+                function() {
+                    // Erfolg: Zeige Feedback für den Benutzer
+                    alert("E-Mail-Adressen wurden in die Zwischenablage kopiert!");
+                }, 
+                function() {
+                    // Fehler: Bitte den Benutzer, es manuell zu kopieren
+                    alert("Kopieren fehlgeschlagen. Bitte markieren Sie die Adressen und kopieren Sie manuell.");
+                }
+            );
+        }
+        
+        function closePage() {
+            window.close();
+        }
+    </script>
+</head>
+<body>
+    <button class="close-button" onclick="closePage()">Seite schließen</button>
+    <h1>' . $pageTitle . '</h1>';
+
+    // Wenn keine E-Mail-Spalten gefunden wurden
+    if (empty($emailColumns)) {
+        echo '<p class="no-emails">Es wurden keine E-Mail-Adressen in den Daten gefunden.</p>';
+    } else {
+        // Für jede E-Mail-Spalte die Verteilerliste ausgeben
+        foreach ($emailColumns as $header => $emails) {
+            $uniqueId = 'email-list-' . md5($header);
+            echo '<h2>' . htmlspecialchars($header) . ' <button class="copy-button" onclick="copyToClipboard(\'' . $uniqueId . '\')">Kopieren</button></h2>';
+            echo '<div id="' . $uniqueId . '" class="email-list">';
+            echo implode('; ', $emails);
+            echo '</div>';
+            
+            // Zeige die Anzahl der eindeutigen E-Mail-Adressen an
+            echo '<p>' . count($emails) . ' eindeutige E-Mail-Adressen gefunden.</p>';
+        }
+    }
+    
+    echo '</body>
+</html>';
+    
+    exit();
 }
