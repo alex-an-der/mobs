@@ -154,7 +154,7 @@ $anzuzeigendeDaten[] = array(
     "writeaccess" => false,
     "import" => false,
     "hinweis" => "Es werden nur Mitglieder angezeigt, die ´Mailbenachrichtigung´ aktiviert haben.",
-    "query" => "SELECT m.id as id, m.Mail as Mail, YEAR(m.Geburtsdatum) as Jahrgang, g.auswahl as 'm/w/d', sa.Sportart_Nr, sa.Sportart
+    "query" => "SELECT DISTINCT m.id as id, m.Mail as Mail, YEAR(m.Geburtsdatum) as Jahrgang, g.auswahl as 'm/w/d', sa.Sportart_Nr, sa.Sportart
                 FROM b_mitglieder_in_sparten    as mis
                 JOIN b_mitglieder               as m  ON m.id  = mis.Mitglied
                 JOIN b_bsg                      as b  ON b.id  = m.BSG
