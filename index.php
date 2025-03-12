@@ -1363,37 +1363,37 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
             }
             ?>
             <?php 
-            // Neuer Ansatz, wenn es notwendig ist, Buttons immer zu zeigen:
-            // $noReadWriteDisabling = "disabled";
-            // $noInsertDisabling = "disabled";
-            
-           
-            if ((!empty($tabelle) && $readwrite) || hatUserBerechtigungen() || $deleteAnyway): 
-                $importErlaubt = true;
-
-                if (isset($anzuzeigendeDaten[$selectedTableID]['import']))
-                    if ($anzuzeigendeDaten[$selectedTableID]['import'] === false)
-                        $importErlaubt = false;
-                
-                // Wenn keine Schreibrechte, dann auch keinen Import 
-                if(!$readwrite) $importErlaubt = false;
-                ?>
+            // Always show Filter and Export buttons if a table is selected
+            if (!empty($tabelle)): ?>
                 <div class="row">
                     <div class="btn-group-container">
                         <button id="resetButton" class="btn btn-success" onclick="resetPage()">Aktualisieren</button>
                         <button id='clearFilterButton' class='btn btn-info' onclick='clearFilter()'>Filter löschen</button>
-                        <!--?php if ($readwrite  || hatUserBerechtigungen()):?-->
-                        <?php if ($readwrite && $importErlaubt):?>
-                            <button id="insertDefaultButton" class="btn btn-success">Einfügen</button>
-                        <?php endif; ?> 
-                        <?php if (($readwrite && $importErlaubt) || $deleteAnyway):?>
-                            <button id="deleteSelectedButton" class="btn btn-danger">Ausgewählte löschen</button>
-                        <?php endif; ?>  
+                        
+                        <?php if ($readwrite || hatUserBerechtigungen() || $deleteAnyway): 
+                            $importErlaubt = true;
 
-                        <button id="check-duplicates" class="btn btn-info">Dubletten suchen</button>
-                        <?php if ($importErlaubt && $readwrite):?>
-                            <a href="importeur.php?tab=<?= $selectedTableID ?>" class="btn btn-info">Daten importieren</a>
-                        <?php endif; ?> 
+                            if (isset($anzuzeigendeDaten[$selectedTableID]['import']))
+                                if ($anzuzeigendeDaten[$selectedTableID]['import'] === false)
+                                    $importErlaubt = false;
+                            
+                            // Wenn keine Schreibrechte, dann auch keinen Import 
+                            if(!$readwrite) $importErlaubt = false;
+                        ?>
+                            <?php if ($readwrite && $importErlaubt):?>
+                                <button id="insertDefaultButton" class="btn btn-success">Einfügen</button>
+                            <?php endif; ?> 
+                            <?php if (($readwrite && $importErlaubt) || $deleteAnyway):?>
+                                <button id="deleteSelectedButton" class="btn btn-danger">Ausgewählte löschen</button>
+                            <?php endif; ?>  
+
+                            <button id="check-duplicates" class="btn btn-info">Dubletten suchen</button>
+                            <?php if ($importErlaubt && $readwrite):?>
+                                <a href="importeur.php?tab=<?= $selectedTableID ?>" class="btn btn-info">Daten importieren</a>
+                            <?php endif; ?> 
+                        <?php endif; ?>
+                        
+                        <!-- Export button is always shown when a table is selected -->
                         <div class="btn-group mb-2">
                             <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                 Exportieren
@@ -1403,6 +1403,7 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                                 <li><a class="dropdown-item" href="#" onclick="exportData('csv')">Als CSV</a></li>
                                 <li><a class="dropdown-item" href="#" onclick="exportData('excel', 'Xlsx')">Als Excel</a></li>
                                 <li><a class="dropdown-item" href="#" onclick="exportData('excel', 'Ods')">Als LibreOffice</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('maillist')">Als Mail-Verteiler</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="statistik.php">Statistiken</a></li>
                             </ul>
