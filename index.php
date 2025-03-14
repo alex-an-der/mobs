@@ -1,4 +1,4 @@
-<?php // Ganz oben wegen sessiuon_start()
+<?php // Ganz oben wegen session_start()
 require_once(__DIR__ . "/user_includes/all.head.php");
 require_once(__DIR__ . "/user_includes/index.head.php");
 require_once(__DIR__ . "/inc/include.php");
