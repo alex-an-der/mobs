@@ -1,2 +1,5 @@
+# Ignore database connection configuration
 config/db_connect.php
+
+# Ignore the entire ypum directory
 ypum/
