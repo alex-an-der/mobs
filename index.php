@@ -173,6 +173,13 @@ $tabelle_upper = strtoupper($tabelle)
             height: 100%;
         }
 
+        /* Custom tooltip styles */
+        .tooltip-inner {
+            font-size: 16px; /* Larger font size for tooltip text */
+            max-width: 350px; /* Wider tooltips */
+            text-align: left; /* Left-aligned text */
+            padding: 8px 12px; /* More padding */
+        }
     </style>
 
     <script>
@@ -1362,7 +1369,10 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
             
             <?php 
             if($tabelle!=""){
-                echo "<p><input type='text' id='tableFilter' class='form-control' placeholder='Filtern entweder durch manuelle Eingabe oder Rechtsklick auf ein Datenfeld.'></p>";
+                echo "<p><form class='d-flex align-items-center'><input type='text' id='tableFilter' class='form-control' placeholder='Filtern entweder durch manuelle Eingabe oder Rechtsklick auf ein Datenfeld.'>";
+                // Löschen-Button auskommentiert
+                //echo "<button id='clearFilterButton' type='button' class='btn btn-secondary ms-2' onclick='clearFilter()'>Löschen</button>";
+                echo "</form></p>";
             }
             ?>
             <?php 
@@ -1370,8 +1380,7 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
             if (!empty($tabelle)): ?>
                 <div class="row">
                     <div class="btn-group-container">
-                        <button id="resetButton" class="btn btn-success" onclick="resetPage()">Aktualisieren</button>
-                        <button id='clearFilterButton' class='btn btn-info' onclick='clearFilter()'>Filter löschen</button>
+                        <button id="resetButton" class="btn btn-primary" onclick="resetPage()">Aktualisieren</button>
                         
                         <?php if ($readwrite || hatUserBerechtigungen() || $deleteAnyway): 
                             $importErlaubt = true;
@@ -1390,9 +1399,9 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                                 <button id="deleteSelectedButton" class="btn btn-danger">Ausgewählte löschen</button>
                             <?php endif; ?>  
 
-                            <button id="check-duplicates" class="btn btn-info">Dubletten suchen</button>
+                            <button id="check-duplicates" class="btn btn-primary">Dubletten suchen</button>
                             <?php if ($importErlaubt && $readwrite):?>
-                                <a href="importeur.php?tab=<?= $selectedTableID ?>" class="btn btn-info d-flex align-items-center justify-content-center">Daten importieren</a>
+                                <a href="importeur.php?tab=<?= $selectedTableID ?>" class="btn btn-primary d-flex align-items-center justify-content-center">Daten importieren</a>
                             <?php endif; ?> 
                         <?php endif; ?>
                         
@@ -1456,24 +1465,68 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
     </body>
     
     <script>
-// Add tooltip on hover for table cells
-document.addEventListener('mouseover', function(e) {
-    var td = e.target.closest('td');
-    if (td) {
-        var text = "";
-        var input = td.querySelector('input');
-        if (input) {
-            text = input.value;
-        } else {
-            var select = td.querySelector('select');
-            if (select) {
-                text = select.options[select.selectedIndex].text;
+// Replace the old tooltip code with Bootstrap tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize all tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => 
+        new bootstrap.Tooltip(tooltipTriggerEl, {
+            container: 'body',
+            boundary: 'window',
+            animation: true,
+            html: false
+        })
+    );
+
+    // Add tooltips dynamically to table cells
+    document.addEventListener('mouseover', function(e) {
+        const td = e.target.closest('td');
+        if (td && !td.hasAttribute('data-bs-toggle')) {
+            let text = "";
+            const input = td.querySelector('input');
+            if (input) {
+                text = input.value;
             } else {
-                text = td.innerText.trim();
+                const select = td.querySelector('select');
+                if (select && select.selectedIndex >= 0) {
+                    text = select.options[select.selectedIndex].text;
+                } else {
+                    text = td.innerText.trim();
+                }
+            }
+            
+            // Only show tooltip if text is not empty
+            if (text) {
+                td.setAttribute('data-bs-toggle', 'tooltip');
+                td.setAttribute('data-bs-title', text);
+                td.setAttribute('data-bs-placement', 'auto');
+                td.setAttribute('data-bs-container', 'body');
+                
+                // Create the tooltip
+                new bootstrap.Tooltip(td, {
+                    container: 'body',
+                    boundary: 'window'
+                });
+                
+                // Show it immediately if mouse is already over
+                const tooltip = bootstrap.Tooltip.getInstance(td);
+                if (tooltip) {
+                    tooltip.show();
+                }
             }
         }
-        td.title = text;
-    }
+    });
+
+    // Clean up tooltips when no longer needed
+    document.addEventListener('mouseout', function(e) {
+        const td = e.target.closest('td');
+        if (td) {
+            const tooltip = bootstrap.Tooltip.getInstance(td);
+            if (tooltip) {
+                tooltip.hide();
+            }
+        }
+    });
 });
     </script>
     <script language="javascript" type="text/javascript" src="./user_includes/index_document_ready.js"></script>

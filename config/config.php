@@ -20,11 +20,19 @@ error_reporting(E_ALL);
 
 require_once("db_connect.php");
 
+define("TITEL", "LBSV Nds. Mitgliederverwaltung");
+# Wie sollen NULL-Werte (=keine Zuordnung) dargestellt werden?
+define("NULL_WERT", "---");
 
 # Rechtemanagement (YPUM)
 // $berechtigung = $ypum->getUserData();
-$uid=0;
-if (isset($_SESSION['uid'])) $uid = $_SESSION['uid'];
+if (isset($_SESSION['uid']))
+{
+    $uid = $_SESSION['uid'];
+}else{
+    die();
+}
+
 
 $anzuzeigendeDaten = array();
 $statistik = array();

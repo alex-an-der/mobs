@@ -14,10 +14,6 @@ if($LOCAL_DB_HOST){
 }
 
 define("DB_PASS", "BallBierBertha42");
-define("TITEL", "LBSV Nds. Mitgliederverwaltung");
-# Wie sollen NULL-Werte (=keine Zuordnung) dargestellt werden?
-define("NULL_WERT", "---");
-
 
 # DB direkt hier einbinden
 $db = new Datenbank();
