@@ -52,7 +52,7 @@ $values = !empty($data) ? array_column($data, array_keys($data[0])[1]) : [];
             width: 100%;
             height: 100%;
             z-index: -1;
-            background-image: url('./inc/img/body_green.png');
+            background-image: url('./inc/img/body_green.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;

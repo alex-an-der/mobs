@@ -176,7 +176,7 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
             width: 100%;
             height: 100%;
             z-index: -1;
-            background-image: url('./inc/img/body_red.png');
+            background-image: url('./inc/img/body_red.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;

@@ -7,8 +7,15 @@ require_once(__DIR__ . "/inc/include.php");
 <!DOCTYPE html>
 <html lang="de">
 <head>
-
-
+    <!-- Favicon and mobile web app settings -->
+    <link rel="icon" href="./inc/img/mobs.jpg" type="image/jpeg">
+    <link rel="apple-touch-icon" href="./inc/img/mobs.jpg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="<?=TITEL?>">
+    <!-- For Android devices -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#ffffff">
 
 <?php
 $readwrite = 0;
@@ -140,7 +147,7 @@ $tabelle_upper = strtoupper($tabelle)
             width: 100%;
             height: 100%;
             z-index: -1;
-            background-image: url('./inc/img/body.png');
+            background-image: url('./inc/img/body.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
