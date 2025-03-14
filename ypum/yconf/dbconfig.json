@@ -1,0 +1,8 @@
+{
+	"db_hostname": "x96.lima-db.de",
+	"db_dbname": "db_441127_14",
+	"db_user": "USER441127_bsadm",
+	"db_password": "BallBierBertha42",
+	"ypumSRVpath": "/home/alex/projekte/web-projekte/localhost/udama/ypum",
+	"ypumWEBpath": "http://localhost/udama/ypum"
+}

@@ -1,0 +1,19 @@
+body {
+    padding-bottom: 20px;
+  }
+  
+  .navbar {
+    margin-bottom: 20px;
+  }
+
+  .navbar-nav > li.active {
+    font-weight: 500;
+    background-color: rgba(0, 0, 0, 0.349);
+    
+  }
+
+  .aktiverbereich{
+    background-color: rgba(172, 172, 172, 0.349);
+
+  }
+ 
