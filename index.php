@@ -1166,8 +1166,8 @@ function renderTableSelectBox($db) {
     global $anzuzeigendeDaten;
     global $selectedTableID;
     
-    echo '<p><form method="get">';
-    echo '<select id="tableSelectBox" name="tab" class="form-control" onchange="this.form.submit()">';
+    echo '<p><form method="get" class="d-flex align-items-center">';
+    echo '<select id="tableSelectBox" name="tab" class="form-control me-2" onchange="this.form.submit()">';
 
     if(!isset($anzuzeigendeDaten[$selectedTableID])){
         echo '<option value="">-- Tabelle wählen --</option>';
@@ -1197,8 +1197,11 @@ function renderTableSelectBox($db) {
 
     echo implode("\n", $options);
     echo '</select>';
-    echo '</form></p>';
     
+    // Add Impressum button right next to the dropdown in the same form
+    echo '<a href="./user_code/impressum.php" target="_blank" class="btn btn-secondary ms-2">Impressum</a>';
+    
+    echo '</form></p>';
 }
 
 function hatUserBerechtigungen(){
@@ -1389,13 +1392,13 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
 
                             <button id="check-duplicates" class="btn btn-info">Dubletten suchen</button>
                             <?php if ($importErlaubt && $readwrite):?>
-                                <a href="importeur.php?tab=<?= $selectedTableID ?>" class="btn btn-info">Daten importieren</a>
+                                <a href="importeur.php?tab=<?= $selectedTableID ?>" class="btn btn-info d-flex align-items-center justify-content-center">Daten importieren</a>
                             <?php endif; ?> 
                         <?php endif; ?>
                         
                         <!-- Export button is always shown when a table is selected -->
                         <div class="btn-group mb-2">
-                            <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                 Exportieren
                             </button>
                             <ul class="dropdown-menu">
@@ -1403,7 +1406,6 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                                 <li><a class="dropdown-item" href="#" onclick="exportData('csv')">Als CSV</a></li>
                                 <li><a class="dropdown-item" href="#" onclick="exportData('excel', 'Xlsx')">Als Excel</a></li>
                                 <li><a class="dropdown-item" href="#" onclick="exportData('excel', 'Ods')">Als LibreOffice</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="exportData('maillist')">Als Mail-Verteiler</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="statistik.php">Statistiken</a></li>
                             </ul>

@@ -1,6 +1,18 @@
 <?php
 
-$anzuzeigendeDaten['log'] = array(
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "issues",
+    "auswahltext" => "Offene Issues",
+    "writeaccess" => true,
+    "query" => "SELECT  id, Prio, Issue, Kommentar FROM issues order by Prio ASC;",
+    "spaltenbreiten"    => array(
+        "Prio"          => "50",
+        "Issue"         => "450",
+        "Kommentar"     => "200"
+    )
+);
+
+$anzuzeigendeDaten[] = array(
     "tabellenname" => "log",
     "auswahltext" => "Error-Log",
     "query" => "SELECT  id, id as Nr, zeit as Timestamp, eintrag as Log from log order by zeit desc;",
@@ -10,7 +22,7 @@ $anzuzeigendeDaten['log'] = array(
         "Log"       => "1620"
     )
 );
-$anzuzeigendeDaten['rollback'] = array(
+$anzuzeigendeDaten[] = array(
     "tabellenname" => "log",
     "auswahltext" => "Rollback",
     "hinweis" => "Das Löschen und Anlegen neuer Mitglieder ist nicht im Rollback enthalten. Dies geschieht über den Berechtigungsmanager. Über die normale Schnittstelle sollten keine Mitglieder gelöscht werden können.",

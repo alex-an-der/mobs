@@ -309,6 +309,24 @@ CREATE TABLE `rollback` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `rollback`
+--
+
+DROP TABLE IF EXISTS `issues`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `issues` ( 
+  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `Prio` TINYINT UNSIGNED NULL,
+  `Kommentar` VARCHAR(100) NULL,
+  `Issue` VARCHAR(200) NULL,
+   PRIMARY KEY (`id`)
+)
+ENGINE = InnoDB;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
+--
 -- Table structure for table `y_roles`
 --
 
