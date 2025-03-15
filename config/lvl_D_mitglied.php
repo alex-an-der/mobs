@@ -37,6 +37,7 @@
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
     "auswahltext" => "Meine Daten",
+    "hinweis" => "Bitte nicht vergessen, unter <b>Wer darf meine Daten sehen</b>, deine BSG zu berechtigen, deine Daten zu verwalten. Neue Rechte vergibst du mit <b>einf&uuml;gen</b>.",
     "writeaccess" => true,
     "import" => false,
     "query" => "SELECT m.id, m.Vorname, m.Nachname, m.Mail, m.Geschlecht, m.Geburtsdatum, m.Mailbenachrichtigung
@@ -106,7 +107,7 @@ $anzuzeigendeDaten[] = array(
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_individuelle_berechtigungen",
     "auswahltext" => "Wer darf meine Daten sehen?",
-    "hinweis" => "Bearbeiter der von dir angegebenen Betriebssportgruppen dürfen deine Daten einsehen und diese verarbeiten. Dies ist notwendig, um dich in einer oder mehreren BSG zu verwalten. Solltest du eine Berechtigung löschen, kann die betreffende BSG deine Daten trotzdem noch so lange sehen wie du dort Mitglied bist ('berechtigtes Interesse' nach DSGVO).",
+    "hinweis" => "Bearbeiter der von dir angegebenen Betriebssportgruppen dürfen deine Daten einsehen und diese verarbeiten. Dies ist notwendig, um dich in einer oder mehreren BSG zu verwalten. Solltest du eine Berechtigung löschen, kann die betreffende BSG deine Daten trotzdem noch so lange sehen wie du dort Mitglied bist ('berechtigtes Interesse' nach DSGVO).  Um ein neues Recht zu vergeben, klicke auf <b>'Einf&uuml;gen'</b>.",
     "writeaccess" => true,
     "import" => true,
     "query" => "SELECT ib.id as id, m.id as Mitglied, ib.BSG as BSG

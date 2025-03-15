@@ -154,21 +154,28 @@ CREATE TABLE `b_mitglieder` (
   `Geschlecht` INT UNSIGNED NULL,
   `Geburtsdatum` DATE NULL,
   `Mailbenachrichtigung` TINYINT UNSIGNED NULL,
+  `aktiv` TINYINT UNSIGNED NULL DEFAULT 1 ,
    PRIMARY KEY (`id`),
-  CONSTRAINT `FK_mitglieder_bsg` FOREIGN KEY (`BSG`) REFERENCES `b_bsg` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `FK_mitglieder_Mailbenachrichtigung` FOREIGN KEY (`Mailbenachrichtigung`) REFERENCES `b___an_aus` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_mitglieder_yuser` FOREIGN KEY (`y_id`) REFERENCES `y_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_mitglieder_Mailbenachrichtigung` FOREIGN KEY (`Mailbenachrichtigung`) REFERENCES `b___an_aus` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_mitglieder_bsg` FOREIGN KEY (`BSG`) REFERENCES `b_bsg` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `FK_b_mitglieder_b___an_aus__aktiv` FOREIGN KEY (`aktiv`) REFERENCES `b___an_aus` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `y_id` UNIQUE (`y_id`)
 )
 ENGINE = InnoDB;
-CREATE INDEX `FK_mitglieder_bsg` 
-ON `b_mitglieder` (
-  `BSG` ASC
-);
 CREATE INDEX `FK_mitglieder_Mailbenachrichtigung` 
 ON `b_mitglieder` (
   `Mailbenachrichtigung` ASC
 );
+CREATE INDEX `FK_mitglieder_bsg` 
+ON `b_mitglieder` (
+  `BSG` ASC
+);
+CREATE INDEX `FK_b_mitglieder_b___an_aus__aktiv` 
+ON `b_mitglieder` (
+  `aktiv` ASC
+);
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
