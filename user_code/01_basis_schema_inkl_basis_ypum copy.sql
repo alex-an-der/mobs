@@ -430,3 +430,78 @@ CREATE TABLE `y_user_fields` (
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Temporary view structure for view `y_v_userdata`
+--
+
+DROP TABLE IF EXISTS `y_v_userdata`;
+/*!50001 DROP VIEW IF EXISTS `y_v_userdata`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `y_v_userdata` AS SELECT 
+ 1 AS `userID`,
+ 1 AS `mail`,
+ 1 AS `nname`,
+ 1 AS `vname`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `y_v_userfields`
+--
+
+DROP TABLE IF EXISTS `y_v_userfields`;
+/*!50001 DROP VIEW IF EXISTS `y_v_userfields`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `y_v_userfields` AS SELECT 
+ 1 AS `fieldID`,
+ 1 AS `userID`,
+ 1 AS `uf_name`,
+ 1 AS `fieldname`,
+ 1 AS `fieldvalue`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Final view structure for view `y_v_userdata`
+--
+
+/*!50001 DROP VIEW IF EXISTS `y_v_userdata`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50001 VIEW `y_v_userdata` AS select distinct `t_uid`.`userID` AS `userID`,`y_user`.`mail` AS `mail`,`t_nname`.`fieldvalue` AS `nname`,`t_vname`.`fieldvalue` AS `vname` from (((`y_v_userfields` `t_uid` join `y_user` on((`t_uid`.`userID` = `y_user`.`id`))) left join (select `y_v_userfields`.`userID` AS `userID`,`y_v_userfields`.`fieldvalue` AS `fieldvalue` from `y_v_userfields` where (`y_v_userfields`.`fieldname` = 'nname')) `t_nname` on((`t_uid`.`userID` = `t_nname`.`userID`))) left join (select `y_v_userfields`.`userID` AS `userID`,`y_v_userfields`.`fieldvalue` AS `fieldvalue` from `y_v_userfields` where (`y_v_userfields`.`fieldname` = 'vname')) `t_vname` on((`t_uid`.`userID` = `t_vname`.`userID`))) where (`y_user`.`locked` = 0) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `y_v_userfields`
+--
+
+/*!50001 DROP VIEW IF EXISTS `y_v_userfields`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50001 VIEW `y_v_userfields` AS select `f`.`ID` AS `fieldID`,`d`.`userID` AS `userID`,`f`.`uf_name` AS `uf_name`,`f`.`fieldname` AS `fieldname`,`d`.`fieldvalue` AS `fieldvalue` from (`y_user_details` `d` left join `y_user_fields` `f` on((`d`.`fieldID` = `f`.`ID`))) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2025-02-08 11:32:16
