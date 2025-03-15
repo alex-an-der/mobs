@@ -37,7 +37,7 @@
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
     "auswahltext" => "Meine Daten",
-    "hinweis" => "Bitte nicht vergessen, unter <b>Wer darf meine Daten sehen</b>, deine BSG zu berechtigen, deine Daten zu verwalten. Neue Rechte vergibst du mit <b>einf&uuml;gen</b>.",
+    "hinweis" => "Bitte nicht vergessen, unter <b>Wer darf meine Daten sehen</b> deine BSG zu berechtigen, deine Daten zu verwalten. Neue Rechte vergibst du mit <b>einf&uuml;gen</b>.",
     "writeaccess" => true,
     "import" => false,
     "query" => "SELECT m.id, m.Vorname, m.Nachname, m.Mail, m.Geschlecht, m.Geburtsdatum, m.Mailbenachrichtigung
