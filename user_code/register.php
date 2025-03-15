@@ -69,7 +69,7 @@ require_once(__DIR__.'/../yback/include/inc_main.php')
 
                         <!-- New BSG Selection Section -->
                         <div class='mb-3'>
-                            <label for='verband' class='form-label'>Welche Betriebssportgemeinschaft (BSG) darf deine Daten verarbeiten? Ist deine BSG noch nicht in der Liste oder willst du die Berechtigungen erweitern, kannst du das jederzeit in der Tabelle <b>'Wer darf meine Daten sehen?'</b> einstellen.</label>
+                            <label for='verband' class='form-label'>Welche Betriebssportgemeinschaft (BSG) darf deine Daten verarbeiten? Willst du die Berechtigungen erweitern, kannst du das jederzeit in der Tabelle <b>'Wer darf meine Daten sehen?'</b> einstellen. Ist deine BSG noch nicht in der Liste, wende dich bitte an die Spartenleitung - die BSG muss zuerst erstellt werden.</label>
                             
                             <!-- Regional association dropdown -->
                             <?php
@@ -89,7 +89,7 @@ require_once(__DIR__.'/../yback/include/inc_main.php')
                             
                             <!-- BSG dropdown, will be populated by JavaScript -->
                             <label for='bsg' class='form-label'>Betriebssportgemeinschaft</label><br>
-                            <select class='form-select' id='bsg' name='bsg'>
+                            <select required class='form-select' id='bsg' name='bsg'>
                                 <option value='' disabled selected>Bitte erst Regionalverband wählen...</option>
                             </select>
                         </div>
