@@ -152,7 +152,7 @@ CREATE TABLE `b_mitglieder` (
   `Nachname` VARCHAR(100) NULL,
   `Mail` VARCHAR(50) NULL COMMENT 'y_user - Verknüpfung' ,
   `Geschlecht` INT UNSIGNED NULL,
-  `Geburtsdatum` DATE NOT NULL DEFAULT '1980-07-01' ,
+  `Geburtsdatum` DATE NULL,
   `Mailbenachrichtigung` TINYINT UNSIGNED NULL,
    PRIMARY KEY (`id`),
   CONSTRAINT `FK_mitglieder_bsg` FOREIGN KEY (`BSG`) REFERENCES `b_bsg` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
