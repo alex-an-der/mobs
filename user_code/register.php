@@ -10,6 +10,21 @@ require_once(__DIR__.'/../yback/include/inc_main.php')
 // ypum-Details
 // TRIGGER
 ?>
+<style>
+    /* Prevent select boxes from overflowing their containers */
+    select.form-select {
+        max-width: 100%;
+        width: 100%;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+    
+    /* Handle long text in select options */
+    select.form-select option {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
 </head>
 <body>
 <div class='container py-4'>
@@ -143,6 +158,7 @@ function loadBSGs(verbandId) {
                         const option = document.createElement('option');
                         option.text = bsg.BSG;
                         option.value = bsg.id;
+                        option.title = bsg.BSG; // Add title attribute for tooltip on hover
                         bsgSelect.appendChild(option);
                     });
                 } else {
