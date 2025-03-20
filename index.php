@@ -1186,7 +1186,7 @@ function renderTableSelectBox($db) {
     if(!isset($anzuzeigendeDaten[$selectedTableID])){
         echo '<option value="">-- Tabelle wählen --</option>';
     }
-    $maxLaenge = 0;
+    /*$maxLaenge = 0;
     $trennerindizies = array();
     $options = array();
     foreach ($anzuzeigendeDaten as $index => $table) {
@@ -1207,6 +1207,26 @@ function renderTableSelectBox($db) {
         $firstChar = substr($options[$trennerindex], 0, 1);
         $displayText = str_pad('', $maxLaenge, $firstChar);
         $options[$trennerindex] = '<option disabled>' . $displayText . '</option>';
+    }*/
+
+    $trennerindizies = array();
+    $options = array();
+    foreach ($anzuzeigendeDaten as $index => $table) {
+        if(isset($table['trenner'])){
+            $trennerindizies[] = count($options);
+            $options[] = $table['trenner'];
+        }else{
+            $tableName = htmlspecialchars($table['tabellenname']);
+            $tableComment = htmlspecialchars($table['auswahltext']);
+            $displayText = !empty($tableComment) ? "$tableComment" : $tableName;
+            $selected = ($index == $selectedTableID) ? 'selected' : '';
+            $options[] = '<option value="' . $index . '" ' . $selected . '>' . $displayText . '</option>';
+        }
+    }
+    
+    // Vereinfachte Trennstriche - immer 5 Striche
+    foreach ($trennerindizies as $trennerindex) {
+        $options[$trennerindex] = '<option disabled>-----</option>';
     }
 
     echo implode("\n", $options);

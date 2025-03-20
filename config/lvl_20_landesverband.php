@@ -12,7 +12,7 @@
 # Regionalverbände
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_regionalverband",
-    "auswahltext" => "Regionalverbände",
+    "auswahltext" => "Regionalverbände einfügen, löschen und bearbeiten",
     "writeaccess" => true,
     "query" => "select id, BKV, Verband, Kurzname, Internetadresse from b_regionalverband order by id desc;",
     "spaltenbreiten" => array(
@@ -26,9 +26,9 @@ $anzuzeigendeDaten[] = array(
 # Alle Verbände werden angezeigt
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_regionalverband_rechte",
-    "auswahltext" => "Regionalverbände: Rechteverwaltung",
+    "auswahltext" => "Rechte zur Verwaltung in den Regionalverbänden vergeben",
     "writeaccess" => true,
-    "hinweis" => "Berechtigt angemeldete Nutzer, Sparten und BSG eines Verbandes zu sehen und zu bearbeiten.",
+    "hinweis" => "Berechtigt angemeldete Nutzer, Sparten und BSG eines Regionalverbandes zu sehen und zu bearbeiten. Eine neue Berechtigung kann mit <b>einf&uuml;gen</b> angelegt werden. Zur Bearbeitung der Sparten wird das zusätzliche Systemrecht 'Regional-Admin' benötigt.",
     "query" => "SELECT r.id as id, r.Verband as Verband, r.Nutzer
                 FROM b_regionalverband_rechte as r 
                 order by id desc;

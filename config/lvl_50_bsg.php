@@ -7,7 +7,7 @@
 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_bsg",
-    "auswahltext" => "BSG: Stammdaten",
+    "auswahltext" => "BSG-Stammdaten bearbeiten",
     "import" => false,
     "writeaccess" => true,
     "hinweis" => "<b>RE </b> = Rechnungsempfänger. In diese Spalten bitte eintragen, wohin eventuelle Rechnungen geschickt werden sollen.",
@@ -45,14 +45,10 @@ $anzuzeigendeDaten[] = array(
 );
 
 
-
-
-
-
 # Mitglieder in der Stamm-BSG
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
-    "auswahltext" => "BSG: Mitgliederdaten (Stammmitglieder)",
+    "auswahltext" => "BSG- (Stamm-) Mitglieder bearbeiten",
     "writeaccess" => true,
     "import" => false,
     "query" => "SELECT m.id as id, BSG, Vorname, Nachname, Mail, m.Geschlecht, m.Geburtsdatum, aktiv
@@ -86,7 +82,7 @@ $anzuzeigendeDaten[] = array(
 # Mitglieder in den Sparten 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
-    "auswahltext" => "BSG: Spartenzuweisung",
+    "auswahltext" => "BSG-Mitglieder in Sparten anmelden",
     "writeaccess" => true,
 
     "query" => "SELECT id, Mitglied, BSG, Sparte 
@@ -136,7 +132,7 @@ $anzuzeigendeDaten[] = array(
 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
-    "auswahltext" => "BSG: Übersicht",
+    "auswahltext" => "$bericht Mitglieder und ihre Sparten",
     "writeaccess" => false,
     "query" => "SELECT mis.id, concat(Vorname,' ', Nachname) as Mitglied , stamm.BSG as Stamm_BSG , s.Sparte as Sparte, b.BSG as Sparten_BSG
                 from b_mitglieder_in_sparten as mis
