@@ -105,13 +105,13 @@ $anzuzeigendeDaten[] = array(
                     WHERE
                         FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0;
         ",
-        "Sparte" => "SELECT s.id as id, concat (s.Sparte, ' (',r.Kurzname,')') as anzeige
+        "Sparte" => "SELECT distinct s.id as id, concat (s.Sparte, ' (',r.Kurzname,')') as anzeige
                     FROM b_bsg_rechte as br
                     JOIN b_bsg as b ON br.BSG = b.id  
                     JOIN b_regionalverband as r ON r.id = b.Verband
                     JOIN b_sparte as s ON s.Verband = r.id
-                    WHERE Nutzer = $uid;
-        "
+                    WHERE Nutzer = $uid 
+                    ORDER BY anzeige;"
     ),
     "suchqueries" => array(
         "Sparte" => "SELECT s.id, s.Sparte, v.Verband, v.Kurzname
