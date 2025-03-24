@@ -18,7 +18,7 @@ ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
 }
 
-require_once("db_connect.php");
+require_once(__DIR__."/../../mobs_credentials/db_connect.php");
 
 define("TITEL", "LBSV Nds. Mitgliederverwaltung");
 # Wie sollen NULL-Werte (=keine Zuordnung) dargestellt werden?

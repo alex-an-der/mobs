@@ -1,6 +1,6 @@
 {
-  "name": "UDAMA",
-  "short_name": "UDAMA",
+  "name": "MOBS",
+  "short_name": "MOBS",
   "icons": [
     {
       "src": "./inc/img/mobs.jpg",

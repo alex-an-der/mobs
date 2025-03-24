@@ -8,7 +8,7 @@
             "request": "launch",
             "port": 9003,
             "pathMappings": {
-                "/var/www/html/udama": "/home/alex/projekte/web-projekte/localhost/udama"
+                "/var/www/html/mobs": "/home/alex/projekte/web-projekte/localhost/mobs"
             }
         }
     ]
