@@ -10,6 +10,7 @@ if (!isset($statistik[$selectedStat])) {
 }
 
 // Daten für die ausgewählte Statistik holen
+
 $stat = $statistik[$selectedStat];
 $result = $db->query($stat['query']);
 $data = isset($result['data']) ? $result['data'] : [];
@@ -21,7 +22,7 @@ if (!empty($data)) {
         return $b[$valueKey] <=> $a[$valueKey];
     });
 }
-
+    
 // Labels und Werte für Chart.js vorbereiten
 $labels = !empty($data) ? array_column($data, array_keys($data[0])[0]) : [];
 $values = !empty($data) ? array_column($data, array_keys($data[0])[1]) : [];

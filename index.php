@@ -1452,7 +1452,9 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                                 <li><a class="dropdown-item" href="#" onclick="exportData('excel', 'Xlsx')">Als Excel</a></li>
                                 <li><a class="dropdown-item" href="#" onclick="exportData('excel', 'Ods')">Als LibreOffice</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="statistik.php">Statistiken</a></li>
+                                <?php if (!empty($statistik)):?>
+                                    <li><a class="dropdown-item" href="statistik.php">Statistiken</a></li>
+                                <?php endif;?>
                             </ul>
                         </div>
                     </div>
