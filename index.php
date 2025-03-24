@@ -1212,7 +1212,7 @@ function renderTableSelectBox($db) {
         }
     }
 
-    foreach ($trennerindizies as $trennerindex) {
+    foreach ($trennerindizies als $trennerindex) {
         $firstChar = substr($options[$trennerindex], 0, 1);
         $displayText = str_pad('', $maxLaenge, $firstChar);
         $options[$trennerindex] = '<option disabled>' . $displayText . '</option>';
@@ -1521,6 +1521,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('mouseover', function(e) {
         const td = e.target.closest('td');
         if (td && !td.hasAttribute('data-bs-toggle')) {
+            // Skip checkbox cells
+            const hasCheckbox = td.querySelector('.form-check-input') || 
+                               td.querySelector('.checkbox-container');
+            if (hasCheckbox) return;
+            
             let text = "";
             const input = td.querySelector('input');
             if (input) {
