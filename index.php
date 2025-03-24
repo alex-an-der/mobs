@@ -1448,9 +1448,9 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                             </button>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="#" onclick="exportData('pdf')">Als PDF</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="exportData('csv')">Als CSV</a></li>
+                                <!--li><a class="dropdown-item" href="#" onclick="exportData('csv')">Als CSV</a></li-->
                                 <li><a class="dropdown-item" href="#" onclick="exportData('excel', 'Xlsx')">Als Excel</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="exportData('excel', 'Ods')">Als LibreOffice</a></li>
+                                <!--li><a class="dropdown-item" href="#" onclick="exportData('excel', 'Ods')">Als LibreOffice</a></li-->
                                 <li><a class="dropdown-item" href="#" onclick="exportData('maillist')">Als Mail-Verteiler</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <?php if (!empty($statistik)):?>

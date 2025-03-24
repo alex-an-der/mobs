@@ -7,6 +7,9 @@ require_once(__DIR__ . "/inc/include.php");
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+// Add to your config file
+ini_set('log_errors', 1);
+ini_set('error_log', './../mobs_error.log');
 
 // Validate input
 $format = $_POST['format'] ?? '';
@@ -38,7 +41,7 @@ if (!$exportAll && !empty($ids)) {
     
     // Bestimme den richtigen Tabellennamen und ID-Feld aus der Query
     $tableInfo = extractTableInfo($query);
-    $idField = $tableInfo['idField'];
+    $idField = 'id';  // ist IMMER id // $tableInfo['idField'];
     
     error_log("Using ID field: $idField for filtered query");
     
