@@ -1,10 +1,10 @@
+<!DOCTYPE html>
 <?php // Ganz oben wegen session_start()
 require_once(__DIR__ . "/user_includes/all.head.php");
 require_once(__DIR__ . "/user_includes/index.head.php");
 require_once(__DIR__ . "/inc/include.php");
 ?>
 
-<!DOCTYPE html>
 <html lang="de">
 <head>
     <!-- Favicon and mobile web app settings -->
@@ -839,7 +839,11 @@ $tabelle_upper = strtoupper($tabelle)
         function toggleSelectAll(source) {
             const checkboxes = document.querySelectorAll('.row-checkbox');
             checkboxes.forEach(checkbox => {
-                checkbox.checked = source.checked;
+                // Only select checkboxes in visible rows
+                const row = checkbox.closest('tr');
+                if (row && row.style.display !== 'none') {
+                    checkbox.checked = source.checked;
+                }
             });
         }
 
@@ -1407,7 +1411,7 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
             if (!empty($tabelle)): ?>
                 <div class="row">
                     <div class="btn-group-container">
-                        <button id="resetButton" class="btn btn-primary" onclick="resetPage()">Aktualisieren</button>
+                        <button id="resetButton" class="btn btn-primary" onclick="resetPage()">Neu laden</button>
                         
                         <?php if ($readwrite || hatUserBerechtigungen() || $deleteAnyway): 
                             $importErlaubt = true;
