@@ -289,6 +289,11 @@ $tabelle_upper = strtoupper($tabelle)
                             td.style.backgroundColor = 'lightgreen';
                         } else {
                             td.style.backgroundColor = 'lightcoral';
+                            navigator.clipboard.writeText(input.value).then(() => {
+                                alert("Die Daten konnten nicht gespeichert werden. Bitte prüfen Sie Ihre Eingabe. \n\nIhre ursprügliche Eingabe ist nicht verloren - ich habe sie in die Zwischenablage kopiert (Einfügen mit STRG & v).");
+                            }).catch(err => {
+                                alert("Die Daten konnten nicht gespeichert werden. Bitte prüfen Sie Ihre Eingabe."); 
+                            });
                             input.value = dbRow[field];
                         }
                     }
