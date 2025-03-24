@@ -1553,7 +1553,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const td = e.target.closest('td');
         if (td) {
             const tooltip = bootstrap.Tooltip.getInstance(td);
-            if (tooltip) {
+            if (tooltip && typeof tooltip.hide === 'function') {
                 tooltip.hide();
             }
         }
