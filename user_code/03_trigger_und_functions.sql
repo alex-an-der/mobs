@@ -265,20 +265,6 @@ BEGIN
                 WHERE y.id = uid
             )indiv_m
         )
-        -- WHEN 'stammmitglied' THEN (
-        --     SELECT GROUP_CONCAT(DISTINCT ID)
-        --     FROM (
-        --         SELECT member_bsg.id as ID, member_bsg.bsg as BSG, v.id as Verband 
-        --         FROM(
-        --             SELECT m.id as id, m.BSG as bsg
-        --             FROM b_mitglieder as m
-        --         ) member_bsg
-        --         JOIN b_bsg on b_bsg.id = member_bsg.bsg
-        --         JOIN b_regionalverband as v on v.id = b_bsg.Verband
-        --     ) b_und_v
-        --     WHERE (FIND_IN_SET(b_und_v.BSG, berechtigte_elemente_sub1(uid, 'BSG')) > 0) 
-        --     OR (FIND_IN_SET(b_und_v.Verband, berechtigte_elemente_sub1(uid, 'verband')) > 0)
-        -- )
         ELSE ''
     END INTO result;
     
@@ -318,11 +304,6 @@ BEGIN
                 LEFT JOIN b_bsg_rechte as br ON b.id = br.BSG
                 JOIN y_user as y ON Nutzer = y.id
                 WHERE y.id = uid
-                -- UNION
-                -- SELECT b.id as bsg_id, b.BSG, Nutzer
-                -- FROM b_bsg as b
-                -- LEFT JOIN b_regionalverband_rechte as vr ON b.Verband = vr.Verband
-                -- WHERE Nutzer = uid
             ) berechtigungen
         )
         WHEN 'sparte' THEN (
@@ -362,20 +343,6 @@ BEGIN
                 WHERE y.id = uid
             )indiv_m
         )
-        -- WHEN 'stammmitglied' THEN (
-        --     SELECT GROUP_CONCAT(DISTINCT ID)
-        --     FROM (
-        --         SELECT member_bsg.id as ID, member_bsg.bsg as BSG, v.id as Verband 
-        --         FROM(
-        --             SELECT m.id as id, m.BSG as bsg
-        --             FROM b_mitglieder as m
-        --         ) member_bsg
-        --         JOIN b_bsg on b_bsg.id = member_bsg.bsg
-        --         JOIN b_regionalverband as v on v.id = b_bsg.Verband
-        --     ) b_und_v
-        --     WHERE (FIND_IN_SET(b_und_v.BSG, berechtigte_elemente_sub1(uid, 'BSG')) > 0) 
-        --     OR (FIND_IN_SET(b_und_v.Verband, berechtigte_elemente_sub1(uid, 'verband')) > 0)
-        -- )
         ELSE ''
     END INTO result;
     
