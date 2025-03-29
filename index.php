@@ -1241,7 +1241,8 @@ function renderTableSelectBox($db) {
     echo '</select>';
     
     // Add Impressum button right next to the dropdown in the same form
-    echo '<a href="./user_code/impressum.php" target="_blank" class="btn btn-secondary ms-2">Impressum</a>';
+    echo '<a href="./user_code/impressum.php" target="_blank" class="btn btn-secondary ms-2" style="white-space: nowrap;">Impressum und Datenschutzerklärung</a>';
+    echo '<a href="doc/hilfe.html" target="_blank" class="btn btn-secondary ms-2">?</a>';
     
     echo '</form></p>';
 }
