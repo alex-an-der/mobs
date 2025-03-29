@@ -1,6 +1,6 @@
 <?php
 // We only need the database connection for this simple AJAX endpoint
-require_once(__DIR__."/../../mobs_credentials//db_connect.php");
+require_once(__DIR__."/../config/db_connect.php");
 
 header('Content-Type: application/json');
 

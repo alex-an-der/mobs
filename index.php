@@ -1,10 +1,9 @@
-<!DOCTYPE html>
-<?php // Ganz oben wegen session_start()
+<?php // Ganz oben wegen session_start(). Auch kein <!DOCTYPE html> vorher!
 require_once(__DIR__ . "/user_includes/all.head.php");
 require_once(__DIR__ . "/user_includes/index.head.php");
 require_once(__DIR__ . "/inc/include.php");
 ?>
-
+<!DOCTYPE html>
 <html lang="de">
 <head>
     <!-- Favicon and mobile web app settings -->

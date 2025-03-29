@@ -46,7 +46,7 @@ require_once(__DIR__.'/../yback/include/inc_main.php')
                             <input required class='form-control' type='text' id='nname' name='nname' value='<?= isset($_POST['nname']) ? $_POST['nname'] : '' ?>' />
                         </div>
                         <?php
-                        require_once(__DIR__."/../../../mobs_credentials/db_connect.php");
+                        require_once(__DIR__."/../../config/db_connect.php");
                         $options = '';
                         $query = "SELECT id, auswahl FROM b___geschlecht";
                         $result = $db->query($query);

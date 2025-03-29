@@ -111,11 +111,21 @@ if(!empty($err)){
 
 $register_link = $conf->getYpumRoot()."/yfront/register.php";
 
+$version = "<span style='font-weight:bold; color:red;'>Keine Versionsnummer im root-Verzeichnis abgelegt</span>";
+
+$rootDir = __DIR__ . "/../../";
+$files = glob($rootDir . "v[0-9]*.[0-9]*.[0-9]*");
+
+if (count($files) === 1) {
+    $version = basename($files[0]);
+}
+$version = "Version: " . $version;
 ?>
  
 </head>
 <body class="text-center h-100">
 
+<div class ="text-right"><?=$version."&nbsp;&nbsp;&nbsp;&nbsp;"?></div>
 
 <form class="form-signin" method="POST"> <!--action löscht übertragene GET-Werte -->
 <div class="container h-100">
