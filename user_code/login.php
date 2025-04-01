@@ -135,6 +135,9 @@ $version = "Version: " . $version;
                 <div class="col col-12 col-sm-8">
                     <?=$msg?>
                     <h1 class="h3 mb-3 font-weight-normal">Bitte melden Sie sich hier an</h1>
+                    <div class='alert alert-info mb-3' role='alert'>
+                        Vor dem ersten Anmelden musst du dich zunächst einmalig registrieren. Klicke dazu bitte auf '<a href='register.php'>Registrieren</a>'.
+                    </div>
                     <input class="form-control" name="usermail" type="email" id="usermail" required autocomplete="off" autofocus placeholder="Mailadresse" >
                 </div>
             </div>

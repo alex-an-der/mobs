@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>MOBS &lpar;Mitgliederorganisation im Betriebssport&rpar; - Handbuch</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="mobs-mitgliederorganisation-im-betriebssport---handbuch">MOBS (Mitgliederorganisation im Betriebssport) - Handbuch</h1>
+<p>Aktuelle Version: v0.0.6</p>
+<ul>
+<li><a href="#mobs-mitgliederorganisation-im-betriebssport---handbuch">MOBS (Mitgliederorganisation im Betriebssport) - Handbuch</a></li>
+<li><a href="#grundlegendes">Grundlegendes</a>
+<ul>
+<li><a href="#bedienungskonzepte">Bedienungskonzepte</a>
+<ul>
+<li><a href="#anlegen-von-datens%C3%A4tzen">Anlegen von Datensätzen</a></li>
+<li><a href="#l%C3%B6schen-von-datens%C3%A4tzen">Löschen von Datensätzen</a></li>
+<li><a href="#auswahl-von-datens%C3%A4tzen">Auswahl von Datensätzen</a></li>
+<li><a href="#filtern">Filtern</a></li>
+<li><a href="#sortieren">Sortieren</a></li>
+<li><a href="#speichern">Speichern</a></li>
+<li><a href="#dubletten">Dubletten</a></li>
+<li><a href="#support">Support</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#ich-bin-ein-mitglied---was-muss-ich-tun">Ich bin ein Mitglied - was muss ich tun?</a>
+<ul>
+<li><a href="#registrieren">Registrieren</a></li>
+<li><a href="#verwaltung-deiner-daten">Verwaltung deiner Daten</a>
+<ul>
+<li><a href="#meine-daten-bearbeiten">Meine Daten bearbeiten</a></li>
+<li><a href="#meine-daten-zur-bearbeitung-freigeben">Meine Daten zur Bearbeitung freigeben</a></li>
+<li><a href="#sonstige-funktionen">Sonstige Funktionen</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#ich-m%C3%B6chte-im-regionalverband-sparten-bearbeiten">Ich möchte im Regionalverband Sparten bearbeiten</a></li>
+<li><a href="#ich-verwalte-eine-bsg---was-muss-ich-tun">Ich verwalte eine BSG - was muss ich tun?</a>
+<ul>
+<li><a href="#bsg-stammdaten-pflegen">BSG Stammdaten pflegen</a></li>
+<li><a href="#bsg-stamm-mitglieder-pflegen">BSG Stamm-Mitglieder pflegen</a></li>
+<li><a href="#bsg-mitglieder-in-sparten-anmelden">BSG-Mitglieder in Sparten anmelden</a></li>
+</ul>
+</li>
+</ul>
+<h1 id="grundlegendes">Grundlegendes</h1>
+<p>Mit MOBS lassen sich alle Elemente eines Landesbetriebssportverbandes verwalten. Dabei werden folgende Begrifflichkeiten verwendet:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Abkürzung</th>
+<th>Erklärung</th>
+<th>Beispiel</th>
+<th>Angaben zum Datenschutz</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Landesverband</td>
+<td>LV</td>
+<td>Der Dachverband in einem Bundesland.</td>
+<td>LBSV Niedersachsen</td>
+<td>Der Landesverband darf alle Mitgliederdaten einsehen und darf Regionalverbände einrichten, sowie die Rechte darauf vergeben.</td>
+</tr>
+<tr>
+<td>Regionalverband</td>
+<td>RV</td>
+<td>Dem Landesverband untergeordnetete Regionalverbände. Ein RV gehört genau zu einem LV.</td>
+<td>BSV Hannover</td>
+<td>Der Regionalverband darf alle Mitgliederdaten in seinem Regionalverband einsehen. Er darf Sparten und Betriebssportgruppen einrichten und Rechte darauf vergeben.</td>
+</tr>
+<tr>
+<td>Sparte</td>
+<td></td>
+<td>Die Sparten der jeweiligen Regionalverbände. Eine Sparte ist immer genau einem RV zugeordnet. Gleinamige Sparten verschiedener RV sind verschiedene Sparten. Es kann aber verschiedene Sportarten geben, die die selbe Sportart ausüben. Eine Sparte muss genau einer Sportart zugewiesen werden.</td>
+<td>Darts, Bowling</td>
+<td>Da Sparten von den RV organisiert sind, gelten die gleichen Ansichtsrechte wie beim RV.</td>
+</tr>
+<tr>
+<td>Betriebssportgruppe</td>
+<td>BSG</td>
+<td>Eine Betriebssportgruppe ist die Gruppe der Betriebssport-Teilnehmer, die einem gemeinsamen Unternehmen oder Verein zugeordnet sind. Eine BSG kann Mitglieder in verschiedenen Sparten anmelden, jedoch nur innerhalb eines RV.</td>
+<td>BSG Volkswagen</td>
+<td>Um von einer BSG gesehen zu werden, muss jeder Teilnehmer die Ansicht freigeben.</td>
+</tr>
+<tr>
+<td>Mitglied</td>
+<td></td>
+<td>Jedes Mitglied wird in MOBS erfasst und ist verantwortlich für die Aktualität seiner Daten. Jedes Mitglied muss genau <strong>einer</strong> Stamm-BSG zugeordnet sein. Die Stamm-BSG führt die Basis-Mitgliedsbeiträge ab. Für die Sparten können auch verschiedene BSG ausgewählt werden. Voraussetzung: Die BSG sind einverstanden und haben das Ansichtsrecht für die Daten.</td>
+<td></td>
+<td>Es gelten die oben genannten Ansichtsrechte. Die Ansicht und Bearbeitung durch eine BSG muss vom Mitglied ausdrücklich genehmigt werden. Ohne Erlaubnis kann anderseits keine Bearbeitung erfolgen.</td>
+</tr>
+<tr>
+<td>Alle Daten werden auf Servern innerhalb der EU gespeichert. Es gelten die Datenschutzbestimmungen des LBSV Niedersachsen.</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><a href="#mobs-mitgliederorganisation-im-betriebssport---handbuch">zurück</a></p>
+<h2 id="bedienungskonzepte">Bedienungskonzepte</h2>
+<p>Die verschiedenen Ansichten werden aucb Tabellen genannt und können über die oberere Auswahlbox angezeigt werden. Die Auswahl der möglichen Ansichten ist abhängig von den Rollen und damit einhhergehenden Rechten des angemeldeten Nutzers. Bis du z.B. für keine BSG als Verantwortlicher vom RV eingetragen, siehst du die Ansichten zur BSG-Verwaltung auch nicht. In der Hauptansicht unten ist prinzipiell eine Zeile ein Datensatz. Die Begriffe werden hier synonym verwendet.</p>
+<h3 id="anlegen-von-datensätzen">Anlegen von Datensätzen</h3>
+<p>Neue Zeilen werden mit <em>Einfügen</em> angelegt. Dabei ist es kontextabhängig, was ein neuer Datensatz ist. So wird mit <em>einfügen</em> auf der Seite zur Vergabe von Berechtigungen eine neue Berechtigung eingefügt, auf der Seite der Betriebssportgemeinschaften eine neue BSG.</p>
+<h3 id="löschen-von-datensätzen">Löschen von Datensätzen</h3>
+<p>Um einen Datensatz zu enfernen, kann der Knopf <em>Ausgewähltes löschen</em> benutzt werden. Bitte sei dir bewusst, dass dies meist eine Kaskade an Löschungen auslöst. Löscht du zB. ein Mitglied aus deiner BSG, so wird er auch aus den Sparten gelöscht, in denen er für die BSG angetreten ist.</p>
+<h3 id="auswahl-von-datensätzen">Auswahl von Datensätzen</h3>
+<p>Für einige Aktionen (z.B. <em>Löschen</em>) ist eine Auswahl von einem oder mehreren Datensätzen erforderlich. Dies geschieht mit den Checkboxen zu beginn jeder Zeile. Gibt es keine Checkboxen, muss auch nichts ausgewählt werden. Wird die Checkbox im Tabellenkopf aktiviert, werden alle sichtbaren Datensätze aktiviert.</p>
+<h3 id="filtern">Filtern</h3>
+<p>In der Filterzeile (über der Tabelle) kannst du einen Text eingeben. Nach diesem wird die gesamte Tabelle gefiltert - egal, wo dieser Text steht. Klickst du mit der rechten Maustaste auf ein Tabellenfeld, wird der Inhalt als Filtertext übernommen. Klickst du erneut darauf wird er wieder gelöscht. Mit einem blauem Hintergrund werden die Zellen markiert, die den gesuchten Text enthalten. Zum Löschen des Filers, lösche die Filter-Eingabe.</p>
+<h3 id="sortieren">Sortieren</h3>
+<p>Klicke mit der linken Maustaste auf eine Spaltenüberschrift, um nach dieser zu sortieren. Ein weiterer Klick kehrt die Sortierung um.</p>
+<h3 id="speichern">Speichern</h3>
+<p>Die Daten werden beim Verlassen des Feldes automatisch an die Datenbank gesendet (= gespeichert). Wird das Feld rot, konnten die Daten nicht gespeichert werden. Entweder ist keine Verbindung vorhanden (bitte Internetverbindung prüfen) oder das Datenformat stimmt nicht mit dem erwartetem Format überein (z.B. Buchstaben im Geburtsdatum). Das Feld wird grün, wenn ein erfolgreicher Verifizierungslauf durchgeführt wurde: Dann wurden die Daten gespeichert und kontrolliert.</p>
+<h3 id="dubletten">Dubletten</h3>
+<p>Bitte prüfe deine Tabellen regelmäßig auf Doppeleinträge, indem du nach Dubletten suchst (Knopf in der Bedienleiste).</p>
+<h3 id="support">Support</h3>
+<p>Fragen kannst du jederzeit an <a href="mailto:support@mobs24.de">support@mobs24.de</a> richten.</p>
+<p><a href="#mobs-mitgliederorganisation-im-betriebssport---handbuch">zurück</a></p>
+<h1 id="ich-bin-ein-mitglied---was-muss-ich-tun">Ich bin ein Mitglied - was muss ich tun?</h1>
+<h2 id="registrieren">Registrieren</h2>
+<p>Wenn noch nicht geschehen, registriere dich bitte, idem du bei der Anmeldung auf 'Registrieren' klickst. Fülle die Felder wahrheitsgemäß aus. Falsche Angaben können zur Verlust des Versicherungsschutzes oder zum Ausschluss aus der Sparte, RV oder LV führen. Alle Daten sind später noch bearbeitbar. Zum Abschluss der Registrierung folge bitte den Angaben des Registrierungsprozesses. Du kannst später deine Daten selbständig löschen und jederzeit einsehen, welche personenbezogebeb Daten von dir gespeichert sind.</p>
+<h2 id="verwaltung-deiner-daten">Verwaltung deiner Daten</h2>
+<p>Nach dem erfolgreichen Login, siehst du folgende Punkte:</p>
+<h3 id="meine-daten-bearbeiten">Meine Daten bearbeiten</h3>
+<p>Passe hier deine Daten an, wenn es Veränderungen gibt.</p>
+<h3 id="meine-daten-zur-bearbeitung-freigeben">Meine Daten zur Bearbeitung freigeben</h3>
+<p>Um die innerhalb einer BSG bearbeiten zu können, müssen die Verwalter dieser BSG auf deine Daten zugreifen können. Hier kannst du deine Daten entsprechend einer oder mehreren BSG freigeben. Du kannst neue Berechtigungen mit 'einfügen' anlegen und mit 'Ausgewählte löschen' wieder entfernen.</p>
+<h3 id="sonstige-funktionen">Sonstige Funktionen</h3>
+<p>Du kannst unter dem entsprechenden Punkt deine Daten löschen oder verschiedene Berichte einsehen.</p>
+<p><a href="#mobs-mitgliederorganisation-im-betriebssport---handbuch">zurück</a></p>
+<h1 id="ich-möchte-im-regionalverband-sparten-bearbeiten">Ich möchte im Regionalverband Sparten bearbeiten</h1>
+<p>Für das Einrichten von Sparten benötigst du besondere Systemrechte. Bitte nehme Kontakt mit einem Administrator auf: <a href="mailto:support@mobs24.de">support@mobs24.de</a></p>
+<p><a href="#mobs-mitgliederorganisation-im-betriebssport---handbuch">zurück</a></p>
+<h1 id="ich-verwalte-eine-bsg---was-muss-ich-tun">Ich verwalte eine BSG - was muss ich tun?</h1>
+<p><strong>Wichtig:</strong> Um ein Mitglied auswählen oder bearbeiten zu können, muss das jeweilige Mitglied der BSG die Bearbeitungsrechte einräumen (siehe <a href="#meine-daten-zur-bearbeitung-freigeben">Meine Daten zur Bearbeitung freigeben</a>).</p>
+<h2 id="bsg-stammdaten-pflegen">BSG Stammdaten pflegen</h2>
+<p>Unter BSG-Stammdaten bitte den Hauptansprechpartner und die Rechnungsdaten pflegen.</p>
+<h2 id="bsg-stamm-mitglieder-pflegen">BSG Stamm-Mitglieder pflegen</h2>
+<p>Jedes Mitglied benötigt zunächst eine Stamm-BSG, die den Basis-Verbandsbeitrag abführt. Dies funktioniert wie folgt:</p>
+<ol>
+<li>Ein Mitglied räumt einer BSG Bearbeitungsrechte ein.</li>
+<li>Daraufhin erscheint das Mitglied ohne BSG-Zuweisung ('---') in allen freigegebenen BSG.</li>
+<li>Die Stamm-BSG weist die zutreffende BSG dem Mitglied zu (klick auf '---' und entsprechende Auswahl).</li>
+</ol>
+<p>Wenn das Mitglied nicht sichtbar ist, kann dies verschiedene Ursachen haben:</p>
+<ol>
+<li>Das Mitglied hat sich noch nie eingeloggt (erst dann wird das Mitglied im System angelegt).</li>
+<li>Das Mitglied hat der BSG nicht die Bearbeitungsrechte eingeräumt.</li>
+<li>Das Mitglied hat bereits eine andere Stamm-BSG. Bitte zuerst dort wieder auf '---' setzen. Erst dann kann eine neue BSG zugewiesen werden.</li>
+</ol>
+<p>Um die Stammmitgliedschaft eines Mitglieds zu beenden, bitte als BSG wieder '---' auswählen.</p>
+<h2 id="bsg-mitglieder-in-sparten-anmelden">BSG-Mitglieder in Sparten anmelden</h2>
+<p>Mit der Aufnahme in die BSG als Stammmitglied ist dem Mitglied noch keine Sparte zugewiesen. Dies muss hier gemacht werden - auch wenn die BSG nur eine einzige Sparte bedient. Auch nicht-Stammmitglieder können hier Sparten zugewiesen werden, wenn Sie in diesen für die BSG antreten.</p>
+<p>Um eine Anmeldung durchzuführen, klicke auf <em>Einfügen</em> und wähle die Felder entsprechend aus. Um ein Mitglied abzumelden, lösche in dieser Ansicht die entsprechende Zeile.</p>
+<p>Wenn ein Mitglied nicht sichtbar ist, , kann dies verschiedene Ursachen haben:</p>
+<ol>
+<li>Das Mitglied hat sich noch nie eingeloggt (erst dann wird das Mitglied im System angelegt).</li>
+<li>Das Mitglied hat der BSG nicht die Bearbeitungsrechte eingeräumt.</li>
+<li>Das Mitglied hat noch keine Stamm-BSG. Eine Stamm-BSG ist die Grundvoraussetzung für eine Spartenzuordnung.<br>
+<a href="#mobs-mitgliederorganisation-im-betriebssport---handbuch">zurück</a></li>
+</ol>
+
+            
+            
+        </body>
+        </html>

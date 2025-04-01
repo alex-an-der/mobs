@@ -7,6 +7,7 @@ Aktuelle Version: v0.0.6
     - [Löschen von Datensätzen](#löschen-von-datensätzen)
     - [Auswahl von Datensätzen](#auswahl-von-datensätzen)
     - [Filtern](#filtern)
+    - [Sortieren](#sortieren)
     - [Speichern](#speichern)
     - [Dubletten](#dubletten)
     - [Support](#support)
@@ -44,6 +45,8 @@ Um einen Datensatz zu enfernen, kann der Knopf _Ausgewähltes löschen_ benutzt 
 Für einige Aktionen (z.B. _Löschen_) ist eine Auswahl von einem oder mehreren Datensätzen erforderlich. Dies geschieht mit den Checkboxen zu beginn jeder Zeile. Gibt es keine Checkboxen, muss auch nichts ausgewählt werden. Wird die Checkbox im Tabellenkopf aktiviert, werden alle sichtbaren Datensätze aktiviert.  
 ### Filtern
 In der Filterzeile (über der Tabelle) kannst du einen Text eingeben. Nach diesem wird die gesamte Tabelle gefiltert - egal, wo dieser Text steht. Klickst du mit der rechten Maustaste auf ein Tabellenfeld, wird der Inhalt als Filtertext übernommen. Klickst du erneut darauf wird er wieder gelöscht. Mit einem blauem Hintergrund werden die Zellen markiert, die den gesuchten Text enthalten. Zum Löschen des Filers, lösche die Filter-Eingabe.
+### Sortieren
+Klicke mit der linken Maustaste auf eine Spaltenüberschrift, um nach dieser zu sortieren. Ein weiterer Klick kehrt die Sortierung um.
 ### Speichern
 Die Daten werden beim Verlassen des Feldes automatisch an die Datenbank gesendet (= gespeichert). Wird das Feld rot, konnten die Daten nicht gespeichert werden. Entweder ist keine Verbindung vorhanden (bitte Internetverbindung prüfen) oder das Datenformat stimmt nicht mit dem erwartetem Format überein (z.B. Buchstaben im Geburtsdatum). Das Feld wird grün, wenn ein erfolgreicher Verifizierungslauf durchgeführt wurde: Dann wurden die Daten gespeichert und kontrolliert.
 ### Dubletten
