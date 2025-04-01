@@ -113,8 +113,9 @@ require_once(__DIR__.'/../yback/include/inc_main.php')
                             <input type="checkbox" class="form-check-input" id="datenschutz" name="datenschutz" required>
                             <label class="form-check-label" for="datenschutz">Ich habe die <a href="https://lbsv-nds.de/datenschutz/" target="_blank">Datenschutzerklärung</a> gelesen und bin damit einverstanden.</label>
                         </div>
-                        <div class='d-grid'>
+                        <div class='d-grid gap-2'>
                             <button type='submit' class='btn btn-success' name='saveandmail'>Speichern und Bestätigungsmail senden</button>
+                            <a href='./login.php' class='btn btn-primary'>Abbrechen</a>
                         </div>
                     </form>
                 </div>
