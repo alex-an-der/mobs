@@ -1323,7 +1323,7 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                 // Add word-wrap styles
                 $style .= "word-wrap: break-word; white-space: normal;'";
                 
-                echo '<td data-field="' . $key . '" ' . $style . '>';
+                echo '<td data-field="' . htmlspecialchars($key) . '" ' . $style . '>';
                 $data_fk_ID_key = "";
                 $data_fk_ID_value = "";
                
@@ -1338,20 +1338,18 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
 
                     if ($readwrite || $deleteAnyway) {
                         echo '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0)">';
-                        echo '<option  value="NULL"' . (empty($value) ? ' selected' : '') . '>'.NULL_WERT.'</option>';
-                        foreach ($foreignKeys[$key] as $fk ) {
+                        echo '<option value="NULL"' . (empty($value) ? ' selected' : '') . '>'.NULL_WERT.'</option>';
+                        foreach ($foreignKeys[$key] as $fk) {
                             $fk_value = $fk['id'];
-                            $fk_display = $fk['anzeige'];
+                            $fk_display = htmlspecialchars($fk['anzeige'], ENT_QUOTES);
 
                             $selected = ($fk_value == $value) ? 'selected' : '';
-                            echo '<option  value="' . htmlspecialchars($fk_value) . '" ' . $selected . '>' . $fk_display . '</option>\n';
+                            echo '<option value="' . htmlspecialchars($fk_value, ENT_QUOTES) . '" ' . $selected . '>' . $fk_display . '</option>';
                         }
                         echo '</select>';
                     } else {
-                        //echo htmlspecialchars($data_fk_ID_value);
-                        echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars($data_fk_ID_value) . '</div>';
+                        echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars($data_fk_ID_value, ENT_QUOTES) . '</div>';
                     }
-
                 } else {
                     if ($readwrite) {
                         $inputType = 'text';
@@ -1364,13 +1362,13 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                                 $inputType = 'date';
                             }
                         }
-                        echo '<input oncontextmenu="filter_that(this, \'input\');" data-type="'.$columnType.'" data-fkIDkey="' . htmlspecialchars($data_fk_ID_key) . '" 
-                              data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value) . '" 
+                        echo '<input oncontextmenu="filter_that(this, \'input\');" data-type="'.htmlspecialchars($columnType).'" data-fkIDkey="' . htmlspecialchars($data_fk_ID_key, ENT_QUOTES) . '" 
+                              data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value, ENT_QUOTES) . '" 
                               type="' . $inputType . '" 
                               class="form-control border-0" 
                               style="background-color: inherit; word-wrap: break-word; white-space: normal;" 
-                              value="' . $value . '"
-                              onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, \'' . $columnType . '\')"
+                              value="' . htmlspecialchars($value, ENT_QUOTES) . '"
+                              onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, \'' . htmlspecialchars($columnType, ENT_QUOTES) . '\')"
                               onfocus="clearCellColor(this)">';
                 
                     } else {
@@ -1379,7 +1377,7 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                                 $value = number_format((float)$value, 2, '.', '');
                             }
                         }
-                        echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars($value) . '</div>';
+                        echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars($value, ENT_QUOTES) . '</div>';
                     }
                 }
                 echo '</td>';
