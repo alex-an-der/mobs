@@ -347,9 +347,6 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                 return;
             }
             
-            const failedRows = errorItems.length;
-            const successRows = totalRows - failedRows;
-            
             // Identify which rows had errors
             const errorRowNumbers = errorItems.map(err => (typeof err.row === 'number' ? err.row : 0));
             
@@ -361,10 +358,15 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                 }
             }
             
-            // Use validRowIndices from server if available
+            // Use validRowIndices from server if available - but adjust for proper row indexing
             if (Array.isArray(result.validRowIndices)) {
-                validRows = result.validRowIndices;
+                // Server uses 0-based indexing, but we need to add 1 to match our row indices
+                validRows = result.validRowIndices.map(index => index + 1);
+                console.log("Adjusted validRows (after adding 1):", validRows);
             }
+            
+            const failedRows = errorItems.length;
+            const successRows = totalRows - failedRows;
             
             let message = `<p><strong>${failedRows} von ${totalRows} Datensätzen konnten nicht importiert werden.</strong></p>`;
             
@@ -452,7 +454,7 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
             
             console.log("Valid row indices:", validRowIndices);
             
-            // Prepare all rows with their indices for individual import
+            // Collect all non-empty rows with their indices
             const allRows = [];
             for (let i = 1; i < lines.length; i++) {
                 if (lines[i].trim() === '') continue;
@@ -462,16 +464,27 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                 });
             }
             
-            // Filter to only valid rows if we have valid indices
-            let rowsToImport = allRows;
+            console.log("All data rows:", allRows);
+            
+            // Determine which rows to import - fixing the index mismatch issue
+            let rowsToImport = [];
             if (validRowIndices && validRowIndices.length > 0) {
                 rowsToImport = allRows.filter(row => validRowIndices.includes(row.index));
+                console.log("Filtered rows to import:", rowsToImport);
+            } else {
+                // Otherwise assume all rows are valid
+                rowsToImport = [...allRows];
             }
             
-            console.log("Rows to import:", rowsToImport);
+            console.log("Selected rows to import:", rowsToImport);
             
             if (rowsToImport.length === 0) {
-                showValidationResult(false, 'Keine gültigen Zeilen zum Importieren gefunden.');
+                // Improved error message with more details
+                let errorMessage = 'Keine gültigen Zeilen zum Importieren gefunden. ';
+                errorMessage += `<br>validRowIndices: ${JSON.stringify(validRowIndices)}`;
+                errorMessage += `<br>Anzahl gefundener Datenzeilen: ${allRows.length}`;
+                errorMessage += `<br>Indizes der gefundenen Datenzeilen: ${JSON.stringify(allRows.map(r => r.index))}`;
+                showValidationResult(false, errorMessage);
                 importButton.disabled = false;
                 importButton.innerHTML = 'Daten importieren';
                 return;
@@ -503,7 +516,6 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                 }
                 
                 const row = rowsToImport[index];
-                const rowData = [header, row.data]; // Just header and this one row
                 
                 // Update progress bar
                 const progressPercent = Math.round((index / rowsToImport.length) * 100);
@@ -518,14 +530,16 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'import',
-                        rows: rowData,
+                        rows: [header, row.data], // Send only header and this one row
                         suchQueries: suchQueries,
                         tabelle: tabelle,
-                        singleRowImport: true // Flag to indicate we're importing just one row
+                        singleRowImport: true
                     })
                 })
                 .then(response => response.json())
                 .then(result => {
+                    console.log(`Row ${index + 1} import result:`, result);
+                    
                     if (result.status === 'success') {
                         successCount++;
                     } else {
@@ -540,6 +554,7 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                     importRow(index + 1);
                 })
                 .catch(error => {
+                    console.error(`Error importing row ${index + 1}:`, error);
                     failureCount++;
                     failures.push({
                         row: row.index,
@@ -556,42 +571,55 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
             
             // Function to show final results when all rows are processed
             const finishImport = () => {
+                let message = '';
+                
                 if (successCount > 0 && failureCount === 0) {
                     // All successful
-                    showValidationResult(true, `<strong>Import erfolgreich!</strong><br>${successCount} Datensätze wurden importiert.`);
+                    message = `<strong>Import erfolgreich!</strong><br>${successCount} Datensätze wurden importiert.`;
+                    showValidationResult(true, message);
                 } else if (successCount > 0 && failureCount > 0) {
                     // Partial success
-                    let message = `<p><strong>${successCount} von ${totalRows} Datensätzen wurden erfolgreich importiert.</strong></p>
-                                  <p>${failureCount} Datensätze konnten nicht importiert werden.</p>`;
+                    message = `<p><strong>${successCount} von ${totalRows} Datensätzen wurden erfolgreich importiert.</strong></p>`;
                     
-                    // Show error details
+                    // Show error details for failed imports
+                    message += '<p>Folgende Datensätze konnten nicht importiert werden:</p>';
                     message += '<table class="error-table">';
                     message += '<thead><tr><th>Zeile</th><th>Daten</th><th>Fehlermeldung</th></tr></thead><tbody>';
                     
                     for (const failure of failures) {
+                        const errorMsg = String(failure.error)
+                            .replace(/(<([^>]+)>)/gi, "")
+                            .replace(/SQLSTATE\[\d+\]:/gi, "")
+                            .replace(/Integrity constraint violation: \d+/gi, "Constraint verletzt:");
+                        
                         message += `<tr>`;
                         message += `<td>${failure.row}</td>`;
                         message += `<td>${failure.data}</td>`;
-                        message += `<td class="error-message">${failure.error}</td>`;
+                        message += `<td class="error-message">${errorMsg}</td>`;
                         message += `</tr>`;
                     }
                     
                     message += '</tbody></table>';
                     
-                    showValidationResult(true, message);
+                    showValidationResult(true, message); // Still show as success with warnings
                 } else {
                     // All failed
-                    let message = `<p><strong>Fehler: Kein Datensatz konnte importiert werden.</strong></p>`;
+                    message = `<p><strong>Fehler: Kein Datensatz konnte importiert werden.</strong></p>`;
                     
                     // Show error details
                     message += '<table class="error-table">';
                     message += '<thead><tr><th>Zeile</th><th>Daten</th><th>Fehlermeldung</th></tr></thead><tbody>';
                     
                     for (const failure of failures) {
+                        const errorMsg = String(failure.error)
+                            .replace(/(<([^>]+)>)/gi, "")
+                            .replace(/SQLSTATE\[\d+\]:/gi, "")
+                            .replace(/Integrity constraint violation: \d+/gi, "Constraint verletzt:");
+                        
                         message += `<tr>`;
                         message += `<td>${failure.row}</td>`;
                         message += `<td>${failure.data}</td>`;
-                        message += `<td class="error-message">${failure.error}</td>`;
+                        message += `<td class="error-message">${errorMsg}</td>`;
                         message += `</tr>`;
                     }
                     

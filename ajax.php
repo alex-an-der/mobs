@@ -394,42 +394,79 @@ try {
             $response = checkDaten($data, $db);
             if($response['status'] == "success"){
                 try {
-                    $db->query("START TRANSACTION");
+                    // Don't START TRANSACTION for single row imports to allow partial success
+                    $singleRowImport = isset($data['singleRowImport']) && $data['singleRowImport'] === true;
+                    if (!$singleRowImport) {
+                        $db->query("START TRANSACTION");
+                    }
                     
                     $successCount = 0;
                     $errorCount = 0;
                     $errorLog = [];
                     $insertQuery = $response['insert_query'];
 
+                    $totalRows = count($response['args']);
+                    $failedRows = [];
+                    $validRowIndices = [];
+
                     foreach($response['args'] as $index => $args) {
                         try {
-                            $result = $db->query($insertQuery, $args);
+                            if ($singleRowImport) {
+                                // For single row imports, we don't need transactions
+                                $result = $db->query($insertQuery, $args);
+                            } else {
+                                // For regular imports, use transactions
+                                $result = $db->query($insertQuery, $args);
+                            }
+                            
                             if(isset($result['error'])) {
                                 $errorCount++;
-                                $errorLog[] = ["row" => $index, "data" => $args, "error" => $result['error']];    
+                                $failedRows[] = ["row" => $index, "data" => $args, "error" => $result['error']];    
                             } else {
                                 $successCount++;
+                                // Store the row index (0-based) in validRowIndices
+                                $validRowIndices[] = $index;
                             }
                         } catch (Exception $e) {
                             $errorCount++;
-                            $errorLog[] = ["row" => $index, "data" => $args, "error" => $e->getMessage()];
+                            $failedRows[] = ["row" => $index, "data" => $args, "error" => $e->getMessage()];
                         }
                     }
                 
-                    if($errorCount == 0) {
-                        $db->query("COMMIT");
-                        $response = ["status" => "success", "message" => "Alle $successCount Datensätze wurden importiert."];
+                    if ($singleRowImport) {
+                        // For single row imports, just return success if it worked
+                        if ($errorCount == 0) {
+                            $response = ["status" => "success", "message" => "Datensatz wurde erfolgreich importiert."];
+                        } else {
+                            $response = [
+                                "status" => "error", 
+                                "message" => "Fehler beim Import des Datensatzes.",
+                                "errors" => $failedRows
+                            ];
+                        }
                     } else {
-                        $db->query("ROLLBACK");
-                        $response = [
-                            "status" => "error", 
-                            "message" => "Fehler beim Import: $errorCount von ".($successCount + $errorCount)." Datensätzen fehlgeschlagen.",
-                            "errors" => json_encode($errorLog)
-                        ];
+                        // For multi-row imports with transaction, commit only if all succeeded
+                        if($errorCount == 0) {
+                            $db->query("COMMIT");
+                            $response = ["status" => "success", "message" => "Alle $successCount Datensätze wurden importiert."];
+                        } else {
+                            // For partial failures, still report which rows are valid
+                            // This is used when the user opts to continue with valid rows only
+                            $db->query("ROLLBACK");
+                            $response = [
+                                "status" => "error", 
+                                "message" => "$errorCount von $totalRows Datensätzen fehlgeschlagen.",
+                                "errors" => $failedRows,
+                                "totalRows" => $totalRows,
+                                "validRowIndices" => $validRowIndices
+                            ];
+                        }
                     }
                 }
                 catch (Exception $e) {
-                    $db->query("ROLLBACK");
+                    if (!$singleRowImport) {
+                        $db->query("ROLLBACK");
+                    }
                     $response = ["status" => "error", "message" => "Schwerwiegender Fehler: " . $e->getMessage()];
                 }
 
