@@ -127,13 +127,12 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
     return count($matches) === 1 ? $matches[0] : null;*/
     }
 
-
 ?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" width="device-width, initial-scale=1.0">
     <title><?=TITEL?></title>
     <style>
         .textarea-container {
@@ -180,6 +179,25 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+        }
+        .error-table {
+            width: 100%;
+            margin-top: 15px;
+            border-collapse: collapse;
+        }
+        .error-table th, .error-table td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+        }
+        .error-table th {
+            background-color: #f8f9fa;
+        }
+        .error-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .error-message {
+            color: #721c24;
+            font-weight: bold;
         }
     </style>
 
@@ -265,25 +283,25 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                 .then(response => response.json())
                 .then(result => {
                     if (result.status === 'error') {
-                        ausgabe = result.message;
-                        if (typeof result.errors !== 'undefined'){ console.log(result.errors);
-                            ausgabe += "<p>" + JSON.stringify(result.errors) + "</p>";
+                        if (typeof result.errors !== 'undefined' && result.errors.length > 0 && action === 'import') {
+                            displayImportErrors(result, button, originalText);
+                        } else {
+                            showValidationResult(false, result.message);
+                            button.innerHTML = originalText;
+                            button.disabled = false;
                         }
-                        showValidationResult(false, ausgabe);
                     } else {
                         if(insert){
                             showValidationResult(true, result.message);
                         }else{
                             showValidationResult(true, 'Die Daten k&ouml;nnen so importiert werden.');
-
                         }
+                        button.innerHTML = originalText;
+                        button.disabled = false;
                     }
                 })
                 .catch(error => {
                     showValidationResult(false, 'Fehler bei der Fremdschlüssel-Validierung: ' + error.message);
-                })
-                .finally(() => {
-                    // Button zurücksetzen
                     button.innerHTML = originalText;
                     button.disabled = false;
                 });
@@ -295,7 +313,299 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
             }
         }
 
-        function showValidationResult(isValid, message) {
+        function displayImportErrors(result, button, originalText) {
+            const totalRows = result.totalRows || allRows.length - 1; // Fallback to counting rows if server doesn't provide
+            let errorItems = [];
+            
+            // Debug output to console to see what we're getting
+            console.log("Result from server:", result);
+            
+            // Check if errors is a string that needs to be parsed
+            if (typeof result.errors === 'string') {
+                try {
+                    errorItems = JSON.parse(result.errors);
+                    console.log("Parsed error items:", errorItems);
+                } catch (e) {
+                    console.error("Failed to parse error string:", e);
+                    errorItems = [{
+                        row: 0,
+                        data: "Unbekannt",
+                        error: result.errors
+                    }];
+                }
+            } else if (Array.isArray(result.errors)) {
+                errorItems = result.errors;
+            } else if (typeof result.errors === 'object' && result.errors !== null) {
+                errorItems = Object.values(result.errors);
+            }
+            
+            if (!errorItems || errorItems.length === 0) {
+                // If we couldn't parse any errors, show the raw message
+                showValidationResult(false, 'Fehler beim Import: ' + result.message);
+                button.innerHTML = originalText;
+                button.disabled = false;
+                return;
+            }
+            
+            const failedRows = errorItems.length;
+            const successRows = totalRows - failedRows;
+            
+            // Identify which rows had errors
+            const errorRowNumbers = errorItems.map(err => (typeof err.row === 'number' ? err.row : 0));
+            
+            // Generate list of valid row indices (row numbers starting from 1 after header)
+            let validRows = [];
+            for (let i = 1; i <= totalRows; i++) {
+                if (!errorRowNumbers.includes(i)) {
+                    validRows.push(i);
+                }
+            }
+            
+            // Use validRowIndices from server if available
+            if (Array.isArray(result.validRowIndices)) {
+                validRows = result.validRowIndices;
+            }
+            
+            let message = `<p><strong>${failedRows} von ${totalRows} Datensätzen konnten nicht importiert werden.</strong></p>`;
+            
+            // Fehlerdetails in einer Tabelle anzeigen
+            message += '<table class="error-table">';
+            message += '<thead><tr><th>Zeile</th><th>Daten</th><th>Fehlermeldung</th></tr></thead><tbody>';
+            
+            for (let i = 0; i < errorItems.length; i++) {
+                const err = errorItems[i];
+                const rowNum = (typeof err.row === 'number' ? err.row : i) + 1; // +1 weil die Zeilennummerierung beim Header beginnt
+                
+                let dataDisplay = "Keine Daten";
+                if (err.data) {
+                    dataDisplay = Array.isArray(err.data) ? err.data.join(', ') : 
+                                 (typeof err.data === 'object' ? JSON.stringify(err.data) : String(err.data));
+                }
+                
+                let errorMsg = "Unbekannter Fehler";
+                if (err.error) {
+                    errorMsg = String(err.error)
+                        .replace(/(<([^>]+)>)/gi, "") // Entferne HTML-Tags
+                        .replace(/SQLSTATE\[\d+\]:/gi, "") // Entferne SQLSTATE-Codes
+                        .replace(/Integrity constraint violation: \d+/gi, "Constraint verletzt:"); // Vereinfache Fehlermeldung
+                }
+                
+                message += `<tr>`;
+                message += `<td>${rowNum}</td>`;
+                message += `<td>${dataDisplay}</td>`;
+                message += `<td class="error-message">${errorMsg}</td>`;
+                message += `</tr>`;
+            }
+            
+            message += '</tbody></table>';
+            
+            // Always ask if user wants to import valid records
+            if (validRows.length > 0) {
+                message += `<div class="alert alert-warning mt-3">
+                    <h5>Fortfahren mit gültigen Datensätzen?</h5>
+                    <p>${validRows.length} Datensätze können problemlos importiert werden.</p>
+                    <div class="d-flex gap-2">
+                        <button id="continueImport" class="btn btn-warning">Ja, gültige Datensätze importieren</button>
+                        <button id="cancelImport" class="btn btn-secondary">Abbrechen</button>
+                    </div>
+                </div>`;
+            } else {
+                message += `<div class="alert alert-danger mt-3">
+                    <p>Es gibt keine gültigen Datensätze, die importiert werden könnten.</p>
+                    <button id="cancelImport" class="btn btn-secondary">Zurück</button>
+                </div>`;
+            }
+            
+            showValidationResult(false, message, true);
+            
+            // Event-Listener für die Buttons hinzufügen
+            setTimeout(() => {
+                const continueButton = document.getElementById('continueImport');
+                const cancelButton = document.getElementById('cancelImport');
+                
+                if (continueButton) {
+                    continueButton.addEventListener('click', () => {
+                        // Import nur der gültigen Datensätze fortsetzen
+                        importPartialData(validRows);
+                    });
+                }
+                
+                if (cancelButton) {
+                    cancelButton.addEventListener('click', () => {
+                        // Zurück zum Bearbeitungsmodus
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                        showValidationResult(false, 'Import abgebrochen.', false);
+                    });
+                }
+            }, 100);
+        }
+
+        function importPartialData(validRowIndices) {
+            const importButton = document.getElementById('importButton');
+            importButton.disabled = true;
+            importButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Importiere...';
+            
+            const textarea = document.getElementById('importData');
+            const lines = textarea.value.trim().split('\n');
+            const header = lines[0]; // Save header row
+            
+            console.log("Valid row indices:", validRowIndices);
+            
+            // Prepare all rows with their indices for individual import
+            const allRows = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim() === '') continue;
+                allRows.push({
+                    index: i,
+                    data: lines[i]
+                });
+            }
+            
+            // Filter to only valid rows if we have valid indices
+            let rowsToImport = allRows;
+            if (validRowIndices && validRowIndices.length > 0) {
+                rowsToImport = allRows.filter(row => validRowIndices.includes(row.index));
+            }
+            
+            console.log("Rows to import:", rowsToImport);
+            
+            if (rowsToImport.length === 0) {
+                showValidationResult(false, 'Keine gültigen Zeilen zum Importieren gefunden.');
+                importButton.disabled = false;
+                importButton.innerHTML = 'Daten importieren';
+                return;
+            }
+            
+            // New approach: Import each row individually
+            const totalRows = rowsToImport.length;
+            let successCount = 0;
+            let failureCount = 0;
+            const failures = [];
+            
+            // Show progress message
+            const resultDiv = document.getElementById('validationResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'alert alert-warning';
+            resultDiv.innerHTML = `<p><strong>Import läuft...</strong></p>
+                                  <div class="progress">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                         role="progressbar" style="width: 0%" 
+                                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                                  </div>`;
+            
+            // Process each row sequentially with promises
+            const importRow = (index) => {
+                if (index >= rowsToImport.length) {
+                    // All rows processed, show final result
+                    finishImport();
+                    return;
+                }
+                
+                const row = rowsToImport[index];
+                const rowData = [header, row.data]; // Just header and this one row
+                
+                // Update progress bar
+                const progressPercent = Math.round((index / rowsToImport.length) * 100);
+                const progressBar = resultDiv.querySelector('.progress-bar');
+                progressBar.style.width = `${progressPercent}%`;
+                progressBar.setAttribute('aria-valuenow', progressPercent);
+                progressBar.textContent = `${progressPercent}%`;
+                
+                fetch('ajax.php', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'import',
+                        rows: rowData,
+                        suchQueries: suchQueries,
+                        tabelle: tabelle,
+                        singleRowImport: true // Flag to indicate we're importing just one row
+                    })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.status === 'success') {
+                        successCount++;
+                    } else {
+                        failureCount++;
+                        failures.push({
+                            row: row.index,
+                            data: row.data,
+                            error: result.message || 'Unbekannter Fehler'
+                        });
+                    }
+                    // Process next row
+                    importRow(index + 1);
+                })
+                .catch(error => {
+                    failureCount++;
+                    failures.push({
+                        row: row.index,
+                        data: row.data,
+                        error: error.message
+                    });
+                    // Process next row despite error
+                    importRow(index + 1);
+                });
+            };
+            
+            // Start the import process with the first row
+            importRow(0);
+            
+            // Function to show final results when all rows are processed
+            const finishImport = () => {
+                if (successCount > 0 && failureCount === 0) {
+                    // All successful
+                    showValidationResult(true, `<strong>Import erfolgreich!</strong><br>${successCount} Datensätze wurden importiert.`);
+                } else if (successCount > 0 && failureCount > 0) {
+                    // Partial success
+                    let message = `<p><strong>${successCount} von ${totalRows} Datensätzen wurden erfolgreich importiert.</strong></p>
+                                  <p>${failureCount} Datensätze konnten nicht importiert werden.</p>`;
+                    
+                    // Show error details
+                    message += '<table class="error-table">';
+                    message += '<thead><tr><th>Zeile</th><th>Daten</th><th>Fehlermeldung</th></tr></thead><tbody>';
+                    
+                    for (const failure of failures) {
+                        message += `<tr>`;
+                        message += `<td>${failure.row}</td>`;
+                        message += `<td>${failure.data}</td>`;
+                        message += `<td class="error-message">${failure.error}</td>`;
+                        message += `</tr>`;
+                    }
+                    
+                    message += '</tbody></table>';
+                    
+                    showValidationResult(true, message);
+                } else {
+                    // All failed
+                    let message = `<p><strong>Fehler: Kein Datensatz konnte importiert werden.</strong></p>`;
+                    
+                    // Show error details
+                    message += '<table class="error-table">';
+                    message += '<thead><tr><th>Zeile</th><th>Daten</th><th>Fehlermeldung</th></tr></thead><tbody>';
+                    
+                    for (const failure of failures) {
+                        message += `<tr>`;
+                        message += `<td>${failure.row}</td>`;
+                        message += `<td>${failure.data}</td>`;
+                        message += `<td class="error-message">${failure.error}</td>`;
+                        message += `</tr>`;
+                    }
+                    
+                    message += '</tbody></table>';
+                    
+                    showValidationResult(false, message);
+                }
+                
+                importButton.disabled = false;
+                importButton.innerHTML = 'Daten importieren';
+            };
+        }
+
+        function showValidationResult(isValid, message, isPartialError = false) {
             const resultDiv = document.getElementById('validationResult');
             const importButton = document.getElementById('importButton');
             const importHelpContent = document.getElementById('importHelpContent');
@@ -307,49 +617,14 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
             if (isValid) {
                 importButton.style.display = 'inline-block';
                 importHelpContent.classList.remove('show');
-            } else {
+            } else if (!isPartialError) {
                 importButton.style.display = 'none';
                 importHelpContent.classList.add('show');
+            } else {
+                // Bei teilweisen Fehlern zeigen wir den Import-Button nicht,
+                // da stattdessen die Bestätigungsbuttons angezeigt werden
+                importButton.style.display = 'none';
             }
-        }
-
-        function importData() {
-            const textarea = document.getElementById('importData');
-            const data = textarea.value.trim();
-            const lines = data.split('\n');
-            const allRows = lines.map(line => parseCSVLine(line));
-
-            const importButton = document.getElementById('importButton');
-            importButton.disabled = true;
-            importButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Importiere...';
-
-            fetch('ajax.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    action: 'import',
-                    rows: allRows,
-                    suchQueries: suchQueries,
-                    tabelle: tabelle
-                })
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.status === 'success') {
-                    showValidationResult(true, result.message);
-                } else {
-                    showValidationResult(false, 'Fehler beim Import: ' + result.message);
-                }
-            })
-            .catch(error => {
-                showValidationResult(false, 'Fehler beim Import: ' + error.message);
-            })
-            .finally(() => {
-                importButton.disabled = false;
-                importButton.innerHTML = 'Daten importieren';
-            });
         }
 
         function parseCSVLine(line) {
