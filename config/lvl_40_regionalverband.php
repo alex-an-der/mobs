@@ -17,7 +17,9 @@ $anzuzeigendeDaten[] = array(
     "auswahltext" => "BSG einfügen, löschen und bearbeiten",
     "writeaccess" => true,
     "query" => "SELECT 
-        id, Verband, VKZ, BSG 
+        id, Verband, VKZ, BSG, 
+        (SELECT COUNT(*) FROM b_mitglieder m WHERE m.BSG = b.id) AS `info:Mitglieder`,
+        (SELECT COUNT(*) FROM b_bsg_rechte as r WHERE r.BSG = b.id) AS `info:Berechtigte`
         from b_bsg as b
         WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0 
         order by id desc;
@@ -32,7 +34,9 @@ $anzuzeigendeDaten[] = array(
     "spaltenbreiten" => array(
         "Verband"                       => "380",
         "VKZ"                           => "100",
-        "BSG"                           => "320"
+        "BSG"                           => "320",
+        "info:Mitglieder"               => "100",
+        "info:Berechtigte"              => "100"
     ) 
 );
 

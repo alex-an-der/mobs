@@ -25,6 +25,11 @@ class Datenbank {
     public function query($query, $arguments = array()) {
         require_once(__DIR__ . "/../../user_includes/before_sending_query.php");
 
+        // Handle info: columns by correctly escaping them in MySQL
+        // This allows using "info:" prefix in column aliases
+        $query = preg_replace('/\bAS\s+`?info:([^`\s,)]+)`?/i', 'AS `info:$1`', $query);
+        $query = preg_replace('/\bAS\s+info:([^\s,)]+)/i', 'AS `info:$1`', $query);
+
         $stmt = $this->pdo->prepare($query);
 
         // Handle NULL values

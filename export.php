@@ -254,10 +254,16 @@ function exportPDF($data, $tabelle) {
         // Header-Zeile
         $html .= '<tr>';
         foreach ($visibleHeaders as $header) {
+            // Check if it's an info column and extract the real display name
+            $displayHeader = $header;
+            if (strpos($header, 'info:') === 0) {
+                $displayHeader = substr($header, 5); // Remove 'info:' prefix
+            }
+            
             $html .= sprintf(
                 '<th style="width:%.1fmm">%s</th>',
                 $columnWidths[$header],
-                htmlspecialchars($header)
+                htmlspecialchars($displayHeader)
             );
         }
         $html .= '</tr>';

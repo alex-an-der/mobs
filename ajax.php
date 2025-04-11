@@ -27,6 +27,15 @@ try {
             $id = $data['id'];
             //$id = intval($id, 10);
             $field = $data['field'];
+            
+            // Skip update if it's an info column
+            if (strpos($field, 'info:') === 0) {
+                $response = ["status" => "error", "message" => "Info columns cannot be updated."];
+                ob_end_clean();
+                echo json_encode($response);
+                break;
+            }
+            
             $value = $data['value'];
             $tabelle = $data['tabelle'];
 
@@ -333,6 +342,11 @@ try {
         case 'insert_record':
             $tabelle = $data['tabelle'];
             $recordData = (array)$data['data'];
+            
+            // Filter out info: columns from data before insert
+            $recordData = array_filter($recordData, function($key) {
+                return strpos($key, 'info:') !== 0;
+            }, ARRAY_FILTER_USE_KEY);
             
             $fields = array_keys($recordData);
             $values = array_values($recordData);

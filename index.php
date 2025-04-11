@@ -706,11 +706,11 @@ $tabelle_upper = strtoupper($tabelle)
             if (tableHeaders && tableHeaders.length > 0) {
                 headers = Array.from(tableHeaders)
                     .map(th => th.getAttribute('data-field'))
-                    .filter(field => field && field !== 'id');
+                    .filter(field => field && field !== 'id' && !field.startsWith('info:'));  // Exclude 'id' and 'info:' fields
             } else {
                 // If no table headers exist (empty result), use column definitions
                 headers = columns.map(col => col.Field || col.field || col.name || col.Name)
-                    .filter(field => field && field !== 'id');
+                    .filter(field => field && field !== 'id' && !field.startsWith('info:'));  // Exclude 'id' and 'info:' fields
             }
 
             if (headers.length === 0) {
@@ -1281,7 +1281,12 @@ function renderTableHeaders($data) {
                 $style = "style='width: ".$anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header]."px;'";
             }
             if (strcasecmp($header, 'id') !== 0) {
-                echo "<th $style data-field='" . htmlspecialchars($header) . "'>" . htmlspecialchars($header) . "</th>";
+                // Check if it's an info column and extract the real display name
+                $displayHeader = $header;
+                if (strpos($header, 'info:') === 0) {
+                    $displayHeader = substr($header, 5); // Remove 'info:' prefix
+                }
+                echo "<th $style data-field='" . htmlspecialchars($header) . "'>" . htmlspecialchars($displayHeader) . "</th>";
             }
         }
     } else {
@@ -1326,6 +1331,9 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                 echo '<td data-field="' . htmlspecialchars($key) . '" ' . $style . '>';
                 $data_fk_ID_key = "";
                 $data_fk_ID_value = "";
+                
+                // Check if this is an info column (starts with 'info:')
+                $isInfoColumn = strpos($key, 'info:') === 0;
                
                 if(isset($foreignKeys[$key])) { 
                     foreach($foreignKeys[$key] as $fk){
@@ -1351,7 +1359,7 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                         echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars($data_fk_ID_value, ENT_QUOTES) . '</div>';
                     }
                 } else {
-                    if ($readwrite) {
+                    if ($readwrite && !$isInfoColumn) {
                         $inputType = 'text';
                         $columnType = $columnTypes[$key];
                         if (strpos($columnType, 'date') !== false) {
