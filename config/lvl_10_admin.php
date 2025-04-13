@@ -37,4 +37,14 @@ $anzuzeigendeDaten[] = array(
     )
 );
 
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "adm_usercount",
+    "auswahltext" => "Nutzerzahlen",
+    "query" => "select id, Timestamp, Anzahl from adm_usercount order by Timestamp desc;",
+    "spaltenbreiten" => array(
+        "Nr"        => "80",
+        "Timestamp" => "220",
+        "Log"       => "1620"
+    )
+);
 ?>

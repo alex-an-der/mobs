@@ -389,6 +389,9 @@ $tabelle_upper = strtoupper($tabelle)
             const table = document.querySelector('table tbody');
             const rows = Array.from(table.rows);
 
+            // Check if the column might contain timestamp data
+            const isTimestampColumn = checkIfTimestampColumn(column);
+            
             rows.sort((a, b) => {
                 const aCell = a.querySelector(`td[data-field='${column}']`);
                 const bCell = b.querySelector(`td[data-field='${column}']`);
@@ -404,6 +407,10 @@ $tabelle_upper = strtoupper($tabelle)
                         aText = aSelect.options[aSelect.selectedIndex] ? aSelect.options[aSelect.selectedIndex].text : '';
                     } else if (aInput) {
                         aText = aInput.value;
+                        // Get raw value for timestamp inputs
+                        if (aInput.type === 'date' || aInput.type === 'datetime-local') {
+                            aText = aInput.value;
+                        }
                     } else {
                         aText = aCell.innerText;
                     }
@@ -419,6 +426,10 @@ $tabelle_upper = strtoupper($tabelle)
                         bText = bSelect.options[bSelect.selectedIndex] ? bSelect.options[bSelect.selectedIndex].text : '';
                     } else if (bInput) {
                         bText = bInput.value;
+                        // Get raw value for timestamp inputs
+                        if (bInput.type === 'date' || bInput.type === 'datetime-local') {
+                            bText = bInput.value;
+                        }
                     } else {
                         bText = bCell.innerText;
                     }
@@ -430,7 +441,38 @@ $tabelle_upper = strtoupper($tabelle)
                 aText = aText.trim();
                 bText = bText.trim();
 
-                // Check if values are numbers for numeric sorting
+                // Try to detect and parse timestamps
+                if (isTimestampColumn) {
+                    const aDate = parseTimestamp(aText);
+                    const bDate = parseTimestamp(bText);
+                    
+                    if (aDate !== null && bDate !== null) {
+                        return order === 'asc' ? aDate - bDate : bDate - aDate;
+                    }
+                }
+
+                // Regular date formats detection
+                const dateRegex = /^\d{4}-\d{2}-\d{2}(T|\s)?\d{2}:\d{2}(:\d{2})?$/;
+                const simpleDate = /^\d{4}-\d{2}-\d{2}$/;
+                
+                if ((dateRegex.test(aText) || simpleDate.test(aText)) && 
+                    (dateRegex.test(bText) || simpleDate.test(bText))) {
+                    const aDate = new Date(aText);
+                    const bDate = new Date(bText);
+                    
+                    // Only use date comparison if both are valid dates
+                    if (!isNaN(aDate) && !isNaN(bDate)) {
+                        const primaryComparison = order === 'asc' ? 
+                            aDate.getTime() - bDate.getTime() : 
+                            bDate.getTime() - aDate.getTime();
+                            
+                        if (primaryComparison !== 0 || lastSortColumn === null) {
+                            return primaryComparison;
+                        }
+                    }
+                }
+
+                // If not dates, check if values are numbers for numeric sorting
                 const aNumber = parseFloat(aText.replace(',', '.'));
                 const bNumber = parseFloat(bText.replace(',', '.'));
 
@@ -472,7 +514,7 @@ $tabelle_upper = strtoupper($tabelle)
                     const bLastSelect = bLastCell.querySelector('select');
                     const bLastInput = bLastCell.querySelector('input');
                     if (bLastSelect) {
-                        bLastText = bLastSelect.options[bLastSelect.selectedIndex] ? bLastSelect.options[bLastSelect.selectedIndex].text : '';
+                        bLastText = bLastSelect.options[bLast.selectedIndex] ? bLastSelect.options[bLast.selectedIndex].text : '';
                     } else if (bLastInput) {
                         bLastText = bLastInput.value;
                     } else {
@@ -515,6 +557,123 @@ $tabelle_upper = strtoupper($tabelle)
 
             lastSortColumn = column;
             lastSortOrder = order;
+        }
+
+        // Function to check if a column likely contains timestamp data
+        function checkIfTimestampColumn(column) {
+            // Check column name for common timestamp-related terms
+            const timestampKeywords = ['date', 'time', 'timestamp', 'created', 'modified', 'updated'];
+            const columnLower = column.toLowerCase();
+            
+            for (const keyword of timestampKeywords) {
+                if (columnLower.includes(keyword)) {
+                    return true;
+                }
+            }
+            
+            // Check data types in column
+            const cells = document.querySelectorAll(`td[data-field='${column}']`);
+            let dateCount = 0;
+            
+            for (let i = 0; i < Math.min(cells.length, 5); i++) {
+                const cell = cells[i];
+                const input = cell.querySelector('input');
+                
+                if (input && (input.type === 'date' || input.type === 'datetime-local')) {
+                    return true;
+                }
+                
+                // Check if content matches common date patterns
+                const text = cell.textContent.trim();
+                if (isTimestampFormat(text)) {
+                    dateCount++;
+                }
+            }
+            
+            // If more than half of the checked cells contain timestamp-like data
+            return dateCount > 2;
+        }
+
+        // Function to parse different timestamp formats
+        function parseTimestamp(value) {
+            if (!value) return null;
+            
+            // Handle empty values
+            value = value.trim();
+            if (value === '' || value.toLowerCase() === 'null') return null;
+            
+            // Try different timestamp formats
+            const formats = [
+                // ISO format: 2023-01-30T15:30:45
+                (val) => {
+                    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(val)) {
+                        const date = new Date(val);
+                        return isNaN(date) ? null : date.getTime();
+                    }
+                    return null;
+                },
+                // MySQL format: 2023-01-30 15:30:45
+                (val) => {
+                    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/.test(val)) {
+                        const date = new Date(val.replace(' ', 'T'));
+                        return isNaN(date) ? null : date.getTime();
+                    }
+                    return null;
+                },
+                // Simple date: 2023-01-30
+                (val) => {
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+                        const date = new Date(val);
+                        return isNaN(date) ? null : date.getTime();
+                    }
+                    return null;
+                },
+                // European format: 30.01.2023
+                (val) => {
+                    if (/^\d{2}\.\d{2}\.\d{4}$/.test(val)) {
+                        const parts = val.split('.');
+                        const date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                        return isNaN(date) ? null : date.getTime();
+                    }
+                    return null;
+                },
+                // US format: 01/30/2023
+                (val) => {
+                    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(val)) {
+                        const date = new Date(val);
+                        return isNaN(date) ? null : date.getTime();
+                    }
+                    return null;
+                },
+                // Timestamp as number
+                (val) => {
+                    const num = parseInt(val, 10);
+                    if (!isNaN(num) && num > 946684800000) { // Jan 1, 2000
+                        return num;
+                    }
+                    return null;
+                }
+            ];
+            
+            // Try each format until one works
+            for (const format of formats) {
+                const timestamp = format(value);
+                if (timestamp !== null) {
+                    return timestamp;
+                }
+            }
+            
+            return null;
+        }
+
+        // Function to check if a string looks like a timestamp
+        function isTimestampFormat(text) {
+            // Common date/time patterns
+            return /\d{4}-\d{2}-\d{2}/.test(text) || // YYYY-MM-DD
+                   /\d{2}\.\d{2}\.\d{4}/.test(text) || // DD.MM.YYYY
+                   /\d{2}\/\d{2}\/\d{4}/.test(text) || // MM/DD/YYYY
+                   /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(text) || // ISO datetime
+                   /\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(text); // SQL datetime
         }
 
         function addSortEventListeners() {
