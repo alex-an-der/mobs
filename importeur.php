@@ -318,7 +318,7 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
             let errorItems = [];
             
             // Debug output to console to see what we're getting
-            console.log("Result from server:", result);
+            // console.log("Result from server:", result);
             
             // Check if errors is a string that needs to be parsed
             if (typeof result.errors === 'string') {

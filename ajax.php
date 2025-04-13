@@ -46,7 +46,7 @@ try {
                 $response = ["status" => $result ? "success" : "error"];
             } catch (Exception $e) {
                 $db->log("Update error: " . $e->getMessage());
-                $response = ["status" => "error", "message" => "Fehler beim Update. Stimmt das Datenformat? Für Details siehe log-Tabelle in der Datenbank."];
+                $response = ["status" => "error", "message" => "Fehler beim Update. Stimmt das Datenformat? Für Details siehe adm_log-Tabelle in der Datenbank."];
             }
             ob_end_clean();
             echo json_encode($response);
@@ -90,11 +90,11 @@ try {
                 } else {
                     $errorInfo = $db->errorInfo();
                     $db->log("Insert error: " . json_encode($errorInfo));
-                    $response = ["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!"];
+                    $response = ["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die adm_log-Tabelle in der Datenbank!"];
                 }
             } catch (Exception $e) {
                 $db->log("Exception: " . $e->getMessage());
-                $response = ["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!"];
+                $response = ["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die adm_log-Tabelle in der Datenbank!"];
             }
             ob_end_clean();
             echo json_encode($response);
@@ -112,11 +112,11 @@ try {
                 } else {
                     $errorInfo = $db->errorInfo();
                     $db->log("Insert error: " . json_encode($errorInfo));
-                    $response = ["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!"];
+                    $response = ["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die adm_log-Tabelle in der Datenbank!"];
                 }
             } catch (Exception $e) {
                 $db->log("Exception: " . $e->getMessage());
-                $response = ["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die log-Tabelle in der Datenbank!"];
+                $response = ["status" => "error", "message" => "Fehler beim Einfügen des Datensatzes. Bitte prüfen Sie die adm_log-Tabelle in der Datenbank!"];
             }
             ob_end_clean();
             echo json_encode($response);

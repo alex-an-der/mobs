@@ -78,7 +78,7 @@ class Datenbank {
     public function log($eintrag) {
         require_once(__DIR__ . "/../../user_includes/before_logging.php");
         try {
-            $query = "INSERT INTO log (eintrag) VALUES (:eintrag)";
+            $query = "INSERT INTO adm_log (eintrag) VALUES (:eintrag)";
             $stmt = $this->pdo->prepare($query);
             $stmt->bindParam(':eintrag', $eintrag, PDO::PARAM_STR);
             $stmt->execute();
@@ -92,7 +92,7 @@ class Datenbank {
         require_once(__DIR__ . "/../../user_includes/before_log_for_rollback.php");
         try {
             $args = array($autor, $originalquery.";");
-            $query = "INSERT INTO rollback (autor, eintrag) VALUES (?, ?)";
+            $query = "INSERT INTO adm_rollback (autor, eintrag) VALUES (?, ?)";
             $stmt = $this->pdo->prepare($query);
             $stmt->execute($args);
         } catch (PDOException $e) {

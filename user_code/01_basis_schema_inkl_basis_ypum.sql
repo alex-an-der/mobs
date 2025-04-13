@@ -285,13 +285,13 @@ CREATE TABLE `b_sparte` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `log`
+-- Table structure for table `adm_log`
 --
 
-DROP TABLE IF EXISTS `log`;
+DROP TABLE IF EXISTS `adm_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `log` (
+CREATE TABLE `adm_log` (
   `ID` bigint NOT NULL AUTO_INCREMENT,
   `zeit` datetime DEFAULT CURRENT_TIMESTAMP,
   `eintrag` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -300,13 +300,13 @@ CREATE TABLE `log` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `rollback`
+-- Table structure for table `adm_rollback`
 --
 
-DROP TABLE IF EXISTS `rollback`;
+DROP TABLE IF EXISTS `adm_rollback`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `rollback` (
+CREATE TABLE `adm_rollback` (
   `ID` bigint NOT NULL AUTO_INCREMENT,
   `zeit` datetime DEFAULT CURRENT_TIMESTAMP,
   `autor` varchar(200) COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -316,13 +316,13 @@ CREATE TABLE `rollback` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `rollback`
+-- Table structure for table `adm_issues`
 --
 
-DROP TABLE IF EXISTS `issues`;
+DROP TABLE IF EXISTS `adm_issues`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `issues` ( 
+CREATE TABLE `adm_issues` ( 
   `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
   `Prio` TINYINT UNSIGNED NULL,
   `Kommentar` VARCHAR(100) NULL,
