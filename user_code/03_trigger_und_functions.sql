@@ -76,6 +76,10 @@ BEGIN
             INSERT INTO b_individuelle_berechtigungen (Mitglied, BSG)
             VALUES (new_member_id, bsg_value);
         END IF;
+        
+        -- Zähle die Mitglieder mit Stamm-BSG
+        INSERT INTO `adm_usercount` (timestamp, Anzahl)
+        SELECT NOW(), COUNT(*) FROM b_mitglieder WHERE BSG IS NOT NULL;
     END IF;
 END;//
 DELIMITER ;
@@ -140,6 +144,10 @@ BEGIN
     INSERT INTO `adm_log` (`zeit`, `eintrag`)
     VALUES (NOW(), CONCAT('User with ID: ', OLD.id, ' and email: ', OLD.mail, ' will be deleted. Data backed up.'));
     
+    -- Zähle die Mitglieder mit Stamm-BSG
+    INSERT INTO `adm_usercount` (timestamp, Anzahl)
+    SELECT NOW(), COUNT(*) FROM b_mitglieder WHERE BSG IS NOT NULL;
+
 END //
 DELIMITER ;
 
@@ -187,6 +195,10 @@ BEGIN
     INSERT INTO `adm_log` (`zeit`, `eintrag`)
     VALUES (NOW(), CONCAT('BSG with ID: ', OLD.id, ' (', OLD.BSG, ') will be deleted. Data backed up.'));
     
+    -- Zähle die Mitglieder mit Stamm-BSG
+    INSERT INTO `adm_usercount` (timestamp, Anzahl)
+    SELECT NOW(), COUNT(*) FROM b_mitglieder WHERE BSG IS NOT NULL;
+
 END //
 DELIMITER ;
 

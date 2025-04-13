@@ -437,3 +437,16 @@ CREATE TABLE `y_user_fields` (
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+
+--
+-- Table structure for table `adm_usercount`
+--
+
+DROP TABLE IF EXISTS `adm_usercount`;
+CREATE TABLE `adm_usercount` ( 
+  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `Timestamp` TIMESTAMP NULL,
+  `Anzahl` INT UNSIGNED NULL,
+   PRIMARY KEY (`id`)
+)
+ENGINE = InnoDB;
