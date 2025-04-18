@@ -41,7 +41,7 @@ BEGIN
     -- Prüfe Bedingungen für den Trigger
     IF OLD.lastlogin IS NULL AND NEW.lastlogin IS NOT NULL AND NEW.run_trigger = 1 THEN
         -- Füge Mitglied in b_mitglieder ein
-        INSERT INTO b_mitglieder (y_id, Mail, Vorname, Nachname, Geschlecht, Geburtsdatum, Mailbenachrichtigung)
+        INSERT INTO b_mitglieder (y_id, Mail, Vorname, Nachname, Geschlecht, Geburtsdatum, Mailbenachrichtigung, BSG)
             SELECT 
                 NEW.id,
                 NEW.mail,
@@ -58,7 +58,11 @@ BEGIN
                 (SELECT fieldvalue
                 FROM y_user_details AS d
                 JOIN y_user_fields AS f ON d.fieldID = f.ID 
-                WHERE userID = NEW.id AND fieldname = 'okformail')
+                WHERE userID = NEW.id AND fieldname = 'okformail'),
+                (SELECT fieldvalue
+                FROM y_user_details AS d
+                JOIN y_user_fields AS f ON d.fieldID = f.ID 
+                WHERE userID = NEW.id AND fieldname = 'bsg')
             FROM y_v_userdata AS ud
             WHERE ud.userID = NEW.id;
             
