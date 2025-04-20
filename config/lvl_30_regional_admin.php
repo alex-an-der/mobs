@@ -4,7 +4,7 @@ $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_sparte",
     "auswahltext" => "Sparten im Regionalverband einfügen, löschen und bearbeiten",
     "writeaccess" => true,
-    "query" => "SELECT s.id as id, s.Verband as Verband, s.Sparte, s.Spartenleiter as Spartenleiter, s.Sportart as Sportart
+    "query" => "SELECT s.id as id, s.Verband as Verband, s.Sparte, Spartenbeitrag, s.Spartenleiter as Spartenleiter, s.Sportart as Sportart
         FROM b_sparte as s
         WHERE FIND_IN_SET(s.id, berechtigte_elemente($uid, 'sparte')) > 0 or Verband IS NULL
         order by id desc;
@@ -23,6 +23,7 @@ $anzuzeigendeDaten[] = array(
     "spaltenbreiten" => array(
         "Verband"                       => "380",
         "Sparte"                        => "250",  
+        "Spartenbeitrag"                => "80",
         "Spartenleiter"                 => "250",  
         "Sportart"                      => "250"
     )
