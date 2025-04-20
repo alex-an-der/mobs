@@ -91,7 +91,7 @@ CREATE TABLE `b_bsg_deleted` (
   `RE_Strasse_Nr` VARCHAR(100) NULL,
   `RE_Strasse2` VARCHAR(100) NULL,
   `RE_PLZ_Ort` VARCHAR(100) NULL,
-  `VKZ` SMALLINT UNSIGNED NULL,
+  `VKZ` VARCHAR(8) NULL,
   `delete_date` DATETIME NULL,
    PRIMARY KEY (`id`)
 )

@@ -45,7 +45,8 @@ class Datenbank {
             $success = $stmt->execute();
         } catch (PDOException $e) {
             $errmsg = $e->getMessage();
-            $this->log("Query error in ".__FILE__.": " . $errmsg);
+
+            $this->log($query." with the arguments: ".json_encode($arguments)." led to a query error in ".__FILE__.": " . $errmsg);
             return ['error' => "Ein Fehler ist aufgetreten: <b>$errmsg</b>"];
         }
         // Prüfen, ob die Abfrage ein SELECT oder SHOW ist - dann mit return raus
