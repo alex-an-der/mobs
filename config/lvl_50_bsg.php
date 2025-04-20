@@ -196,6 +196,37 @@ $anzuzeigendeDaten[] = array(
     )
 );
 
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_mitglieder_in_sparten",
+    "auswahltext" => "$bericht Beiträge der Mitglieder",
+    "writeaccess" => false,
+    "query" => "SELECT * FROM 
+                (SELECT m.id as id, b.VKZ, b.BSG, concat(m.Vorname, ' ', m.Nachname) as Name, 'Verbandsbeitrag' as Sparte, concat(r.Basisbeitrag, '€') as Beitrag, DATE_FORMAT(m.Stammmitglied_seit, '%d.%m.%Y') as seit
+                from b_mitglieder as m
+                join b_bsg as b on m.BSG=b.id
+                join b_regionalverband as r on b.Verband = r.id
+
+                union
+
+                select m.id as id, b.VKZ, b.bsg, concat(m.Vorname, ' ', m.Nachname) as Name, s.Sparte, concat(s.Spartenbeitrag, '€') as Beitrag,  DATE_FORMAT(mis.seit, '%d.%m.%Y') as seit
+                from b_mitglieder_in_sparten as mis 
+                join b_sparte as s on mis.Sparte = s.id
+                join b_mitglieder as m on mis.Mitglied = m.id
+                join b_bsg as b on mis.BSG=b.id) AS bigsel
+                WHERE FIND_IN_SET(id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0
+                order by Name;
+                
+    ",
+    "spaltenbreiten" => array(
+        "VKZ"                       => "100",
+        "BSG"                       => "300",
+        "Name"                      => "400",
+        "Sparte"                    => "300",
+        "Beitrag"                   => "150",
+        "seit"                      => "150"
+    )
+);
+
 
 ######################################################################################################
 
