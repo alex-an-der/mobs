@@ -513,9 +513,13 @@ $tabelle_upper = strtoupper($tabelle)
                 if (bLastCell) {
                     const bLastSelect = bLastCell.querySelector('select');
                     const bLastInput = bLastCell.querySelector('input');
+                    /*if (bLastSelect) {
+                        bLastText = bLastSelect.options[bLastSelect.selectedIndex] ? bLastSelect.options[bLast.selectedIndex].text : '';
+                    }*/
                     if (bLastSelect) {
-                        bLastText = bLastSelect.options[bLast.selectedIndex] ? bLastSelect.options[bLast.selectedIndex].text : '';
-                    } else if (bLastInput) {
+                        bLastText = bLastSelect.options[bLastSelect.selectedIndex] ? bLastSelect.options[bLastSelect.selectedIndex].text : '';
+                    }
+                    else if (bLastInput) {
                         bLastText = bLastInput.value;
                     } else {
                         bLastText = bLastCell.innerText;

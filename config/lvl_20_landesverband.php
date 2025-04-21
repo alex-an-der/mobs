@@ -14,11 +14,12 @@ $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_regionalverband",
     "auswahltext" => "Regionalverbände einfügen, löschen und bearbeiten",
     "writeaccess" => true,
-    "query" => "select id, BKV, Verband, Kurzname, Internetadresse from b_regionalverband order by id desc;",
+    "query" => "select id, BKV, Verband, Kurzname, Basisbeitrag, Internetadresse from b_regionalverband order by id desc;",
     "spaltenbreiten" => array(
         "BKV"               => "100",
         "Verband"           => "400",
         "Kurzname"          => "200",
+        "Basisbeitrag"      => "80",
         "Internetadresse"   => "400"
     )
 );

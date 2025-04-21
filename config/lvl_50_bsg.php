@@ -49,9 +49,11 @@ $anzuzeigendeDaten[] = array(
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
     "auswahltext" => "BSG- (Stamm-) Mitglieder bearbeiten",
+    "hinweis" => "<b>ACHTUNG!</b> Das Feld <b>Stammmitglied_seit</b> wird <b>automatisch</b> angepasst, wenn sich die BSG ändert. Dies wird erst 
+    nach dem erneuten Laden sichtbar und kann dann manuell verändert werden. Dieses Angabe dient nur zur Information und  wird bei der Rechnungsstellung nicht berücksichtigt.",
     "writeaccess" => true,
     "import" => false,
-    "query" => "SELECT m.id as id, BSG, Vorname, Nachname, Mail, m.Geschlecht, m.Geburtsdatum, aktiv
+    "query" => "SELECT m.id as id, Vorname, Nachname, BSG, Stammmitglied_seit, Mail, m.Geschlecht, m.Geburtsdatum, aktiv
                 from b_mitglieder as m
                 WHERE FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 or 
                 ( BSG IS NULL AND FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0)
@@ -74,18 +76,53 @@ $anzuzeigendeDaten[] = array(
         "BSG"                       => "300",
         "Vorname"                   => "150",
         "Nachname"                  => "150",
-        "Mail"                      => "250"
+        "Mail"                      => "250",
+        "Geschlecht"                => "100",
+        "Geburtsdatum"              => "100",
+        "aktiv"                     => "100",
+        "Stammmitglied_seit"        => "100",
     )
 );
+/*
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_mitglieder_in_sparten",
+    "auswahltext" => "BSG-Mitglieder in Sparten anmelden",
+    "writeaccess" => true,
+    "query" => "SELECT mis.id,
+            concat (m.Vorname, ' ', m.Nachname)           as info:Mitglied,
+            b_stamm.BSG                                   as info:Stamm_BSG,
+            b_sparte.BSG                                  as info:Sparten_BSG,
+            s.Sparte                                      as info:Sparte,
+            DATE_FORMAT(m.Stammmitglied_seit, '%d.%m.%Y') as info:seit
+            from b_mitglieder_in_sparten as mis
+            join b_mitglieder as m        on mis.Mitglied = m.id
+            join b_bsg        as b_stamm  on m.BSG = b_stamm.id
+            join b_bsg        as b_sparte on mis.BSG = b_sparte.id
+            join b_sparte     as s        on mis.Sparte = s.id
+            WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 and
+            FIND_IN_SET(b_sparte.id, berechtigte_elemente($uid, 'BSG')) > 0
+            order by mis.id desc;",
+
+
+    "spaltenbreiten" => array(
+        "info:Mitglied"                  => "180",
+        "info:Stamm_BSG"                 => "350",
+        "info:Sparten_BSG"               => "350",
+        "info:Sparte"                    => "180",
+        "info:seit"                      => "150"
+
+    )
+);*/
 
 
 # Mitglieder in den Sparten 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
     "auswahltext" => "BSG-Mitglieder in Sparten anmelden",
+    "hinweis" => "Das Feld ´<b>seit</b>´ wird <b>automatisch</b> bei einem neuen Eintrag gesetzt und dient nur zur Information. 
+    Das Feld wird nicht für die Rechnungsstellung genutzt.", 
     "writeaccess" => true,
-
-    "query" => "SELECT id, Mitglied, BSG, Sparte 
+    "query" => "SELECT id, Mitglied, BSG, Sparte, DATE_FORMAT(seit, '%d.%m.%Y') as info:seit
                     from b_mitglieder_in_sparten as mis
                     WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 and
                     FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0
@@ -126,15 +163,22 @@ $anzuzeigendeDaten[] = array(
     "spaltenbreiten" => array(
         "Mitglied"                  => "400",
         "BSG"                       => "400",
-        "Sparte"                    => "300"
+        "Sparte"                    => "300",
+        "info:seit"                 => "100"
     )
 );
+
 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
     "auswahltext" => "$bericht Mitglieder und ihre Sparten",
     "writeaccess" => false,
-    "query" => "SELECT mis.id, concat(Vorname,' ', Nachname) as Mitglied , stamm.BSG as Stamm_BSG , s.Sparte as Sparte, b.BSG as Sparten_BSG
+    "query" => "SELECT mis.id, 
+                concat(Vorname,' ', Nachname) as Mitglied , 
+                stamm.BSG as Stamm_BSG , 
+                s.Sparte as Sparte, 
+                b.BSG as Sparten_BSG, 
+                DATE_FORMAT(mis.seit, '%d.%m.%Y') as seit
                 from b_mitglieder_in_sparten as mis
                 join b_mitglieder as m on mis.Mitglied = m.id
                 join b_bsg as b on mis.BSG = b.id
@@ -148,6 +192,38 @@ $anzuzeigendeDaten[] = array(
         "Stamm-BSG"                 => "400",
         "Sparte"                    => "300",
         "Sparten-BSG"               => "400",
+        "seit"                      => "150"
+    )
+);
+
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_mitglieder_in_sparten",
+    "auswahltext" => "$bericht Beiträge der Mitglieder",
+    "writeaccess" => false,
+    "query" => "SELECT * FROM 
+                (SELECT m.id as id, b.VKZ, b.BSG, concat(m.Vorname, ' ', m.Nachname) as Name, 'Verbandsbeitrag' as Sparte, concat(r.Basisbeitrag, '€') as Beitrag, DATE_FORMAT(m.Stammmitglied_seit, '%d.%m.%Y') as seit
+                from b_mitglieder as m
+                join b_bsg as b on m.BSG=b.id
+                join b_regionalverband as r on b.Verband = r.id
+
+                union
+
+                select m.id as id, b.VKZ, b.bsg, concat(m.Vorname, ' ', m.Nachname) as Name, s.Sparte, concat(s.Spartenbeitrag, '€') as Beitrag,  DATE_FORMAT(mis.seit, '%d.%m.%Y') as seit
+                from b_mitglieder_in_sparten as mis 
+                join b_sparte as s on mis.Sparte = s.id
+                join b_mitglieder as m on mis.Mitglied = m.id
+                join b_bsg as b on mis.BSG=b.id) AS bigsel
+                WHERE FIND_IN_SET(id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0
+                order by Name;
+                
+    ",
+    "spaltenbreiten" => array(
+        "VKZ"                       => "100",
+        "BSG"                       => "300",
+        "Name"                      => "400",
+        "Sparte"                    => "300",
+        "Beitrag"                   => "150",
+        "seit"                      => "150"
     )
 );
 
