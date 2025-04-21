@@ -54,4 +54,28 @@ $anzuzeigendeDaten[] = array(
         "Haben"                        => "150"
     ) 
 );
+
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_forderungen",
+    "auswahltext" => "Offene Forderungen",
+    "writeaccess" => true,
+    "query" => "SELECT f.id, f.Datum, f.BSG, f.Soll, f.Beschreibung
+                FROM b_forderungen as f
+                JOIN b_bsg as b on b.id=f.BSG
+                WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0
+                ORDER BY f.Datum desc;
+    ",
+    "referenzqueries" => array(
+    "BSG" => "SELECT b.id as id, b.BSG as anzeige
+                FROM b_bsg as b
+                WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0
+                ORDER BY anzeige;",
+    ),
+    "spaltenbreiten" => array(
+        "Datum"                        => "170",
+        "BSG"                          => "350",
+        "Betrag"                       => "150",    
+        "Beschreibung"                 => "600"
+    ) 
+);
 ?>

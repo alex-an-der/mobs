@@ -467,3 +467,19 @@ CREATE INDEX `FK_zahlungseingaenge_bsg`
 ON `b_zahlungseingaenge` (
   `BSG` ASC
 );
+
+DROP TABLE IF EXISTS `b_forderungen`;
+CREATE TABLE `b_forderungen` ( 
+  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `Datum` DATE NULL,
+  `BSG` BIGINT UNSIGNED NOT NULL,
+  `Beschreibung` VARCHAR(2000) NULL,
+  `Soll` DECIMAL(10,2) NULL,
+   PRIMARY KEY (`id`),
+  CONSTRAINT `FK_forderungen_bsg` FOREIGN KEY (`BSG`) REFERENCES `b_bsg` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE
+)
+ENGINE = InnoDB;
+CREATE INDEX `FK_forderungen_bsg` 
+ON `b_forderungen` (
+  `BSG` ASC
+);
