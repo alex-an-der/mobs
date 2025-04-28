@@ -47,7 +47,7 @@ $anzuzeigendeDaten[] = array(
     "hinweis" => "Bearbeiter der von dir angegebenen Betriebssportgruppen dürfen deine Daten einsehen und diese verarbeiten. Dies ist notwendig, um dich in einer oder mehreren BSG zu verwalten. Solltest du eine Berechtigung löschen, kann die betreffende BSG deine Daten trotzdem noch so lange sehen wie du dort Mitglied bist ('berechtigtes Interesse' nach DSGVO).  Um ein neues Recht zu vergeben, klicke auf <b>'Einf&uuml;gen'</b>.",
     "writeaccess" => true,
     "import" => true,
-    "query" => "SELECT ib.id as id, m.id as Mitglied, ib.BSG as BSG
+    "query" => "SELECT ib.id as id, concat(m.Vorname, ' ', m.Nachname) as info:Mitglied, ib.BSG as BSG
                 from b_individuelle_berechtigungen as ib
                 join b_mitglieder as m on ib.Mitglied=m.id
                 join b_bsg as b on ib.BSG = b.id 
@@ -55,9 +55,6 @@ $anzuzeigendeDaten[] = array(
                 ORDER BY b.BSG asc;
     ",
     "referenzqueries" => array(
-        "Mitglied" => "SELECT id, concat(Vorname,' ',Nachname) as anzeige
-                        from b_mitglieder WHERE y_id = $uid;
-        ",
         "BSG" => "SELECT b.id, concat(b.BSG, ' (',v.Kurzname,')') as anzeige
             from b_bsg as b
             join b_regionalverband as v on b.Verband = v.id
@@ -66,17 +63,17 @@ $anzuzeigendeDaten[] = array(
     )
 );
 
-#Wechselantrag
+#Wechselantrag (Wenn keiner exisatiert, wird einer auf die aktuelle BSG erstellt)
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_bsg_wechselantrag",
     "auswahltext" => "Antrag zum Wechsel der Stamm-BSG",
     "writeaccess" => true,
-    "import" => true,
+    "import" => false,
     "query" => "SELECT wa.id as id, concat(m. Vorname, ' ', m.Nachname) as info:Mitglied, Ziel_BSG
                 FROM b_bsg_wechselantrag as wa
                 JOIN b_mitglieder as m on m.id = wa.m_id
                 JOIN b_bsg as b on b.id = wa.Ziel_BSG
-                WHERE $uid = m.y_id
+                WHERE $uid = m.y_id;
     ",
     "referenzqueries" => array(
         "Ziel_BSG" => "SELECT b.id as id, concat(v.Kurzname, ' --> ', b.BSG)  as anzeige

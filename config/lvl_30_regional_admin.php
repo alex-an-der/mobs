@@ -39,6 +39,7 @@ $anzuzeigendeDaten[] = array(
                 JOIN b_bsg as b on b.id=z.BSG
                 JOIN b_regionalverband as r on r.id = b.Verband 
                 WHERE z.Eingangsdatum >= CURDATE() - INTERVAL 730 DAY
+                AND FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0
                 ORDER BY Eingangsdatum desc;
     ",
     "referenzqueries" => array(

@@ -289,6 +289,33 @@ END //
 
 DELIMITER ;
 
+-- -----------------------------------------------------------------------------------
+
+DROP TRIGGER IF EXISTS trg_after_update_bsg_wechselantrag;
+DELIMITER //
+
+CREATE TRIGGER trg_after_update_bsg_wechselantrag
+AFTER UPDATE ON b_bsg_wechselantrag
+FOR EACH ROW
+BEGIN
+    -- Prüfe, ob sich Ziel_BSG geändert hat und der neue Wert nicht NULL ist
+    IF NEW.Ziel_BSG <> OLD.Ziel_BSG AND NEW.Ziel_BSG IS NOT NULL THEN
+        -- Prüfe, ob es schon eine Berechtigung gibt
+        IF NOT EXISTS (
+            SELECT 1 FROM b_individuelle_berechtigungen
+            WHERE Mitglied = NEW.m_id AND BSG = NEW.Ziel_BSG
+        ) THEN
+            -- Füge die Berechtigung ein
+            INSERT INTO b_individuelle_berechtigungen (Mitglied, BSG)
+            VALUES (NEW.m_id, NEW.Ziel_BSG);
+        END IF;
+    END IF;
+END;
+//
+
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------
 
 
 DROP FUNCTION IF EXISTS berechtigte_elemente_sub1;

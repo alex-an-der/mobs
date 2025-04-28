@@ -154,47 +154,42 @@ $anzuzeigendeDaten[] = array(
     "writeaccess" => false,
     "import" => false,
     "query" => "SELECT 
-                    abg.BSG_ID as id,
+                    b.id as id,
                     r.Kurzname as Verband,
-                    abg.BSG_Name,
+                    b.BSG as BSG_Name,
                     ze.Haben as 'Haben/€',
-                    SUM(abg.Gesamtbeitrag) AS 'Soll/€',
+                    IFNULL(SUM(abg.Gesamtbeitrag), 0) AS 'Soll/€',
                     IFNULL(ze.Haben, 0) - IFNULL(SUM(abg.Gesamtbeitrag),0) AS 'Saldo/€'
-                FROM (
-                    -- Verbandsbeiträge
+                FROM b_bsg as b
+                JOIN b_regionalverband as r ON b.Verband = r.id
+                LEFT JOIN (
+                    -- Verbandsbeiträge + Spartenbeiträge
                     SELECT 
                         b.id AS BSG_ID,
-                        b.BSG AS BSG_Name,
                         CAST(REPLACE(r.Basisbeitrag, '€', '') AS DECIMAL(10,2)) AS Gesamtbeitrag
                     FROM b_mitglieder AS m
                     JOIN b_bsg AS b ON m.BSG = b.id
                     JOIN b_regionalverband AS r ON b.Verband = r.id
                     WHERE YEAR(m.Stammmitglied_seit) <= YEAR(CURDATE())
-
                     UNION ALL
-
-                    -- Spartenbeiträge
                     SELECT 
                         b.id AS BSG_ID,
-                        b.BSG AS BSG_Name,
                         CAST(REPLACE(s.Spartenbeitrag, '€', '') AS DECIMAL(10,2)) AS Gesamtbeitrag
                     FROM b_mitglieder_in_sparten AS mis
                     JOIN b_sparte AS s ON mis.Sparte = s.id
                     JOIN b_mitglieder AS m ON mis.Mitglied = m.id
                     JOIN b_bsg AS b ON mis.BSG = b.id
                     WHERE YEAR(mis.seit) <= YEAR(CURDATE())
-                ) AS abg
+                ) AS abg ON abg.BSG_ID = b.id
                 LEFT JOIN (
                     SELECT BSG, SUM(Haben) AS Haben
                     FROM b_zahlungseingaenge
                     WHERE Abrechnungsjahr = YEAR(CURDATE())
                     GROUP BY BSG
-                ) AS ze ON abg.BSG_ID = ze.BSG
-                JOIN b_bsg as b ON b.id = abg.BSG_ID
-                JOIN b_regionalverband as r ON b.Verband = r.id
+                ) AS ze ON b.id = ze.BSG
                 WHERE FIND_IN_SET(r.id, berechtigte_elemente($uid, 'verband')) > 0
-                GROUP BY abg.BSG_ID, r.Kurzname, abg.BSG_Name, ze.Haben
-                ORDER BY abg.BSG_Name;
+                GROUP BY b.id, r.Kurzname, b.BSG, ze.Haben
+                ORDER BY b.BSG;
                 ",
                 "spaltenbreiten" => array(
                     "Verband"         => "150",
