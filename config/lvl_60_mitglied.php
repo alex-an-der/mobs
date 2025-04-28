@@ -14,7 +14,7 @@ $anzuzeigendeDaten[] = array(
     "hinweis" => "Bitte nicht vergessen, unter <b>Wer darf meine Daten sehen</b> deine BSG zu berechtigen, deine Daten zu verwalten. Neue Rechte vergibst du mit <b>einf&uuml;gen</b>.",
     "writeaccess" => true,
     "import" => false,
-    "query" => "SELECT m.id, m.Vorname, m.Nachname, m.Mail, m.Geschlecht, m.Geburtsdatum, m.Mailbenachrichtigung
+    "query" => "SELECT m.id, y.id as 'info:Anmelde-ID', m.Vorname, m.Nachname, m.Mail, m.Geschlecht, m.Geburtsdatum, m.Mailbenachrichtigung
             FROM b_mitglieder as m 
             join y_user as y on y.id = m.y_id
             WHERE y.id = $uid
@@ -29,13 +29,13 @@ $anzuzeigendeDaten[] = array(
         "
     ),
     "spaltenbreiten" => array(
-        "BSG"                       => "300",
+        "info:Anmelde-ID"           => "50",
         "Vorname"                   => "200",
         "Nachname"                  => "200",
         "Mail"                      => "250",
         "Geschlecht"                => "120",
         "Geburtsdatum"              => "200",
-        "Mailbenachrichtigung"      => "200"
+        "Mailbenachrichtigung"      => "100"
     )  
 );
 
@@ -59,6 +59,27 @@ $anzuzeigendeDaten[] = array(
                         from b_mitglieder WHERE y_id = $uid;
         ",
         "BSG" => "SELECT b.id, concat(b.BSG, ' (',v.Kurzname,')') as anzeige
+            from b_bsg as b
+            join b_regionalverband as v on b.Verband = v.id
+            ORDER BY anzeige asc;
+        "
+    )
+);
+
+#Wechselantrag
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_bsg_wechselantrag",
+    "auswahltext" => "Antrag zum Wechsel der Stamm-BSG",
+    "writeaccess" => true,
+    "import" => true,
+    "query" => "SELECT wa.id as id, concat(m. Vorname, ' ', m.Nachname) as info:Mitglied, Ziel_BSG
+                FROM b_bsg_wechselantrag as wa
+                JOIN b_mitglieder as m on m.id = wa.m_id
+                JOIN b_bsg as b on b.id = wa.Ziel_BSG
+                WHERE $uid = m.y_id
+    ",
+    "referenzqueries" => array(
+        "Ziel_BSG" => "SELECT b.id as id, concat(v.Kurzname, ' --> ', b.BSG)  as anzeige
             from b_bsg as b
             join b_regionalverband as v on b.Verband = v.id
             ORDER BY anzeige asc;

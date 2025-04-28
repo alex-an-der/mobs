@@ -44,20 +44,55 @@ $anzuzeigendeDaten[] = array(
     ) 
 );
 
-
-# Mitglieder in der Stamm-BSG
+# Mitglieder in die Stamm-BSG aufnehmen
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
-    "auswahltext" => "BSG- (Stamm-) Mitglieder bearbeiten",
+    "auswahltext" => "Stamm-Mitglieder aufnehmen",
+    "writeaccess" => true,
+    "import" => false,
+    "query" => "SELECT 
+                m.id as id, 
+                concat(m.Vorname,' ',  m.Nachname, ' (', DATE_FORMAT(m.Geburtsdatum, '%d.%m.%Y') , ')') as info:Mitglied, 
+                b.BSG as 'info:will_nach' , 
+                m.BSG 
+                FROM b_mitglieder as m 
+                JOIN b_bsg_wechselantrag as wa ON m.id = wa.m_id
+                JOIN b_bsg as b ON b.id = wa.Ziel_BSG
+                WHERE FIND_IN_SET(wa.Ziel_BSG, berechtigte_elemente($uid, 'bsg')) > 0 
+                AND IFNULL(m.BSG,-1) != IFNULL(wa.Ziel_BSG, -2);",
+
+    "referenzqueries" => array(
+        "BSG" => "SELECT b.id, b.BSG as anzeige
+        from b_bsg as b
+        WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0
+        ORDER BY anzeige;
+        ",
+    ),
+    "spaltenbreiten" => array(
+
+        "info:Vorname"              => "150",
+        "info:Nachname"             => "150",
+        "BSG"                       => "300",
+        "info:Mail"                 => "250",
+        "info:Geburtsdatum"         => "100",
+    )
+);
+
+# Mitglieder in der Stamm-BSG bearbeiten
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_mitglieder",
+    "auswahltext" => "Stamm-Mitglieder bearbeiten",
     "hinweis" => "<b>ACHTUNG!</b> Das Feld <b>Stammmitglied_seit</b> wird <b>automatisch</b> angepasst, wenn sich die BSG ändert. Dies wird erst 
     nach dem erneuten Laden sichtbar und kann dann manuell verändert werden. Dieses Angabe dient nur zur Information und  wird bei der Rechnungsstellung nicht berücksichtigt.",
     "writeaccess" => true,
     "import" => false,
     "query" => "SELECT m.id as id, Vorname, Nachname, BSG, Stammmitglied_seit, Mail, m.Geschlecht, m.Geburtsdatum, aktiv
                 from b_mitglieder as m
-                WHERE FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 or 
-                ( BSG IS NULL AND FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0)
-                order by id desc;
+                WHERE 
+                    (FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 or 
+                    ( BSG IS NULL AND FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0))
+                and m.BSG IS NOT NULL
+                order by BSG, Vorname desc;
     ",
     "referenzqueries" => array(
         "BSG" => "SELECT b.id, b.BSG as anzeige
@@ -83,36 +118,6 @@ $anzuzeigendeDaten[] = array(
         "Stammmitglied_seit"        => "100",
     )
 );
-/*
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_mitglieder_in_sparten",
-    "auswahltext" => "BSG-Mitglieder in Sparten anmelden",
-    "writeaccess" => true,
-    "query" => "SELECT mis.id,
-            concat (m.Vorname, ' ', m.Nachname)           as info:Mitglied,
-            b_stamm.BSG                                   as info:Stamm_BSG,
-            b_sparte.BSG                                  as info:Sparten_BSG,
-            s.Sparte                                      as info:Sparte,
-            DATE_FORMAT(m.Stammmitglied_seit, '%d.%m.%Y') as info:seit
-            from b_mitglieder_in_sparten as mis
-            join b_mitglieder as m        on mis.Mitglied = m.id
-            join b_bsg        as b_stamm  on m.BSG = b_stamm.id
-            join b_bsg        as b_sparte on mis.BSG = b_sparte.id
-            join b_sparte     as s        on mis.Sparte = s.id
-            WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 and
-            FIND_IN_SET(b_sparte.id, berechtigte_elemente($uid, 'BSG')) > 0
-            order by mis.id desc;",
-
-
-    "spaltenbreiten" => array(
-        "info:Mitglied"                  => "180",
-        "info:Stamm_BSG"                 => "350",
-        "info:Sparten_BSG"               => "350",
-        "info:Sparte"                    => "180",
-        "info:seit"                      => "150"
-
-    )
-);*/
 
 
 # Mitglieder in den Sparten 
@@ -129,11 +134,10 @@ $anzuzeigendeDaten[] = array(
                     order by mis.id desc;
     ",
     "referenzqueries" => array(
-        "Mitglied" => "SELECT m.id as id, concat(m.Vorname,' ', m.Nachname, ' (Stamm: ', b.BSG,')') as anzeige 
+        "Mitglied" => "SELECT m.id as id, concat(m.Vorname,' ', m.Nachname, ' (Stamm: ', IFNULL(b.BSG, '".NULL_WERT."'), ')') as anzeige 
                         from b_mitglieder as m
-                        join b_bsg as b on m.BSG = b.id 
+                        left join b_bsg as b on m.BSG = b.id 
                         WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 
-                        AND m.BSG is not null
                         ORDER BY anzeige;
         ", // BSG is not null => Erst die Stamm BSG, dann die Sparten
         "BSG" => "SELECT b.id as id, concat(b.BSG,' (',v.Kurzname,')') as anzeige

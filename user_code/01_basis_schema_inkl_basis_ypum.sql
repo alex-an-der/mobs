@@ -483,3 +483,20 @@ CREATE INDEX `FK_forderungen_bsg`
 ON `b_forderungen` (
   `BSG` ASC
 );
+
+DROP TABLE IF EXISTS `b_bsg_wechselantrag`;
+CREATE TABLE `b_bsg_wechselantrag` ( 
+  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `m_id` BIGINT UNSIGNED NOT NULL,
+  `Ziel_BSG` BIGINT UNSIGNED NOT NULL,
+   PRIMARY KEY (`id`),
+  CONSTRAINT `FK_bsgwechsel_bsg` FOREIGN KEY (`Ziel_BSG`) REFERENCES `b_bsg` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_bsgwechsel_mitglied` FOREIGN KEY (`m_id`) REFERENCES `b_mitglieder` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `unique_mitglied` UNIQUE (`m_id`)
+)
+ENGINE = InnoDB;
+CREATE INDEX `FK_bsgwechsel_bsg` 
+ON `b_bsg_wechselantrag` (
+  `Ziel_BSG` ASC
+);
+
