@@ -11,7 +11,6 @@
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
     "auswahltext" => "Meine Daten bearbeiten",
-    "hinweis" => "Bitte nicht vergessen, unter <b>Wer darf meine Daten sehen</b> deine BSG zu berechtigen, deine Daten zu verwalten. Neue Rechte vergibst du mit <b>einf&uuml;gen</b>.",
     "writeaccess" => true,
     "import" => false,
     "query" => "SELECT m.id, y.id as 'info:Anmelde-ID', m.Vorname, m.Nachname, m.Mail, m.Geschlecht, m.Geburtsdatum, m.Mailbenachrichtigung
@@ -66,6 +65,9 @@ $anzuzeigendeDaten[] = array(
 #Wechselantrag (Wenn keiner exisatiert, wird einer auf die aktuelle BSG erstellt)
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_bsg_wechselantrag",
+    "hinweis" => "Hier kannst du einen Antrag auf Wechsel der Stamm-BSG stellen. Die neue BSG kann dich dann zuordnen. Solange dies nicht geschehen ist, bist du weiterhin Mitglied der alten BSG. 
+    Bitte beachte, dass du auch die alte BSG über den Wechsel informieren solltest. Die neue BSG erhält automatisch die Bearbeitungsrechte deiner Daten.
+    Solltest du das nicht mehr wollen, kannst du diese Rechte jederzeit unter 'Meine Daten zur Bearbeitung freigeben' löschen. Beachte dazu auch die dortigen Hinweise",
     "auswahltext" => "Antrag zum Wechsel der Stamm-BSG",
     "writeaccess" => true,
     "import" => false,
