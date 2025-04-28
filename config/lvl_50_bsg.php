@@ -51,7 +51,7 @@ $anzuzeigendeDaten[] = array(
     "writeaccess" => true,
     "import" => false,
     "query" => "SELECT 
-                m.id as id, 
+                m.id as id,
                 concat(m.Vorname,' ',  m.Nachname, ' (', DATE_FORMAT(m.Geburtsdatum, '%d.%m.%Y') , ')') as info:Mitglied, 
                 b.BSG as 'info:will_nach' , 
                 m.BSG 
@@ -85,7 +85,7 @@ $anzuzeigendeDaten[] = array(
     "hinweis" => "<b>ACHTUNG!</b> Das Feld <b>Stammmitglied_seit</b> wird <b>automatisch</b> angepasst, wenn sich die BSG ändert. Dies wird erst 
     nach dem erneuten Laden sichtbar und kann dann manuell verändert werden. Dieses Angabe dient nur zur Information und  wird bei der Rechnungsstellung nicht berücksichtigt.",
     "writeaccess" => true,
-    "import" => false,
+    "import" => true,
     "query" => "SELECT m.id as id, Vorname, Nachname, BSG, Stammmitglied_seit, Mail, m.Geschlecht, m.Geburtsdatum, aktiv
                 from b_mitglieder as m
                 WHERE 
@@ -108,6 +108,7 @@ $anzuzeigendeDaten[] = array(
         "
     ),
     "spaltenbreiten" => array(
+        "y_id"                      => "50", 
         "BSG"                       => "300",
         "Vorname"                   => "150",
         "Nachname"                  => "150",
@@ -173,6 +174,9 @@ $anzuzeigendeDaten[] = array(
 );
 
 
+
+
+
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
     "auswahltext" => "$bericht Mitglieder und ihre Sparten",
@@ -228,6 +232,45 @@ $anzuzeigendeDaten[] = array(
         "Sparte"                    => "300",
         "Beitrag"                   => "150",
         "seit"                      => "150"
+    )
+);
+
+# Mitgliederkonten zusammenführen
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_mitglieder",
+    "auswahltext" => "Mitgliederkonten zusammenführen",
+    "hinweis" => "Kurzanleitung",
+    "writeaccess" => true,
+    "import" => false,
+    "query" => "SELECT 
+                    m.id as id, 
+                    m.y_id, 
+                    concat(Vorname, ' ', Nachname) as info:Name,  
+                    DATE_FORMAT(m.Geburtsdatum, '%d.%m.%Y') as info:Geburtsdatum
+                FROM b_mitglieder as m
+                WHERE 
+                    (FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 or 
+                    ( BSG IS NULL AND FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0))
+                AND m.BSG IS NOT NULL
+                ORDER by BSG, Vorname desc;
+    ",
+    "referenzqueries" => array(
+        "BSG" => "SELECT b.id, b.BSG as anzeige
+        from b_bsg as b
+        WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0
+        ORDER BY anzeige;
+        ",
+        "Geschlecht" => "SELECT id, auswahl as anzeige
+                        from b___geschlecht;
+        ",
+        "aktiv" => "SELECT id, wert as anzeige
+                        from b___an_aus;
+        "
+    ),
+    "spaltenbreiten" => array(
+        "y_id"                      => "50", 
+        "info:Name"                 => "300",
+        "info:Geburtsdatum"         => "150"
     )
 );
 
