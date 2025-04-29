@@ -6,7 +6,7 @@
 
 
 ## In der Prod-DB einfügen 
-Areg@greg.de
+aaaa@a.a
 ```
 BEGIN
     DECLARE new_member_id BIGINT;
@@ -34,7 +34,7 @@ BEGIN
                 JOIN y_user_fields AS f ON d.fieldID = f.ID 
                 WHERE userID = NEW.id AND fieldname = 'okformail')
                 
-            FROM y_v_userdata AS ud
+            FROM y_v_user_details AS ud
             WHERE ud.userID = NEW.id;
             
         -- Speichere die ID des neu erstellten Mitglieds
