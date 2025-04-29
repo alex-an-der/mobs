@@ -7,8 +7,8 @@ select
   `d`.`fieldvalue` AS `fieldvalue`
 from
   (
-    `db_441127_14`.`y_user_details` `d`
-    left join `db_441127_14`.`y_user_fields` `f` on((`d`.`fieldID` = `f`.`ID`))
+    `y_user_details` `d`
+    left join `y_user_fields` `f` on((`d`.`fieldID` = `f`.`ID`))
   );
 
   
