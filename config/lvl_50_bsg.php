@@ -1,6 +1,19 @@
 <?php
 
 
+/*
+LOP
+
+Karteileichen ausmisten:
+
+SELECT yu.created, yu.lastlogin, yd.mail, b.BSG, yd.gebdatum, concat(yd.vname, ' ',yd.nname) as name
+FROM y_v_userdata as yd
+join y_user as yu on yu.id = yd.userID
+join b_bsg as b on b.id = yd.bsg
+LEFT JOIN b_mitglieder as m ON m.y_id = yd.userID
+WHERE m.id IS NULL;
+
+*/
 # Mitglieder in der BSG
 
 ######################################################################################################
@@ -239,7 +252,12 @@ $anzuzeigendeDaten[] = array(
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
     "auswahltext" => "Mitgliederkonten zusammenführen",
-    "hinweis" => "Kurzanleitung",
+    "hinweis" => "<p>Wenn ein Mitglied vom BSG-Verwalter erstellt (bzw. importiert wird), ist dieses Konto nicht mit einem LogIn-Konto verknüpft. 
+    Wird später vom Mitglied ein LogIn-Konto erstellt (erkennbar an einer y_id), so müssen diese Konten nachträglich verknüpft werden.
+    Die Verknüpfung führt dazu, dass das neue Konto die LogIn-Daten (Anmelde-Mail und Passwort) besitzt und die sonstigen Daten des zuvor manuell
+    angelegten Kontos (wie z.B. Spartenanmeldungen, aktiv/passiv usw.) erhält.</p><p>Dazu muss die y_id des LogIn-Kontos in das y_id-Feld im zugehörigen 
+    manuell angelegten Konto eingetragen werden. Um Fehleingaben einzuschränken, müssen die Geburtsdaten der beiden zu verknüpfenden Datensätze übereinstimmen. 
+    Wenn dies nicht erfüllt ist oder eine ungültige Nummer eingetragen wird, wird ein Fehler zurückgegeben.</p><p><b>Bitte diese Zusammenführung mit Vorsicht und Bedacht ausführen.</b></p>",
     "writeaccess" => true,
     "import" => false,
     "query" => "SELECT 

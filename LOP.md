@@ -8,60 +8,35 @@
 ## In der Prod-DB einfügen 
 aaaa@a.a
 ```
-BEGIN
-    DECLARE new_member_id BIGINT;
-    DECLARE bsg_value INT;
-    
-    -- Prüfe Bedingungen für den Trigger
-    IF OLD.lastlogin IS NULL AND NEW.lastlogin IS NOT NULL AND NEW.run_trigger = 1 THEN
-        -- Füge Mitglied in b_mitglieder ein
-        INSERT INTO b_mitglieder (y_id, Mail, Vorname, Nachname, Geschlecht, Geburtsdatum, Mailbenachrichtigung)
-            SELECT 
-                NEW.id,
-                NEW.mail,
-                ud.vname,
-                ud.nname,
-                (SELECT fieldvalue
-                FROM y_user_details AS d
-                JOIN y_user_fields AS f ON d.fieldID = f.ID 
-                WHERE userID = NEW.id AND fieldname = 'geschlecht'),
-                (SELECT fieldvalue
-                FROM y_user_details AS d
-                JOIN y_user_fields AS f ON d.fieldID = f.ID 
-                WHERE userID = NEW.id AND fieldname = 'gebdatum'),
-                (SELECT fieldvalue
-                FROM y_user_details AS d
-                JOIN y_user_fields AS f ON d.fieldID = f.ID 
-                WHERE userID = NEW.id AND fieldname = 'okformail')
-                
-            FROM y_v_user_details AS ud
-            WHERE ud.userID = NEW.id;
-            
-        -- Speichere die ID des neu erstellten Mitglieds
-        SET new_member_id = LAST_INSERT_ID();
-        
-        -- Hole den BSG-Wert aus den Benutzerdetails
-        SELECT CAST(fieldvalue AS UNSIGNED) INTO bsg_value
-        FROM y_user_details AS d
-        JOIN y_user_fields AS f ON d.fieldID = f.ID 
-        WHERE userID = NEW.id AND fieldname = 'bsg';
-        
-        
-        -- Füge den Datensatz in b_individuelle_berechtigungen ein, wenn BSG-Wert existiert
-        IF bsg_value IS NOT NULL THEN
-            INSERT INTO b_individuelle_berechtigungen (Mitglied, BSG)
-            VALUES (new_member_id, bsg_value);
-        END IF;
-        
-        -- Füge einen Wechelantrag hinzu (einer muss immer existieren)
-        IF bsg_value IS NOT NULL THEN
-            INSERT INTO b_bsg_wechselantrag (m_id, Ziel_BSG)
-            VALUES (new_member_id, bsg_value);
-        END IF;
 
-        -- Zähle die Mitglieder mit Stamm-BSG
-        INSERT INTO `adm_usercount` (timestamp, Anzahl)
-        SELECT NOW(), COUNT(*) FROM b_mitglieder WHERE BSG IS NOT NULL;
-    END IF;
-END
 ```
+
+
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE `adm_issues`;
+TRUNCATE TABLE `adm_log`;
+TRUNCATE TABLE `adm_rollback`;
+TRUNCATE TABLE `adm_usercount`;
+TRUNCATE TABLE `b___an_aus`;
+TRUNCATE TABLE `b___geschlecht`;
+TRUNCATE TABLE `b___sportart`;
+TRUNCATE TABLE `b_bsg`;
+TRUNCATE TABLE `b_bsg_deleted`;
+TRUNCATE TABLE `b_bsg_rechte`;
+TRUNCATE TABLE `b_bsg_wechselantrag`;
+TRUNCATE TABLE `b_forderungen`;
+TRUNCATE TABLE `b_individuelle_berechtigungen`;
+TRUNCATE TABLE `b_mitglieder`;
+TRUNCATE TABLE `b_mitglieder_deleted`;
+TRUNCATE TABLE `b_mitglieder_in_sparten`;
+TRUNCATE TABLE `b_regionalverband`;
+TRUNCATE TABLE `b_regionalverband_rechte`;
+TRUNCATE TABLE `b_sparte`;
+TRUNCATE TABLE `b_zahlungseingaenge`;
+TRUNCATE TABLE `y_deleted_users`;
+TRUNCATE TABLE `y_roles`;
+TRUNCATE TABLE `y_sites`;
+TRUNCATE TABLE `y_user`;
+TRUNCATE TABLE `y_user_details`;
+TRUNCATE TABLE `y_user_fields`;
+SET FOREIGN_KEY_CHECKS = 1;
