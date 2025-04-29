@@ -36,10 +36,10 @@ $anzuzeigendeDaten[] = array(
                 ",
     "referenzqueries" => array(
         "Verband" => "SELECT id, Verband as anzeige from b_regionalverband ORDER BY anzeige;",
-        "Nutzer" => "SELECT y.id as id, concat (m.Vorname,' ',m.Nachname,', ' , b.BSG,', ',y.mail) as anzeige 
+        "Nutzer" => "SELECT y.id as id, concat (m.Vorname,' ',m.Nachname,', ' , IFNULL(b.BSG, '".NULL_WERT."'),', ',y.mail) as anzeige 
                         from y_user as y
                         join b_mitglieder as m on y.id = m.y_id 
-                        join b_bsg as b on b.id = m.BSG
+                        left join b_bsg as b on b.id = m.BSG
                         ORDER BY anzeige;"
                 ),
     "spaltenbreiten" => array(
