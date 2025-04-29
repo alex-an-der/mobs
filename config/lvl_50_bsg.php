@@ -240,7 +240,7 @@ $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
     "auswahltext" => "Mitgliederkonten zusammenführen",
     "hinweis" => "Kurzanleitung",
-    "writeaccess" => true,
+    "writeaccess" => false,
     "import" => false,
     "query" => "SELECT 
                     m.id as id, 
