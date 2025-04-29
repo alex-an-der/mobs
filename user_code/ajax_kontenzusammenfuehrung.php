@@ -71,6 +71,24 @@ switch($action) {
                 $stmt->execute([':yid' => $value, ':id' => $id]);
     
                 $pdo->commit();
+
+                // 3. Überprüfe, ob die E-Mail-Adresse im aktuellen Datensatz leer ist
+                $stmt = $pdo->prepare("SELECT Mail FROM b_mitglieder WHERE id = :id");
+                $stmt->execute([':id' => $id]);
+                $currentEmail = $stmt->fetchColumn();
+
+                if (empty($currentEmail)) {
+                    // Hole die E-Mail-Adresse aus der Tabelle y_user
+                    $stmt = $pdo->prepare("SELECT mail FROM y_user WHERE id = :yid");
+                    $stmt->execute([':yid' => $value]);
+                    $newEmail = $stmt->fetchColumn();
+
+                    if (!empty($newEmail)) {
+                        // Aktualisiere die E-Mail-Adresse im aktuellen Datensatz
+                        $stmt = $pdo->prepare("UPDATE b_mitglieder SET email = :email WHERE id = :id");
+                        $stmt->execute([':email' => $newEmail, ':id' => $id]);
+                    }
+                }
     
                 echo json_encode(['status' => 'success']);
             } catch (Exception $e) {
