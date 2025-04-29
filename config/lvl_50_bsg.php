@@ -240,11 +240,11 @@ $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
     "auswahltext" => "Mitgliederkonten zusammenführen",
     "hinweis" => "Kurzanleitung",
-    "writeaccess" => false,
+    "writeaccess" => true,
     "import" => false,
     "query" => "SELECT 
                     m.id as id, 
-                    m.y_id, 
+                    m.y_id as 'ajax:y_id', 
                     concat(Vorname, ' ', Nachname) as info:Name,  
                     DATE_FORMAT(m.Geburtsdatum, '%d.%m.%Y') as info:Geburtsdatum
                 FROM b_mitglieder as m
@@ -254,6 +254,7 @@ $anzuzeigendeDaten[] = array(
                 AND m.BSG IS NOT NULL
                 ORDER by BSG, Vorname desc;
     ",
+    "ajaxfile" => "ajax_kontenzusammenfuehrung.php",
     "referenzqueries" => array(
         "BSG" => "SELECT b.id, b.BSG as anzeige
         from b_bsg as b
@@ -268,7 +269,7 @@ $anzuzeigendeDaten[] = array(
         "
     ),
     "spaltenbreiten" => array(
-        "y_id"                      => "50", 
+        "ajax:y_id"                 => "50", 
         "info:Name"                 => "300",
         "info:Geburtsdatum"         => "150"
     )

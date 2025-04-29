@@ -104,6 +104,10 @@ class Datenbank {
     public function errorInfo() {
         return $this->pdo->errorInfo();
     }
+
+    public function getPDO() {
+        return $this->pdo;
+    }
         
 
 }

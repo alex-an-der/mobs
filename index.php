@@ -45,6 +45,13 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
         $readwrite = 0;
     }
 
+    // Importrechte?
+    if(isset($anzuzeigendeDaten[$selectedTableID]['import'])){
+        $importErlaubt = $anzuzeigendeDaten[$selectedTableID]['import'];
+    }else{
+        $importErlaubt = 0;
+    }
+
     // Ausnahmsweise Delete-Rechte?
     if(isset($anzuzeigendeDaten[$selectedTableID]['deleteanyway'])){
         $deleteAnyway = $anzuzeigendeDaten[$selectedTableID]['deleteanyway'];
@@ -191,7 +198,22 @@ $tabelle_upper = strtoupper($tabelle)
     <script>
 
 
-        function updateField(tabelle, id, field, value, datatype) {
+        function updateField(tabelle, id, field, value, datatype, ajaxFile) { 
+
+            let isUserAjax = 0;
+            if (event && event.target && event.target.hasAttribute('data-userajax')) {
+                isUserAjax = event.target.getAttribute('data-userajax');
+            }           
+            let tab = <?=$selectedTableID?>;
+            console.log(isUserAjax);
+            console.log(tab);
+
+            if (isUserAjax) {
+                ajaxFile = "./user_code/" + ajaxFile;
+            }else{
+                ajaxFile = "ajax.php";
+            }
+
             if(datatype){
                 if (datatype.startsWith("decimal")) {
                     value = value.replace(',', '.'); // Replace all commas with dots
@@ -206,7 +228,7 @@ $tabelle_upper = strtoupper($tabelle)
             }
             
             const xhr = new XMLHttpRequest();
-            xhr.open("POST", "ajax.php", true);
+            xhr.open("POST", ajaxFile, true);
             xhr.setRequestHeader("Content-Type", "application/json");
 
             const data = JSON.stringify({
@@ -1432,11 +1454,11 @@ function hatUserBerechtigungen(){
 function renderTableHeaders($data) {
     global $anzuzeigendeDaten;
     global $selectedTableID;
-    global $readwrite;
+    global $importErlaubt;
     global $deleteAnyway;
     
     if (!empty($data)) {
-        if($readwrite || $deleteAnyway)
+        if($importErlaubt || $deleteAnyway)
             echo "<th style='width: 60px'><div class='checkbox-header-container p-2'><input type='checkbox' class='form-check-input' onclick='toggleSelectAll(this)'></div></th>"; // Checkbox for selecting all rows
         foreach (array_keys($data[0]) as $header) {
             $style = "";
@@ -1444,10 +1466,16 @@ function renderTableHeaders($data) {
                 $style = "style='width: ".$anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header]."px;'";
             }
             if (strcasecmp($header, 'id') !== 0) {
-                // Check if it's an info column and extract the real display name
+                
                 $displayHeader = $header;
+
+                // Check if it's an info column and extract the real display name
                 if (strpos($header, 'info:') === 0) {
                     $displayHeader = substr($header, 5); // Remove 'info:' prefix
+                }
+                // Check if it's an ajax column and extract the real display name
+                if (strpos($header, 'ajax:') === 0) {
+                    $displayHeader = substr($header, 5); // Remove 'ajax:' prefix
                 }
                 echo "<th $style data-field='" . htmlspecialchars($header) . "'>" . htmlspecialchars($displayHeader) . "</th>";
             }
@@ -1462,10 +1490,14 @@ function renderTableHeaders($data) {
     }
 }
 
-function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKeys) {
+function renderTableRows($data, $tabelle, $foreignKeys) {
     global $db;
     global $anzuzeigendeDaten;
     global $selectedTableID;
+    global $readwrite;
+    global $deleteAnyway;
+    global $importErlaubt;
+
 
     // Eingabemethode (z.B. Date-Picker) nach Datentyp wählen.
     $columns = $db->query("SHOW COLUMNS FROM $tabelle"); 
@@ -1473,10 +1505,10 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
     foreach ($columns['data'] as $column) {
         $columnTypes[$column['Field']] = $column['Type'];
     }
-
     foreach ($data as $row) {
+        
         echo '<tr data-id="' . $row['id'] . '">';
-        if($readwrite || $deleteAnyway)
+        if($importErlaubt || $deleteAnyway)
             echo '<td><div class="checkbox-container"><input type="checkbox" class="form-check-input row-checkbox" data-id="' . $row['id'] . '" onclick="toggleRowSelection(this)"></div></td>';
         
         foreach ($row as $key => $value) {
@@ -1497,7 +1529,19 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                 
                 // Check if this is an info column (starts with 'info:')
                 $isInfoColumn = strpos($key, 'info:') === 0;
-               
+                $isAjaxColumn = strpos($key, 'ajax:') === 0;
+                $ajaxFile = "";
+                if ($isAjaxColumn) {
+                    $key = substr($key, 5); // Remove 'ajax:' prefix
+                    if(isset($anzuzeigendeDaten[$selectedTableID]['ajaxfile'])){
+                         $ajaxFile = $anzuzeigendeDaten[$selectedTableID]['ajaxfile'];
+                    }else{
+                        $err = "Die Ansicht ´".$anzuzeigendeDaten[$selectedTableID]['auswahltext']."´ hat eine Spalte mit dem Prefix 'ajax:', aber es ist kein Ajax-File mit dem Index ´ajaxfile´ definiert. Bitte in der Konfiguration nachtragen.";
+                        $db->log($err);
+                        die($err);
+                    }
+                }
+
                 if(isset($foreignKeys[$key])) { 
                     foreach($foreignKeys[$key] as $fk){
                         if($fk['id'] == $value){
@@ -1508,7 +1552,7 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                     }
 
                     if ($readwrite || $deleteAnyway) {
-                        echo '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0)">';
+                        echo '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0, \'' . $ajaxFile . '\')">';
                         echo '<option value="NULL"' . (empty($value) ? ' selected' : '') . '>'.NULL_WERT.'</option>';
                         foreach ($foreignKeys[$key] as $fk) {
                             $fk_value = $fk['id'];
@@ -1522,7 +1566,7 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                         echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars($data_fk_ID_value, ENT_QUOTES) . '</div>';
                     }
                 } else {
-                    if ($readwrite && !$isInfoColumn) {
+                    if ($readwrite && !$isInfoColumn) {                        
                         $inputType = 'text';
                         $columnType = $columnTypes[$key];
                         if (strpos($columnType, 'date') !== false) {
@@ -1535,11 +1579,12 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                         }
                         echo '<input oncontextmenu="filter_that(this, \'input\');" data-type="'.htmlspecialchars($columnType).'" data-fkIDkey="' . htmlspecialchars($data_fk_ID_key, ENT_QUOTES) . '" 
                               data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value, ENT_QUOTES) . '" 
+                              data-userajax="' . htmlspecialchars($isAjaxColumn, ENT_QUOTES) . '"
                               type="' . $inputType . '" 
                               class="form-control border-0" 
                               style="background-color: inherit; word-wrap: break-word; white-space: normal;" 
                               value="' . htmlspecialchars($value, ENT_QUOTES) . '"
-                              onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, \'' . htmlspecialchars($columnType, ENT_QUOTES) . '\')"
+                              onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, \'' . htmlspecialchars($columnType, ENT_QUOTES) . '\', \'' . $ajaxFile . '\')"
                               onfocus="clearCellColor(this)">';
                 
                     } else {
@@ -1641,7 +1686,7 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                 </thead>
                 <tbody>
                 <?php 
-                    if (!empty($data)) renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $FKdata);
+                    if (!empty($data)) renderTableRows($data, $tabelle, $FKdata);
                 ?>
                 </tbody>
             </table>
