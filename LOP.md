@@ -1,3 +1,13 @@
+Das aktuelle Problem:
+
+"Anmelden in Sparten" sehe ich nicht die manuell angelegten Mitglieder, da diese nicht durch den check "WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 " kommen.
+
+Grundsätrzlich klären und dokumentieren: Was ist der Unterschied individuell und BSG? Kann man das nicht über BSG-Check machen?
+
+
+
+
+
 # Rechnungserstellung
 - Rechnungserzeugung? PDF??
 - Rechnungen können in der Cloud abgelegt werden - Link kann gespeichert werden
