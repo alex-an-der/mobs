@@ -130,7 +130,7 @@ DELIMITER ;
 */
 
 -- Aaron@Habitus.lo
-
+/*
 DROP TRIGGER IF EXISTS tr_user_first_login;
 DELIMITER //
 CREATE TRIGGER tr_user_first_login 
@@ -191,7 +191,91 @@ BEGIN
         INSERT INTO `adm_usercount` (timestamp, Anzahl)
         SELECT NOW(), COUNT(*) FROM b_mitglieder WHERE BSG IS NOT NULL;
     END IF;
+
+    -- Prüfe, ob es bereits einen Wechselantrag für das Mitglied gibt
+    DECLARE wechselantrag_count INT DEFAULT 0;
+    SELECT COUNT(*) INTO wechselantrag_count
+    FROM b_bsg_wechselantrag
+    WHERE m_id = new_member_id;
+
+    -- Wenn nicht vorhanden, füge einen Wechselantrag ein
+    IF wechselantrag_count = 0 AND bsg_value IS NOT NULL THEN
+        INSERT INTO b_bsg_wechselantrag (m_id, Ziel_BSG)
+        VALUES (new_member_id, bsg_value);
+    END IF;
+
 END;//
+DELIMITER ;*/
+
+DROP TRIGGER IF EXISTS tr_user_first_login;
+DELIMITER //
+CREATE TRIGGER tr_user_first_login 
+AFTER UPDATE ON y_user
+FOR EACH ROW
+BEGIN
+    DECLARE mid BIGINT;
+    DECLARE bsg_value INT;
+    DECLARE wechselantrag_count INT DEFAULT 0;
+
+    -- Ermittle die Mitglieds-ID (mid) anhand der y_id
+    SELECT id INTO mid FROM b_mitglieder WHERE y_id = NEW.id LIMIT 1;
+
+    -- Hole den BSG-Wert aus b_mitglieder
+    IF mid IS NOT NULL THEN
+        SELECT BSG INTO bsg_value FROM b_mitglieder WHERE id = mid LIMIT 1;
+
+        -- Prüfe, ob es bereits einen Wechselantrag für dieses Mitglied gibt
+        SELECT COUNT(*) INTO wechselantrag_count
+        FROM b_bsg_wechselantrag
+        WHERE m_id = mid;
+
+        -- Wenn nicht vorhanden und BSG vorhanden, füge einen Wechselantrag ein
+        IF wechselantrag_count = 0 AND bsg_value IS NOT NULL THEN
+            INSERT INTO b_bsg_wechselantrag (m_id, Ziel_BSG)
+            VALUES (mid, bsg_value);
+        END IF;
+    END IF;
+
+    -- Optional: Erster Login → Mitglied anlegen (wie bisher)
+    IF OLD.lastlogin IS NULL AND NEW.lastlogin IS NOT NULL AND NEW.run_trigger = 1 THEN
+        INSERT INTO b_mitglieder (y_id, Mail, Vorname, Nachname, Geschlecht, Geburtsdatum, Mailbenachrichtigung, BSG)
+            SELECT 
+                NEW.id,
+                NEW.mail,
+                ud.vname,
+                ud.nname,
+                (SELECT fieldvalue FROM y_user_details AS d JOIN y_user_fields AS f ON d.fieldID = f.ID WHERE userID = NEW.id AND fieldname = 'geschlecht' LIMIT 1),
+                (SELECT fieldvalue FROM y_user_details AS d JOIN y_user_fields AS f ON d.fieldID = f.ID WHERE userID = NEW.id AND fieldname = 'gebdatum' LIMIT 1),
+                (SELECT fieldvalue FROM y_user_details AS d JOIN y_user_fields AS f ON d.fieldID = f.ID WHERE userID = NEW.id AND fieldname = 'okformail' LIMIT 1),
+                (SELECT fieldvalue FROM y_user_details AS d JOIN y_user_fields AS f ON d.fieldID = f.ID WHERE userID = NEW.id AND fieldname = 'bsg' LIMIT 1)
+            FROM y_v_userdata AS ud
+            WHERE ud.userID = NEW.id;
+
+        -- Aktualisiere mid und bsg_value nach dem Insert
+        SELECT id, BSG INTO mid, bsg_value FROM b_mitglieder WHERE y_id = NEW.id LIMIT 1;
+
+        -- Füge individuelle Berechtigung hinzu, falls BSG vorhanden
+        IF bsg_value IS NOT NULL THEN
+            INSERT INTO b_individuelle_berechtigungen (Mitglied, BSG)
+            VALUES (mid, bsg_value);
+        END IF;
+
+        -- Füge Wechselantrag hinzu, falls noch nicht vorhanden
+        SELECT COUNT(*) INTO wechselantrag_count
+        FROM b_bsg_wechselantrag
+        WHERE m_id = mid;
+
+        IF wechselantrag_count = 0 AND bsg_value IS NOT NULL THEN
+            INSERT INTO b_bsg_wechselantrag (m_id, Ziel_BSG)
+            VALUES (mid, bsg_value);
+        END IF;
+
+        -- Zähle die Mitglieder mit Stamm-BSG
+        INSERT INTO `adm_usercount` (timestamp, Anzahl)
+        SELECT NOW(), COUNT(*) FROM b_mitglieder WHERE BSG IS NOT NULL;
+    END IF;
+END;
+//
 DELIMITER ;
 -- -----------------------------------------------------------------------------------
 

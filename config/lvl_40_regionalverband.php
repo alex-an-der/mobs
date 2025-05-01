@@ -57,10 +57,10 @@ $anzuzeigendeDaten[] = array(
                     FROM b_bsg as b
                     WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0
                     ORDER BY anzeige;",
-        "Nutzer" => "SELECT y.id as id, concat (m.Vorname,' ',m.Nachname,', ' , b.BSG,', ',y.mail) as anzeige 
+        "Nutzer" => "SELECT y.id as id, concat (m.Vorname,' ',m.Nachname,', ' , IFNULL(b.BSG, '".NULL_WERT."'),', ',y.mail) as anzeige 
                         from y_user as y
                         join b_mitglieder as m on y.id = m.y_id 
-                        join b_bsg as b on b.id = m.BSG
+                        left join b_bsg as b on b.id = m.BSG
                         ORDER BY anzeige;"
     ),
     "spaltenbreiten" => array(
