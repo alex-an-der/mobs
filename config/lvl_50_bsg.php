@@ -85,7 +85,7 @@ $anzuzeigendeDaten[] = array(
     "hinweis" => "<b>ACHTUNG!</b> Das Feld <b>Stammmitglied_seit</b> wird <b>automatisch</b> angepasst, wenn sich die BSG ändert. Dies wird erst 
     nach dem erneuten Laden sichtbar und kann dann manuell verändert werden. Dieses Angabe dient nur zur Information und  wird bei der Rechnungsstellung nicht berücksichtigt.",
     "writeaccess" => true,
-    "import" => true,
+    "import" => false,
     "query" => "SELECT m.id as id, Vorname, Nachname, BSG, Stammmitglied_seit, Mail, m.Geschlecht, m.Geburtsdatum, aktiv
                 from b_mitglieder as m
                 WHERE 
@@ -234,7 +234,7 @@ $anzuzeigendeDaten[] = array(
         "seit"                      => "150"
     )
 );
-
+/*
 # Mitgliederkonten zusammenführen
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
@@ -273,7 +273,7 @@ $anzuzeigendeDaten[] = array(
         "info:Geburtsdatum"         => "150"
     )
 );
-
+*/
 
 ######################################################################################################
 
