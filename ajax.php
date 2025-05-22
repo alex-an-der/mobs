@@ -343,23 +343,26 @@ try {
             $tabelle = $data['tabelle'];
             $recordData = (array)$data['data'];
             
-            // Filter out info: columns from data before insert
-            $recordData = array_filter($recordData, function($key) {
-                return strpos($key, 'info:') !== 0;
-            }, ARRAY_FILTER_USE_KEY);
-            
-            $fields = array_keys($recordData);
-            $values = array_values($recordData);
-            
+            // Entferne "info:"-Präfix aus allen Keys, Werte bleiben erhalten
+            $filteredRecordData = [];
+            foreach ($recordData as $key => $value) {
+                if (strpos($key, 'info:') === 0) {
+                    $key = substr($key, 5);
+                }
+                $filteredRecordData[$key] = $value;
+            }
+            $fields = array_keys($filteredRecordData);
+            $values = array_values($filteredRecordData);
+
             // Convert "NULL" strings to actual NULL
             $values = array_map(function($val) {
                 return $val === "NULL" ? null : $val;
             }, $values);
-            
+
             $placeholders = array_fill(0, count($fields), '?');
-            
+
             $sql = "INSERT INTO $tabelle (" . implode(',', $fields) . ") VALUES (" . implode(',', $placeholders) . ")";
-            
+
             try {
                 $result = $db->query($sql, $values);
                 if (isset($result['error'])) {

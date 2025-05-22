@@ -82,7 +82,7 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
     $tabelle = "";
 }
 
-$tabelle_upper = strtoupper($tabelle)
+$tabelle_upper = strtoupper($tabelle);
 ?>
 
 
@@ -899,13 +899,13 @@ $tabelle_upper = strtoupper($tabelle)
                     const select = document.createElement('select');
                     select.className = 'form-control';
                     select.name = fieldName;
-                    
-                    // Add NULL option
-                    const nullOption = document.createElement('option');
-                    nullOption.value = "NULL";
-                    nullOption.textContent = "<?=NULL_WERT?>";
-                    select.appendChild(nullOption);
-                    
+                    // Add NULL option only if not info:-field
+                    if (!isInfo) {
+                        const nullOption = document.createElement('option');
+                        nullOption.value = "NULL";
+                        nullOption.textContent = "<?=NULL_WERT?>";
+                        select.appendChild(nullOption);
+                    }
                     // Count valid options
                     const validOptions = [];
                     
@@ -927,6 +927,15 @@ $tabelle_upper = strtoupper($tabelle)
                         validOptions[0].selected = true;
                     }
 
+                    if (isInfo) {
+                        // select.disabled = true;
+                    }
+                    // Remove 'info:' prefix for updateField handler if info field
+                    // Nur in der Tabelle sinnvoll, NICHT im Modal!
+                    // select.addEventListener('change', function() {
+                    //     const fieldForUpdate = isInfo ? fieldName.substring(5) : fieldName;
+                    //     updateField('<?=$tabelle?>', this.closest('tr').getAttribute('data-id'), fieldForUpdate, this.value, 0);
+                    // });
                     div.appendChild(select);
                 } else {
                     // Input für normale Felder und info:-Felder
@@ -963,7 +972,12 @@ $tabelle_upper = strtoupper($tabelle)
                         input.readOnly = true;
                         input.style.backgroundColor = "#f5f5f5";
                     }
-
+                    // Remove 'info:' prefix for updateField handler if info field
+                    // Nur in der Tabelle sinnvoll, NICHT im Modal!
+                    // input.addEventListener('change', function() {
+                    //     const fieldForUpdate = isInfo ? fieldName.substring(5) : fieldName;
+                    //     updateField('<?=$tabelle?>', this.closest('tr').getAttribute('data-id'), fieldForUpdate, this.value, input.getAttribute('data-type'));
+                    // });
                     div.appendChild(input);
                 }
 
@@ -1511,12 +1525,12 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                     }
 
                     if ($readwrite || $deleteAnyway) {
-                        echo '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0)">';
+                        $updateKey = $isInfoColumn ? substr($key, 5) : $key;
+                        echo '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $updateKey . '\', this.value, 0)">';
                         echo '<option value="NULL"' . (empty($value) ? ' selected' : '') . '>'.NULL_WERT.'</option>';
                         foreach ($foreignKeys[$key] as $fk) {
                             $fk_value = $fk['id'];
                             $fk_display = htmlspecialchars($fk['anzeige'], ENT_QUOTES);
-
                             $selected = ($fk_value == $value) ? 'selected' : '';
                             echo '<option value="' . htmlspecialchars($fk_value, ENT_QUOTES) . '" ' . $selected . '>' . $fk_display . '</option>';
                         }
@@ -1536,13 +1550,14 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                                 $inputType = 'date';
                             }
                         }
+                        $updateKey = $isInfoColumn ? substr($key, 5) : $key;
                         echo '<input oncontextmenu="filter_that(this, \'input\');" data-type="'.htmlspecialchars($columnType).'" data-fkIDkey="' . htmlspecialchars($data_fk_ID_key, ENT_QUOTES) . '" 
                               data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value, ENT_QUOTES) . '" 
                               type="' . $inputType . '" 
                               class="form-control border-0" 
                               style="background-color: inherit; word-wrap: break-word; white-space: normal;" 
                               value="' . htmlspecialchars($value, ENT_QUOTES) . '"
-                              onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, \'' . htmlspecialchars($columnType, ENT_QUOTES) . '\')"
+                              onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $updateKey . '\', this.value, \'' . htmlspecialchars($columnType, ENT_QUOTES) . '\')"
                               onfocus="clearCellColor(this)">';
                 
                     } else {
