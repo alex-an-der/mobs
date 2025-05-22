@@ -32,33 +32,38 @@ if (!$exportAll && !empty($ids)) {
     $idArray = explode(',', $ids);
     $idList = implode(',', array_map('intval', $idArray));
     
-    // Debug logging
     error_log("Original query: $query");
     error_log("Filtered IDs: $idList");
     
-    // Der wahrscheinliche Fehler: IDs werden möglicherweise falsch in den Query eingebaut
-    // Statt generischer Anpassung, sollten wir die Tabellenstruktur genauer analysieren
-    
-    // Bestimme den richtigen Tabellennamen und ID-Feld aus der Query
     $tableInfo = extractTableInfo($query);
-    $idField = 'id';  // ist IMMER id // $tableInfo['idField'];
-    
+    $idField = $tableInfo['idField'];
     error_log("Using ID field: $idField for filtered query");
-    
-    if (stripos($query, 'WHERE') !== false) {
-        // WHERE bereits vorhanden - füge AND id IN hinzu
-        $query = preg_replace('/WHERE/i', "WHERE $idField IN ($idList) AND ", $query, 1);
-    } else if (stripos($query, 'GROUP BY') !== false) {
-        // Füge WHERE vor GROUP BY ein
-        $query = preg_replace('/(GROUP BY)/i', "WHERE $idField IN ($idList) $1", $query, 1);
-    } else if (stripos($query, 'ORDER BY') !== false) {
-        // Füge WHERE vor ORDER BY ein
-        $query = preg_replace('/(ORDER BY)/i', "WHERE $idField IN ($idList) $1", $query, 1);
+
+    // Neue, robustere Logik:
+    $idFilter = "$idField IN ($idList)";
+    $hasWhere = stripos($query, 'WHERE') !== false;
+    $hasGroupBy = stripos($query, 'GROUP BY') !== false;
+    $hasOrderBy = stripos($query, 'ORDER BY') !== false;
+
+    if ($hasWhere) {
+        // Füge AND id IN (...) vor GROUP BY/ORDER BY/Ende ein
+        if ($hasGroupBy) {
+            $query = preg_replace('/(WHERE .+?)(GROUP BY)/is', '$1 AND ' . $idFilter . ' $2', $query, 1);
+        } else if ($hasOrderBy) {
+            $query = preg_replace('/(WHERE .+?)(ORDER BY)/is', '$1 AND ' . $idFilter . ' $2', $query, 1);
+        } else {
+            $query .= ' AND ' . $idFilter;
+        }
     } else {
-        // Füge WHERE am Ende hinzu
-        $query .= " WHERE $idField IN ($idList)";
+        // Füge WHERE id IN (...) vor GROUP BY/ORDER BY/Ende ein
+        if ($hasGroupBy) {
+            $query = preg_replace('/(GROUP BY)/i', 'WHERE ' . $idFilter . ' $1', $query, 1);
+        } else if ($hasOrderBy) {
+            $query = preg_replace('/(ORDER BY)/i', 'WHERE ' . $idFilter . ' $1', $query, 1);
+        } else {
+            $query .= ' WHERE ' . $idFilter;
+        }
     }
-    
     error_log("Modified filtered query: $query");
 }
 
