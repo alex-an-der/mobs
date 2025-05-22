@@ -1,8 +1,7 @@
 <?php
 // Aktiviere Output Buffering am Anfang der Datei
 ob_start();
-require_once(__DIR__ . "/user_includes/all.head.php");
-require_once(__DIR__ . "/inc/include.php");
+
 // Fehlerausgabe aktivieren
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -19,6 +18,12 @@ $exportAll = ($_POST['exportAll'] ?? '1') === '1';
 $ids = $_POST['ids'] ?? '';
 $tableDataJson = $_POST['tableData'] ?? '';
 error_log('Export-IDs (POST): ' . $ids);
+
+// Nur für Formate, die HTML benötigen, Includes laden
+if (!in_array($format, ['csv', 'excel'])) {
+    require_once(__DIR__ . "/user_includes/all.head.php");
+}
+require_once(__DIR__ . "/inc/include.php");
 
 if (!$tabelle || !isset($anzuzeigendeDaten[$tabid])) {
     die('Invalid parameters');
@@ -411,6 +416,7 @@ function exportExcel($data, $tabelle) {
 
 function exportCSV($data, $tabelle) {
     global $filename;
+    ob_clean(); // Buffer leeren, damit keine HTML-Ausgaben im CSV landen
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename=' . $filename . '.csv');
     
@@ -418,11 +424,26 @@ function exportCSV($data, $tabelle) {
     fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM
     
     // Headers
-    fputcsv($output, array_keys($data[0]), ';');
+    $headers = array_keys($data[0]);
+    fputcsv($output, $headers, ';');
     
     // Data
     foreach ($data as $row) {
-        fputcsv($output, $row, ';');
+        $csvRow = [];
+        foreach ($headers as $header) {
+            $value = isset($row[$header]) ? $row[$header] : '';
+            // Prüfe, ob Wert numerisch ist (aber nicht mit führender Null)
+            $isNumeric = is_numeric($value) && !preg_match('/^0[0-9]/', $value);
+            if ($isNumeric || $value === '' || $value === null) {
+                $csvRow[] = $value;
+            } else {
+                // Maskiere Anführungszeichen im Text
+                $escaped = str_replace('"', '""', $value);
+                $csvRow[] = '"' . str_replace('"', '""', $value) . '"';
+            }
+        }
+        // Schreibe die Zeile manuell, damit keine automatische Maskierung von fputcsv erfolgt
+        fwrite($output, implode(';', $csvRow) . "\n");
     }
     
     fclose($output);

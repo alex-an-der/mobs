@@ -1413,7 +1413,7 @@ function renderTableSelectBox($db) {
     foreach ($trennerindizies als $trennerindex) {
         $firstChar = substr($options[$trennerindex], 0, 1);
         $displayText = str_pad('', $maxLaenge, $firstChar);
-        $options[$trennerindex] = '<option disabled>' . $displayText . '</option>';
+        $options[$trennerindizies] = '<option disabled>' . $displayText . '</option>';
     }*/
 
     $trennerindizies = array();
@@ -1665,7 +1665,7 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                             </button>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="#" onclick="exportData('pdf')">Als PDF</a></li>
-                                <!--li><a class="dropdown-item" href="#" onclick="exportData('csv')">Als CSV</a></li-->
+                                <li><a class="dropdown-item" href="#" onclick="exportData('csv')">Als CSV</a></li>
                                 <li><a class="dropdown-item" href="#" onclick="exportData('excel', 'Xlsx')">Als Excel</a></li>
                                 <!--li><a class="dropdown-item" href="#" onclick="exportData('excel', 'Ods')">Als LibreOffice</a></li-->
                                 <li><a class="dropdown-item" href="#" onclick="exportData('maillist')">Als Mail-Verteiler</a></li>
