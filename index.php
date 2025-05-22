@@ -1293,7 +1293,7 @@ $tabelle_upper = strtoupper($tabelle);
  
 <?php
 // Manche Spalten sind per ID via Fremdschlüssel zu anderen Tabellen verknüpft. Die ID anzuzeigen (und zu bearbeiten) 
-// bringt dem Anwender wenig. Es muss daher in config pro FK eine Referenzquery definiert werden, die die ID in eine für den
+// bringt dem Anwender wenig. Es muss daher in config pro FK eine Referenzquery definiert, die die ID in eine für den
 // Anwender nützliche Information umwandelt. Diese Information wird dann in einer Select-Box angezeigt. 
 // Der Query muss genau zwei Dinge liefern: id (zur Verknüpfung, ist dann der Value der Option) und anzeige (der Text der Option).
 
@@ -1480,7 +1480,6 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
     global $anzuzeigendeDaten;
     global $selectedTableID;
 
-    // Eingabemethode (z.B. Date-Picker) nach Datentyp wählen.
     $columns = $db->query("SHOW COLUMNS FROM $tabelle"); 
     $columnTypes = [];
     foreach ($columns['data'] as $column) {
@@ -1501,19 +1500,29 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                 if(isset($anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$key])) {
                     $style .= "width: ".$anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$key]."px;";
                 }
-                // Add word-wrap styles
                 $style .= "word-wrap: break-word; white-space: normal;'";
                 
                 echo '<td data-field="' . htmlspecialchars($key) . '" ' . $style . '>';
                 $data_fk_ID_key = "";
                 $data_fk_ID_value = "";
-                
-                // Check if this is an info column (starts with 'info:')
+
+                // Info-Spalte: Wert ggf. aus Feld ohne info:-Prefix holen
                 $isInfoColumn = strpos($key, 'info:') === 0;
-               
-                if(isset($foreignKeys[$key])) { 
-                    foreach($foreignKeys[$key] as $fk){
-                        if($fk['id'] == $value){
+                $displayValue = $value;
+                $fkLookupKey = $key;
+                if ($isInfoColumn) {
+                    $plainKey = substr($key, 5);
+                    // Wert aus Feld ohne Prefix, falls vorhanden und nicht leer
+                    if ((empty($displayValue) || $displayValue === null) && isset($row[$plainKey]) && $row[$plainKey] !== "" && $row[$plainKey] !== null) {
+                        $displayValue = $row[$plainKey];
+                    }
+                    // FK-Lookup muss auf plainKey erfolgen!
+                    $fkLookupKey = $plainKey;
+                }
+
+                if(isset($foreignKeys[$fkLookupKey])) { 
+                    foreach($foreignKeys[$fkLookupKey] as $fk){
+                        if($fk['id'] == $displayValue){
                             $data_fk_ID_key = $fk['id'];
                             $data_fk_ID_value = $fk['anzeige'];
                             break;
@@ -1523,16 +1532,17 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                     if ($readwrite || $deleteAnyway) {
                         $updateKey = $isInfoColumn ? substr($key, 5) : $key;
                         echo '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $updateKey . '\', this.value, 0)">';
-                        echo '<option value="NULL"' . (empty($value) ? ' selected' : '') . '>'.NULL_WERT.'</option>';
-                        foreach ($foreignKeys[$key] as $fk) {
+                        echo '<option value="NULL"' . ($displayValue === "" || $displayValue === null ? ' selected' : '') . '>'.NULL_WERT.'</option>';
+                        foreach ($foreignKeys[$fkLookupKey] as $fk) {
                             $fk_value = $fk['id'];
                             $fk_display = htmlspecialchars($fk['anzeige'], ENT_QUOTES);
-                            $selected = ($fk_value == $value) ? 'selected' : '';
+                            $selected = ($fk_value == $displayValue) ? 'selected' : '';
                             echo '<option value="' . htmlspecialchars($fk_value, ENT_QUOTES) . '" ' . $selected . '>' . $fk_display . '</option>';
                         }
                         echo '</select>';
                     } else {
-                        echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars($data_fk_ID_value, ENT_QUOTES) . '</div>';
+                        $anzeige = ($data_fk_ID_value !== "" && $data_fk_ID_value !== null) ? $data_fk_ID_value : NULL_WERT;
+                        echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars($anzeige, ENT_QUOTES) . '</div>';
                     }
                 } else {
                     if ($readwrite && !$isInfoColumn) {
@@ -1541,7 +1551,7 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                         if (strpos($columnType, 'date') !== false) {
                             if (strpos($columnType, 'datetime') !== false) {
                                 $inputType = 'datetime-local';
-                                $value = str_replace(' ', 'T', $value);
+                                $displayValue = str_replace(' ', 'T', $displayValue);
                             } else {
                                 $inputType = 'date';
                             }
@@ -1552,17 +1562,18 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                               type="' . $inputType . '" 
                               class="form-control border-0" 
                               style="background-color: inherit; word-wrap: break-word; white-space: normal;" 
-                              value="' . htmlspecialchars($value, ENT_QUOTES) . '"
+                              value="' . htmlspecialchars($displayValue, ENT_QUOTES) . '"
                               onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $updateKey . '\', this.value, \'' . htmlspecialchars($columnType, ENT_QUOTES) . '\')"
                               onfocus="clearCellColor(this)">';
-                
+        
                     } else {
                         if(isset($columnType)){
                             if (strpos($columnType, 'decimal') !== false || strpos($columnType, 'float') !== false) {
-                                $value = number_format((float)$value, 2, '.', '');
+                                $displayValue = number_format((float)$displayValue, 2, '.', '');
                             }
                         }
-                        echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars($value, ENT_QUOTES) . '</div>';
+                        $anzeige = ($displayValue !== "" && $displayValue !== null) ? $displayValue : NULL_WERT;
+                        echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars($anzeige, ENT_QUOTES) . '</div>';
                     }
                 }
                 echo '</td>';
