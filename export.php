@@ -325,20 +325,16 @@ function exportExcel($data, $tabelle) {
         });
         $headers = array_values($headers);
         
-        // Formatierungsregeln erkennen
+        // Alle Spalten als Text formatieren, um Datumsumwandlung zu verhindern
         $columnFormats = [];
         foreach ($headers as $header) {
-            $columnFormats[$header] = detectColumnFormat($data, $header);
+            $columnFormats[$header] = ['type' => 'text', 'format' => '@'];
         }
         
         // Headers schreiben und formatieren
         foreach ($headers as $colIndex => $header) {
             $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 1);
-            
-            // Header-Zelle setzen
-            $sheet->setCellValue($colLetter . '1', $header);
-            
-            // Header-Styling
+            $sheet->setCellValueExplicit($colLetter . '1', $header, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $sheet->getStyle($colLetter . '1')->applyFromArray([
                 'font' => ['bold' => true, 'size' => 11],
                 'fill' => [
@@ -346,17 +342,10 @@ function exportExcel($data, $tabelle) {
                     'startColor' => ['rgb' => 'F5F5F5']
                 ]
             ]);
-            
-            // Spaltenformat basierend auf Datentyp
-            if ($columnFormats[$header]['type'] === 'number') {
-                $sheet->getStyle($colLetter . '2:' . $colLetter . (count($data) + 1))
-                    ->getNumberFormat()
-                    ->setFormatCode($columnFormats[$header]['format']);
-            } elseif ($columnFormats[$header]['type'] === 'date') {
-                $sheet->getStyle($colLetter . '2:' . $colLetter . (count($data) + 1))
-                    ->getNumberFormat()
-                    ->setFormatCode($columnFormats[$header]['format']);
-            }
+            // Spaltenformat auf Text setzen
+            $sheet->getStyle($colLetter . '2:' . $colLetter . (count($data) + 1))
+                ->getNumberFormat()
+                ->setFormatCode('@');
         }
         
         // Daten schreiben
@@ -366,15 +355,8 @@ function exportExcel($data, $tabelle) {
             foreach ($headers as $header) {
                 $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
                 $value = $rowData[$header] ?? '';
-                
-                // Wert entsprechend des erkannten Formats konvertieren
-                if ($columnFormats[$header]['type'] === 'date' && !empty($value)) {
-                    $value = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel(strtotime($value));
-                } elseif ($columnFormats[$header]['type'] === 'number') {
-                    $value = str_replace(',', '.', $value);
-                }
-                
-                $sheet->setCellValue($colLetter . $rowIndex, $value);
+                // Immer als Text setzen
+                $sheet->setCellValueExplicit($colLetter . $rowIndex, $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                 $colIndex++;
             }
             $rowIndex++;
