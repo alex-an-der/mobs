@@ -926,10 +926,6 @@ $tabelle_upper = strtoupper($tabelle);
                     if (validOptions.length === 1) {
                         validOptions[0].selected = true;
                     }
-
-                    if (isInfo) {
-                        // select.disabled = true;
-                    }
                     // Remove 'info:' prefix for updateField handler if info field
                     // Nur in der Tabelle sinnvoll, NICHT im Modal!
                     // select.addEventListener('change', function() {
