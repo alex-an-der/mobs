@@ -180,6 +180,123 @@ try {
             $selectedTableID = $data['selectedTableID'];
             $result = [];
 
+            if (isset($anzuzeigendeDaten[$selectedTableID])) {
+                $query = $anzuzeigendeDaten[$selectedTableID]['query'];
+                $result['configQuery'] = $query;
+
+                $columns = [];
+                $foreignKeys = [];
+                $referenzqueries = $anzuzeigendeDaten[$selectedTableID]['referenzqueries'] ?? [];
+
+                // Extrahiere die SELECT-Spalten (inkl. info:-Felder, aber ohne id)
+                if (preg_match('/SELECT\s+(.+?)\s+FROM/is', $query, $matches)) {
+                    $selectPart = trim($matches[1]);
+                    $columnExprList = [];
+                    $currentExpr = '';
+                    $parenthesesDepth = 0;
+                    for ($i = 0; $i < strlen($selectPart); $i++) {
+                        $char = $selectPart[$i];
+                        if ($char === '(') $parenthesesDepth++;
+                        if ($char === ')') $parenthesesDepth--;
+                        if ($char === ',' && $parenthesesDepth === 0) {
+                            $columnExprList[] = trim($currentExpr);
+                            $currentExpr = '';
+                        } else {
+                            $currentExpr .= $char;
+                        }
+                    }
+                    if (!empty($currentExpr)) {
+                        $columnExprList[] = trim($currentExpr);
+                    }
+
+                    foreach ($columnExprList as $expr) {
+                        // Extrahiere Alias oder Spaltennamen
+                        $columnName = null;
+                        // AS alias
+                        if (preg_match('/\s+AS\s+([`\'"]?)([a-zA-Z0-9_:]+)\1\s*$/i', $expr, $m)) {
+                            $columnName = $m[2];
+                        }
+                        // Kein AS, aber alias (z.B. "foo bar")
+                        elseif (preg_match('/\s+([`\'"]?)([a-zA-Z0-9_:]+)\1\s*$/i', $expr, $m)) {
+                            $columnName = $m[2];
+                        }
+                        // table.column
+                        elseif (preg_match('/([a-zA-Z0-9_]+)\.([`\'"]?)([a-zA-Z0-9_]+)\2/i', $expr, $m)) {
+                            $columnName = $m[3];
+                        }
+                        // Nur Spaltenname
+                        elseif (preg_match('/^([`\'"]?)([a-zA-Z0-9_:]+)\1$/i', $expr, $m)) {
+                            $columnName = $m[2];
+                        }
+
+                        // id überspringen
+                        if ($columnName && strcasecmp($columnName, 'id') === 0) continue;
+
+                        if ($columnName) {
+                            $isInfo = (strpos($columnName, 'info:') === 0);
+                            $label = $isInfo ? substr($columnName, 5) : $columnName;
+                            $col = [
+                                'Field' => $columnName,
+                                'Label' => $label,
+                                'Type' => 'text'
+                            ];
+                            // Für info:-Felder: Typ immer text, referenzquery verwenden
+                            if ($isInfo) {
+                                if (isset($referenzqueries[$columnName])) {
+                                    try {
+                                        $fkResult = $db->query($referenzqueries[$columnName]);
+                                        if (isset($fkResult['data'])) {
+                                            $foreignKeys[$columnName] = $fkResult['data'];
+                                        }
+                                    } catch (Exception $e) {
+                                        // ignore
+                                    }
+                                }
+                            } else {
+                                // Für andere Felder: Typ aus DB
+                                try {
+                                    $columnTypeQuery = "SHOW COLUMNS FROM `$tabelle` WHERE Field = '$columnName'";
+                                    $columnTypeResult = $db->query($columnTypeQuery);
+                                    if (isset($columnTypeResult['data'][0]['Type'])) {
+                                        $col['Type'] = $columnTypeResult['data'][0]['Type'];
+                                    }
+                                } catch (Exception $e) {
+                                    // ignore
+                                }
+                                // referenzquery für dieses Feld?
+                                if (isset($referenzqueries[$columnName])) {
+                                    try {
+                                        $fkResult = $db->query($referenzqueries[$columnName]);
+                                        if (isset($fkResult['data'])) {
+                                            $foreignKeys[$columnName] = $fkResult['data'];
+                                        }
+                                    } catch (Exception $e) {
+                                        // ignore
+                                    }
+                                }
+                            }
+                            $columns[] = $col;
+                        }
+                    }
+                }
+
+                $result['columns'] = $columns;
+                $result['foreignKeys'] = $foreignKeys;
+                $result['status'] = 'success';
+            } else {
+                $result['status'] = 'error';
+                $result['message'] = "Invalid table ID: $selectedTableID";
+            }
+
+            ob_end_clean();
+            echo json_encode($result);
+            break;
+
+        /*case 'get_table_structure':
+            $tabelle = $data['tabelle'];
+            $selectedTableID = $data['selectedTableID'];
+            $result = [];
+
             // Check if table ID exists in configuration
             if (isset($anzuzeigendeDaten[$selectedTableID])) {
                 
@@ -337,7 +454,7 @@ try {
             
             ob_end_clean();
             echo json_encode($result);
-            break;
+            break;*/
 
         case 'insert_record':
             $tabelle = $data['tabelle'];
