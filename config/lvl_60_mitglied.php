@@ -39,7 +39,6 @@ $anzuzeigendeDaten[] = array(
 );
 
 #  Wer darf meine Daten sehen?
-
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_individuelle_berechtigungen",
     "auswahltext" => "Meine Daten zur Bearbeitung freigeben.",
@@ -54,6 +53,9 @@ $anzuzeigendeDaten[] = array(
                 ORDER BY b.BSG asc;
     ",
     "referenzqueries" => array(
+        "info:Mitglied" => "SELECT id, concat(Vorname,' ',Nachname) as anzeige
+                        from b_mitglieder WHERE y_id = $uid;
+        ",
         "BSG" => "SELECT b.id, concat(b.BSG, ' (',v.Kurzname,')') as anzeige
             from b_bsg as b
             join b_regionalverband as v on b.Verband = v.id
@@ -61,6 +63,57 @@ $anzuzeigendeDaten[] = array(
         "
     )
 );
+
+/*
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_individuelle_berechtigungen",
+    "auswahltext" => "Meine Daten zur Bearbeitung freigeben.",
+    "hinweis" => "Bearbeiter der von dir angegebenen Betriebssportgruppen dürfen deine Daten einsehen und diese verarbeiten. Dies ist notwendig, um dich in einer oder mehreren BSG zu verwalten. Solltest du eine Berechtigung löschen, kann die betreffende BSG deine Daten trotzdem noch so lange sehen wie du dort Mitglied bist ('berechtigtes Interesse' nach DSGVO).  Um ein neues Recht zu vergeben, klicke auf <b>'Einf&uuml;gen'</b>.",
+    "writeaccess" => true,
+    "import" => true,
+    "query" => "SELECT ib.id as id, m.id as Mitglied, ib.BSG as BSG
+                from b_individuelle_berechtigungen as ib
+                join b_mitglieder as m on ib.Mitglied=m.id
+                join b_bsg as b on ib.BSG = b.id 
+                WHERE m.y_id = $uid 
+                ORDER BY b.BSG asc;
+    ",
+    "referenzqueries" => array(
+        "Mitglied" => "SELECT id, concat(Vorname,' ',Nachname) as anzeige
+                        from b_mitglieder WHERE y_id = $uid;
+        ",
+        "BSG" => "SELECT b.id, concat(b.BSG, ' (',v.Kurzname,')') as anzeige
+            from b_bsg as b
+            join b_regionalverband as v on b.Verband = v.id
+            ORDER BY anzeige asc;
+        "
+    )
+);
+*/
+/* 22.05.25, Fehler: Es wird kein Mitglied übermittelt
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_individuelle_berechtigungen",
+    "auswahltext" => "Meine Daten zur Bearbeitung freigeben.",
+    "hinweis" => "Bearbeiter der von dir angegebenen Betriebssportgruppen dürfen deine Daten einsehen und diese verarbeiten. Dies ist notwendig, um dich in einer oder mehreren BSG zu verwalten. Solltest du eine Berechtigung löschen, kann die betreffende BSG deine Daten trotzdem noch so lange sehen wie du dort Mitglied bist ('berechtigtes Interesse' nach DSGVO).  Um ein neues Recht zu vergeben, klicke auf <b>'Einf&uuml;gen'</b>.",
+    "writeaccess" => true,
+    "import" => true,
+    "query" => "SELECT ib.id as id, concat(m.Vorname, ' ', m.Nachname) as info:Mitglied, ib.BSG as BSG
+                from b_individuelle_berechtigungen as ib
+                join b_mitglieder as m on ib.Mitglied=m.id
+                join b_bsg as b on ib.BSG = b.id 
+                WHERE m.y_id = $uid 
+                ORDER BY b.BSG asc;
+    ",
+    "referenzqueries" => array(
+    
+        "BSG" => "SELECT b.id, concat(b.BSG, ' (',v.Kurzname,')') as anzeige
+            from b_bsg as b
+            join b_regionalverband as v on b.Verband = v.id
+            ORDER BY anzeige asc;
+        "
+    )
+);
+*/
 
 #Wechselantrag (Wenn keiner exisatiert, wird einer auf die aktuelle BSG erstellt)
 $anzuzeigendeDaten[] = array(

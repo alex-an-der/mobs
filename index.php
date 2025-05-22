@@ -858,49 +858,42 @@ $tabelle_upper = strtoupper($tabelle)
                 alert("Insert form not found");
                 return;
             }
-            
             form.innerHTML = '';
 
-            // Determine the order of fields by looking at the table headers
-            // which are derived from the query in config.php
+            // Hole die Reihenfolge und Namen aus den Table-Headers
             let headers = [];
             const tableHeaders = document.querySelectorAll('table thead th[data-field]');
-            
             if (tableHeaders && tableHeaders.length > 0) {
                 headers = Array.from(tableHeaders)
                     .map(th => th.getAttribute('data-field'))
-                    .filter(field => field && field !== 'id' && !field.startsWith('info:'));  // Exclude 'id' and 'info:' fields
+                    .filter(field => field && field !== 'id');
             } else {
-                // If no table headers exist (empty result), use column definitions
                 headers = columns.map(col => col.Field || col.field || col.name || col.Name)
-                    .filter(field => field && field !== 'id' && !field.startsWith('info:'));  // Exclude 'id' and 'info:' fields
+                    .filter(field => field && field !== 'id');
             }
-
             if (headers.length === 0) {
                 alert("Fehler: Keine Feldnamen gefunden.");
                 return;
             }
 
-            // Create a map for easier lookup of column data types
-            const columnMap = new Map();
-            columns.forEach(col => {
-                const fieldName = col.Field || col.field || col.name || col.Name;
-                if (fieldName) {
-                    columnMap.set(fieldName, col);
-                }
-            });
-
-            // Process fields in the order they appear in the headers (from query)
             headers.forEach(fieldName => {
                 const div = document.createElement('div');
                 div.className = 'form-group mb-3';
-                
+
+                // Info-Label-Handling
+                let isInfo = false;
+                let displayFieldName = fieldName; 
+                if (fieldName.startsWith('info:')) {
+                    isInfo = true;
+                    displayFieldName = fieldName.substring(5);
+                }
+
                 const label = document.createElement('label');
                 label.className = 'form-label';
-                label.textContent = fieldName;
+                label.textContent = displayFieldName;
                 div.appendChild(label);
 
-                // Check if this is a foreign key field defined in referenzqueries
+                // FK-Select
                 if (foreignKeys && foreignKeys[fieldName]) {
                     // Create select dropdown for foreign key fields
                     const select = document.createElement('select');
@@ -936,31 +929,41 @@ $tabelle_upper = strtoupper($tabelle)
 
                     div.appendChild(select);
                 } else {
-                    // Create input field for regular columns
+                    // Input für normale Felder und info:-Felder
                     const input = document.createElement('input');
                     input.className = 'form-control';
                     input.name = fieldName;
                     input.placeholder = "<?=NULL_WERT?>";
-                    
-                    // Set appropriate input type based on column data type
-                    const column = columnMap.get(fieldName);
-                    if (column) {
-                        const columnType = column.Type || column.type || 'text';
-                        
-                        if (columnType.includes('date')) {
-                            input.type = columnType.includes('datetime') ? 'datetime-local' : 'date';
-                        } else if (columnType.includes('int') || columnType.includes('decimal') || columnType.includes('float') || columnType.includes('double')) {
-                            input.type = 'number';
-                            if (columnType.includes('decimal') || columnType.includes('float') || columnType.includes('double')) {
-                                input.step = '0.01'; // Allow decimal values
+
+                    // Nur für Felder ohne info:-Prefix Typ bestimmen
+                    if (!isInfo) {
+                        // Finde passenden Spaltendefinitionseintrag für diesen Header
+                        let column = columns.find(col => {
+                            let colName = col.Field || col.field || col.name || col.Name;
+                            return colName === fieldName;
+                        });
+                        if (column) {
+                            const columnType = column.Type || column.type || 'text';
+                            if (columnType.includes('date')) {
+                                input.type = columnType.includes('datetime') ? 'datetime-local' : 'date';
+                            } else if (columnType.includes('int') || columnType.includes('decimal') || columnType.includes('float') || columnType.includes('double')) {
+                                input.type = 'number';
+                                if (columnType.includes('decimal') || columnType.includes('float') || columnType.includes('double')) {
+                                    input.step = '0.01';
+                                }
+                            } else {
+                                input.type = 'text';
                             }
                         } else {
                             input.type = 'text';
                         }
                     } else {
-                        input.type = 'text'; // Default
+                        // info:-Felder immer als readonly text
+                        input.type = 'text';
+                        input.readOnly = true;
+                        input.style.backgroundColor = "#f5f5f5";
                     }
-                    
+
                     div.appendChild(input);
                 }
 
