@@ -17,6 +17,8 @@ $tabelle = $_POST['tabelle'] ?? '';
 $tabid = $_POST['tabid'] ?? '';
 $exportAll = ($_POST['exportAll'] ?? '1') === '1';
 $ids = $_POST['ids'] ?? '';
+$tableDataJson = $_POST['tableData'] ?? '';
+error_log('Export-IDs (POST): ' . $ids);
 
 if (!$tabelle || !isset($anzuzeigendeDaten[$tabid])) {
     die('Invalid parameters');
@@ -26,118 +28,128 @@ if (!$tabelle || !isset($anzuzeigendeDaten[$tabid])) {
 $displayName = $anzuzeigendeDaten[$tabid]['auswahltext'] ?? $tabelle;
 $filename = str_replace(' ', '_', $displayName);
 
-// Get data
-$query = $anzuzeigendeDaten[$tabid]['query'];
-if (!$exportAll && !empty($ids)) {
-    $idArray = explode(',', $ids);
-    $idList = implode(',', array_map('intval', $idArray));
-    
-    error_log("Original query: $query");
-    error_log("Filtered IDs: $idList");
-    
-    $tableInfo = extractTableInfo($query);
-    $idField = $tableInfo['idField'];
-    error_log("Using ID field: $idField for filtered query");
-
-    // Neue, robustere Logik:
-    $idFilter = "$idField IN ($idList)";
-    $hasWhere = stripos($query, 'WHERE') !== false;
-    $hasGroupBy = stripos($query, 'GROUP BY') !== false;
-    $hasOrderBy = stripos($query, 'ORDER BY') !== false;
-
-    if ($hasWhere) {
-        // Füge AND id IN (...) vor GROUP BY/ORDER BY/Ende ein
-        if ($hasGroupBy) {
-            $query = preg_replace('/(WHERE .+?)(GROUP BY)/is', '$1 AND ' . $idFilter . ' $2', $query, 1);
-        } else if ($hasOrderBy) {
-            $query = preg_replace('/(WHERE .+?)(ORDER BY)/is', '$1 AND ' . $idFilter . ' $2', $query, 1);
-        } else {
-            $query .= ' AND ' . $idFilter;
-        }
-    } else {
-        // Füge WHERE id IN (...) vor GROUP BY/ORDER BY/Ende ein
-        if ($hasGroupBy) {
-            $query = preg_replace('/(GROUP BY)/i', 'WHERE ' . $idFilter . ' $1', $query, 1);
-        } else if ($hasOrderBy) {
-            $query = preg_replace('/(ORDER BY)/i', 'WHERE ' . $idFilter . ' $1', $query, 1);
-        } else {
-            $query .= ' WHERE ' . $idFilter;
-        }
+// --- WYSIWYG Export: Use posted tableData if present ---
+if (!$exportAll && !empty($tableDataJson)) {
+    $data = json_decode($tableDataJson, true);
+    if (!is_array($data) || empty($data)) {
+        die('No data available for export');
     }
-    error_log("Modified filtered query: $query");
-}
-
-// Execute query with error reporting
-try {
-    error_log("Executing query: " . substr($query, 0, 500) . (strlen($query) > 500 ? "..." : ""));
-    $result = $db->query($query);
-    
-    // Log result information for debugging
-    if (isset($result['data'])) {
-        error_log("Query returned " . count($result['data']) . " rows");
-        if (count($result['data']) > 0) {
-            $sample = json_encode(array_slice($result['data'], 0, 1));
-            error_log("Sample data: $sample");
-        }
-    } else {
-        error_log("Query returned no data array");
-        if (isset($result['error'])) {
-            error_log("Database error: " . $result['error']);
-        }
-    }
-} catch (Exception $e) {
-    error_log("Exception in database query: " . $e->getMessage());
-    if ($format === 'maillist') {
-        $result = ['data' => []];
-    } else {
-        die('Database error: ' . $e->getMessage());
-    }
-}
-
-// Verbesserte Fehlerbehandlung
-if (!isset($result['data']) || !is_array($result['data']) || empty($result['data'])) {
-    if ($format === 'maillist') {
-        // Für Maillist-Format zeige leere Liste an, anstatt zu sterben
-        $data = [];
-    } else {
-        die('No data available');
-    }
+    // Skip SQL query, go directly to export
+    // (Foreign key display values are already in the table, so no need to process again)
 } else {
-    $data = $result['data'];
-}
+    // Get data
+    $query = $anzuzeigendeDaten[$tabid]['query'];
+    if (!$exportAll && !empty($ids)) {
+        $idArray = explode(',', $ids);
+        $idList = implode(',', array_map('intval', $idArray));
+        
+        error_log("Original query: $query");
+        error_log("Filtered IDs: $idList");
+        
+        $tableInfo = extractTableInfo($query);
+        $idField = $tableInfo['idField'];
+        error_log("Using ID field: $idField for filtered query");
 
-// Process foreign key references
-$FKdata = array();
-if (isset($anzuzeigendeDaten[$tabid]['referenzqueries'])) {
-    foreach ($anzuzeigendeDaten[$tabid]['referenzqueries'] as $SRC_ID => $query) {
+        // Neue, robustere Logik:
+        $idFilter = "$idField IN ($idList)";
+        $hasWhere = stripos($query, 'WHERE') !== false;
+        $hasGroupBy = stripos($query, 'GROUP BY') !== false;
+        $hasOrderBy = stripos($query, 'ORDER BY') !== false;
+
+        if ($hasWhere) {
+            // Füge AND id IN (...) vor GROUP BY/ORDER BY/Ende ein
+            if ($hasGroupBy) {
+                $query = preg_replace('/(WHERE .+?)(GROUP BY)/is', '$1 AND ' . $idFilter . ' $2', $query, 1);
+            } else if ($hasOrderBy) {
+                $query = preg_replace('/(WHERE .+?)(ORDER BY)/is', '$1 AND ' . $idFilter . ' $2', $query, 1);
+            } else {
+                $query .= ' AND ' . $idFilter;
+            }
+        } else {
+            // Füge WHERE id IN (...) vor GROUP BY/ORDER BY/Ende ein
+            if ($hasGroupBy) {
+                $query = preg_replace('/(GROUP BY)/i', 'WHERE ' . $idFilter . ' $1', $query, 1);
+            } else if ($hasOrderBy) {
+                $query = preg_replace('/(ORDER BY)/i', 'WHERE ' . $idFilter . ' $1', $query, 1);
+            } else {
+                $query .= ' WHERE ' . $idFilter;
+            }
+        }
+        error_log("Modified filtered query: $query");
+    }
+
+    // Execute query with error reporting
+    try {
+        error_log("Executing query: " . substr($query, 0, 500) . (strlen($query) > 500 ? "..." : ""));
         $result = $db->query($query);
+        
+        // Log result information for debugging
         if (isset($result['data'])) {
-            $FKdata[$SRC_ID] = array_column($result['data'], 'anzeige', 'id');
+            error_log("Query returned " . count($result['data']) . " rows");
+            if (count($result['data']) > 0) {
+                $sample = json_encode(array_slice($result['data'], 0, 1));
+                error_log("Sample data: $sample");
+            }
+        } else {
+            error_log("Query returned no data array");
+            if (isset($result['error'])) {
+                error_log("Database error: " . $result['error']);
+            }
+        }
+    } catch (Exception $e) {
+        error_log("Exception in database query: " . $e->getMessage());
+        if ($format === 'maillist') {
+            $result = ['data' => []];
+        } else {
+            die('Database error: ' . $e->getMessage());
         }
     }
-}
 
-// Replace foreign keys with their display values
-if (!empty($data)) {
-    foreach ($data as &$row) {
-        foreach ($row as $key => &$value) {
-            if (isset($FKdata[$key]) && isset($FKdata[$key][$value])) {
-                $value = $FKdata[$key][$value];
+    // Verbesserte Fehlerbehandlung
+    if (!isset($result['data']) || !is_array($result['data']) || empty($result['data'])) {
+        if ($format === 'maillist') {
+            // Für Maillist-Format zeige leere Liste an, anstatt zu sterben
+            $data = [];
+        } else {
+            die('No data available');
+        }
+    } else {
+        $data = $result['data'];
+    }
+
+    // Process foreign key references
+    $FKdata = array();
+    if (isset($anzuzeigendeDaten[$tabid]['referenzqueries'])) {
+        foreach ($anzuzeigendeDaten[$tabid]['referenzqueries'] as $SRC_ID => $query) {
+            $result = $db->query($query);
+            if (isset($result['data'])) {
+                $FKdata[$SRC_ID] = array_column($result['data'], 'anzeige', 'id');
             }
         }
     }
-}
 
-// Sortierparameter aus Session holen (müssen vorher in index.php gespeichert werden)
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-$sortColumn = $_SESSION['sortColumn'] ?? null;
-$sortOrder = $_SESSION['sortOrder'] ?? 'asc';
+    // Replace foreign keys with their display values
+    if (!empty($data)) {
+        foreach ($data as &$row) {
+            foreach ($row as $key => &$value) {
+                if (isset($FKdata[$key]) && isset($FKdata[$key][$value])) {
+                    $value = $FKdata[$key][$value];
+                }
+            }
+        }
+    }
 
-// Daten sortieren
-if (!empty($data)) {
-    $data = sortData($data, $sortColumn, $sortOrder);
+    // Sortierparameter aus Session holen (müssen vorher in index.php gespeichert werden)
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    $sortColumn = $_SESSION['sortColumn'] ?? null;
+    $sortOrder = $_SESSION['sortOrder'] ?? 'asc';
+
+    // Daten sortieren
+    if (!empty($data)) {
+        $data = sortData($data, $sortColumn, $sortOrder);
+    }
 }
 
 // Export based on format
@@ -715,26 +727,28 @@ function exportMailList($data, $tabelle) {
 // Neue Funktion zur präzisen Extraktion der Tabelleninformation
 function extractTableInfo($query) {
     $result = ['table' => '', 'alias' => '', 'idField' => 'id'];
-    
-    // Überprüfe, ob ein direkter Tabellenzugriff erfolgt
+
+    // Prüfe auf FROM ... AS ...
     if (preg_match('/FROM\s+(\w+)(?:\s+AS)?(?:\s+(\w+))?/i', $query, $matches)) {
         $result['table'] = $matches[1];
         $result['alias'] = isset($matches[2]) ? $matches[2] : '';
     }
-    
-    // Versuche den Primärschlüssel zu bestimmen
-    if (preg_match('/SELECT.*?(\w+)\.id.*?FROM/is', $query, $matches)) {
-        // Wenn ein Alias explizit für id verwendet wird
+
+    // Prüfe auf SELECT ... <etwas>.id as id ...
+    if (preg_match('/SELECT.*?(\w+)\.id\s+as\s+id/i', $query, $matches)) {
+        // z.B. mis.id as id
         $result['idField'] = $matches[1] . '.id';
-    } else if ($result['alias']) {
-        // Wenn ein Tabellen-Alias existiert, verwende ihn
+    } elseif (preg_match('/SELECT.*?(\w+)\.id\s+as\s+([\w:]+)/i', $query, $matches)) {
+        // z.B. mis.id as irgendwas
+        $result['idField'] = $matches[1] . '.id';
+    } elseif (preg_match('/SELECT.*?(\w+)\.id/i', $query, $matches)) {
+        $result['idField'] = $matches[1] . '.id';
+    } elseif ($result['alias']) {
         $result['idField'] = $result['alias'] . '.id';
-    } else if ($result['table']) {
-        // Wenn eine Tabelle ohne Alias gefunden wurde
+    } elseif ($result['table']) {
         $result['idField'] = $result['table'] . '.id';
     }
-    
-    // Fallback: Wenn nichts gefunden wird, verwende einfach 'id'
+
     return $result;
 }
 

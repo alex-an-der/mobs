@@ -1217,10 +1217,24 @@ $tabelle_upper = strtoupper($tabelle);
             }
 
             const visibleRows = [];
+            const visibleData = [];
             if (!exportAll) {
-                document.querySelectorAll('table tbody tr').forEach(row => {
+                // Collect visible row IDs and all cell data
+                const table = document.querySelector('table');
+                const headers = Array.from(table.querySelectorAll('thead th[data-field]')).map(th => th.getAttribute('data-field'));
+                table.querySelectorAll('tbody tr').forEach(row => {
                     if (row.style.display !== 'none') {
                         visibleRows.push(row.getAttribute('data-id'));
+                        // Collect cell data for this row
+                        const rowData = {};
+                        rowData['id'] = row.getAttribute('data-id');
+                        let cellIdx = 0;
+                        row.querySelectorAll('td[data-field]').forEach(cell => {
+                            const key = headers[cellIdx];
+                            rowData[key] = cell.innerText.trim();
+                            cellIdx++;
+                        });
+                        visibleData.push(rowData);
                     }
                 });
             }
@@ -1247,6 +1261,15 @@ $tabelle_upper = strtoupper($tabelle);
                     input.value = params[key];
                     form.appendChild(input);
                 }
+            }
+
+            // Add tableData as JSON if exporting filtered/visible rows
+            if (!exportAll && visibleData.length > 0) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'tableData';
+                input.value = JSON.stringify(visibleData);
+                form.appendChild(input);
             }
 
             document.body.appendChild(form);
