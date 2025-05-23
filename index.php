@@ -243,6 +243,29 @@ $tabelle_upper = strtoupper($tabelle);
     padding-right: 0.5em;
   }
 }
+
+.btn-group-container .btn, .btn-group-container .btn-group .btn, .btn-group-container .btn-group .dropdown-toggle {
+  height: 48px;
+  min-height: 48px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1.2;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  border-radius: 0.375rem;
+  margin: 0;
+}
+.btn-group-container .btn-group {
+  height: 48px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+}
     </style>
 
     <script>
