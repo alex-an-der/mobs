@@ -186,6 +186,63 @@ $tabelle_upper = strtoupper($tabelle);
             text-align: left; /* Left-aligned text */
             padding: 8px 12px; /* More padding */
         }
+
+        /* Responsive Anpassung für Tabellenauswahl und Buttons */
+@media (max-width: 600px) {
+  .table-select-form {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  .table-select-row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 0.5rem;
+    margin-bottom: 1.2rem;
+  }
+  .table-select-box {
+    flex: 1 1 0%;
+    min-width: 0;
+  }
+  .table-help-btn {
+    flex: 0 0 auto;
+    width: 48px;
+    min-width: 40px;
+    text-align: center;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+}
+@media (min-width: 601px) {
+  .table-select-form {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .table-select-row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 0.5rem;
+    margin-bottom: 0;
+  }
+  .table-select-box {
+    flex: 1 1 0%;
+    min-width: 200px;
+    max-width: 100%;
+  }
+  .table-help-btn {
+    flex: 0 0 auto;
+    width: 48px;
+    min-width: 40px;
+    text-align: center;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+}
     </style>
 
     <script>
@@ -1383,39 +1440,16 @@ function dieWithError($err, $file, $line, $stayAlive = false) {
 }
 
 function renderTableSelectBox($db) {
-    
     global $anzuzeigendeDaten;
     global $selectedTableID;
-    
-    echo '<p><form method="get" class="d-flex align-items-center">';
-    echo '<select id="tableSelectBox" name="tab" class="form-control me-2" onchange="this.form.submit()">';
-
+    echo '<div class="table-select-wrapper mb-3">';
+    echo '<form method="get" class="table-select-form">';
+    // Zeile: Tabellenauswahl und ?-Button
+    echo '<div class="table-select-row">';
+    echo '<select id="tableSelectBox" name="tab" class="form-control table-select-box" onchange="this.form.submit()">';
     if(!isset($anzuzeigendeDaten[$selectedTableID])){
         echo '<option value="">-- Tabelle wählen --</option>';
     }
-    /*$maxLaenge = 0;
-    $trennerindizies = array();
-    $options = array();
-    foreach ($anzuzeigendeDaten as $index => $table) {
-        if(isset($table['trenner'])){
-            $trennerindizies[] = count($options);
-            $options[] = $table['trenner'];
-        }else{
-            $tableName = htmlspecialchars($table['tabellenname']);
-            $tableComment = htmlspecialchars($table['auswahltext']);
-            if(strlen($tableComment) > $maxLaenge) $maxLaenge = strlen($tableComment);
-            $displayText = !empty($tableComment) ? "$tableComment" : $tableName;
-            $selected = ($index == $selectedTableID) ? 'selected' : '';
-            $options[] = '<option value="' . $index . '" ' . $selected . '>' . $displayText . '</option>';
-        }
-    }
-
-    foreach ($trennerindizies als $trennerindex) {
-        $firstChar = substr($options[$trennerindex], 0, 1);
-        $displayText = str_pad('', $maxLaenge, $firstChar);
-        $options[$trennerindizies] = '<option disabled>' . $displayText . '</option>';
-    }*/
-
     $trennerindizies = array();
     $options = array();
     foreach ($anzuzeigendeDaten as $index => $table) {
@@ -1430,20 +1464,16 @@ function renderTableSelectBox($db) {
             $options[] = '<option value="' . $index . '" ' . $selected . '>' . $displayText . '</option>';
         }
     }
-    
-    // Vereinfachte Trennstriche - immer 5 Striche
     foreach ($trennerindizies as $trennerindex) {
         $options[$trennerindex] = '<option disabled>-----</option>';
     }
-
     echo implode("\n", $options);
     echo '</select>';
-    
-    // Add Impressum button right next to the dropdown in the same form
-    echo '<a href="./user_code/impressum.php" target="_blank" class="btn btn-secondary ms-2" style="white-space: nowrap;">Impressum und Datenschutzerklärung</a>';
-    echo '<a href="doc/hilfe.html" target="_blank" class="btn btn-secondary ms-2">?</a>';
-    
-    echo '</form></p>';
+    // ?-Button direkt daneben
+    echo '<a href="doc/hilfe.html" target="_blank" class="btn btn-secondary table-help-btn ms-2">?</a>';
+    echo '</div>';
+    echo '</form>';
+    echo '</div>';
 }
 
 function hatUserBerechtigungen(){
@@ -1693,9 +1723,11 @@ function renderTableRows($data, $readwrite, $deleteAnyway, $tabelle, $foreignKey
                 ?>
                 </tbody>
             </table>
-        </div>  
+        </div>  <!-- Ende flex-container container table-container -->
 
-    </div>
+    <footer class="text-center mt-5 mb-3">
+        <a href="./user_code/impressum.php" target="_blank" style="color: #888; font-size: 0.95em; text-decoration: underline dotted;">Impressum und Datenschutzerklärung</a>
+    </footer>
 
     <!-- Insert Modal -->
     <div class="modal fade" id="insertModal" tabindex="-1" aria-labelledby="insertModalLabel" aria-hidden="true">
