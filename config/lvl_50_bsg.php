@@ -247,7 +247,7 @@ $anzuzeigendeDaten[] = array(
         "seit"                      => "150"
     )
 );
-/*
+
 # Mitgliederkonten zusammenführen
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
@@ -292,7 +292,7 @@ $anzuzeigendeDaten[] = array(
         "info:Geburtsdatum"         => "150"
     )
 );
-*/
+
 
 ######################################################################################################
 
