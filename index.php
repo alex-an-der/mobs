@@ -44,6 +44,13 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
     }else{
         $readwrite = 0;
     }
+    
+    // Importrechte?
+    if(isset($anzuzeigendeDaten[$selectedTableID]['import'])){
+        $importErlaubt = $anzuzeigendeDaten[$selectedTableID]['import'];
+    }else{
+        $importErlaubt = 0;
+    }
 
     // Ausnahmsweise Delete-Rechte?
     if(isset($anzuzeigendeDaten[$selectedTableID]['deleteanyway'])){
