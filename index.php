@@ -153,12 +153,12 @@ $tabelle_upper = strtoupper($tabelle);
         }
         .btn-group-container {
             display: flex;
-            justify-content: space-between;
             flex-wrap: wrap;
+            gap: 0.75rem; /* Abstand zwischen den Buttons */
+            justify-content: flex-start;
         }
-        .btn-group-container .btn {
-            flex: 1;
-            margin: 5px;
+        .btn-group-container .btn, .btn-group-container .btn-group, .btn-group-container .btn-group .btn, .btn-group-container .btn-group .dropdown-toggle {
+            margin: 0;
         }
         .checkbox-container {
             display: flex;
