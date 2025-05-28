@@ -3,11 +3,15 @@ Das aktuelle Problem:
 "Anmelden in Sparten" sehe ich nicht die manuell angelegten Mitglieder, da diese nicht durch den check "WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 " kommen.
 
 Grundsätrzlich klären und dokumentieren: Was ist der Unterschied individuell und BSG? Kann man das nicht über BSG-Check machen?
-Hypothese: 
+Beide checken die BSG-Berechtigungen. Der Unterschied ist lediglich der Eingangsparameter:
+FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 => Darf $uid die BSG sehen?
+FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 => Darf $uid diese m.id sehen?
+Den Rest macht dann eben die SQL-Function
+
+In der DB ist das anders dargestellt: (daher ggf. etwas verwirrend, aber das hat 2 verschiedene POV)
 RV und BSG-Rechte: Einem Nutzer werden Rechte gewährt (Alex -> Nutzis := Alex darf alle Nutzis sehen)
 indiv. Rechte:     Ein Nutzer gewährt einer BSG die Rechte (Martin -> Nutzis := Die Nutzis dürfen die Daten von Martin sehen)
-Beides in Kombination: Alex darf die Daten von Martin sehen.
-
+Beides in Kombination: Alex darf die Daten von Martin sehen und das funktioniert immer über berechtigte_elemente, egal mit welchem Eingangsparameter.
 
 
 

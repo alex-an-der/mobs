@@ -189,7 +189,7 @@ $anzuzeigendeDaten[] = array(
 
 
 
-
+// WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
     "auswahltext" => "$bericht Mitglieder und ihre Sparten",
@@ -205,7 +205,7 @@ $anzuzeigendeDaten[] = array(
                 join b_bsg as b on mis.BSG = b.id
                 join b_regionalverband as v on b.Verband = v.id
                 join b_sparte as s on mis.Sparte = s.id
-                join b_bsg as stamm on m.BSG = stamm.id
+                join b_bsg as stamm on m.BSG = stamm.id 
                 WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0
     ",
     "spaltenbreiten" => array(
