@@ -96,6 +96,8 @@ else                                         $countRechte = 0;
 if($countRechte > 0){
     $anzuzeigendeDaten[] = array("trenner" => "-");
     require_once(__DIR__ . "/lvl_50_bsg.php");
+    $anzuzeigendeDaten[] = array("trenner" => "-");
+    require_once(__DIR__ . "/lvl_51_bsg_import.php");
 }
 
 ########################################################################################################

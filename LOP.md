@@ -3,7 +3,10 @@ Das aktuelle Problem:
 "Anmelden in Sparten" sehe ich nicht die manuell angelegten Mitglieder, da diese nicht durch den check "WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 " kommen.
 
 Grundsätrzlich klären und dokumentieren: Was ist der Unterschied individuell und BSG? Kann man das nicht über BSG-Check machen?
-
+Hypothese: 
+RV und BSG-Rechte: Einem Nutzer werden Rechte gewährt (Alex -> Nutzis := Alex darf alle Nutzis sehen)
+indiv. Rechte:     Ein Nutzer gewährt einer BSG die Rechte (Martin -> Nutzis := Die Nutzis dürfen die Daten von Martin sehen)
+Beides in Kombination: Alex darf die Daten von Martin sehen.
 
 
 
