@@ -354,36 +354,6 @@ END;
 DELIMITER ;
 
 -- -----------------------------------------------------------------------------------
-DROP TRIGGER IF EXISTS tr_set_seit_on_b_mitglieder_in_sparten_insert;
-DROP TRIGGER IF EXISTS tr_set_seit_on_b_mitglieder_in_sparten_update;
-
-
--- Wenn ein Mitglied in eine Sparte eingefügt wird, setze das 'seit'-Datum auf jetzt
-DELIMITER //
-CREATE TRIGGER tr_set_seit_on_b_mitglieder_in_sparten_insert
-BEFORE INSERT ON b_mitglieder_in_sparten
-FOR EACH ROW
-BEGIN
-    SET NEW.seit = NOW();
-END;
-//
-DELIMITER ;
-
-
--- Wenn sich Mitglied oder Sparte in b_mitglieder_in_sparten ändert, setze 'seit' auf jetzt
-DELIMITER //
-CREATE TRIGGER tr_set_seit_on_b_mitglieder_in_sparten_update
-BEFORE UPDATE ON b_mitglieder_in_sparten
-FOR EACH ROW
-BEGIN
-    IF NEW.Mitglied <> OLD.Mitglied OR NEW.Sparte <> OLD.Sparte THEN
-        SET NEW.seit = NOW();
-    END IF;
-END;
-//
-DELIMITER ;
-
--- -----------------------------------------------------------------------------------
 
 DROP FUNCTION IF EXISTS berechtigte_elemente_sub1;
 DELIMITER //
