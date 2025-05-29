@@ -105,7 +105,7 @@ $anzuzeigendeDaten[] = array(
                     (FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 or 
                     ( BSG IS NULL AND FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0))
                 and m.BSG IS NOT NULL
-                order by BSG, Vorname desc;
+                order by BSG, Vorname, Nachname;
     ",
     "referenzqueries" => array(
         "BSG" => "SELECT b.id, b.BSG as anzeige
@@ -185,8 +185,6 @@ $anzuzeigendeDaten[] = array(
         "info:seit"                 => "100"
     )
 );
-
-
 
 
 // WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0
