@@ -72,12 +72,17 @@ switch($action) {
     
                 $pdo->commit();
 
-                // 3. Überprüfe, ob die E-Mail-Adresse im aktuellen Datensatz leer ist
-                $stmt = $pdo->prepare("SELECT Mail FROM b_mitglieder WHERE id = :id");
-                $stmt->execute([':id' => $id]);
-                $currentEmail = $stmt->fetchColumn();
+                // Einstellungen des Mitglieds bei der Registrierung überschreiben die Einstellungen des BGS-Verwalters
+                
 
-                if (empty($currentEmail)) {
+                // 3. Überprüfe, ob die E-Mail-Adresse im aktuellen Datensatz leer ist
+                // 3.v2/KORREKTUR: Nimm IMMER die neue Mailadresse
+                
+                // $stmt = $pdo->prepare("SELECT Mail FROM b_mitglieder WHERE id = :id");
+                // $stmt->execute([':id' => $id]);
+                // $currentEmail = $stmt->fetchColumn();
+
+                // if (empty($currentEmail)) {
                     // Hole die E-Mail-Adresse aus der Tabelle y_user
                     $stmt = $pdo->prepare("SELECT mail FROM y_user WHERE id = :yid");
                     $stmt->execute([':yid' => $value]);
@@ -85,10 +90,10 @@ switch($action) {
 
                     if (!empty($newEmail)) {
                         // Aktualisiere die E-Mail-Adresse im aktuellen Datensatz
-                        $stmt = $pdo->prepare("UPDATE b_mitglieder SET email = :email WHERE id = :id");
+                        $stmt = $pdo->prepare("UPDATE b_mitglieder SET Mail = :email WHERE id = :id");
                         $stmt->execute([':email' => $newEmail, ':id' => $id]);
                     }
-                }
+                // }
     
                 echo json_encode(['status' => 'success']);
             } catch (Exception $e) {

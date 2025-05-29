@@ -278,6 +278,29 @@ END;
 //
 DELIMITER ;
 -- -----------------------------------------------------------------------------------
+DROP TRIGGER IF EXISTS tr_manuelles_mitglied_anlegen;
+-- Mitglied ohne y_id anlegen
+DELIMITER //
+CREATE TRIGGER tr_manuelles_mitglied_anlegen
+AFTER INSERT ON b_mitglieder
+FOR EACH ROW
+BEGIN
+    IF NEW.y_id IS NULL AND NEW.BSG IS NOT NULL THEN
+            INSERT INTO b_individuelle_berechtigungen (Mitglied, BSG)
+            VALUES (NEW.id, NEW.BSG);
+
+        -- Zähle die Mitglieder mit Stamm-BSG
+        INSERT INTO `adm_usercount` (timestamp, Anzahl)
+        SELECT NOW(), COUNT(*) FROM b_mitglieder WHERE BSG IS NOT NULL;
+
+    END IF;
+END;
+//
+DELIMITER ;
+
+
+
+-- -----------------------------------------------------------------------------------
 
 DROP TRIGGER IF EXISTS before_delete_y_user;
 DELIMITER //
