@@ -279,16 +279,14 @@ $tabelle_upper = strtoupper($tabelle);
 
 
         function updateField(tabelle, id, field, value, datatype, ajaxFile) { 
-
+            
             let isUserAjax = 0;
             if (event && event.target && event.target.hasAttribute('data-userajax')) {
                 isUserAjax = event.target.getAttribute('data-userajax');
             }           
             let tab = <?=$selectedTableID?>;
-            console.log(isUserAjax);
-            console.log(tab);
-
-            if (isUserAjax) {
+            
+            if (isUserAjax>0) {console.log("A");
                 ajaxFile = "./user_code/" + ajaxFile;
             }else{
                 ajaxFile = "ajax.php";
@@ -1029,12 +1027,7 @@ $tabelle_upper = strtoupper($tabelle);
                     if (validOptions.length === 1) {
                         validOptions[0].selected = true;
                     }
-                    // Remove 'info:' prefix for updateField handler if info field
-                    // Nur in der Tabelle sinnvoll, NICHT im Modal!
-                    // select.addEventListener('change', function() {
-                    //     const fieldForUpdate = isInfo ? fieldName.substring(5) : fieldName;
-                    //     updateField('<?=$tabelle?>', this.closest('tr').getAttribute('data-id'), fieldForUpdate, this.value, 0);
-                    // });
+                    
                     div.appendChild(select); 
                 } else { // else = no Foreign Key
                     // Input für normale Felder und info:-Felder
@@ -1081,12 +1074,7 @@ $tabelle_upper = strtoupper($tabelle);
                         input.readOnly = true;
                         input.style.backgroundColor = "#f5f5f5";
                     }
-                    // Remove 'info:' prefix for updateField handler if info field
-                    // Nur in der Tabelle sinnvoll, NICHT im Modal!
-                    // input.addEventListener('change', function() {
-                    //     const fieldForUpdate = isInfo ? fieldName.substring(5) : fieldName;
-                    //     updateField('<?=$tabelle?>', this.closest('tr').getAttribute('data-id'), fieldForUpdate, this.value, input.getAttribute('data-type'));
-                    // });
+
                     div.appendChild(input);
                 }
 
@@ -1640,7 +1628,6 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                     }
 
                     if ($readwrite || $deleteAnyway) {
-                        //echo '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'" . $row['id'] . "\', \'" . $key . "\', this.value, 0)">';
                         echo '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0)">';
                         echo '<option value="NULL"' . (empty($value) ? ' selected' : '') . '>'.NULL_WERT.'</option>';
                         foreach ($foreignKeys[$key] as $fk) {
@@ -1667,7 +1654,6 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                             }
                         }
                         $updateKey = $isInfoColumn ? substr($key, 5) : $key;
-                        // echo '<input oncontextmenu="filter_that(this, \'input\');" data-type="' . htmlspecialchars((string)$columnType) . '" data-fkIDkey="' . htmlspecialchars((string)$data_fk_ID_key, ENT_QUOTES) . '" data-fkIDvalue="' . htmlspecialchars((string)$data_fk_ID_value, ENT_QUOTES) . '" data-userajax="' . htmlspecialchars($isAjaxColumn ? '1' : '0', ENT_QUOTES) . '" type="' . $inputType . '" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" value="' . htmlspecialchars((string)$value, ENT_QUOTES) . '" onchange="updateField(\'' . $tabelle . '\', \'" . $row['id'] . "\', \'" . $key . "\', this.value, \'" . htmlspecialchars((string)$columnType, ENT_QUOTES) . "\')" onfocus="clearCellColor(this)">';
                         echo '<input oncontextmenu="filter_that(this, \'input\');" data-type="' . htmlspecialchars((string)$columnType) . '" data-fkIDkey="' . htmlspecialchars((string)$data_fk_ID_key, ENT_QUOTES) . '" data-fkIDvalue="' . htmlspecialchars((string)$data_fk_ID_value, ENT_QUOTES) . '" data-userajax="' . htmlspecialchars($isAjaxColumn ? '1' : '0', ENT_QUOTES) . '" type="' . $inputType . '" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" value="' . htmlspecialchars((string)$value, ENT_QUOTES) . '" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, \'' . htmlspecialchars((string)$columnType, ENT_QUOTES) . '\')" onfocus="clearCellColor(this)">';
                     } else {
                         // Spezialbehandlung für Info-Spalten: Wenn leer, aber Plain-Feld vorhanden, dieses anzeigen
