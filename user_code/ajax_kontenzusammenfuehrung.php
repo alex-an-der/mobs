@@ -154,7 +154,7 @@ switch($action) {
 
                 $msg = "Die Datensätze wurden erfolgreich zusammengelegt.";
                 if ($changesText) {
-                    $msg .= " Folgende Felder wurden auf die Daten der Registrierung gesetzt:\n\n" . $changesText . "\nDanke";
+                    $msg .= " Folgende Felder wurden auf die Daten der Registrierung gesetzt:\n\n" . $changesText;
                 } else {
                     $msg .= " Es wurden keine Felder geändert.";
                 }

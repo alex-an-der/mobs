@@ -326,6 +326,10 @@ $tabelle_upper = strtoupper($tabelle);
                     try {
                         const response = JSON.parse(xhr.responseText);
                         if (response.status === "success") {
+                            // Show alert if merge/changes occurred (Kontenzusammenführung)
+                            if (response.success_alert === 1 && response.message) {
+                                alert(response.message);
+                            }
                             checkRow(tabelle, id, field, value);
                         } else {
                             markCellError(id, field);
