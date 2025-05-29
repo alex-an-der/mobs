@@ -185,6 +185,9 @@ switch ($format) {
     case 'maillist':
         exportMailList($data, $tabelle);
         break;
+    case 'markdown':
+        exportMarkdown($data, $tabelle);
+        break;
     default:
         die('Invalid format');
 }
@@ -816,43 +819,37 @@ function exportMailList($data, $tabelle) {
     exit();
 }
 
-// Neue Funktion zur präzisen Extraktion der Tabelleninformation
-function extractTableInfo($query) {
-    $result = ['table' => '', 'alias' => '', 'idField' => 'id'];
+// Neue Funktion für den Markdown-Export
+function exportMarkdown($data, $tabelle) {
+    global $filename;
+    ob_clean();
+    header('Content-Type: text/markdown; charset=utf-8');
+    header('Content-Disposition: attachment; filename=' . $filename . '.md');
 
-    // Prüfe auf FROM ... AS ...
-    if (preg_match('/FROM\s+(\w+)(?:\s+AS)?(?:\s+(\w+))?/i', $query, $matches)) {
-        $result['table'] = $matches[1];
-        $result['alias'] = isset($matches[2]) ? $matches[2] : '';
+    if (empty($data) || !is_array($data)) {
+        echo "Keine Daten zum Export vorhanden.";
+        return;
     }
 
-    // Prüfe auf SELECT ... <etwas>.id as id ...
-    if (preg_match('/SELECT.*?(\w+)\.id\s+as\s+id/i', $query, $matches)) {
-        // z.B. mis.id as id
-        $result['idField'] = $matches[1] . '.id';
-    } elseif (preg_match('/SELECT.*?(\w+)\.id\s+as\s+([\w:]+)/i', $query, $matches)) {
-        // z.B. mis.id as irgendwas
-        $result['idField'] = $matches[1] . '.id';
-    } elseif (preg_match('/SELECT.*?(\w+)\.id/i', $query, $matches)) {
-        $result['idField'] = $matches[1] . '.id';
-    } elseif ($result['alias']) {
-        $result['idField'] = $result['alias'] . '.id';
-    } elseif ($result['table']) {
-        $result['idField'] = $result['table'] . '.id';
-    }
+    // Tabellenkopf
+    $headers = array_keys($data[0]);
+    $visibleHeaders = array_filter($headers, function($header) {
+        return strcasecmp($header, 'id') !== 0;
+    });
 
-    return $result;
-}
+    // Markdown-Header
+    echo '| ' . implode(' | ', array_map('htmlspecialchars', $visibleHeaders)) . " |\n";
+    echo '| ' . implode(' | ', array_fill(0, count($visibleHeaders), '---')) . " |\n";
 
-// Hilfsfunktion zur Überprüfung einer Spalte auf E-Mail-Adressen
-function columnContainsEmails($data, $header) {
+    // Datenzeilen
     foreach ($data as $row) {
-        $value = isset($row[$header]) && $row[$header] !== null ? (string)$row[$header] : '';
-        $value = trim($value);
-        
-        if (!empty($value) && filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            return true;
+        $rowValues = [];
+        foreach ($visibleHeaders as $header) {
+            $value = isset($row[$header]) ? $row[$header] : '';
+            // Zeilenumbrüche und Pipes maskieren
+            $value = str_replace(["\n", "|"], ["<br>", "\\|"], $value);
+            $rowValues[] = htmlspecialchars($value);
         }
+        echo '| ' . implode(' | ', $rowValues) . " |\n";
     }
-    return false;
 }
