@@ -2,6 +2,11 @@
 require_once(__DIR__ . "/user_includes/all.head.php");
 require_once(__DIR__ . "/user_includes/index.head.php");
 require_once(__DIR__ . "/inc/include.php");
+
+// Sicherstellen, dass die MySQL-Verbindung auf utf8mb4 steht (für korrekte Anzeige und Speicherung von Umlauten, Akzenten etc.)
+if (isset($db) && method_exists($db, 'query')) {
+    $db->query("SET NAMES 'utf8mb4'");
+}
 ?>
 <!DOCTYPE html>
 <html lang="de">
