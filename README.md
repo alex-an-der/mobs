@@ -163,3 +163,4 @@ BSG-Vewrbandsansicht, Ansprechpartner verbinden
 Suche nicht nur in den Datenfeldern des Queries, sondern erweitere die Felder auf * (from und joins bleiben natürlich)
 ## ####################################
 
+# Die Kontenzusammenführung geschieht in einer user-ajax-Komponente (user_code)

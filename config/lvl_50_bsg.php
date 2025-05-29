@@ -1,6 +1,19 @@
 <?php
 
 
+/*
+LOP
+
+Karteileichen ausmisten:
+
+SELECT yu.created, yu.lastlogin, yd.mail, b.BSG, yd.gebdatum, concat(yd.vname, ' ',yd.nname) as name
+FROM y_v_userdata as yd
+join y_user as yu on yu.id = yd.userID
+join b_bsg as b on b.id = yd.bsg
+LEFT JOIN b_mitglieder as m ON m.y_id = yd.userID
+WHERE m.id IS NULL;
+
+*/
 # Mitglieder in der BSG
 
 ######################################################################################################
@@ -92,7 +105,7 @@ $anzuzeigendeDaten[] = array(
                     (FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 or 
                     ( BSG IS NULL AND FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0))
                 and m.BSG IS NOT NULL
-                order by BSG, Vorname desc;
+                order by BSG, Vorname, Nachname;
     ",
     "referenzqueries" => array(
         "BSG" => "SELECT b.id, b.BSG as anzeige
@@ -122,13 +135,12 @@ $anzuzeigendeDaten[] = array(
 
 
 # Mitglieder in den Sparten 
+// -- DATE_FORMAT(seit, '%d.%m.%Y') as info:seit
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
-    "auswahltext" => "BSG-Mitglieder in Sparten anmelden",
-    "hinweis" => "Das Feld ´<b>seit</b>´ wird <b>automatisch</b> bei einem neuen Eintrag gesetzt und dient nur zur Information. 
-    Das Feld wird nicht für die Rechnungsstellung genutzt.", 
+    "auswahltext" => "BSG-Mitglieder in Sparten anmelden", 
     "writeaccess" => true,
-    "query" => "SELECT id, Mitglied, BSG, Sparte, DATE_FORMAT(seit, '%d.%m.%Y') as info:seit
+    "query" => "SELECT id, Mitglied, BSG, Sparte, seit 
                     from b_mitglieder_in_sparten as mis
                     WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 and
                     FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0
@@ -169,14 +181,12 @@ $anzuzeigendeDaten[] = array(
         "Mitglied"                  => "400",
         "BSG"                       => "400",
         "Sparte"                    => "300",
-        "info:seit"                 => "100"
+        "seit"                      => "150"
     )
 );
 
 
-
-
-
+// WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
     "auswahltext" => "$bericht Mitglieder und ihre Sparten",
@@ -192,7 +202,7 @@ $anzuzeigendeDaten[] = array(
                 join b_bsg as b on mis.BSG = b.id
                 join b_regionalverband as v on b.Verband = v.id
                 join b_sparte as s on mis.Sparte = s.id
-                join b_bsg as stamm on m.BSG = stamm.id
+                join b_bsg as stamm on m.BSG = stamm.id 
                 WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0
     ",
     "spaltenbreiten" => array(
@@ -234,46 +244,9 @@ $anzuzeigendeDaten[] = array(
         "seit"                      => "150"
     )
 );
-/*
-# Mitgliederkonten zusammenführen
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_mitglieder",
-    "auswahltext" => "Mitgliederkonten zusammenführen",
-    "hinweis" => "Kurzanleitung",
-    "writeaccess" => true,
-    "import" => false,
-    "query" => "SELECT 
-                    m.id as id, 
-                    m.y_id, 
-                    concat(Vorname, ' ', Nachname) as info:Name,  
-                    DATE_FORMAT(m.Geburtsdatum, '%d.%m.%Y') as info:Geburtsdatum
-                FROM b_mitglieder as m
-                WHERE 
-                    (FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 or 
-                    ( BSG IS NULL AND FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0))
-                AND m.BSG IS NOT NULL
-                ORDER by BSG, Vorname desc;
-    ",
-    "referenzqueries" => array(
-        "BSG" => "SELECT b.id, b.BSG as anzeige
-        from b_bsg as b
-        WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0
-        ORDER BY anzeige;
-        ",
-        "Geschlecht" => "SELECT id, auswahl as anzeige
-                        from b___geschlecht;
-        ",
-        "aktiv" => "SELECT id, wert as anzeige
-                        from b___an_aus;
-        "
-    ),
-    "spaltenbreiten" => array(
-        "y_id"                      => "50", 
-        "info:Name"                 => "300",
-        "info:Geburtsdatum"         => "150"
-    )
-);
-*/
+
+
+
 
 ######################################################################################################
 
