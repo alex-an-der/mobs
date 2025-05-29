@@ -240,9 +240,14 @@ function exportPDF($data, $tabelle) {
             td {
                 padding: 6px 8px;
                 border: 1px solid #ddd;
+                vertical-align: top;
             }
             tr:nth-child(even) {
                 background-color: #f9f9f9;
+            }
+            .wrap-text {
+                word-break: break-word;
+                white-space: pre-line;
             }
         </style>';
         
@@ -252,36 +257,108 @@ function exportPDF($data, $tabelle) {
         $visibleHeaders = array_filter($headers, function($header) {
             return strcasecmp($header, 'id') !== 0;
         });
-        
+
+        // Automatische Erkennung schmaler und Textspalten
+        $narrowColumns = [];
+        $textColumns = [];
+        foreach ($visibleHeaders as $header) {
+            // Schmale Spalten: sehr kurze Überschrift und alle Werte sind kurz (<=5 Zeichen)
+            $isNarrow = (mb_strlen($header) <= 5);
+            if ($isNarrow) {
+                $allShort = true;
+                foreach ($data as $row) {
+                    if (mb_strlen((string)($row[$header] ?? '')) > 5) {
+                        $allShort = false;
+                        break;
+                    }
+                }
+                if ($allShort) {
+                    $narrowColumns[] = $header;
+                    continue;
+                }
+            }
+            // Textspalten: mindestens ein Wert ist lang (>=30 Zeichen) oder enthält Zeilenumbrüche
+            $isText = false;
+            foreach ($data as $row) {
+                $val = (string)($row[$header] ?? '');
+                if (mb_strlen($val) >= 30 || strpos($val, "\n") !== false) {
+                    $isText = true;
+                    break;
+                }
+            }
+            if ($isText) {
+                $textColumns[] = $header;
+            }
+        }
+
         // Spaltenbreiten berechnen
         $columnWidths = [];
         $totalContentWidth = 0;
+        $minNarrow = 18; // Mindestbreite für schmale Spalten (mm)
+        $maxNarrow = 28; // Maximalbreite für schmale Spalten (mm)
+        $minText = 40;   // Mindestbreite für Textspalten (mm)
+        $maxText = 90;   // Maximalbreite für Textspalten (mm)
+        $default = 28;   // Standardbreite für andere Spalten (mm)
+
+        // 1. Vorbelegen mit Mindestwerten
+        foreach ($visibleHeaders as $header) {
+            $headerClean = strtolower(str_replace('info:', '', $header));
+            if (in_array($header, $narrowColumns) || in_array($headerClean, $narrowColumns)) {
+                $columnWidths[$header] = $minNarrow;
+            } elseif (in_array($header, $textColumns) || in_array($headerClean, $textColumns)) {
+                $columnWidths[$header] = $minText;
+            } else {
+                $columnWidths[$header] = $default;
+            }
+        }
+
+        // 2. Passe Breite anhand Inhalt an (aber nicht unter Mindestwert)
         foreach ($visibleHeaders as $header) {
             $maxWidth = strlen($header) * 2.5;
             foreach ($data as $row) {
-                $maxWidth = max($maxWidth, strlen($row[$header]) * 2.5);
+                $maxWidth = max($maxWidth, strlen($row[$header]) * 2.2);
             }
-            $columnWidths[$header] = $maxWidth;
-            $totalContentWidth += $maxWidth;
+            $headerClean = strtolower(str_replace('info:', '', $header));
+            if (in_array($header, $narrowColumns) || in_array($headerClean, $narrowColumns)) {
+                $columnWidths[$header] = max($minNarrow, min($maxWidth, $maxNarrow));
+            } elseif (in_array($header, $textColumns) || in_array($headerClean, $textColumns)) {
+                $columnWidths[$header] = max($minText, min($maxWidth, $maxText));
+            } else {
+                $columnWidths[$header] = max($default, min($maxWidth, 40));
+            }
         }
-        
-        // Spaltenbreiten proportional anpassen
+
+        // 3. Gesamtbreite berechnen und ggf. Textspalten flexibel anpassen
+        $totalContentWidth = array_sum($columnWidths);
         if ($totalContentWidth > $availableWidth) {
-            $ratio = $availableWidth / $totalContentWidth;
-            foreach ($columnWidths as &$width) {
-                $width *= $ratio;
+            // Skaliere nur Textspalten, andere bleiben bei Mindestbreite
+            $fixedWidth = 0;
+            $textCols = [];
+            foreach ($visibleHeaders as $header) {
+                $headerClean = strtolower(str_replace('info:', '', $header));
+                if (in_array($header, $textColumns) || in_array($headerClean, $textColumns)) {
+                    $textCols[] = $header;
+                } else {
+                    $fixedWidth += $columnWidths[$header];
+                }
+            }
+            $remainingWidth = max($availableWidth - $fixedWidth, count($textCols) * $minText);
+            $sumText = 0;
+            foreach ($textCols as $header) {
+                $sumText += $columnWidths[$header];
+            }
+            foreach ($textCols as $header) {
+                $columnWidths[$header] = max($minText, ($columnWidths[$header] / $sumText) * $remainingWidth);
             }
         }
-        
+
         // Header-Zeile
         $html .= '<tr>';
         foreach ($visibleHeaders as $header) {
-            // Check if it's an info column and extract the real display name
             $displayHeader = $header;
             if (strpos($header, 'info:') === 0) {
-                $displayHeader = substr($header, 5); // Remove 'info:' prefix
+                $displayHeader = substr($header, 5);
             }
-            
             $html .= sprintf(
                 '<th style="width:%.1fmm">%s</th>',
                 $columnWidths[$header],
@@ -294,20 +371,25 @@ function exportPDF($data, $tabelle) {
         foreach ($data as $row) {
             $html .= '<tr>';
             foreach ($row as $key => $value) {
-            if (strcasecmp($key, 'id') !== 0) {
-                // Prüfe auf Datum im Format yyyy-mm-dd
-                if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
-                $dateObj = DateTime::createFromFormat('Y-m-d', $value);
-                if ($dateObj) {
-                    $value = $dateObj->format('d.m.Y');
+                if (strcasecmp($key, 'id') !== 0) {
+                    // Prüfe auf Datum im Format yyyy-mm-dd
+                    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+                        $dateObj = DateTime::createFromFormat('Y-m-d', $value);
+                        if ($dateObj) {
+                            $value = $dateObj->format('d.m.Y');
+                        }
+                    }
+                    // Textspalten mit Umbruch-Style
+                    $keyClean = strtolower(str_replace('info:', '', $key));
+                    $isText = in_array($key, $textColumns) || in_array($keyClean, $textColumns);
+                    $tdClass = $isText ? ' class="wrap-text"' : '';
+                    $html .= sprintf(
+                        '<td style="width:%.1fmm"%s>%s</td>',
+                        $columnWidths[$key],
+                        $tdClass,
+                        htmlspecialchars($value)
+                    );
                 }
-                }
-                $html .= sprintf(
-                '<td style="width:%.1fmm">%s</td>',
-                $columnWidths[$key],
-                htmlspecialchars($value)
-                );
-            }
             }
             $html .= '</tr>';
         }
