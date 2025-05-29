@@ -1652,7 +1652,17 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
 
                     if ($readwrite || $deleteAnyway) {
                         echo '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0, \'' . $ajaxFile . '\')">';
-                        echo '<option value="NULL"' . (empty($value) ? ' selected' : '') . '>'.NULL_WERT.'</option>';
+                    
+                        // Add NULL option, when DB allows NULL values
+                        if (isset($columns['data'])) {
+                            foreach ($columns['data'] as $col) {
+                                if ($col['Field'] === $key && $col['Null'] === 'YES') {
+                                    echo '<option value="NULL"' . (empty($value) ? ' selected' : '') . '>' . NULL_WERT . '</option>';
+                                    break;
+                                }
+                            }
+                        }
+
                         foreach ($foreignKeys[$key] as $fk) {
                             $fk_value = $fk['id'];
                             $fk_display = htmlspecialchars($fk['anzeige'], ENT_QUOTES);
@@ -1660,6 +1670,7 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                             $selected = ($fk_value == $value) ? 'selected' : '';
                             echo '<option value="' . htmlspecialchars($fk_value, ENT_QUOTES) . '" ' . $selected . '>' . $fk_display . '</option>';
                         }
+                        
                         echo '</select>';
                     } else {
                         echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars($data_fk_ID_value, ENT_QUOTES) . '</div>';
