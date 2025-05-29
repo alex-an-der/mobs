@@ -294,13 +294,20 @@ function exportPDF($data, $tabelle) {
         foreach ($data as $row) {
             $html .= '<tr>';
             foreach ($row as $key => $value) {
-                if (strcasecmp($key, 'id') !== 0) {
-                    $html .= sprintf(
-                        '<td style="width:%.1fmm">%s</td>',
-                        $columnWidths[$key],
-                        htmlspecialchars($value)
-                    );
+            if (strcasecmp($key, 'id') !== 0) {
+                // Prüfe auf Datum im Format yyyy-mm-dd
+                if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+                $dateObj = DateTime::createFromFormat('Y-m-d', $value);
+                if ($dateObj) {
+                    $value = $dateObj->format('d.m.Y');
                 }
+                }
+                $html .= sprintf(
+                '<td style="width:%.1fmm">%s</td>',
+                $columnWidths[$key],
+                htmlspecialchars($value)
+                );
+            }
             }
             $html .= '</tr>';
         }
