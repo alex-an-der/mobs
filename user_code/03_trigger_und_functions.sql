@@ -529,6 +529,22 @@ DELIMITER ;
 
 -- -----------------------------------------------------------------------------------
 
+DROP TRIGGER IF EXISTS tr_update_mail_in_y_user;
+DELIMITER //
+CREATE TRIGGER tr_update_mail_in_y_user
+AFTER UPDATE ON b_mitglieder
+FOR EACH ROW
+BEGIN
+    IF NEW.Mail <> OLD.Mail THEN
+        UPDATE y_user
+        SET mail = NEW.Mail
+        WHERE id = NEW.y_id;
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------
 
 DROP FUNCTION IF EXISTS berechtigte_elemente_sub1;
 DELIMITER //
