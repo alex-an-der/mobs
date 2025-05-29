@@ -73,29 +73,93 @@ switch($action) {
                 $pdo->commit();
 
                 // Einstellungen des Mitglieds bei der Registrierung überschreiben die Einstellungen des BGS-Verwalters
-                
 
-                // 3. Überprüfe, ob die E-Mail-Adresse im aktuellen Datensatz leer ist
-                // 3.v2/KORREKTUR: Nimm IMMER die neue Mailadresse
-                
-                // $stmt = $pdo->prepare("SELECT Mail FROM b_mitglieder WHERE id = :id");
-                // $stmt->execute([':id' => $id]);
-                // $currentEmail = $stmt->fetchColumn();
+                // Hole die E-Mail-Adresse aus der Tabelle y_user
+                $stmt = $pdo->prepare("SELECT mail FROM y_user WHERE id = :yid");
+                $stmt->execute([':yid' => $value]);
+                $newEmail = $stmt->fetchColumn();
 
-                // if (empty($currentEmail)) {
-                    // Hole die E-Mail-Adresse aus der Tabelle y_user
-                    $stmt = $pdo->prepare("SELECT mail FROM y_user WHERE id = :yid");
-                    $stmt->execute([':yid' => $value]);
-                    $newEmail = $stmt->fetchColumn();
+                // Vorherige Werte laden
+                $oldValues = [];
+                $fieldsToCheck = ['Mail' => 'Mail', 'Vorname' => 'Vorname', 'Nachname' => 'Nachname', 'Geschlecht' => 'Geschlecht', 'Mailbenachrichtigung' => 'Mailbenachrichtigung'];
+                $placeholders = implode(", ", array_map(function($f){return "`$f`";}, $fieldsToCheck));
+                $stmt = $pdo->prepare("SELECT $placeholders FROM b_mitglieder WHERE id = :id");
+                $stmt->execute([':id' => $id]);
+                $oldValues = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                    if (!empty($newEmail)) {
-                        // Aktualisiere die E-Mail-Adresse im aktuellen Datensatz
-                        $stmt = $pdo->prepare("UPDATE b_mitglieder SET Mail = :email WHERE id = :id");
-                        $stmt->execute([':email' => $newEmail, ':id' => $id]);
+                // Neue Werte vorbereiten
+                $newValues = $oldValues;
+                $changedFields = [];
+
+                // Mail aktualisieren
+                if (!empty($newEmail)) {
+                    if ($oldValues['Mail'] !== $newEmail) {
+                        $changedFields['Mail'] = [$oldValues['Mail'], $newEmail];
+                        $newValues['Mail'] = $newEmail;
                     }
-                // }
-    
-                echo json_encode(['status' => 'success']);
+                    $stmt = $pdo->prepare("UPDATE b_mitglieder SET Mail = :email WHERE id = :id");
+                    $stmt->execute([':email' => $newEmail, ':id' => $id]);
+                }
+
+                // 4. Weitere Felder aus y_user_details übernehmen (ohne Geburtsdatum)
+                $fieldMap = [
+                    'vname' => 'Vorname',
+                    'nname' => 'Nachname',
+                    'geschlecht' => 'Geschlecht',
+                    'okformail' => 'Mailbenachrichtigung'
+                ];
+                foreach ($fieldMap as $yField => $bField) {
+                    $stmt = $pdo->prepare("
+                        SELECT d.fieldvalue
+                        FROM y_user_details d
+                        JOIN y_user_fields f ON d.fieldID = f.ID
+                        WHERE d.userID = :yid AND f.fieldname = :fieldname
+                        LIMIT 1
+                    ");
+                    $stmt->execute([':yid' => $value, ':fieldname' => $yField]);
+                    $fieldValue = $stmt->fetchColumn();
+                    if ($fieldValue !== false && $fieldValue !== null && $oldValues[$bField] != $fieldValue) {
+                        $changedFields[$bField] = [$oldValues[$bField], $fieldValue];
+                        $newValues[$bField] = $fieldValue;
+                        $stmtUpdate = $pdo->prepare("UPDATE b_mitglieder SET `$bField` = :val WHERE id = :id");
+                        $stmtUpdate->execute([':val' => $fieldValue, ':id' => $id]);
+                    }
+                }
+
+                // Für die Rückmeldung: Werte ggf. lesbar machen
+                $labelMap = [
+                    'Mail' => 'Mail',
+                    'Vorname' => 'Vorname',
+                    'Nachname' => 'Nachname',
+                    'Geschlecht' => 'Geschlecht',
+                    'Mailbenachrichtigung' => 'Mailbenachrichtigung'
+                ];
+                // Für Geschlecht und Mailbenachrichtigung ggf. Mapping auf Text
+                $geschlechtMap = [1 => 'männlich', 2 => 'weiblich', 3 => 'divers'];
+                $mailbenachrichtigungMap = [1 => 'JA', 2 => 'NEIN'];
+                $formatValue = function($field, $val) use ($geschlechtMap, $mailbenachrichtigungMap) {
+                    if ($field === 'Geschlecht') {
+                        return $geschlechtMap[$val] ?? $val;
+                    }
+                    if ($field === 'Mailbenachrichtigung') {
+                        return $mailbenachrichtigungMap[$val] ?? $val;
+                    }
+                    return $val;
+                };
+
+                $changesText = "";
+                foreach ($changedFields as $field => [$old, $new]) {
+                    $changesText .= $labelMap[$field] . ": " . $formatValue($field, $old) . " -> " . $formatValue($field, $new) . "\n";
+                }
+
+                $msg = "Die Datensätze wurden erfolgreich zusammengelegt.";
+                if ($changesText) {
+                    $msg .= " Folgende Felder wurden auf die Daten der Registrierung gesetzt:\n\n" . $changesText . "\nDanke";
+                } else {
+                    $msg .= " Es wurden keine Felder geändert.";
+                }
+
+                echo json_encode(['status' => 'success', 'message' => $msg, 'success_alert' => 1]);
             } catch (Exception $e) {
                 $pdo->rollBack();
                 error_log("Transaktionsfehler: " . $e->getMessage());
