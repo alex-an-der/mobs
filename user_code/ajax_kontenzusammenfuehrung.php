@@ -70,6 +70,38 @@ switch($action) {
                 $stmt = $pdo->prepare("UPDATE b_mitglieder SET y_id = :yid WHERE id = :id");
                 $stmt->execute([':yid' => $value, ':id' => $id]);
     
+                // 3. "Stammmitglied seit": Ältestes Datum der beiden Einträge oder NOW() verwenden
+                $stmt = $pdo->prepare("SELECT Stammmitglied_seit FROM b_mitglieder WHERE y_id = :yid AND id <> :id");
+                $stmt->execute([':yid' => $value, ':id' => $id]);
+                $otherStammmitgliedSeit = $stmt->fetchColumn();
+
+                $stmt = $pdo->prepare("SELECT Stammmitglied_seit FROM b_mitglieder WHERE id = :id");
+                $stmt->execute([':id' => $id]);
+                $currentStammmitgliedSeit = $stmt->fetchColumn();
+
+                // Datumswerte ggf. ins ISO-Format umwandeln
+                $toIso = function($d) {
+                    if (preg_match('/^\\d{4}-\\d{2}-\\d{2}$/', $d)) {
+                        return $d;
+                    } elseif (preg_match('/^(\\d{2})\\.(\\d{2})\\.(\\d{4})$/', $d, $m)) {
+                        return "$m[3]-$m[2]-$m[1]";
+                    }
+                    return null;
+                };
+                $dates = [];
+                $isoOther = $toIso($otherStammmitgliedSeit);
+                $isoCurrent = $toIso($currentStammmitgliedSeit);
+                if ($isoOther) $dates[] = $isoOther;
+                if ($isoCurrent) $dates[] = $isoCurrent;
+                if (count($dates) > 0) {
+                    $minDate = min($dates);
+                } else {
+                    $minDate = date('Y-m-d');
+                }
+                // Trage das älteste Datum in den verbleibenden Datensatz ein (ISO-Format)
+                $stmt = $pdo->prepare("UPDATE b_mitglieder SET Stammmitglied_seit = :datum WHERE id = :id");
+                $stmt->execute([':datum' => $minDate, ':id' => $id]);
+
                 $pdo->commit();
 
                 // Einstellungen des Mitglieds bei der Registrierung überschreiben die Einstellungen des BGS-Verwalters
@@ -151,12 +183,24 @@ switch($action) {
                 foreach ($changedFields as $field => [$old, $new]) {
                     $changesText .= $labelMap[$field] . ": " . $formatValue($field, $old) . " -> " . $formatValue($field, $new) . "\n";
                 }
+                // "Stammmitglied seit"-Änderung immer in die Liste aufnehmen
+                $oldStammmitglied = $currentStammmitgliedSeit; // Wert vor dem Update merken
+                $newStammmitglied = $minDate;
+                // Formatierung ins deutsche Datumsformat
+                $formatDate = function($d) {
+                    if (preg_match('/^\\d{4}-\\d{2}-\\d{2}$/', $d)) {
+                        $parts = explode('-', $d);
+                        return $parts[2] . '.' . $parts[1] . '.' . $parts[0];
+                    }
+                    return $d;
+                };
+                $changesText .= "Stammmitglied seit: " . $formatDate($oldStammmitglied) . " -> " . $formatDate($newStammmitglied) . "\n";
 
                 $msg = "Die Datensätze wurden erfolgreich zusammengelegt.";
                 if ($changesText) {
-                    $msg .= " Folgende Felder wurden auf die Daten der Registrierung gesetzt:\n\n" . $changesText . "\nUm die Anzeige zu aktualisieren, bitte die Daten neu laden (oben rechts).";
+                    $msg .= " Folgende Felder wurden auf die Daten der Registrierung gesetzt:\n\n" . $changesText . "\nUm die Anzeige zu aktualisieren, bitte die Daten neu laden (oben links).";
                 } else {
-                    $msg .= " Es wurden keine Felder geändert.\nUm die Anzeige zu aktualisieren, bitte die Daten neu laden (oben rechts).";
+                    $msg .= " Es wurden keine Felder geändert.\nUm die Anzeige zu aktualisieren, bitte die Daten neu laden (oben links).";
                 }
 
                 echo json_encode(['status' => 'success', 'message' => $msg, 'success_alert' => 1]);
