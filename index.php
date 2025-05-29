@@ -2,11 +2,6 @@
 require_once(__DIR__ . "/user_includes/all.head.php");
 require_once(__DIR__ . "/user_includes/index.head.php");
 require_once(__DIR__ . "/inc/include.php");
-
-// Sicherstellen, dass die MySQL-Verbindung auf utf8mb4 steht (für korrekte Anzeige und Speicherung von Umlauten, Akzenten etc.)
-if (isset($db) && method_exists($db, 'query')) {
-    $db->query("SET NAMES 'utf8mb4'");
-}
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -49,7 +44,7 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
     }else{
         $readwrite = 0;
     }
-    
+
     // Importrechte?
     if(isset($anzuzeigendeDaten[$selectedTableID]['import'])){
         $importErlaubt = $anzuzeigendeDaten[$selectedTableID]['import'];
@@ -285,7 +280,6 @@ $tabelle_upper = strtoupper($tabelle);
 
         function updateField(tabelle, id, field, value, datatype, ajaxFile) { 
 
-            // Y-ID-SWAP - ajax: - Sonderfeld
             let isUserAjax = 0;
             if (event && event.target && event.target.hasAttribute('data-userajax')) {
                 isUserAjax = event.target.getAttribute('data-userajax');
@@ -299,7 +293,6 @@ $tabelle_upper = strtoupper($tabelle);
             }else{
                 ajaxFile = "ajax.php";
             }
-            // Y-ID-SWAP-MOD Ende
 
             if(datatype){
                 if (datatype.startsWith("decimal")) {
@@ -331,10 +324,6 @@ $tabelle_upper = strtoupper($tabelle);
                     try {
                         const response = JSON.parse(xhr.responseText);
                         if (response.status === "success") {
-                            // Show alert if merge/changes occurred (Kontenzusammenführung)
-                            if (response.success_alert === 1 && response.message) {
-                                alert(response.message);
-                            }
                             checkRow(tabelle, id, field, value);
                         } else {
                             markCellError(id, field);
@@ -965,7 +954,7 @@ $tabelle_upper = strtoupper($tabelle);
             }
         }
 
-        function populateInsertModal(columns, foreignKeys, configQuery) {
+        function populateInsertModal(columns, foreignKeys, configQuery) { 
             const form = document.getElementById('insertForm');
             if (!form) {
                 alert("Insert form not found");
@@ -989,17 +978,18 @@ $tabelle_upper = strtoupper($tabelle);
                 return;
             }
 
-            headers.forEach(fieldName => {
-                const div = document.createElement('div');
-                div.className = 'form-group mb-3';
+            headers.forEach(
+                fieldName => 
+                    {  const div = document.createElement('div'); 
+                        div.className = 'form-group mb-3';
+                    // Info-Label-Handling
+                    let isInfo = false;
+                    let displayFieldName = fieldName; 
+                    if (fieldName.startsWith('info:')) { 
+                        isInfo = true;
+                        displayFieldName = fieldName.substring(5);
+                    }
 
-                // Info-Label-Handling
-                let isInfo = false;
-                let displayFieldName = fieldName; 
-                if (fieldName.startsWith('info:')) {
-                    isInfo = true;
-                    displayFieldName = fieldName.substring(5);
-                }
 
                 const label = document.createElement('label');
                 label.className = 'form-label';
@@ -1045,8 +1035,8 @@ $tabelle_upper = strtoupper($tabelle);
                     //     const fieldForUpdate = isInfo ? fieldName.substring(5) : fieldName;
                     //     updateField('<?=$tabelle?>', this.closest('tr').getAttribute('data-id'), fieldForUpdate, this.value, 0);
                     // });
-                    div.appendChild(select);
-                } else {
+                    div.appendChild(select); 
+                } else { // else = no Foreign Key
                     // Input für normale Felder und info:-Felder
                     const input = document.createElement('input');
                     input.className = 'form-control';
@@ -1059,7 +1049,8 @@ $tabelle_upper = strtoupper($tabelle);
                         let column = columns.find(col => {
                             let colName = col.Field || col.field || col.name || col.Name;
                             return colName === fieldName;
-                        });
+                        });  
+                        
                         if (column) {
                             const columnType = column.Type || column.type || 'text';
                             if (columnType.includes('date')) {
@@ -1566,8 +1557,9 @@ function renderTableHeaders($data) {
                 $style = "style='width: ".$anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header]."px;'";
             }
             if (strcasecmp($header, 'id') !== 0) {
-        
+                
                 $displayHeader = $header;
+
                 // Check if it's an info column and extract the real display name
                 if (strpos($header, 'info:') === 0) {
                     $displayHeader = substr($header, 5); // Remove 'info:' prefix
@@ -1598,7 +1590,6 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
     global $importErlaubt;
 
 
-    // Eingabemethode (z.B. Date-Picker) nach Datentyp wählen.
     $columns = $db->query("SHOW COLUMNS FROM $tabelle"); 
     $columnTypes = [];
     foreach ($columns['data'] as $column) {
@@ -1619,28 +1610,17 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                 if(isset($anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$key])) {
                     $style .= "width: ".$anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$key]."px;";
                 }
-                // Add word-wrap styles
                 $style .= "word-wrap: break-word; white-space: normal;'";
                 
-                echo '<td data-field="' . htmlspecialchars($key) . '" ' . $style . '>';
+                echo '<td data-field="' . htmlspecialchars((string)$key) . '" ' . $style . '>';
                 $data_fk_ID_key = "";
                 $data_fk_ID_value = "";
-                
-                // Check if this is an info column (starts with 'info:')
-                $isInfoColumn = strpos($key, 'info:') === 0;
-                $isAjaxColumn = strpos($key, 'ajax:') === 0;
-                $ajaxFile = "";
-                if ($isAjaxColumn) {
-                    $key = substr($key, 5); // Remove 'ajax:' prefix
-                    if(isset($anzuzeigendeDaten[$selectedTableID]['ajaxfile'])){
-                         $ajaxFile = $anzuzeigendeDaten[$selectedTableID]['ajaxfile'];
-                    }else{
-                        $err = "Die Ansicht ´".$anzuzeigendeDaten[$selectedTableID]['auswahltext']."´ hat eine Spalte mit dem Prefix 'ajax:', aber es ist kein Ajax-File mit dem Index ´ajaxfile´ definiert. Bitte in der Konfiguration nachtragen.";
-                        $db->log($err);
-                        die($err);
-                    }
-                }
 
+                // Info-Spalte: Wert ggf. aus Feld ohne info:-Prefix holen
+                $isInfoColumn = strpos($key, 'info:') === 0;
+                $isAjaxColumn = strpos($key, 'ajax:') === 0; // Immer initialisieren!
+                $displayValue = $value;
+                
                 if(isset($foreignKeys[$key])) { 
                     foreach($foreignKeys[$key] as $fk){
                         if($fk['id'] == $value){
@@ -1651,29 +1631,19 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                     }
 
                     if ($readwrite || $deleteAnyway) {
-                        echo '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0, \'' . $ajaxFile . '\')">';
-                    
-                        // Add NULL option, when DB allows NULL values
-                        if (isset($columns['data'])) {
-                            foreach ($columns['data'] as $col) {
-                                if ($col['Field'] === $key && $col['Null'] === 'YES') {
-                                    echo '<option value="NULL"' . (empty($value) ? ' selected' : '') . '>' . NULL_WERT . '</option>';
-                                    break;
-                                }
-                            }
-                        }
-
+                        //echo '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'" . $row['id'] . "\', \'" . $key . "\', this.value, 0)">';
+                        echo '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0)">';
+                        echo '<option value="NULL"' . (empty($value) ? ' selected' : '') . '>'.NULL_WERT.'</option>';
                         foreach ($foreignKeys[$key] as $fk) {
                             $fk_value = $fk['id'];
-                            $fk_display = htmlspecialchars($fk['anzeige'], ENT_QUOTES);
-
-                            $selected = ($fk_value == $value) ? 'selected' : '';
-                            echo '<option value="' . htmlspecialchars($fk_value, ENT_QUOTES) . '" ' . $selected . '>' . $fk_display . '</option>';
+                            $fk_display = htmlspecialchars((string)$fk['anzeige'], ENT_QUOTES);
+                            $selected = ($fk_value == $displayValue) ? 'selected' : '';
+                            echo '<option value="' . htmlspecialchars((string)$fk_value, ENT_QUOTES) . '" ' . $selected . '>' . $fk_display . '</option>';
                         }
-                        
                         echo '</select>';
                     } else {
-                        echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars($data_fk_ID_value, ENT_QUOTES) . '</div>';
+                        $anzeige = ($data_fk_ID_value !== "" && $data_fk_ID_value !== null) ? $data_fk_ID_value : NULL_WERT;
+                        echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars((string)$anzeige, ENT_QUOTES) . '</div>';
                     }
                 } else {
                     if ($readwrite && !$isInfoColumn) {                        
@@ -1682,28 +1652,33 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                         if (strpos($columnType, 'date') !== false) {
                             if (strpos($columnType, 'datetime') !== false) {
                                 $inputType = 'datetime-local';
-                                $value = str_replace(' ', 'T', $value);
+                                $displayValue = str_replace(' ', 'T', $displayValue);
                             } else {
                                 $inputType = 'date';
                             }
                         }
-                        echo '<input oncontextmenu="filter_that(this, \'input\');" data-type="'.htmlspecialchars($columnType).'" data-fkIDkey="' . htmlspecialchars($data_fk_ID_key, ENT_QUOTES) . '" 
-                              data-fkIDvalue="' . htmlspecialchars($data_fk_ID_value, ENT_QUOTES) . '" 
-                              data-userajax="' . htmlspecialchars($isAjaxColumn, ENT_QUOTES) . '"
-                              type="' . $inputType . '" 
-                              class="form-control border-0" 
-                              style="background-color: inherit; word-wrap: break-word; white-space: normal;" 
-                              value="' . htmlspecialchars($value, ENT_QUOTES) . '"
-                              onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, \'' . htmlspecialchars($columnType, ENT_QUOTES) . '\', \'' . $ajaxFile . '\')"
-                              onfocus="clearCellColor(this)">';
-                
+                        $updateKey = $isInfoColumn ? substr($key, 5) : $key;
+                        // echo '<input oncontextmenu="filter_that(this, \'input\');" data-type="' . htmlspecialchars((string)$columnType) . '" data-fkIDkey="' . htmlspecialchars((string)$data_fk_ID_key, ENT_QUOTES) . '" data-fkIDvalue="' . htmlspecialchars((string)$data_fk_ID_value, ENT_QUOTES) . '" data-userajax="' . htmlspecialchars($isAjaxColumn ? '1' : '0', ENT_QUOTES) . '" type="' . $inputType . '" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" value="' . htmlspecialchars((string)$value, ENT_QUOTES) . '" onchange="updateField(\'' . $tabelle . '\', \'" . $row['id'] . "\', \'" . $key . "\', this.value, \'" . htmlspecialchars((string)$columnType, ENT_QUOTES) . "\')" onfocus="clearCellColor(this)">';
+                        echo '<input oncontextmenu="filter_that(this, \'input\');" data-type="' . htmlspecialchars((string)$columnType) . '" data-fkIDkey="' . htmlspecialchars((string)$data_fk_ID_key, ENT_QUOTES) . '" data-fkIDvalue="' . htmlspecialchars((string)$data_fk_ID_value, ENT_QUOTES) . '" data-userajax="' . htmlspecialchars($isAjaxColumn ? '1' : '0', ENT_QUOTES) . '" type="' . $inputType . '" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" value="' . htmlspecialchars((string)$value, ENT_QUOTES) . '" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, \'' . htmlspecialchars((string)$columnType, ENT_QUOTES) . '\')" onfocus="clearCellColor(this)">';
                     } else {
-                        if(isset($columnType)){
-                            if (strpos($columnType, 'decimal') !== false || strpos($columnType, 'float') !== false) {
-                                $value = number_format((float)$value, 2, '.', '');
+                        // Spezialbehandlung für Info-Spalten: Wenn leer, aber Plain-Feld vorhanden, dieses anzeigen
+                        if ($isInfoColumn) {
+                            $plainKey = substr($key, 5);
+                            $anzeige = NULL_WERT;
+                            if ((empty($displayValue) || $displayValue === null) && isset($row[$plainKey]) && $row[$plainKey] !== "" && $row[$plainKey] !== null) {
+                                $anzeige = $row[$plainKey];
+                            } elseif ($displayValue !== "" && $displayValue !== null) {
+                                $anzeige = $displayValue;
                             }
+                        } else {
+                            if(isset($columnType)){
+                                if (strpos($columnType, 'decimal') !== false || strpos($columnType, 'float') !== false) {
+                                    $displayValue = number_format((float)$displayValue, 2, '.', '');
+                                }
+                            }
+                            $anzeige = ($displayValue !== "" && $displayValue !== null) ? $displayValue : NULL_WERT;
                         }
-                        echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars($value, ENT_QUOTES) . '</div>';
+                        echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars((string)$anzeige, ENT_QUOTES) . '</div>';
                     }
                 }
                 echo '</td>';

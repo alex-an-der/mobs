@@ -135,13 +135,14 @@ $anzuzeigendeDaten[] = array(
 
 
 # Mitglieder in den Sparten 
+// -- DATE_FORMAT(seit, '%d.%m.%Y') as info:seit
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
     "auswahltext" => "BSG-Mitglieder in Sparten anmelden",
     "hinweis" => "Das Feld ´<b>seit</b>´ wird <b>automatisch</b> bei einem neuen Eintrag gesetzt und dient nur zur Information. 
     Das Feld wird nicht für die Rechnungsstellung genutzt.", 
     "writeaccess" => true,
-    "query" => "SELECT id, Mitglied, BSG, Sparte, DATE_FORMAT(seit, '%d.%m.%Y') as info:seit
+    "query" => "SELECT id, Mitglied, BSG, Sparte, seit 
                     from b_mitglieder_in_sparten as mis
                     WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 and
                     FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0
@@ -182,7 +183,7 @@ $anzuzeigendeDaten[] = array(
         "Mitglied"                  => "400",
         "BSG"                       => "400",
         "Sparte"                    => "300",
-        "info:seit"                 => "100"
+        "seit"                      => "150"
     )
 );
 
