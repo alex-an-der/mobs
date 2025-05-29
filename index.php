@@ -1329,11 +1329,18 @@ $tabelle_upper = strtoupper($tabelle);
                         // Collect cell data for this row
                         const rowData = {};
                         rowData['id'] = row.getAttribute('data-id');
-                        let cellIdx = 0;
-                        row.querySelectorAll('td[data-field]').forEach(cell => {
+                        let cellIdx = 0; 
+                        row.querySelectorAll('td[data-field]').forEach(cell => { 
                             const key = headers[cellIdx];
-                            rowData[key] = cell.innerText.trim();
-                            cellIdx++;
+                            const input = cell.querySelector('input');
+                            if (input) {
+                                rowData[key] =  input.value.trim();
+                                //console.log("input");
+                            } else {
+                                rowData[key] =   cell.innerText.trim();
+                                //console.log("plain text");
+                            }
+                            cellIdx++
                         });
                         visibleData.push(rowData);
                     }
