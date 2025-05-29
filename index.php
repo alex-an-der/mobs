@@ -1055,6 +1055,15 @@ $tabelle_upper = strtoupper($tabelle);
                             const columnType = column.Type || column.type || 'text';
                             if (columnType.includes('date')) {
                                 input.type = columnType.includes('datetime') ? 'datetime-local' : 'date';
+                                // Setze Standardwert auf heute, falls kein Default vorhanden
+                                if (!input.value) {
+                                    const now = new Date();
+                                    if (input.type === 'date') {
+                                        input.value = now.toISOString().slice(0, 10);
+                                    } else if (input.type === 'datetime-local') {
+                                        input.value = now.toISOString().slice(0, 16);
+                                    }
+                                }
                             } else if (columnType.includes('int') || columnType.includes('decimal') || columnType.includes('float') || columnType.includes('double')) {
                                 input.type = 'number';
                                 if (columnType.includes('decimal') || columnType.includes('float') || columnType.includes('double')) {

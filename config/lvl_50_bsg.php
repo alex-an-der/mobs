@@ -138,9 +138,7 @@ $anzuzeigendeDaten[] = array(
 // -- DATE_FORMAT(seit, '%d.%m.%Y') as info:seit
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
-    "auswahltext" => "BSG-Mitglieder in Sparten anmelden",
-    "hinweis" => "Das Feld ´<b>seit</b>´ wird <b>automatisch</b> bei einem neuen Eintrag gesetzt und dient nur zur Information. 
-    Das Feld wird nicht für die Rechnungsstellung genutzt.", 
+    "auswahltext" => "BSG-Mitglieder in Sparten anmelden", 
     "writeaccess" => true,
     "query" => "SELECT id, Mitglied, BSG, Sparte, seit 
                     from b_mitglieder_in_sparten as mis
