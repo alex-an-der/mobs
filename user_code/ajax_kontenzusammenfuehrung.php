@@ -154,9 +154,9 @@ switch($action) {
 
                 $msg = "Die Datensätze wurden erfolgreich zusammengelegt.";
                 if ($changesText) {
-                    $msg .= " Folgende Felder wurden auf die Daten der Registrierung gesetzt:\n\n" . $changesText;
+                    $msg .= " Folgende Felder wurden auf die Daten der Registrierung gesetzt:\n\n" . $changesText . "\nUm die Anzeige zu aktualisieren, bitte die Daten neu laden (oben rechts).";
                 } else {
-                    $msg .= " Es wurden keine Felder geändert.";
+                    $msg .= " Es wurden keine Felder geändert.\nUm die Anzeige zu aktualisieren, bitte die Daten neu laden (oben rechts).";
                 }
 
                 echo json_encode(['status' => 'success', 'message' => $msg, 'success_alert' => 1]);

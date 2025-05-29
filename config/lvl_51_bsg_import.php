@@ -64,7 +64,9 @@ $anzuzeigendeDaten[] = array(
     </ul></p>
     <p>Dazu muss die y_id des LogIn-Kontos in das y_id-Feld im zugehörigen 
     manuell angelegten Konto eingetragen werden. Um Fehleingaben einzuschränken, müssen die Geburtsdaten der beiden zu verknüpfenden Datensätze übereinstimmen. 
-    Wenn dies nicht erfüllt ist oder eine ungültige Nummer eingetragen wird, wird ein Fehler zurückgegeben.</p><p><b>Bitte diese Zusammenführung mit Vorsicht und Bedacht ausführen.</b></p>",
+    Wenn dies nicht erfüllt ist oder eine ungültige Nummer eingetragen wird, wird ein Fehler zurückgegeben.</p><p><b>Bitte diese Zusammenführung mit Vorsicht und Bedacht ausführen.</b></p>
+    <p>Es werden hier nur Datensätze angezeigt, die die Grundbedingung erfüllen, dass die Geburtsdaten übereinstimmen. Sollte die aufgrund eines Tippfehlers 
+    nicht der Fall sein, muss dieser Fehler zunächst behoben werden (z.B. durch die Bearbeitung in den Stammdaten).</p>",
     "writeaccess" => true,
     "import" => false,
     "query" => "SELECT 
@@ -74,10 +76,16 @@ $anzuzeigendeDaten[] = array(
                     DATE_FORMAT(m.Geburtsdatum, '%d.%m.%Y') as info:Geburtsdatum
                 FROM b_mitglieder as m
                 WHERE 
-                    (FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 or 
-                    ( BSG IS NULL AND FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0))
+                    (FIND_IN_SET(BSG, berechtigte_elemente(102, 'BSG')) > 0 or 
+                    ( BSG IS NULL AND FIND_IN_SET(m.id, berechtigte_elemente(102, 'individuelle_mitglieder')) > 0))
                 AND m.BSG IS NOT NULL
-                ORDER by BSG, Vorname desc;
+                AND m.Geburtsdatum IN (
+                    SELECT Geburtsdatum
+                    FROM b_mitglieder
+                    GROUP BY Geburtsdatum
+                    HAVING COUNT(*) >= 2
+                )
+                ORDER BY BSG, Vorname DESC;
     ",
     "ajaxfile" => "ajax_kontenzusammenfuehrung.php",
     "referenzqueries" => array(
