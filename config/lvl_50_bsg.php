@@ -99,7 +99,7 @@ $anzuzeigendeDaten[] = array(
     nach dem erneuten Laden sichtbar und kann dann manuell verändert werden. Dieses Angabe dient nur zur Information und  wird bei der Rechnungsstellung nicht berücksichtigt.",
     "writeaccess" => true,
     "import" => false,
-    "query" => "SELECT m.id as id, Vorname, Nachname, BSG, Stammmitglied_seit, Mail, m.Geschlecht, m.Geburtsdatum, aktiv
+    "query" => "SELECT m.id as id, m.id as info:Nr, Vorname, Nachname, BSG, Stammmitglied_seit, Mail, m.Geschlecht, m.Geburtsdatum, aktiv
                 from b_mitglieder as m
                 WHERE 
                     (FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 or 
@@ -121,7 +121,7 @@ $anzuzeigendeDaten[] = array(
         "
     ),
     "spaltenbreiten" => array(
-        "y_id"                      => "50", 
+        "info:Nr"               => "70", 
         "BSG"                       => "300",
         "Vorname"                   => "150",
         "Nachname"                  => "150",

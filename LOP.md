@@ -62,3 +62,109 @@ TRUNCATE TABLE `y_user`;
 TRUNCATE TABLE `y_user_details`;
 TRUNCATE TABLE `y_user_fields`;
 SET FOREIGN_KEY_CHECKS = 1;
+
+Änderungen
+Spartenanmeldung
+Spartenabmeldung
+Stammdaten ändern
+
+Tabellen
+----------
+CREATE TABLE `b_mitglieder_historie` ( 
+  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `Timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  `MNr` BIGINT UNSIGNED NOT NULL,
+  `Aktion` VARCHAR(500) NOT NULL,
+   PRIMARY KEY (`id`),
+  CONSTRAINT `FK_historie_mNr_betroffenes_Mitglied` FOREIGN KEY (`MNr`) REFERENCES `b_mitglieder` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE
+)
+ENGINE = InnoDB
+COMMENT = 'Der Akteur kann über das Rollback-Log ermittelt werden.';
+CREATE INDEX `FK_historie_mNr_betroffenes_Mitglied` 
+ON `b_mitglieder_historie` (
+  `MNr` ASC
+);
+
+Trigger
+-------
+
+DROP TRIGGER IF EXISTS trg_b_mitglieder_update_historie;
+DELIMITER $$
+CREATE TRIGGER trg_b_mitglieder_update_historie
+AFTER UPDATE ON b_mitglieder
+FOR EACH ROW
+BEGIN
+    DECLARE alter_wert VARCHAR(100);
+    DECLARE neuer_wert VARCHAR(100);
+
+    -- Für jede relevante Spalte prüfen, ob sich der Wert geändert hat
+    IF NOT (OLD.Vorname <=> NEW.Vorname) THEN
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung Vorname von ''', IFNULL(OLD.Vorname, ''), ''' zu ''', IFNULL(NEW.Vorname, ''), ''''));
+    END IF;
+
+    IF NOT (OLD.Nachname <=> NEW.Nachname) THEN
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung Nachname von ''', IFNULL(OLD.Nachname, ''), ''' zu ''', IFNULL(NEW.Nachname, ''), ''''));
+    END IF;
+
+    IF NOT (OLD.BSG <=> NEW.BSG) THEN
+        SELECT concat(BSG, ' (VKZ ', VKZ, ')') INTO alter_wert FROM b_bsg WHERE id = OLD.BSG;
+        SELECT concat(BSG, ' (VKZ ', VKZ, ')') INTO neuer_wert FROM b_bsg WHERE id = NEW.BSG;
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung BSG von ''', IFNULL(alter_wert, ''), ''' zu ''', IFNULL(neuer_wert, ''), ''''));
+    END IF;
+
+    IF NOT (OLD.Mail <=> NEW.Mail) THEN
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung Mail von ''', IFNULL(OLD.Mail, ''), ''' zu ''', IFNULL(NEW.Mail, ''), ''''));
+    END IF;
+
+    IF NOT (OLD.aktiv <=> NEW.aktiv) THEN
+        SELECT wert INTO alter_wert FROM b___an_aus WHERE id = OLD.aktiv;
+        SELECT wert INTO neuer_wert FROM b___an_aus WHERE id = NEW.aktiv;
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung aktiv von ''', IFNULL(alter_wert, ''), ''' zu ''', IFNULL(neuer_wert, ''), ''''));
+    END IF;
+    
+    IF NOT (OLD.Geburtsdatum <=> NEW.Geburtsdatum) THEN
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (
+            OLD.id,
+            CONCAT(
+                'Änderung Geburtsdatum von ''',
+                IFNULL(DATE_FORMAT(OLD.Geburtsdatum, '%d.%m.%Y'), ''),
+                ''' zu ''',
+                IFNULL(DATE_FORMAT(NEW.Geburtsdatum, '%d.%m.%Y'), ''),
+                ''''
+            )
+        );
+    END IF;
+
+    IF NOT (OLD.Mailbenachrichtigung <=> NEW.Mailbenachrichtigung) THEN
+        SELECT wert INTO alter_wert FROM b___an_aus WHERE id = OLD.Mailbenachrichtigung;
+        SELECT wert INTO neuer_wert FROM b___an_aus WHERE id = NEW.Mailbenachrichtigung;
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung Mailbenachrichtigung von ''', IFNULL(alter_wert, ''), ''' zu ''', IFNULL(neuer_wert, ''), ''''));
+    END IF;
+
+    IF NOT (OLD.Geschlecht <=> NEW.Geschlecht) THEN
+        SELECT auswahl INTO alter_wert FROM b___geschlecht WHERE id = OLD.Geschlecht;
+        SELECT auswahl INTO neuer_wert FROM b___geschlecht WHERE id = NEW.Geschlecht;
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung Geschlecht von ''', IFNULL(alter_wert, ''), ''' zu ''', IFNULL(neuer_wert, ''), ''''));
+    END IF;
+
+    IF NOT (OLD.Stammmitglied_seit <=> NEW.Stammmitglied_seit) THEN
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung Stammmitglied_seit von ''', IFNULL(OLD.Stammmitglied_seit, ''), ''' zu ''', IFNULL(NEW.Stammmitglied_seit, ''), ''''));
+    END IF;
+
+    IF NOT (OLD.y_id <=> NEW.y_id) THEN
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung y_id von ''', IFNULL(OLD.y_id, ''), ''' zu ''', IFNULL(NEW.y_id, ''), ''''));
+    END IF;
+
+END$$
+
+DELIMITER ;
