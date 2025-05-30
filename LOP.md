@@ -21,10 +21,17 @@ VALUES ('Tommy Manuell','Nocker',1,'1966-06-06','NeueMail@Nocker.de',3,'1966-06-
 
 
 ## In der Prod-DB einfügen 
-aaaa@a.a
+- TRIGGER (s.open Issues)
+- Autoinkrement auf Mitgliedsnummern umschwenken 
 ```
-
+SET @new_id = 100000;
+UPDATE b_mitglieder SET id = (@new_id := @new_id + 1) ORDER BY id;
+SELECT MAX(id) + 1 AS neuer_wert FROM b_mitglieder;
+ALTER TABLE b_mitglieder AUTO_INCREMENT = <MAX+1_hier_eintragen>;
+(z.B. ALTER TABLE b_mitglieder AUTO_INCREMENT = 100043;)
 ```
+- CRONJOB einrichten (prod und local und ggf. qs)
+- YPUM-Anpassung nicht vergessen! (s.open Issues)
 
 
 SET FOREIGN_KEY_CHECKS = 0;

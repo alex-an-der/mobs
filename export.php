@@ -838,7 +838,11 @@ function exportMarkdown($data, $tabelle) {
     });
 
     // Markdown-Header
-    echo '| ' . implode(' | ', array_map('htmlspecialchars', $visibleHeaders)) . " |\n";
+    // 1. Interpretiere HTML-Entities zurück zu UTF-8
+    $headerRow = array_map(function($h) {
+        return html_entity_decode($h, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    }, $visibleHeaders);
+    echo '| ' . implode(' | ', $headerRow) . " |\n";
     echo '| ' . implode(' | ', array_fill(0, count($visibleHeaders), '---')) . " |\n";
 
     // Datenzeilen
@@ -848,7 +852,15 @@ function exportMarkdown($data, $tabelle) {
             $value = isset($row[$header]) ? $row[$header] : '';
             // Zeilenumbrüche und Pipes maskieren
             $value = str_replace(["\n", "|"], ["<br>", "\\|"], $value);
-            $rowValues[] = htmlspecialchars($value);
+            // 2. Datum umwandeln wie im PDF-Export (yyyy-mm-dd zu dd.mm.yyyy)
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+                $dateObj = DateTime::createFromFormat('Y-m-d', $value);
+                if ($dateObj) {
+                    $value = $dateObj->format('d.m.Y');
+                }
+            }
+            // Interpretiere HTML-Entities zurück zu UTF-8
+            $rowValues[] = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         }
         echo '| ' . implode(' | ', $rowValues) . " |\n";
     }
