@@ -500,3 +500,18 @@ ON `b_bsg_wechselantrag` (
   `Ziel_BSG` ASC
 );
 
+DROP TABLE IF EXISTS `b_mitglieder_historie`;
+CREATE TABLE `b_mitglieder_historie` ( 
+  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `Timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  `MNr` BIGINT UNSIGNED NOT NULL,
+  `Aktion` VARCHAR(500) NOT NULL,
+   PRIMARY KEY (`id`),
+  CONSTRAINT `FK_historie_mNr_betroffenes_Mitglied` FOREIGN KEY (`MNr`) REFERENCES `b_mitglieder` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE
+)
+ENGINE = InnoDB
+COMMENT = 'Der Akteur kann über das Rollback-Log ermittelt werden.';
+CREATE INDEX `FK_historie_mNr_betroffenes_Mitglied` 
+ON `b_mitglieder_historie` (
+  `MNr` ASC
+);
