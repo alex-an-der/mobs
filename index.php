@@ -1592,13 +1592,16 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
     global $readwrite;
     global $deleteAnyway;
     global $importErlaubt;
+    
 
-
-    $columns = $db->query("SHOW COLUMNS FROM $tabelle"); 
-    $columnTypes = [];
+        $columns = $db->query("SHOW COLUMNS FROM $tabelle"); 
+        $columnTypes = [];
+    $columnMayBeNULL = [];
     foreach ($columns['data'] as $column) {
         $columnTypes[$column['Field']] = $column['Type'];
+        $columnMayBeNULL[$column['Field']] = ($column['Null'] === 'YES') ? true : false;
     }
+
     foreach ($data as $row) {
         
         echo '<tr data-id="' . $row['id'] . '">';
@@ -1625,7 +1628,12 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                 $isAjaxColumn = strpos($key, 'ajax:') === 0; // Immer initialisieren!
                 $displayValue = $value;
                 
+                // Unterscheidung zwischen Auswahllisten ("Foreign-Keys-Spalten") wie z.B. "BSG" und normale Text-Spalten wie z.B. "Vorname"
                 if(isset($foreignKeys[$key])) { 
+                    /* ************************************************************************************************
+                       * AJAX: - Spalten (user-code-ajax) werden mit FK (noch) nicht unterstützt!                     *
+                       * **********************************************************************************************/
+                    // Hole die Anzeigedaten mit der Referenz-ID
                     foreach($foreignKeys[$key] as $fk){
                         if($fk['id'] == $value){
                             $data_fk_ID_key = $fk['id'];
@@ -1633,10 +1641,17 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                             break;
                         }
                     }
-
-                    if ($readwrite || $deleteAnyway) {
+                    // Selects nur, wenn readwrite UND keine Info-Spalte 
+                    if ($readwrite && !$isInfoColumn) {
+                        // SELECT ZUSAMMENSTELLEN //
                         echo '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0)">';
-                        echo '<option value="NULL"' . (empty($value) ? ' selected' : '') . '>'.NULL_WERT.'</option>';
+                        
+                        // Nur wenn Spalte nullable ist, die "---" anbieten (und nur bei r/w + non-info-Spalten)
+                        if( $columnMayBeNULL[$key]) {
+                            echo '<option value="NULL"' . (empty($value) ? ' selected' : '') . '>'.NULL_WERT.'</option>';
+                        }
+
+                        // OPTION - FELDER //
                         foreach ($foreignKeys[$key] as $fk) {
                             $fk_value = $fk['id'];
                             $fk_display = htmlspecialchars((string)$fk['anzeige'], ENT_QUOTES);
@@ -1648,7 +1663,29 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                         $anzeige = ($data_fk_ID_value !== "" && $data_fk_ID_value !== null) ? $data_fk_ID_value : NULL_WERT;
                         echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars((string)$anzeige, ENT_QUOTES) . '</div>';
                     }
-                } else {
+
+                    // DBI Original if war: if ($readwrite || $deleteAnyway) { - macht das "deleteAnyway" Sinn?
+                    /* Original-Code:
+                        if ($readwrite || $deleteAnyway) {
+                            echo '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0)">';
+                            echo '<option value="NULL"' . (empty($value) ? ' selected' : '') . '>'.NULL_WERT.'</option>';
+                            foreach ($foreignKeys[$key] as $fk) {
+                                $fk_value = $fk['id'];
+                                $fk_display = htmlspecialchars((string)$fk['anzeige'], ENT_QUOTES);
+                                $selected = ($fk_value == $displayValue) ? 'selected' : '';
+                                echo '<option value="' . htmlspecialchars((string)$fk_value, ENT_QUOTES) . '" ' . $selected . '>' . $fk_display . '</option>';
+                            }
+                            echo '</select>';
+                        } else {
+                            $anzeige = ($data_fk_ID_value !== "" && $data_fk_ID_value !== null) ? $data_fk_ID_value : NULL_WERT;
+                            echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars((string)$anzeige, ENT_QUOTES) . '</div>';
+                        }
+
+                    */
+                   
+
+                    
+                } else { // normale Textspalte 
                     if ($readwrite && !$isInfoColumn) {                        
                         $inputType = 'text';
                         $columnType = $columnTypes[$key];
