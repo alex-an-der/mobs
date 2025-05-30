@@ -1594,8 +1594,8 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
     global $importErlaubt;
     
 
-        $columns = $db->query("SHOW COLUMNS FROM $tabelle"); 
-        $columnTypes = [];
+    $columns = $db->query("SHOW COLUMNS FROM $tabelle"); 
+    $columnTypes = [];
     $columnMayBeNULL = [];
     foreach ($columns['data'] as $column) {
         $columnTypes[$column['Field']] = $column['Type'];
@@ -1634,12 +1634,14 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                        * AJAX: - Spalten (user-code-ajax) werden mit FK (noch) nicht unterstützt!                     *
                        * **********************************************************************************************/
                     // Hole die Anzeigedaten mit der Referenz-ID
+                    
                     foreach($foreignKeys[$key] as $fk){
                         if($fk['id'] == $value){
                             $data_fk_ID_key = $fk['id'];
                             $data_fk_ID_value = $fk['anzeige'];
                             break;
                         }
+                        
                     }
                     // Selects nur, wenn readwrite UND keine Info-Spalte 
                     if ($readwrite && !$isInfoColumn) {
@@ -1660,6 +1662,8 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                         }
                         echo '</select>';
                     } else {
+                        //$data_fk_ID_key   = $foreignKeys[$key][0]['id'];
+                        //$data_fk_ID_value = $foreignKeys[$key][0]['anzeige'];
                         $anzeige = ($data_fk_ID_value !== "" && $data_fk_ID_value !== null) ? $data_fk_ID_value : NULL_WERT;
                         echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars((string)$anzeige, ENT_QUOTES) . '</div>';
                     }
