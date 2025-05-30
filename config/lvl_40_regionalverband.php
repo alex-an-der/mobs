@@ -201,7 +201,6 @@ $anzuzeigendeDaten[] = array(
                 
 );
 
-# Mitglieder nach Sportarten / Turniereinladungen
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
     "auswahltext" => "$bericht Salden ".($curyear-1),
@@ -259,6 +258,32 @@ $anzuzeigendeDaten[] = array(
                 )   
 );
 
+# Änderungshistorie per Mitglied
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_mitglieder_historie",
+    "auswahltext" => "$bericht Änderungen per Mitgliedsnummer",
+    "writeaccess" => false,
+    "import" => false,
+    "query" => "SELECT mh.id as id, 
+                m.Vorname, 
+                m.Nachname, 
+                mh.Aenderung, 
+                mh.Datum, 
+                mh.Beschreibung
+                FROM b_mitglieder_historie as mh
+                JOIN b_mitglieder as m ON mh.Mitglied = m.id
+                WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'mitglied')) > 0
+                ORDER BY mh.Datum DESC;",
+    "writeaccess" => false,
+    "import" => false,
+    "query" => "SELECT id, Timestamp, MNr, Aktion 
+                FROM b_mitglieder_historie;",
+    "spaltenbreiten" => array(
+        "Timestamp" => "150",
+        "MNr"       => "100",
+        "Aktion"    => "300"
+        )
+);
 ######################################################################################################
 
 # Statistik: Mitglieder in Sparten
@@ -273,5 +298,6 @@ $statistik[] = array(
     "typ"   => "torte"
 );
 
+ 
 
 ?>
