@@ -140,26 +140,26 @@ $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
     "auswahltext" => "BSG-Mitglieder in Sparten anmelden", 
     "writeaccess" => true,
-    "query" => "SELECT id, Mitglied, BSG, Sparte, seit 
+    "query" => "SELECT id, Mitglied as info:Mitglied, BSG as info:BSG, Sparte as info:Sparte 
                     from b_mitglieder_in_sparten as mis
                     WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 and
                     FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0
                     order by mis.id desc;
     ",
     "referenzqueries" => array(
-        "Mitglied" => "SELECT m.id as id, concat(m.Vorname,' ', m.Nachname, ' (Stamm: ', IFNULL(b.BSG, '".NULL_WERT."'), ')') as anzeige 
+        "info:Mitglied" => "SELECT m.id as id, concat(m.Vorname,' ', m.Nachname, ' (Stamm: ', IFNULL(b.BSG, '".NULL_WERT."'), ')') as anzeige 
                         from b_mitglieder as m
                         left join b_bsg as b on m.BSG = b.id 
                         WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 
                         ORDER BY anzeige;
         ", // BSG is not null => Erst die Stamm BSG, dann die Sparten
-        "BSG" => "SELECT b.id as id, concat(b.BSG,' (',v.Kurzname,')') as anzeige
+        "info:BSG" => "SELECT b.id as id, concat(b.BSG,' (',v.Kurzname,')') as anzeige
                     from b_bsg as b
                     join b_regionalverband as v on v.id = b.Verband
                     WHERE
                         FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0;
         ",
-        "Sparte" => "SELECT distinct s.id as id, concat (s.Sparte, ' (',r.Kurzname,')') as anzeige
+        "info:Sparte" => "SELECT distinct s.id as id, concat (s.Sparte, ' (',r.Kurzname,')') as anzeige
                     FROM b_bsg_rechte as br
                     JOIN b_bsg as b ON br.BSG = b.id  
                     JOIN b_regionalverband as r ON r.id = b.Verband
