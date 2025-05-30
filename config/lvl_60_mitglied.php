@@ -45,7 +45,7 @@ $anzuzeigendeDaten[] = array(
     "hinweis" => "Bearbeiter der von dir angegebenen Betriebssportgruppen dürfen deine Daten einsehen und diese verarbeiten. Dies ist notwendig, um dich in einer oder mehreren BSG zu verwalten. Solltest du eine Berechtigung löschen, kann die betreffende BSG deine Daten trotzdem noch so lange sehen wie du dort Mitglied bist ('berechtigtes Interesse' nach DSGVO).  Um ein neues Recht zu vergeben, klicke auf <b>'Einf&uuml;gen'</b>.",
     "writeaccess" => true,
     "import" => true,
-    "query" => "SELECT ib.id as id, concat(m.Vorname, ' ', m.Nachname) as info:Mitglied, ib.BSG as BSG
+    "query" => "SELECT ib.id as id, Mitglied as info:Mitglied, ib.BSG as BSG
                 from b_individuelle_berechtigungen as ib
                 join b_mitglieder as m on ib.Mitglied=m.id
                 join b_bsg as b on ib.BSG = b.id 
