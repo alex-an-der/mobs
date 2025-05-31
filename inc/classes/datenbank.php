@@ -22,7 +22,7 @@ class Datenbank {
 
 
     // Führt pdo-Query aus und liefert das Ergebnis als Array zurück
-    public function query($query, $arguments = array()) {
+    public function query($query, $arguments = array(), $rollback=true) {
         require_once(__DIR__ . "/../../user_includes/before_sending_query.php");
 
         // Handle info: columns by correctly escaping them in MySQL
@@ -72,7 +72,7 @@ class Datenbank {
             $query = preg_replace('/\?/', $argument, $query, 1);
         }
         // $this->log( $query); // Mit den Fehlermeldungen, damit man das besser nachvollziehen kann
-        $this->log_for_rollback( $query); // Nur für Rollbacks (BU einspielen und dann auf den richtigen Stand bringen
+        if($rollback) $this->log_for_rollback( $query); // Nur für Rollbacks (BU einspielen und dann auf den richtigen Stand bringen
         return $success ? $stmt->rowCount() : false;
     }
 

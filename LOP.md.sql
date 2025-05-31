@@ -85,6 +85,45 @@ ON `b_mitglieder_historie` (
   `MNr` ASC
 );
 
+DROP TABLE IF EXISTS `b_meldeliste`; -- Muss zuerst gedroppt werden, da es eine FK-Verknüpfung gibt
+DROP TABLE IF EXISTS `b___beitragszuordnungen`;
+CREATE TABLE `b___beitragszuordnungen` ( 
+  `id` INT UNSIGNED NOT NULL,
+  `Zweck` VARCHAR(200) NOT NULL,
+   PRIMARY KEY (`id`)
+)
+ENGINE = InnoDB;
+
+INSERT INTO `b___beitragszuordnungen` (`id`, `Zweck`) VALUES (1, 'Verbandsbeitrag');
+INSERT INTO `b___beitragszuordnungen` (`id`, `Zweck`) VALUES (2, 'Spartenbeitrag');
+
+DROP TABLE IF EXISTS `b_meldeliste`;
+CREATE TABLE `b_meldeliste` ( 
+  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `Timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  `Beitragsjahr` YEAR NOT NULL,
+  `MNr` BIGINT UNSIGNED NOT NULL,
+  `BSG` BIGINT UNSIGNED NOT NULL,
+  `Zuordnung` INT UNSIGNED NULL,
+  `Zuordnung_ID` BIGINT NULL COMMENT 'Wenn der Zweck eine ID erfordert' ,
+  `Betrag` DECIMAL(10,2) NULL DEFAULT 0.00 ,
+   PRIMARY KEY (`id`),
+  CONSTRAINT `FK_medleliste_beitragszuordnungen` FOREIGN KEY (`Zuordnung`) REFERENCES `b___beitragszuordnungen` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `FK_meldeliste_BSG` FOREIGN KEY (`BSG`) REFERENCES `b_bsg` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT `FK_meldeliste_mitglieder` FOREIGN KEY (`MNr`) REFERENCES `b_mitglieder` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT `unique_kombinationen` UNIQUE (`MNr`, `Beitragsjahr`, `Zuordnung`, `Zuordnung_ID`)
+)
+ENGINE = InnoDB;
+CREATE INDEX `FK_medleliste_beitragszuordnungen` 
+ON `b_meldeliste` (
+  `Zuordnung` ASC
+);
+CREATE INDEX `FK_meldeliste_BSG` 
+ON `b_meldeliste` (
+  `BSG` ASC
+);
+
+
 Trigger
 -------
 
@@ -233,6 +272,8 @@ END$$
 DROP TRIGGER IF EXISTS trg_b_mitglieder_in_sparten_delete_historie;
 DELIMITER $$
 
+#####################################################################################
+
 CREATE TRIGGER trg_b_mitglieder_in_sparten_delete_historie
 AFTER DELETE ON b_mitglieder_in_sparten
 FOR EACH ROW
@@ -259,3 +300,142 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+#####################################################################################
+
+ABRUF über CRONJOB
+------------------
+INSERT IGNORE INTO b_meldeliste
+    (MNr, BSG, Zuordnung, Zuordnung_ID, Betrag, Beitragsjahr)
+SELECT
+    m.id               AS MNr,
+    m.BSG              AS BSG,
+    1                  AS Zuordnung,
+    b.Verband          AS Zuordnung_ID,
+    r.Basisbeitrag     AS Betrag,
+    YEAR(CURDATE())    AS Beitragsjahr
+FROM b_mitglieder AS m
+JOIN b_bsg AS b ON b.id = m.BSG
+JOIN b_regionalverband AS r ON r.id = b.Verband
+WHERE m.BSG IS NOT NULL;
+
+INSERT IGNORE INTO b_meldeliste
+    (MNr, BSG, Zuordnung, Zuordnung_ID, Betrag, Beitragsjahr)
+SELECT 
+    mis.Mitglied      AS MNr,
+    mis.BSG           AS BSG,
+    2                 AS Zuordnung,
+    mis.Sparte        AS Zuordnung_ID,
+    s.Spartenbeitrag  AS Betrag,
+    YEAR(CURDATE())   AS Beitragsjahr
+FROM b_mitglieder_in_sparten AS mis
+JOIN b_sparte AS s ON s.id = mis.Sparte;
+
+
+
+
+
+
+DROP VIEW IF EXISTS b_v_meldeliste_dieses_jahr;
+CREATE VIEW b_v_meldeliste_dieses_jahr AS 
+(SELECT
+l.id,
+l.Timestamp as Erfasst_am,
+l.Beitragsjahr,
+concat(m.Vorname, ' ',m.Nachname, ' (',m.id, ')') as Mitglied,
+concat (b.BSG, ' (',b.VKZ,')') as Zahlungspflichtige_BSG,
+z.Zweck as Zuordnung,
+r.Kurzname as Beschreibung,
+r.Basisbeitrag as Betrag
+FROM b_meldeliste            as l
+JOIN b_mitglieder            as m on m.id = l.MNr
+JOIN b_bsg                   as b on b.id = l.BSG
+JOIN b___beitragszuordnungen as z on z.id = l.Zuordnung
+JOIN b_regionalverband       as r on r.id = l.Zuordnung_ID
+WHERE Zuordnung = 1 AND Beitragsjahr = YEAR(CURDATE())
+
+UNION 
+
+SELECT
+l.id,
+l.Timestamp as Erfasst_am,
+l.Beitragsjahr,
+concat(m.Vorname, ' ',m.Nachname, ' (',m.id, ')') as Mitglied,
+concat (b.BSG, ' (',b.VKZ,')') as Zahlungspflichtige_BSG,
+z.Zweck as Zuordnung,
+s.Sparte as Beschreibung,
+s.Spartenbeitrag as Betrag
+FROM b_meldeliste            as l
+JOIN b_mitglieder            as m on m.id = l.MNr
+JOIN b_bsg                   as b on b.id = l.BSG
+JOIN b___beitragszuordnungen as z on z.id = l.Zuordnung
+JOIN b_sparte                as s on s.id = l.Zuordnung_ID
+WHERE Zuordnung = 2 AND Beitragsjahr = YEAR(CURDATE())
+);
+
+
+DROP VIEW IF EXISTS b_v_meldeliste_letztes_jahr;
+CREATE VIEW b_v_meldeliste_letztes_jahr AS 
+(SELECT
+l.id,
+l.Timestamp as Erfasst_am,
+l.Beitragsjahr,
+concat(m.Vorname, ' ',m.Nachname, ' (',m.id, ')') as Mitglied,
+concat (b.BSG, ' (',b.VKZ,')') as Zahlungspflichtige_BSG,
+z.Zweck as Zuordnung,
+r.Kurzname as Beschreibung,
+r.Basisbeitrag as Betrag
+FROM b_meldeliste            as l
+JOIN b_mitglieder            as m on m.id = l.MNr
+JOIN b_bsg                   as b on b.id = l.BSG
+JOIN b___beitragszuordnungen as z on z.id = l.Zuordnung
+JOIN b_regionalverband       as r on r.id = l.Zuordnung_ID
+WHERE Zuordnung = 1 AND Beitragsjahr = YEAR(CURDATE()) -1
+
+UNION 
+
+SELECT
+l.id,
+l.Timestamp as Erfasst_am,
+l.Beitragsjahr,
+concat(m.Vorname, ' ',m.Nachname, ' (',m.id, ')') as Mitglied,
+concat (b.BSG, ' (',b.VKZ,')') as Zahlungspflichtige_BSG,
+z.Zweck as Zuordnung,
+s.Sparte as Beschreibung,
+s.Spartenbeitrag as Betrag
+FROM b_meldeliste            as l
+JOIN b_mitglieder            as m on m.id = l.MNr
+JOIN b_bsg                   as b on b.id = l.BSG
+JOIN b___beitragszuordnungen as z on z.id = l.Zuordnung
+JOIN b_sparte                as s on s.id = l.Zuordnung_ID
+WHERE Zuordnung = 2 AND Beitragsjahr = YEAR(CURDATE())-1 
+);
+
+
+
+Bau das noch ein:
+ALTER DATABASE <DATENBANK>
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_0900_ai_ci;
+
+  SELECT CONCAT('ALTER TABLE `', TABLE_NAME, '` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;')
+FROM information_schema.TABLES
+WHERE TABLE_SCHEMA = 'MOBS_local_DEV';
+
+
+
+
+UNIQUE VKZ !!
+
+
+SONNTAG
+- Ansicht der b_v - Views einbauen (ACHTUNG - Leserechte beachten! Ebene Regionalverband (aber Achtung - was ist,
+ wenn Mitglied wechselt? Es müsste immer
+die zahlungspflichtige BSG sein - aber was ist, wenn NULL und wie kann das überhaupt passieren?
+Wie ist es JETZT geregelt?
+
+- SOLL-Berechnung auf Grundlage der Meldeliste stellen
+
+- QS - System einstellen
+
+- Alle DB-Operationen (hier) bei der prod $ QS-DB machen

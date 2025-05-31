@@ -13,8 +13,8 @@ header('Cache-Control: post-check=0, pre-check=0',false);
 header('Pragma: no-cache');
 
 require_once(__DIR__."/../config/config.php");
-require_once(__DIR__."/classes/datenbank.php");
-$db = new Datenbank();
+//require_once(__DIR__."/classes/datenbank.php");
+//$db = new Datenbank();
 
 // Framework einbindungen - einheitlich Bootstrap 5.3.0
 echo "<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>";
