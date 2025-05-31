@@ -439,3 +439,5 @@ Wie ist es JETZT geregelt?
 - QS - System einstellen
 
 - Alle DB-Operationen (hier) bei der prod $ QS-DB machen
+
+- Noch nicht geklärt: Soll in den configs in den Suchqueries das "info:" rein oder nicht? Ausprobieren!
