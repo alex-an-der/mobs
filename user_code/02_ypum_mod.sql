@@ -10,3 +10,11 @@ CREATE TABLE `y_deleted_users` (
    PRIMARY KEY (`id`)
 )
 ENGINE = InnoDB;
+
+-- Userfields müssen definiert werden, BEVOR die y-views erstellt werden
+INSERT INTO `y_user_fields` (`ID`, `uf_name`, `fieldname`) VALUES ('4', 'Vorname', 'vname');
+INSERT INTO `y_user_fields` (`ID`, `uf_name`, `fieldname`) VALUES ('5', 'Nachname', 'nname');
+INSERT INTO `y_user_fields` (`ID`, `uf_name`, `fieldname`) VALUES ('6', 'Mail_OK', 'okformail');
+INSERT INTO `y_user_fields` (`ID`, `uf_name`, `fieldname`) VALUES ('7', 'Geschlecht', 'geschlecht');
+INSERT INTO `y_user_fields` (`ID`, `uf_name`, `fieldname`) VALUES ('8', 'Geburtsdatum', 'gebdatum');
+INSERT INTO `y_user_fields` (`ID`, `uf_name`, `fieldname`) VALUES ('9', 'bsg', 'bsg');

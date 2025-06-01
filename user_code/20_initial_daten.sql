@@ -148,3 +148,4 @@ INSERT INTO `b___sportart` (`id`, `Sportart`, `Sportart_Nr`) VALUES (107, 'Funkt
 INSERT INTO `b___sportart` (`id`, `Sportart`, `Sportart_Nr`) VALUES (108, 'Vorstand', 8510);
 INSERT INTO `b___sportart` (`id`, `Sportart`, `Sportart_Nr`) VALUES (109, 'Helfer', 8520);
 INSERT INTO `b___sportart` (`id`, `Sportart`, `Sportart_Nr`) VALUES (110, 'Sonstige Ballsportarten', 8530);
+

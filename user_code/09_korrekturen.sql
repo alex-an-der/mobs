@@ -27,3 +27,4 @@ ADD COLUMN `seit` DATE DEFAULT (CURRENT_DATE);
 
 ALTER TABLE `b_regionalverband` ADD  `Basisbeitrag` DECIMAL(10,2) NOT NULL DEFAULT 0.00 ;
 ALTER TABLE `b_sparte` ADD  `Spartenbeitrag` DECIMAL(10,2) NOT NULL DEFAULT 0.00 ;
+
