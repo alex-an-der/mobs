@@ -213,151 +213,6 @@ DELIMITER ;
 
 -- -----------------------------------------------------------------------------------
 
-DROP TRIGGER IF EXISTS trg_b_mitglieder_update_historie;
-DELIMITER $$
-CREATE TRIGGER trg_b_mitglieder_update_historie
-AFTER UPDATE ON b_mitglieder
-FOR EACH ROW
-BEGIN
-    DECLARE alter_wert VARCHAR(100);
-    DECLARE neuer_wert VARCHAR(100);
-
-    -- Für jede relevante Spalte prüfen, ob sich der Wert geändert hat
-    IF NOT (OLD.Vorname <=> NEW.Vorname) THEN
-        INSERT INTO b_mitglieder_historie (MNr, Aktion)
-        VALUES (OLD.id, CONCAT('Änderung Vorname von ''', IFNULL(OLD.Vorname, ''), ''' zu ''', IFNULL(NEW.Vorname, ''), ''''));
-    END IF;
-
-    IF NOT (OLD.Nachname <=> NEW.Nachname) THEN
-        INSERT INTO b_mitglieder_historie (MNr, Aktion)
-        VALUES (OLD.id, CONCAT('Änderung Nachname von ''', IFNULL(OLD.Nachname, ''), ''' zu ''', IFNULL(NEW.Nachname, ''), ''''));
-    END IF;
-
-    IF NOT (OLD.BSG <=> NEW.BSG) THEN
-        SELECT concat(BSG, ' (VKZ ', VKZ, ')') INTO alter_wert FROM b_bsg WHERE id = OLD.BSG;
-        SELECT concat(BSG, ' (VKZ ', VKZ, ')') INTO neuer_wert FROM b_bsg WHERE id = NEW.BSG;
-        INSERT INTO b_mitglieder_historie (MNr, Aktion)
-        VALUES (OLD.id, CONCAT('Änderung BSG von ''', IFNULL(alter_wert, ''), ''' zu ''', IFNULL(neuer_wert, ''), ''''));
-    END IF;
-
-    IF NOT (OLD.Mail <=> NEW.Mail) THEN
-        INSERT INTO b_mitglieder_historie (MNr, Aktion)
-        VALUES (OLD.id, CONCAT('Änderung Mail von ''', IFNULL(OLD.Mail, ''), ''' zu ''', IFNULL(NEW.Mail, ''), ''''));
-    END IF;
-
-    IF NOT (OLD.aktiv <=> NEW.aktiv) THEN
-        SELECT wert INTO alter_wert FROM b___an_aus WHERE id = OLD.aktiv;
-        SELECT wert INTO neuer_wert FROM b___an_aus WHERE id = NEW.aktiv;
-        INSERT INTO b_mitglieder_historie (MNr, Aktion)
-        VALUES (OLD.id, CONCAT('Änderung aktiv von ''', IFNULL(alter_wert, ''), ''' zu ''', IFNULL(neuer_wert, ''), ''''));
-    END IF;
-    
-    IF NOT (OLD.Geburtsdatum <=> NEW.Geburtsdatum) THEN
-        INSERT INTO b_mitglieder_historie (MNr, Aktion)
-        VALUES (
-            OLD.id,
-            CONCAT(
-                'Änderung Geburtsdatum von ''',
-                IFNULL(DATE_FORMAT(OLD.Geburtsdatum, '%d.%m.%Y'), ''),
-                ''' zu ''',
-                IFNULL(DATE_FORMAT(NEW.Geburtsdatum, '%d.%m.%Y'), ''),
-                ''''
-            )
-        );
-    END IF;
-
-    IF NOT (OLD.Mailbenachrichtigung <=> NEW.Mailbenachrichtigung) THEN
-        SELECT wert INTO alter_wert FROM b___an_aus WHERE id = OLD.Mailbenachrichtigung;
-        SELECT wert INTO neuer_wert FROM b___an_aus WHERE id = NEW.Mailbenachrichtigung;
-        INSERT INTO b_mitglieder_historie (MNr, Aktion)
-        VALUES (OLD.id, CONCAT('Änderung Mailbenachrichtigung von ''', IFNULL(alter_wert, ''), ''' zu ''', IFNULL(neuer_wert, ''), ''''));
-    END IF;
-
-    IF NOT (OLD.Geschlecht <=> NEW.Geschlecht) THEN
-        SELECT auswahl INTO alter_wert FROM b___geschlecht WHERE id = OLD.Geschlecht;
-        SELECT auswahl INTO neuer_wert FROM b___geschlecht WHERE id = NEW.Geschlecht;
-        INSERT INTO b_mitglieder_historie (MNr, Aktion)
-        VALUES (OLD.id, CONCAT('Änderung Geschlecht von ''', IFNULL(alter_wert, ''), ''' zu ''', IFNULL(neuer_wert, ''), ''''));
-    END IF;
-
-    IF NOT (OLD.y_id <=> NEW.y_id) THEN
-        INSERT INTO b_mitglieder_historie (MNr, Aktion)
-        VALUES (OLD.id, CONCAT('Änderung y_id von ''', IFNULL(OLD.y_id, ''), ''' zu ''', IFNULL(NEW.y_id, ''), ''''));
-    END IF;
-
-END$$
-
-DELIMITER ;
-
--- -----------------------------------------------------------------------------------
-
--- Trigger für Anmeldung in einer Sparte
-DROP TRIGGER IF EXISTS trg_b_mitglieder_in_sparten_insert_historie;
-DELIMITER $$
-
-CREATE TRIGGER trg_b_mitglieder_in_sparten_insert_historie
-AFTER INSERT ON b_mitglieder_in_sparten
-FOR EACH ROW
-BEGIN
-    DECLARE spartenname VARCHAR(255);
-    DECLARE bsgname VARCHAR(255);
-
-    -- Spartenname inkl. Verband holen
-    SELECT CONCAT(s.Sparte, ' (', r.Kurzname, ')')
-      INTO spartenname
-      FROM b_sparte AS s
-      JOIN b_regionalverband AS r ON r.id = s.Verband
-     WHERE s.id = NEW.Sparte;
-
-    -- BSG-Name holen
-    SELECT BSG INTO bsgname FROM b_bsg WHERE id = NEW.BSG;
-
-    -- Eintrag in Historie
-    INSERT INTO b_mitglieder_historie (MNr, Aktion)
-    VALUES (
-        NEW.Mitglied,
-        CONCAT('Anmeldung in der Sparte ', IFNULL(spartenname, ''), ' für die BSG ', IFNULL(bsgname, ''))
-    );
-END$$
-
-DELIMITER ;
-
--- -----------------------------------------------------------------------------------
-
-
--- Trigger für Abmeldung aus einer Sparte
-DROP TRIGGER IF EXISTS trg_b_mitglieder_in_sparten_delete_historie;
-DELIMITER $$
-
-CREATE TRIGGER trg_b_mitglieder_in_sparten_delete_historie
-AFTER DELETE ON b_mitglieder_in_sparten
-FOR EACH ROW
-BEGIN
-    DECLARE spartenname VARCHAR(255);
-    DECLARE bsgname VARCHAR(255);
-
-    -- Spartenname inkl. Verband holen
-    SELECT CONCAT(s.Sparte, ' (', r.Kurzname, ')')
-      INTO spartenname
-      FROM b_sparte AS s
-      JOIN b_regionalverband AS r ON r.id = s.Verband
-     WHERE s.id = OLD.Sparte;
-
-    -- BSG-Name holen
-    SELECT BSG INTO bsgname FROM b_bsg WHERE id = OLD.BSG;
-
-    -- Eintrag in Historie
-    INSERT INTO b_mitglieder_historie (MNr, Aktion)
-    VALUES (
-        OLD.Mitglied,
-        CONCAT('Abmeldung aus der Sparte ', IFNULL(spartenname, ''), ' für die BSG ', IFNULL(bsgname, ''))
-    );
-END$$
-
-DELIMITER ;
-
--- -----------------------------------------------------------------------------------
-
 DROP FUNCTION IF EXISTS berechtigte_elemente;
 DELIMITER //
 
@@ -559,3 +414,153 @@ BEGIN
 END //
 
 DELIMITER ;
+
+
+-- ------------------------------------------------------------
+-- v0.1.7
+-- ------------------------------------------------------------
+
+DROP TRIGGER IF EXISTS trg_b_mitglieder_update_historie;
+DELIMITER $$
+CREATE TRIGGER trg_b_mitglieder_update_historie
+AFTER UPDATE ON b_mitglieder
+FOR EACH ROW
+BEGIN
+    DECLARE alter_wert VARCHAR(100);
+    DECLARE neuer_wert VARCHAR(100);
+
+    -- Für jede relevante Spalte prüfen, ob sich der Wert geändert hat
+    IF NOT (OLD.Vorname <=> NEW.Vorname) THEN
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung Vorname von ''', IFNULL(OLD.Vorname, ''), ''' zu ''', IFNULL(NEW.Vorname, ''), ''''));
+    END IF;
+
+    IF NOT (OLD.Nachname <=> NEW.Nachname) THEN
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung Nachname von ''', IFNULL(OLD.Nachname, ''), ''' zu ''', IFNULL(NEW.Nachname, ''), ''''));
+    END IF;
+
+    IF NOT (OLD.BSG <=> NEW.BSG) THEN
+        SELECT concat(BSG, ' (VKZ ', VKZ, ')') INTO alter_wert FROM b_bsg WHERE id = OLD.BSG;
+        SELECT concat(BSG, ' (VKZ ', VKZ, ')') INTO neuer_wert FROM b_bsg WHERE id = NEW.BSG;
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung BSG von ''', IFNULL(alter_wert, ''), ''' zu ''', IFNULL(neuer_wert, ''), ''''));
+    END IF;
+
+    IF NOT (OLD.Mail <=> NEW.Mail) THEN
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung Mail von ''', IFNULL(OLD.Mail, ''), ''' zu ''', IFNULL(NEW.Mail, ''), ''''));
+    END IF;
+
+    IF NOT (OLD.aktiv <=> NEW.aktiv) THEN
+        SELECT wert INTO alter_wert FROM b___an_aus WHERE id = OLD.aktiv;
+        SELECT wert INTO neuer_wert FROM b___an_aus WHERE id = NEW.aktiv;
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung aktiv von ''', IFNULL(alter_wert, ''), ''' zu ''', IFNULL(neuer_wert, ''), ''''));
+    END IF;
+    
+    IF NOT (OLD.Geburtsdatum <=> NEW.Geburtsdatum) THEN
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (
+            OLD.id,
+            CONCAT(
+                'Änderung Geburtsdatum von ''',
+                IFNULL(DATE_FORMAT(OLD.Geburtsdatum, '%d.%m.%Y'), ''),
+                ''' zu ''',
+                IFNULL(DATE_FORMAT(NEW.Geburtsdatum, '%d.%m.%Y'), ''),
+                ''''
+            )
+        );
+    END IF;
+
+    IF NOT (OLD.Mailbenachrichtigung <=> NEW.Mailbenachrichtigung) THEN
+        SELECT wert INTO alter_wert FROM b___an_aus WHERE id = OLD.Mailbenachrichtigung;
+        SELECT wert INTO neuer_wert FROM b___an_aus WHERE id = NEW.Mailbenachrichtigung;
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung Mailbenachrichtigung von ''', IFNULL(alter_wert, ''), ''' zu ''', IFNULL(neuer_wert, ''), ''''));
+    END IF;
+
+    IF NOT (OLD.Geschlecht <=> NEW.Geschlecht) THEN
+        SELECT auswahl INTO alter_wert FROM b___geschlecht WHERE id = OLD.Geschlecht;
+        SELECT auswahl INTO neuer_wert FROM b___geschlecht WHERE id = NEW.Geschlecht;
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung Geschlecht von ''', IFNULL(alter_wert, ''), ''' zu ''', IFNULL(neuer_wert, ''), ''''));
+    END IF;
+
+    IF NOT (OLD.y_id <=> NEW.y_id) THEN
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung y_id von ''', IFNULL(OLD.y_id, ''), ''' zu ''', IFNULL(NEW.y_id, ''), ''''));
+    END IF;
+
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------
+
+-- Trigger für Anmeldung in einer Sparte
+DROP TRIGGER IF EXISTS trg_b_mitglieder_in_sparten_insert_historie;
+DELIMITER $$
+
+CREATE TRIGGER trg_b_mitglieder_in_sparten_insert_historie
+AFTER INSERT ON b_mitglieder_in_sparten
+FOR EACH ROW
+BEGIN
+    DECLARE spartenname VARCHAR(255);
+    DECLARE bsgname VARCHAR(255);
+
+    -- Spartenname inkl. Verband holen
+    SELECT CONCAT(s.Sparte, ' (', r.Kurzname, ')')
+      INTO spartenname
+      FROM b_sparte AS s
+      JOIN b_regionalverband AS r ON r.id = s.Verband
+     WHERE s.id = NEW.Sparte;
+
+    -- BSG-Name holen
+    SELECT BSG INTO bsgname FROM b_bsg WHERE id = NEW.BSG;
+
+    -- Eintrag in Historie
+    INSERT INTO b_mitglieder_historie (MNr, Aktion)
+    VALUES (
+        NEW.Mitglied,
+        CONCAT('Anmeldung in der Sparte ', IFNULL(spartenname, ''), ' für die BSG ', IFNULL(bsgname, ''))
+    );
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------
+
+
+-- Trigger für Abmeldung aus einer Sparte
+DROP TRIGGER IF EXISTS trg_b_mitglieder_in_sparten_delete_historie;
+DELIMITER $$
+
+CREATE TRIGGER trg_b_mitglieder_in_sparten_delete_historie
+AFTER DELETE ON b_mitglieder_in_sparten
+FOR EACH ROW
+BEGIN
+    DECLARE spartenname VARCHAR(255);
+    DECLARE bsgname VARCHAR(255);
+
+    -- Spartenname inkl. Verband holen
+    SELECT CONCAT(s.Sparte, ' (', r.Kurzname, ')')
+      INTO spartenname
+      FROM b_sparte AS s
+      JOIN b_regionalverband AS r ON r.id = s.Verband
+     WHERE s.id = OLD.Sparte;
+
+    -- BSG-Name holen
+    SELECT BSG INTO bsgname FROM b_bsg WHERE id = OLD.BSG;
+
+    -- Eintrag in Historie
+    INSERT INTO b_mitglieder_historie (MNr, Aktion)
+    VALUES (
+        OLD.Mitglied,
+        CONCAT('Abmeldung aus der Sparte ', IFNULL(spartenname, ''), ' für die BSG ', IFNULL(bsgname, ''))
+    );
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------
