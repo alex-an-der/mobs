@@ -1,4 +1,9 @@
 <?php
+$meldedatum = date('Y') . '-02-15';
+$heute = date('Y-m-d');
+if ($heute < $meldedatum) {
+    return;
+}
 require_once(__DIR__."/../config/db_connect.php");
 
 $cnt1 = $db->query("INSERT IGNORE INTO b_meldeliste

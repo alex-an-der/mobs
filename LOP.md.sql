@@ -448,7 +448,7 @@ WHERE TABLE_SCHEMA = 'MOBS_local_DEV';
 
 
 UNIQUE VKZ !!
-
+(Gibt es schon, PRO Verband (was korrekt ist))
 
 SONNTAG
 - Ansicht der b_v - Views einbauen (ACHTUNG - Leserechte beachten! Ebene Regionalverband (aber Achtung - was ist,
