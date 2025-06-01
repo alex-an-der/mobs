@@ -115,7 +115,8 @@ $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
     "auswahltext" => "$bericht Sparten und ihre Mitglieder",
     "writeaccess" => false,
-    "query" => "SELECT mis.id as id, v.Kurzname as Verband, s.Sparte as Sparte, b.BSG as BSG, concat (m.Vorname,' ',m.Nachname) as Mitglied
+    "query" => "SELECT mis.id as id, v.Kurzname as Verband, s.Sparte as Sparte, b.BSG as BSG, 
+                    concat (m.Vorname,' ',m.Nachname,' (',m.id,')') as Mitglied
                 from b_mitglieder_in_sparten as mis
                 join b_sparte as s on mis.Sparte = s.id
                 join b_regionalverband as v on s.Verband = v.id
@@ -261,7 +262,7 @@ $anzuzeigendeDaten[] = array(
 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_v_meldeliste_dieses_jahr",
-    "auswahltext" => "$bericht Medldeliste ".$curyear." auf Ebene Regionalverband",
+    "auswahltext" => "$bericht Meldeliste ".$curyear." auf Ebene Regionalverband",
     "writeaccess" => false,
     "import" => false,
     "query" => "SELECT
@@ -290,7 +291,7 @@ $anzuzeigendeDaten[] = array(
 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_v_meldeliste_letztes_jahr",
-    "auswahltext" => "$bericht Medldeliste ".($curyear-1)." auf Ebene Regionalverband",
+    "auswahltext" => "$bericht Meldeliste ".($curyear-1)." auf Ebene Regionalverband",
     "writeaccess" => false,
     "import" => false,
     "query" => "SELECT

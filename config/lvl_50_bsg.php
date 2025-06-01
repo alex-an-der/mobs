@@ -216,7 +216,7 @@ $anzuzeigendeDaten[] = array(
 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_v_meldeliste_dieses_jahr",
-    "auswahltext" => "$bericht Medldeliste ".$curyear." auf Ebene BSG",
+    "auswahltext" => "$bericht Meldeliste ".$curyear." auf Ebene BSG",
     "writeaccess" => false,
     "import" => false,
     "query" => "SELECT
@@ -245,7 +245,7 @@ $anzuzeigendeDaten[] = array(
 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_v_meldeliste_letztes_jahr",
-    "auswahltext" => "$bericht Medldeliste ".($curyear-1)." auf Ebene BSG",
+    "auswahltext" => "$bericht Meldeliste ".($curyear-1)." auf Ebene BSG",
     "writeaccess" => false,
     "import" => false,
     "query" => "SELECT
