@@ -316,3 +316,96 @@ LÖSUNG: Keine BSG = kein Basisbeitrag, aber auch keine Sparten möglich -> pass
 - Alle DB-Operationen (hier) bei der prod $ QS-DB machen
 
 - Noch nicht geklärt: Soll in den configs in den Suchqueries das "info:" rein oder nicht? Ausprobieren!
+
+
+
+
+index.php
+
+
+headers.forEach(
+                fieldName => 
+                    {  // Info-Felder überspringen
+                        if (fieldName.startsWith('info:')) return;
+                        const div = document.createElement('div'); 
+                        div.className = 'form-group mb-3';
+
+
+UND
+
+
+if (foreignKeys && foreignKeys[fieldName]) {
+                // Create select dropdown for foreign key fields
+                const select = document.createElement('select');
+                select.className = 'form-control';
+                select.name = fieldName;
+
+                // Filtere alle echten FK-Optionen (ohne NULL/undefined)
+                const fkOptions = (foreignKeys[fieldName] || []).filter(fk => fk && fk.id !== undefined && fk.anzeige !== undefined && fk.id !== null);
+
+                if (fkOptions.length === 0) {
+                    // Keine Daten gefunden
+                    const nullOption = document.createElement('option');
+                    nullOption.value = "NULL";
+                    nullOption.textContent = "Keine Daten gefunden";
+                    select.appendChild(nullOption);
+                    select.disabled = true;
+                } else {
+                    // Add NULL option
+                    const nullOption = document.createElement('option');
+                    nullOption.value = "NULL";
+                    nullOption.textContent = "<?=NULL_WERT?>";
+                    select.appendChild(nullOption);
+
+                    // Add all foreign key options
+                    fkOptions.forEach(fk => {
+                        const option = document.createElement('option');
+                        option.value = fk.id;
+                        option.textContent = fk.anzeige;
+                        select.appendChild(option);
+                    });
+
+                    // If there's only one valid option (außer NULL), automatisch auswählen
+                    if (fkOptions.length === 1) {
+                        select.options[1].selected = true;
+                    }
+                }
+
+                div.appendChild(select);
+            }
+                /* vor v0.1.7b (kompletter if-Block vor else) DBI
+                if (foreignKeys && foreignKeys[fieldName]) {
+                    // Create select dropdown for foreign key fields
+                    const select = document.createElement('select');
+                    select.className = 'form-control';
+                    select.name = fieldName;
+
+                    // Add NULL option only if not info:-field
+                    if (!isInfo) {
+                        const nullOption = document.createElement('option');
+                        nullOption.value = "NULL";
+                        nullOption.textContent = "<  ?=NULL_WERT?>";
+                        select.appendChild(nullOption);
+                    }
+                    // Count valid options
+                    const validOptions = [];
+                    
+                    // Add all foreign key options
+                    if (foreignKeys[fieldName] && foreignKeys[fieldName].length > 0) {
+                        foreignKeys[fieldName].forEach(fk => {
+                            if (fk && fk.id !== undefined && fk.anzeige !== undefined) {
+                                const option = document.createElement('option');
+                                option.value = fk.id;
+                                option.textContent = fk.anzeige;
+                                select.appendChild(option);
+                                validOptions.push(option);
+                            }
+                        });
+                    }
+                    
+                    // If there's only one valid option (besides NULL), automatically select it
+                    if (validOptions.length === 1) {
+                        validOptions[0].selected = true;
+                    }
+                    
+                    div.appendChild(select); */

@@ -978,7 +978,9 @@ $tabelle_upper = strtoupper($tabelle);
 
             headers.forEach(
                 fieldName => 
-                    {  const div = document.createElement('div'); 
+                    {  // Info-Felder überspringen
+                        if (fieldName.startsWith('info:')) return;
+                        const div = document.createElement('div'); 
                         div.className = 'form-group mb-3';
                     // Info-Label-Handling
                     let isInfo = false;
