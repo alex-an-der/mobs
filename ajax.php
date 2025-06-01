@@ -260,15 +260,24 @@ try {
                                     if (isset($columnTypeResult['data'][0]['Type'])) {
                                         $col['Type'] = $columnTypeResult['data'][0]['Type'];
                                     }
+                                    if (isset($columnTypeResult['data'][0]['Null'])) {
+                                        $col['nullable'] = ($columnTypeResult['data'][0]['Null'] === 'YES');
+                                    }
                                 } catch (Exception $e) {
                                     // ignore
                                 }
-                                // referenzquery für dieses Feld?
+                                // referenzquery für dieses Feld? DBI821
                                 if (isset($referenzqueries[$columnName])) {
                                     try {
                                         $fkResult = $db->query($referenzqueries[$columnName]);
                                         if (isset($fkResult['data'])) {
                                             $foreignKeys[$columnName] = $fkResult['data'];
+                                        }else{ // referenzquery, aber keine Daten
+                                            if($col['nullable']){ // Array im Array, also [[...]]
+                                                $foreignKeys[$columnName] = [['id' => NULL, 'anzeige' => NULL_WERT]];
+                                            }else{
+                                                $foreignKeys[$columnName] = [['id' => -1, 'anzeige' => NULL_BUT_NOT_NULLABLE]];
+                                            }
                                         }
                                     } catch (Exception $e) {
                                         // ignore

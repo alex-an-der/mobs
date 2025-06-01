@@ -24,6 +24,7 @@ require_once(__DIR__."/db_connect.php");
 define("TITEL", "LBSV Nds. Mitgliederverwaltung");
 # Wie sollen NULL-Werte (=keine Zuordnung) dargestellt werden?
 define("NULL_WERT", "---");
+define("NULL_BUT_NOT_NULLABLE", "Fehler: Mindestens eine Auswahlmöglichkeit muss vorhanden sein.");
 
 # Rechtemanagement (YPUM)
 // $berechtigung = $ypum->getUserData();

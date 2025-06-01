@@ -11,13 +11,13 @@ $anzuzeigendeDaten[] = array(
     ",
     "referenzqueries" => array(
         "Verband" => "SELECT v.id, v.Verband as anzeige
-        FROM b_regionalverband as v
-        WHERE FIND_IN_SET(v.id, berechtigte_elemente($uid, 'verband')) > 0
-        ORDER BY anzeige;
+                        FROM b_regionalverband as v
+                        WHERE FIND_IN_SET(v.id, berechtigte_elemente($uid, 'verband')) > 0
+                        ORDER BY anzeige;
         ",
         "Spartenleiter" => "SELECT m.id, CONCAT(Nachname, ', ', Vorname) as anzeige
-        from b_mitglieder as m
-        ORDER BY anzeige;",
+                                from b_mitglieder as m
+                                ORDER BY anzeige;",
         "Sportart" => "SELECT id, CONCAT (Sportart,' (',Sportart_Nr,')') as anzeige from b___sportart ORDER BY anzeige;"
     ),
     "spaltenbreiten" => array(

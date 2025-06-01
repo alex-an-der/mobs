@@ -996,31 +996,37 @@ $tabelle_upper = strtoupper($tabelle);
                 label.textContent = displayFieldName;
                 div.appendChild(label);
 
-                // FK-Select
-                if (foreignKeys && foreignKeys[fieldName]) {
+                // Ist die COL eine Spalte mit Referenzquery/"foreignKeys-Spalte", dann mach einen Select, sonst ein Input
+                if (foreignKeys[fieldName]) {
                     // Create select dropdown for foreign key fields
                     const select = document.createElement('select');
                     select.className = 'form-control';
                     select.name = fieldName;
+                    /* Infofelder werden gar nicht mehr angezeigt. Könnte also weg  (1.6.25)
                     // Add NULL option only if not info:-field
                     if (!isInfo) {
                         const nullOption = document.createElement('option');
                         nullOption.value = "NULL";
-                        nullOption.textContent = "<?=NULL_WERT?>";
+                        nullOption.textContent = "< ?=NULL_WERT?>";
                         select.appendChild(nullOption);
-                    }
-                    // Count valid options
-                    const validOptions = [];
-                    
+                    }*/
+
+
+                    // Optionen sammeln
+                    const validOptions = []; 
                     // Add all foreign key options
-                    if (foreignKeys[fieldName] && foreignKeys[fieldName].length > 0) {
+                    if (foreignKeys[fieldName].length > 0) {
                         foreignKeys[fieldName].forEach(fk => {
-                            if (fk && fk.id !== undefined && fk.anzeige !== undefined) {
+                            if (fk && fk.id !== undefined && fk.anzeige !== undefined) {                                
                                 const option = document.createElement('option');
                                 option.value = fk.id;
                                 option.textContent = fk.anzeige;
                                 select.appendChild(option);
                                 validOptions.push(option);
+                                if(fk.id==-1){
+                                    // Select nach dem Hinzufügen der Option deaktivieren
+                                    select.disabled = true;
+                                }
                             }
                         });
                     }
@@ -1028,7 +1034,7 @@ $tabelle_upper = strtoupper($tabelle);
                     // If there's only one valid option (besides NULL), automatically select it
                     if (validOptions.length === 1) {
                         validOptions[0].selected = true;
-                    }
+                    }                    
                     
                     div.appendChild(select); 
                 } else { // else = no Foreign Key
@@ -1036,7 +1042,7 @@ $tabelle_upper = strtoupper($tabelle);
                     const input = document.createElement('input');
                     input.className = 'form-control';
                     input.name = fieldName;
-                    input.placeholder = "<?=NULL_WERT?>";
+                    input.placeholder = ""; 
 
                     // Nur für Felder ohne info:-Prefix Typ bestimmen
                     if (!isInfo) {
