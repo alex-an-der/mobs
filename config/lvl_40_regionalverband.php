@@ -154,51 +154,58 @@ $anzuzeigendeDaten[] = array(
     "auswahltext" => "$bericht Salden ".$curyear,
     "writeaccess" => false,
     "import" => false,
-    "query" => "SELECT 
-                    b.id as id,
-                    r.Kurzname as Verband,
-                    b.BSG as BSG_Name,
-                    ze.Haben as 'Haben/€',
-                    IFNULL(SUM(abg.Gesamtbeitrag), 0) AS 'Soll/€',
-                    IFNULL(ze.Haben, 0) - IFNULL(SUM(abg.Gesamtbeitrag),0) AS 'Saldo/€'
-                FROM b_bsg as b
-                JOIN b_regionalverband as r ON b.Verband = r.id
-                LEFT JOIN (
-                    -- Verbandsbeiträge + Spartenbeiträge
-                    SELECT 
-                        b.id AS BSG_ID,
-                        CAST(REPLACE(r.Basisbeitrag, '€', '') AS DECIMAL(10,2)) AS Gesamtbeitrag
-                    FROM b_mitglieder AS m
-                    JOIN b_bsg AS b ON m.BSG = b.id
-                    JOIN b_regionalverband AS r ON b.Verband = r.id
-                    WHERE YEAR(m.Stammmitglied_seit) <= YEAR(CURDATE())
-                    UNION ALL
-                    SELECT 
-                        b.id AS BSG_ID,
-                        CAST(REPLACE(s.Spartenbeitrag, '€', '') AS DECIMAL(10,2)) AS Gesamtbeitrag
-                    FROM b_mitglieder_in_sparten AS mis
-                    JOIN b_sparte AS s ON mis.Sparte = s.id
-                    JOIN b_mitglieder AS m ON mis.Mitglied = m.id
-                    JOIN b_bsg AS b ON mis.BSG = b.id
-                    WHERE YEAR(mis.seit) <= YEAR(CURDATE())
-                ) AS abg ON abg.BSG_ID = b.id
-                LEFT JOIN (
-                    SELECT BSG, SUM(Haben) AS Haben
-                    FROM b_zahlungseingaenge
-                    WHERE Abrechnungsjahr = YEAR(CURDATE())
-                    GROUP BY BSG
-                ) AS ze ON b.id = ze.BSG
-                WHERE FIND_IN_SET(r.id, berechtigte_elemente($uid, 'verband')) > 0
-                GROUP BY b.id, r.Kurzname, b.BSG, ze.Haben
-                ORDER BY b.BSG;
+    "query" =>
+    "SELECT 
+        kombi.BSG as id,
+        COALESCE(MIN(r.Kurzname), MIN(r_bsg.Kurzname)) as Verband,
+        kombi.BSG as Zahlungspflichtige_BSG,
+        CONCAT(IFNULL(SUM(ml.Betrag), 0.00),'€') AS Beiträge,
+        CONCAT(IFNULL(SUM(ze.Haben), 0.00),'€') as Einzahlungen,
+        CONCAT(IFNULL(SUM(ze.Haben), 0.00) - IFNULL(SUM(ml.Betrag), 0.00), '€') AS Saldo
+    FROM (
+        SELECT bsg_id AS BSG, Beitragsjahr AS Jahr
+        FROM b_v_meldeliste_dieses_jahr
+        WHERE Zahlungspflichtige_BSG IS NOT NULL
+        UNION
+        SELECT BSG, Abrechnungsjahr AS Jahr
+        FROM b_zahlungseingaenge
+        WHERE Abrechnungsjahr = YEAR(CURDATE())
+    ) AS kombi
+    LEFT JOIN b_v_meldeliste_dieses_jahr AS ml
+        ON ml.bsg_id = kombi.BSG AND ml.Beitragsjahr = kombi.Jahr
+    LEFT JOIN (
+        SELECT 
+            BSG, 
+            Abrechnungsjahr,
+            SUM(Haben) AS Haben
+        FROM b_zahlungseingaenge
+        WHERE Abrechnungsjahr = YEAR(CURDATE())
+        GROUP BY BSG, Abrechnungsjahr
+    ) AS ze 
+        ON ze.BSG = kombi.BSG AND ze.Abrechnungsjahr = kombi.Jahr
+    LEFT JOIN b_regionalverband as r on r.id = ml.rv_id
+    LEFT JOIN b_bsg AS bsg ON bsg.id = kombi.BSG
+    LEFT JOIN b_regionalverband AS r_bsg ON r_bsg.id = bsg.Verband
+    WHERE (ml.Zahlungspflichtige_BSG IS NOT NULL OR ze.Haben IS NOT NULL)
+    AND (
+            (ml.rv_id IS NULL AND FIND_IN_SET(bsg.Verband, berechtigte_elemente(1, 'verband')) > 0)
+            OR
+            (ml.rv_id IS NOT NULL AND FIND_IN_SET(ml.rv_id, berechtigte_elemente(1, 'verband')) > 0)
+        )
+    GROUP BY kombi.BSG
+    ORDER BY (IFNULL(SUM(ze.Haben), 0.00) - IFNULL(SUM(ml.Betrag), 0.00));
                 ",
-                "spaltenbreiten" => array(
-                    "Verband"         => "150",
-                    "BSG_Name"        => "300",
-                    "Haben/€"         => "100",
-                    "Soll/€"          => "100",
-                    "Saldo/€"         => "100"
-                )   
+    "referenzqueries" => array(
+        "Zahlungspflichtige_BSG" => "SELECT bsg.id as id, bsg.BSG as anzeige
+                FROM b_bsg as bsg;"
+    ),         
+    "spaltenbreiten" => array(
+        "Verband"         => "150",
+        "BSG_Name"        => "300",
+        "Haben/€"         => "100",
+        "Soll/€"          => "100",
+        "Saldo/€"         => "100"
+    )   
                 
 );
 
@@ -207,56 +214,59 @@ $anzuzeigendeDaten[] = array(
     "auswahltext" => "$bericht Salden ".($curyear-1),
     "writeaccess" => false,
     "import" => false,
-    "query" => "SELECT 
-                    abg.BSG_ID as id,
-                    r.Kurzname as Verband,
-                    abg.BSG_Name,
-                    ze.Haben as 'Haben/€',
-                    SUM(abg.Gesamtbeitrag) AS 'Soll/€',
-                    IFNULL(ze.Haben, 0) - IFNULL(SUM(abg.Gesamtbeitrag),0) AS 'Saldo/€'
-                FROM (
-                    -- Verbandsbeiträge
-                    SELECT 
-                        b.id AS BSG_ID,
-                        b.BSG AS BSG_Name,
-                        CAST(REPLACE(r.Basisbeitrag, '€', '') AS DECIMAL(10,2)) AS Gesamtbeitrag
-                    FROM b_mitglieder AS m
-                    JOIN b_bsg AS b ON m.BSG = b.id
-                    JOIN b_regionalverband AS r ON b.Verband = r.id
-                    WHERE YEAR(m.Stammmitglied_seit) <= YEAR(CURDATE()) -1
-
-                    UNION ALL
-
-                    -- Spartenbeiträge
-                    SELECT 
-                        b.id AS BSG_ID,
-                        b.BSG AS BSG_Name,
-                        CAST(REPLACE(s.Spartenbeitrag, '€', '') AS DECIMAL(10,2)) AS Gesamtbeitrag
-                    FROM b_mitglieder_in_sparten AS mis
-                    JOIN b_sparte AS s ON mis.Sparte = s.id
-                    JOIN b_mitglieder AS m ON mis.Mitglied = m.id
-                    JOIN b_bsg AS b ON mis.BSG = b.id
-                    WHERE YEAR(mis.seit) <= YEAR(CURDATE()) -1
-                ) AS abg
-                LEFT JOIN (
-                    SELECT BSG, SUM(Haben) AS Haben
-                    FROM b_zahlungseingaenge
-                    WHERE Abrechnungsjahr = YEAR(CURDATE()) -1
-                    GROUP BY BSG
-                ) AS ze ON abg.BSG_ID = ze.BSG
-                JOIN b_bsg as b ON b.id = abg.BSG_ID
-                JOIN b_regionalverband as r ON b.Verband = r.id
-                WHERE FIND_IN_SET(r.id, berechtigte_elemente($uid, 'verband')) > 0
-                GROUP BY abg.BSG_ID, r.Kurzname, abg.BSG_Name, ze.Haben
-                ORDER BY abg.BSG_Name;
+    "query" =>
+    "SELECT 
+        kombi.BSG as id,
+        COALESCE(MIN(r.Kurzname), MIN(r_bsg.Kurzname)) as Verband,
+        kombi.BSG as Zahlungspflichtige_BSG,
+        CONCAT(IFNULL(SUM(ml.Betrag), 0.00),'€') AS Beiträge,
+        CONCAT(IFNULL(SUM(ze.Haben), 0.00),'€') as Einzahlungen,
+        CONCAT(IFNULL(SUM(ze.Haben), 0.00) - IFNULL(SUM(ml.Betrag), 0.00), '€') AS Saldo
+    FROM (
+        SELECT bsg_id AS BSG, Beitragsjahr AS Jahr
+        FROM b_v_meldeliste_letztes_jahr
+        WHERE Zahlungspflichtige_BSG IS NOT NULL
+        UNION
+        SELECT BSG, Abrechnungsjahr AS Jahr
+        FROM b_zahlungseingaenge
+        WHERE Abrechnungsjahr = YEAR(CURDATE())-1
+    ) AS kombi
+    LEFT JOIN b_v_meldeliste_letztes_jahr AS ml
+        ON ml.bsg_id = kombi.BSG AND ml.Beitragsjahr = kombi.Jahr
+    LEFT JOIN (
+        SELECT 
+            BSG, 
+            Abrechnungsjahr,
+            SUM(Haben) AS Haben
+        FROM b_zahlungseingaenge
+        WHERE Abrechnungsjahr = YEAR(CURDATE())-1
+        GROUP BY BSG, Abrechnungsjahr
+    ) AS ze 
+        ON ze.BSG = kombi.BSG AND ze.Abrechnungsjahr = kombi.Jahr
+    LEFT JOIN b_regionalverband as r on r.id = ml.rv_id
+    LEFT JOIN b_bsg AS bsg ON bsg.id = kombi.BSG
+    LEFT JOIN b_regionalverband AS r_bsg ON r_bsg.id = bsg.Verband
+    WHERE (ml.Zahlungspflichtige_BSG IS NOT NULL OR ze.Haben IS NOT NULL)
+    AND (
+            (ml.rv_id IS NULL AND FIND_IN_SET(bsg.Verband, berechtigte_elemente(1, 'verband')) > 0)
+            OR
+            (ml.rv_id IS NOT NULL AND FIND_IN_SET(ml.rv_id, berechtigte_elemente(1, 'verband')) > 0)
+        )
+    GROUP BY kombi.BSG
+    ORDER BY (IFNULL(SUM(ze.Haben), 0.00) - IFNULL(SUM(ml.Betrag), 0.00));
                 ",
-                "spaltenbreiten" => array(
-                    "Verband"         => "150",
-                    "BSG_Name"        => "300",
-                    "Haben/€"         => "100",
-                    "Soll/€"          => "100",
-                    "Saldo/€"         => "100"
-                )   
+    "referenzqueries" => array(
+        "Zahlungspflichtige_BSG" => "SELECT bsg.id as id, bsg.BSG as anzeige
+                FROM b_bsg as bsg;"
+    ),         
+    "spaltenbreiten" => array(
+        "Verband"         => "150",
+        "BSG_Name"        => "300",
+        "Haben/€"         => "100",
+        "Soll/€"          => "100",
+        "Saldo/€"         => "100"
+    )   
+                
 );
 
 

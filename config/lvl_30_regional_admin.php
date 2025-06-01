@@ -29,17 +29,46 @@ $anzuzeigendeDaten[] = array(
     )
 );
 
-# Zahlungseingänge (Anzeige der letzten 2 Jahre = 730 Tage)
+$curyear = (int)date("Y");
+
+# Zahlungseingänge laufendes Jahr
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_zahlungseingaenge",
-    "auswahltext" => "Zahlungseingänge",
+    "auswahltext" => "Zahlungseingänge ".$curyear,
     "writeaccess" => true,
     "query" => "SELECT  z.id as id, z.BSG as BSG, z.Eingangsdatum, z.Abrechnungsjahr, z.Haben
                 FROM b_zahlungseingaenge as z
                 JOIN b_bsg as b on b.id=z.BSG
                 JOIN b_regionalverband as r on r.id = b.Verband 
-                WHERE z.Eingangsdatum >= CURDATE() - INTERVAL 730 DAY
-                AND FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0
+                WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0
+                AND z.Abrechnungsjahr = YEAR(CURDATE())
+                ORDER BY Eingangsdatum desc;
+    ",
+    "referenzqueries" => array(
+    "BSG" => "SELECT b.id as id, b.BSG as anzeige
+                FROM b_bsg as b
+                WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0
+                ORDER BY anzeige;",
+    ),
+    "spaltenbreiten" => array(
+        "BSG"                          => "380",
+        "Eingangsdatum"                => "150",
+        "Abrechnungsjahr"              => "150",
+        "Haben"                        => "150"
+    ) 
+);
+
+# Zahlungseingänge letztes Jahr
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_zahlungseingaenge",
+    "auswahltext" => "Zahlungseingänge ".($curyear-1),
+    "writeaccess" => true,
+    "query" => "SELECT  z.id as id, z.BSG as BSG, z.Eingangsdatum, z.Abrechnungsjahr, z.Haben
+                FROM b_zahlungseingaenge as z
+                JOIN b_bsg as b on b.id=z.BSG
+                JOIN b_regionalverband as r on r.id = b.Verband 
+                WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0
+                AND z.Abrechnungsjahr = YEAR(CURDATE())-1
                 ORDER BY Eingangsdatum desc;
     ",
     "referenzqueries" => array(
@@ -58,7 +87,7 @@ $anzuzeigendeDaten[] = array(
 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_forderungen",
-    "auswahltext" => "Offene Forderungen",
+    "auswahltext" => "Offene Forderungen (Notizen)",
     "writeaccess" => true,
     "query" => "SELECT f.id, f.Datum, f.BSG, f.Soll, f.Beschreibung
                 FROM b_forderungen as f

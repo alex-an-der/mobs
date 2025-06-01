@@ -333,83 +333,105 @@ JOIN b_sparte AS s ON s.id = mis.Sparte;
 
 
 
-
-
-
 DROP VIEW IF EXISTS b_v_meldeliste_dieses_jahr;
-CREATE VIEW b_v_meldeliste_dieses_jahr AS 
-(SELECT
-l.id,
-l.Timestamp as Erfasst_am,
-l.Beitragsjahr,
-concat(m.Vorname, ' ',m.Nachname, ' (',m.id, ')') as Mitglied,
-concat (b.BSG, ' (',b.VKZ,')') as Zahlungspflichtige_BSG,
-z.Zweck as Zuordnung,
-r.Kurzname as Beschreibung,
-r.Basisbeitrag as Betrag
-FROM b_meldeliste            as l
-JOIN b_mitglieder            as m on m.id = l.MNr
-JOIN b_bsg                   as b on b.id = l.BSG
-JOIN b___beitragszuordnungen as z on z.id = l.Zuordnung
-JOIN b_regionalverband       as r on r.id = l.Zuordnung_ID
-WHERE Zuordnung = 1 AND Beitragsjahr = YEAR(CURDATE())
+CREATE VIEW b_v_meldeliste_dieses_jahr AS
 
-UNION 
-
+-- Beiträge mit Zuordnung = 1 (Regionalverband)
 SELECT
-l.id,
-l.Timestamp as Erfasst_am,
-l.Beitragsjahr,
-concat(m.Vorname, ' ',m.Nachname, ' (',m.id, ')') as Mitglied,
-concat (b.BSG, ' (',b.VKZ,')') as Zahlungspflichtige_BSG,
-z.Zweck as Zuordnung,
-s.Sparte as Beschreibung,
-s.Spartenbeitrag as Betrag
-FROM b_meldeliste            as l
-JOIN b_mitglieder            as m on m.id = l.MNr
-JOIN b_bsg                   as b on b.id = l.BSG
-JOIN b___beitragszuordnungen as z on z.id = l.Zuordnung
-JOIN b_sparte                as s on s.id = l.Zuordnung_ID
-WHERE Zuordnung = 2 AND Beitragsjahr = YEAR(CURDATE())
-);
+    l.id AS id,
+    l.Timestamp AS Erfasst_am,
+    l.Beitragsjahr AS Beitragsjahr,
+    CONCAT(m.Vorname, ' ', m.Nachname, ' (', m.id, ')') AS Mitglied,
+    CONCAT(b.BSG, ' (', b.VKZ, ')') AS Zahlungspflichtige_BSG,
+    z.Zweck AS Zuordnung,
+    r.Kurzname AS Beschreibung,
+    r.Basisbeitrag AS Betrag,
+    b.id AS bsg_id,
+    b.Verband AS rv_id
+FROM
+    MOBS_local_DEV.b_meldeliste l
+    JOIN MOBS_local_DEV.b_mitglieder m       ON m.id = l.MNr
+    JOIN MOBS_local_DEV.b_bsg b              ON b.id = l.BSG
+    JOIN MOBS_local_DEV.b___beitragszuordnungen z ON z.id = l.Zuordnung
+    JOIN MOBS_local_DEV.b_regionalverband r  ON r.id = l.Zuordnung_ID
+WHERE
+    l.Zuordnung = 1
+    AND l.Beitragsjahr = YEAR(CURDATE())
+
+UNION
+
+-- Beiträge mit Zuordnung = 2 (Sparte)
+SELECT
+    l.id AS id,
+    l.Timestamp AS Erfasst_am,
+    l.Beitragsjahr AS Beitragsjahr,
+    CONCAT(m.Vorname, ' ', m.Nachname, ' (', m.id, ')') AS Mitglied,
+    CONCAT(b.BSG, ' (', b.VKZ, ')') AS Zahlungspflichtige_BSG,
+    z.Zweck AS Zuordnung,
+    s.Sparte AS Beschreibung,
+    s.Spartenbeitrag AS Betrag,
+    b.id AS bsg_id,
+    b.Verband AS rv_id
+FROM
+    MOBS_local_DEV.b_meldeliste l
+    JOIN MOBS_local_DEV.b_mitglieder m       ON m.id = l.MNr
+    JOIN MOBS_local_DEV.b_bsg b              ON b.id = l.BSG
+    JOIN MOBS_local_DEV.b___beitragszuordnungen z ON z.id = l.Zuordnung
+    JOIN MOBS_local_DEV.b_sparte s           ON s.id = l.Zuordnung_ID
+WHERE
+    l.Zuordnung = 2
+    AND l.Beitragsjahr = YEAR(CURDATE());
 
 
 DROP VIEW IF EXISTS b_v_meldeliste_letztes_jahr;
-CREATE VIEW b_v_meldeliste_letztes_jahr AS 
-(SELECT
-l.id,
-l.Timestamp as Erfasst_am,
-l.Beitragsjahr,
-concat(m.Vorname, ' ',m.Nachname, ' (',m.id, ')') as Mitglied,
-concat (b.BSG, ' (',b.VKZ,')') as Zahlungspflichtige_BSG,
-z.Zweck as Zuordnung,
-r.Kurzname as Beschreibung,
-r.Basisbeitrag as Betrag
-FROM b_meldeliste            as l
-JOIN b_mitglieder            as m on m.id = l.MNr
-JOIN b_bsg                   as b on b.id = l.BSG
-JOIN b___beitragszuordnungen as z on z.id = l.Zuordnung
-JOIN b_regionalverband       as r on r.id = l.Zuordnung_ID
-WHERE Zuordnung = 1 AND Beitragsjahr = YEAR(CURDATE()) -1
+CREATE VIEW b_v_meldeliste_letztes_jahr AS
 
-UNION 
-
+-- Beiträge mit Zuordnung = 1 (Regionalverband)
 SELECT
-l.id,
-l.Timestamp as Erfasst_am,
-l.Beitragsjahr,
-concat(m.Vorname, ' ',m.Nachname, ' (',m.id, ')') as Mitglied,
-concat (b.BSG, ' (',b.VKZ,')') as Zahlungspflichtige_BSG,
-z.Zweck as Zuordnung,
-s.Sparte as Beschreibung,
-s.Spartenbeitrag as Betrag
-FROM b_meldeliste            as l
-JOIN b_mitglieder            as m on m.id = l.MNr
-JOIN b_bsg                   as b on b.id = l.BSG
-JOIN b___beitragszuordnungen as z on z.id = l.Zuordnung
-JOIN b_sparte                as s on s.id = l.Zuordnung_ID
-WHERE Zuordnung = 2 AND Beitragsjahr = YEAR(CURDATE())-1 
-);
+    l.id AS id,
+    l.Timestamp AS Erfasst_am,
+    l.Beitragsjahr AS Beitragsjahr,
+    CONCAT(m.Vorname, ' ', m.Nachname, ' (', m.id, ')') AS Mitglied,
+    CONCAT(b.BSG, ' (', b.VKZ, ')') AS Zahlungspflichtige_BSG,
+    z.Zweck AS Zuordnung,
+    r.Kurzname AS Beschreibung,
+    r.Basisbeitrag AS Betrag,
+    b.id AS bsg_id,
+    b.Verband AS rv_id
+FROM
+    MOBS_local_DEV.b_meldeliste l
+    JOIN MOBS_local_DEV.b_mitglieder m       ON m.id = l.MNr
+    JOIN MOBS_local_DEV.b_bsg b              ON b.id = l.BSG
+    JOIN MOBS_local_DEV.b___beitragszuordnungen z ON z.id = l.Zuordnung
+    JOIN MOBS_local_DEV.b_regionalverband r  ON r.id = l.Zuordnung_ID
+WHERE
+    l.Zuordnung = 1
+    AND l.Beitragsjahr = YEAR(CURDATE())-1
+
+UNION
+
+-- Beiträge mit Zuordnung = 2 (Sparte)
+SELECT
+    l.id AS id,
+    l.Timestamp AS Erfasst_am,
+    l.Beitragsjahr AS Beitragsjahr,
+    CONCAT(m.Vorname, ' ', m.Nachname, ' (', m.id, ')') AS Mitglied,
+    CONCAT(b.BSG, ' (', b.VKZ, ')') AS Zahlungspflichtige_BSG,
+    z.Zweck AS Zuordnung,
+    s.Sparte AS Beschreibung,
+    s.Spartenbeitrag AS Betrag,
+    b.id AS bsg_id,
+    b.Verband AS rv_id
+FROM
+    MOBS_local_DEV.b_meldeliste l
+    JOIN MOBS_local_DEV.b_mitglieder m       ON m.id = l.MNr
+    JOIN MOBS_local_DEV.b_bsg b              ON b.id = l.BSG
+    JOIN MOBS_local_DEV.b___beitragszuordnungen z ON z.id = l.Zuordnung
+    JOIN MOBS_local_DEV.b_sparte s           ON s.id = l.Zuordnung_ID
+WHERE
+    l.Zuordnung = 2
+    AND l.Beitragsjahr = YEAR(CURDATE())-1;
+
 
 
 
@@ -442,3 +464,27 @@ LÖSUNG: Keine BSG = kein Basisbeitrag, aber auch keine Sparten möglich -> pass
 - Alle DB-Operationen (hier) bei der prod $ QS-DB machen
 
 - Noch nicht geklärt: Soll in den configs in den Suchqueries das "info:" rein oder nicht? Ausprobieren!
+
+SELECT 
+    MIN(ml.id) as id,
+    MIN(r.Kurzname) as Verband,
+    Zahlungspflichtige_BSG,
+    CONCAT(SUM(Betrag),'€') AS Beiträge,
+    CONCAT(IFNULL(MAX(ze.Haben),0.00),'€') as Einzahlungen,
+    CONCAT(IFNULL(MAX(ze.Haben), 0.00) - SUM(Betrag), '€') AS Saldo
+FROM b_v_meldeliste_dieses_jahr as ml
+LEFT JOIN (
+    SELECT 
+        BSG, 
+        Abrechnungsjahr,
+        SUM(Haben) AS Haben
+    FROM b_zahlungseingaenge
+    GROUP BY BSG, Abrechnungsjahr
+) AS ze 
+    ON ml.bsg_id = ze.BSG
+    AND ml.Beitragsjahr = ze.Abrechnungsjahr
+JOIN b_regionalverband as r on r.id = rv_id
+WHERE Zahlungspflichtige_BSG IS NOT NULL 
+AND FIND_IN_SET(rv_id, berechtigte_elemente(1, 'verband')) > 0
+GROUP BY Zahlungspflichtige_BSG
+ORDER BY (IFNULL(MAX(ze.Haben), 0.00) - SUM(Betrag));
