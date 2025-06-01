@@ -278,6 +278,17 @@ $tabelle_upper = strtoupper($tabelle);
     <script>
 
 
+        function showErrorMsg(message) {
+    const errorDiv = document.getElementById('insertErrorMsg');
+    if (errorDiv) {
+        errorDiv.innerHTML = message || "Unbekannter Fehler";
+        errorDiv.classList.remove('d-none');
+    } else {
+        // Fallback: HTML-Tags entfernen für alert
+        alert((message || "Unbekannter Fehler").replace(/<[^>]+>/g, ''));
+    }
+}
+
         function updateField(tabelle, id, field, value, datatype, ajaxFile) { 
             
             let isUserAjax = 0;
@@ -325,15 +336,15 @@ $tabelle_upper = strtoupper($tabelle);
                             checkRow(tabelle, id, field, value);
                         } else {
                             markCellError(id, field);
-                            alert("Fehler beim Update. Stimmt das Datenformat? Für Details siehe adm_log-Tabelle in der Datenbank.");
+                            showErrorMsg("Fehler beim Update. Stimmt das Datenformat? Für Details siehe adm_log-Tabelle in der Datenbank.");
                         }
                     } catch (e) {
                         markCellError(id, field);
-                        alert("Fehler beim Verarbeiten der Serverantwort.");
+                        showErrorMsg("Fehler beim Verarbeiten der Serverantwort.");
                     }
                 } else if (xhr.readyState === 4 && xhr.status !== 200) {
                     markCellError(id, field);
-                    alert("Serverfehler beim Update. Stimmt das Datenformat? Für Details siehe adm_log-Tabelle in der Datenbank.");
+                    showErrorMsg("Serverfehler beim Update. Stimmt das Datenformat? Für Details siehe adm_log-Tabelle in der Datenbank.");
                 }
             };
 
@@ -361,7 +372,7 @@ $tabelle_upper = strtoupper($tabelle);
                             updateRowColors(response.row, id, field);
                         }
                     } catch (e) {
-                        alert("Fehler beim Abgleich der Zeile.");
+                        showErrorMsg("Fehler beim Abgleich der Zeile.");
                     }
                 }
             };
@@ -1096,6 +1107,13 @@ $tabelle_upper = strtoupper($tabelle);
             const data = {};
             formData.forEach((value, key) => data[key] = value === "" ? null : value);
 
+            // Fehlerbereich zurücksetzen
+            const errorDiv = document.getElementById('insertErrorMsg');
+            if (errorDiv) {
+                errorDiv.innerHTML = '';
+                errorDiv.classList.add('d-none');
+            }
+
             const xhr = new XMLHttpRequest();
             xhr.open("POST", "ajax.php", true);
             xhr.setRequestHeader("Content-Type", "application/json");
@@ -1114,10 +1132,10 @@ $tabelle_upper = strtoupper($tabelle);
                             $('#insertModal').modal('hide');
                             resetPage();
                         } else {
-                            alert("Fehler beim Speichern" + (response.message ? ": " + response.message : ""));
+                            showErrorMsg("Fehler beim Speichern" + (response.message ? ": " + response.message : ""));
                         }
                     } catch (e) {
-                        alert("Fehler beim Verarbeiten der Serverantwort.");
+                        showErrorMsg("Fehler beim Verarbeiten der Serverantwort.");
                     }
                 }
             };
@@ -1198,19 +1216,15 @@ $tabelle_upper = strtoupper($tabelle);
                         if (response.status === "success") {
                             resetPage(); // Reload the page to see the changes
                         } else {
-                            alert("Fehler beim Löschen der Daten.");
+                            showErrorMsg("Fehler beim Löschen der Daten." + (response.message ? ": " + response.message : ""));
                         }
                     } catch (e) {
-                        alert("Fehler beim Verarbeiten der Serverantwort.");
+                        showErrorMsg("Fehler beim Verarbeiten der Serverantwort.");
                     }
                 } else if (xhr.readyState === 4 && xhr.status !== 200) {
-                    alert("Serverfehler beim Löschen der Daten.");
+                    showErrorMsg("Serverfehler beim Löschen der Daten.");
                 }
-
-                // Setze den Button zurück und aktiviere ihn wieder
-                // Automatisch nach reload.
-                // deleteButton.innerHTML = originalText;
-                // deleteButton.disabled = false;
+                // ...existing code...
             };
 
             xhr.send(data);
@@ -1845,6 +1859,7 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                     <form id="insertForm">
                         <!-- Felder werden dynamisch eingefügt -->
                     </form>
+                    <div id="insertErrorMsg" class="alert alert-danger d-none" role="alert"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
