@@ -280,11 +280,6 @@ BEGIN
         VALUES (OLD.id, CONCAT('Änderung Geschlecht von ''', IFNULL(alter_wert, ''), ''' zu ''', IFNULL(neuer_wert, ''), ''''));
     END IF;
 
-    IF NOT (OLD.Stammmitglied_seit <=> NEW.Stammmitglied_seit) THEN
-        INSERT INTO b_mitglieder_historie (MNr, Aktion)
-        VALUES (OLD.id, CONCAT('Änderung Stammmitglied_seit von ''', IFNULL(OLD.Stammmitglied_seit, ''), ''' zu ''', IFNULL(NEW.Stammmitglied_seit, ''), ''''));
-    END IF;
-
     IF NOT (OLD.y_id <=> NEW.y_id) THEN
         INSERT INTO b_mitglieder_historie (MNr, Aktion)
         VALUES (OLD.id, CONCAT('Änderung y_id von ''', IFNULL(OLD.y_id, ''), ''' zu ''', IFNULL(NEW.y_id, ''), ''''));
@@ -482,22 +477,6 @@ BEGIN
         UPDATE y_user
         SET mail = NEW.Mail
         WHERE id = NEW.y_id;
-    END IF;
-END;
-//
-DELIMITER ;
-
--- -----------------------------------------------------------------------------------
-
-DROP TRIGGER IF EXISTS tr_bsg_change_set_stammmitglied_seit;
--- Wenn sich die BSG eines Mitglieds ändert, setze Stammmitglied_seit auf das aktuelle Datum
-DELIMITER //
-CREATE TRIGGER tr_bsg_change_set_stammmitglied_seit
-BEFORE UPDATE ON b_mitglieder
-FOR EACH ROW
-BEGIN
-    IF NEW.BSG <> OLD.BSG THEN
-        SET NEW.Stammmitglied_seit = NOW();
     END IF;
 END;
 //

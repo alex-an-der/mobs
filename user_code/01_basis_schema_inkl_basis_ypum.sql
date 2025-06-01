@@ -500,6 +500,9 @@ ON `b_bsg_wechselantrag` (
   `Ziel_BSG` ASC
 );
 
+-- ------------------------------------------------------------
+-- v0.1.7
+-- ------------------------------------------------------------
 DROP TABLE IF EXISTS `b_mitglieder_historie`;
 CREATE TABLE `b_mitglieder_historie` ( 
   `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
@@ -514,4 +517,41 @@ COMMENT = 'Der Akteur kann über das Rollback-Log ermittelt werden.';
 CREATE INDEX `FK_historie_mNr_betroffenes_Mitglied` 
 ON `b_mitglieder_historie` (
   `MNr` ASC
+);
+
+DROP TABLE IF EXISTS `b_meldeliste`; -- Muss zuerst gedroppt werden, da es eine FK-Verknüpfung gibt
+DROP TABLE IF EXISTS `b___beitragszuordnungen`;
+CREATE TABLE `b___beitragszuordnungen` ( 
+  `id` INT UNSIGNED NOT NULL,
+  `Zweck` VARCHAR(200) NOT NULL,
+   PRIMARY KEY (`id`)
+)
+ENGINE = InnoDB;
+
+INSERT INTO `b___beitragszuordnungen` (`id`, `Zweck`) VALUES (1, 'Verbandsbeitrag');
+INSERT INTO `b___beitragszuordnungen` (`id`, `Zweck`) VALUES (2, 'Spartenbeitrag');
+
+CREATE TABLE `b_meldeliste` ( 
+  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `Timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  `Beitragsjahr` YEAR NOT NULL,
+  `MNr` BIGINT UNSIGNED NOT NULL,
+  `BSG` BIGINT UNSIGNED NOT NULL,
+  `Zuordnung` INT UNSIGNED NULL,
+  `Zuordnung_ID` BIGINT NULL COMMENT 'Wenn der Zweck eine ID erfordert' ,
+  `Betrag` DECIMAL(10,2) NULL DEFAULT 0.00 ,
+   PRIMARY KEY (`id`),
+  CONSTRAINT `FK_medleliste_beitragszuordnungen` FOREIGN KEY (`Zuordnung`) REFERENCES `b___beitragszuordnungen` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `FK_meldeliste_BSG` FOREIGN KEY (`BSG`) REFERENCES `b_bsg` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT `FK_meldeliste_mitglieder` FOREIGN KEY (`MNr`) REFERENCES `b_mitglieder` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT `unique_kombinationen` UNIQUE (`MNr`, `Beitragsjahr`, `Zuordnung`, `Zuordnung_ID`)
+)
+ENGINE = InnoDB;
+CREATE INDEX `FK_medleliste_beitragszuordnungen` 
+ON `b_meldeliste` (
+  `Zuordnung` ASC
+);
+CREATE INDEX `FK_meldeliste_BSG` 
+ON `b_meldeliste` (
+  `BSG` ASC
 );
