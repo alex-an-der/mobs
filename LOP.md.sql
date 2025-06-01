@@ -433,6 +433,7 @@ SONNTAG
  wenn Mitglied wechselt? Es müsste immer
 die zahlungspflichtige BSG sein - aber was ist, wenn NULL und wie kann das überhaupt passieren?
 Wie ist es JETZT geregelt?
+LÖSUNG: Keine BSG = kein Basisbeitrag, aber auch keine Sparten möglich -> passt
 
 - SOLL-Berechnung auf Grundlage der Meldeliste stellen
 
