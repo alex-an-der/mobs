@@ -47,4 +47,6 @@ $anzuzeigendeDaten[] = array(
         "Log"       => "1620"
     )
 );
+
+
 ?>

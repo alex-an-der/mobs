@@ -215,6 +215,64 @@ $anzuzeigendeDaten[] = array(
 );
 
 $anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_v_meldeliste_dieses_jahr",
+    "auswahltext" => "$bericht Medldeliste ".$curyear." auf Ebene BSG",
+    "writeaccess" => false,
+    "import" => false,
+    "query" => "SELECT
+        rv_id           as id,
+        Erfasst_am           ,
+        Beitragsjahr         ,
+        Mitglied             ,
+        Zahlungspflichtige_BSG,
+        Zuordnung            ,
+        Beschreibung         ,
+        Betrag               
+
+                FROM b_v_meldeliste_dieses_jahr
+                WHERE FIND_IN_SET(bsg_id, berechtigte_elemente($uid, 'BSG')) > 0
+                ORDER BY Erfasst_am DESC;",
+    "spaltenbreiten" => array(
+        "Erfasst_am"              => "200",
+        "Beitragsjahr"            => "100",
+        "Mitglied"                => "250",
+        "Zahlungspflichtige_BSG"  => "200",
+        "Zuordnung"               => "150",
+        "Beschreibung"            => "150",
+        "Betrag"                  => "100",
+        )
+);
+
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_v_meldeliste_letztes_jahr",
+    "auswahltext" => "$bericht Medldeliste ".($curyear-1)." auf Ebene BSG",
+    "writeaccess" => false,
+    "import" => false,
+    "query" => "SELECT
+        rv_id           as id,
+        Erfasst_am           ,
+        Beitragsjahr         ,
+        Mitglied             ,
+        Zahlungspflichtige_BSG,
+        Zuordnung            ,
+        Beschreibung         ,
+        Betrag               
+
+                FROM b_v_meldeliste_letztes_jahr
+                WHERE FIND_IN_SET(bsg_id, berechtigte_elemente($uid, 'BSG')) > 0
+                ORDER BY Erfasst_am DESC;",
+    "spaltenbreiten" => array(
+        "Erfasst_am"              => "200",
+        "Beitragsjahr"            => "100",
+        "Mitglied"                => "250",
+        "Zahlungspflichtige_BSG"  => "200",
+        "Zuordnung"               => "150",
+        "Beschreibung"            => "150",
+        "Betrag"                  => "100",
+        )
+);
+
+$anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
     "auswahltext" => "$bericht Beiträge der Mitglieder",
     "writeaccess" => false,

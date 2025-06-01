@@ -258,32 +258,82 @@ $anzuzeigendeDaten[] = array(
                 )   
 );
 
+
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_v_meldeliste_dieses_jahr",
+    "auswahltext" => "$bericht Medldeliste ".$curyear." auf Ebene Regionalverband",
+    "writeaccess" => false,
+    "import" => false,
+    "query" => "SELECT
+        rv_id           as id,
+        Erfasst_am           ,
+        Beitragsjahr         ,
+        Mitglied             ,
+        Zahlungspflichtige_BSG,
+        Zuordnung            ,
+        Beschreibung         ,
+        Betrag               
+
+                FROM b_v_meldeliste_dieses_jahr
+                WHERE FIND_IN_SET(rv_id, berechtigte_elemente($uid, 'verband')) > 0
+                ORDER BY Erfasst_am DESC;",
+    "spaltenbreiten" => array(
+        "Erfasst_am"              => "200",
+        "Beitragsjahr"            => "100",
+        "Mitglied"                => "250",
+        "Zahlungspflichtige_BSG"  => "200",
+        "Zuordnung"               => "150",
+        "Beschreibung"            => "150",
+        "Betrag"                  => "100",
+        )
+);
+
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_v_meldeliste_letztes_jahr",
+    "auswahltext" => "$bericht Medldeliste ".($curyear-1)." auf Ebene Regionalverband",
+    "writeaccess" => false,
+    "import" => false,
+    "query" => "SELECT
+        rv_id           as id,
+        Erfasst_am           ,
+        Beitragsjahr         ,
+        Mitglied             ,
+        Zahlungspflichtige_BSG,
+        Zuordnung            ,
+        Beschreibung         ,
+        Betrag               
+
+                FROM b_v_meldeliste_letztes_jahr
+                WHERE FIND_IN_SET(rv_id, berechtigte_elemente($uid, 'verband')) > 0
+                ORDER BY Erfasst_am DESC;",
+    "spaltenbreiten" => array(
+        "Erfasst_am"              => "200",
+        "Beitragsjahr"            => "100",
+        "Mitglied"                => "250",
+        "Zahlungspflichtige_BSG"  => "200",
+        "Zuordnung"               => "150",
+        "Beschreibung"            => "150",
+        "Betrag"                  => "100",
+        )
+);
+
 # Änderungshistorie per Mitglied
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_historie",
     "auswahltext" => "$bericht Änderungen per Mitgliedsnummer",
     "writeaccess" => false,
     "import" => false,
-    "query" => "SELECT mh.id as id, 
-                m.Vorname, 
-                m.Nachname, 
-                mh.Aenderung, 
-                mh.Datum, 
-                mh.Beschreibung
-                FROM b_mitglieder_historie as mh
-                JOIN b_mitglieder as m ON mh.Mitglied = m.id
-                WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'mitglied')) > 0
-                ORDER BY mh.Datum DESC;",
-    "writeaccess" => false,
-    "import" => false,
     "query" => "SELECT id, Timestamp, MNr, Aktion 
-                FROM b_mitglieder_historie;",
+                FROM b_mitglieder_historie
+                WHERE FIND_IN_SET(MNr, berechtigte_elemente($uid, 'mitglied')) > 0
+                ORDER BY Timestamp DESC;",
     "spaltenbreiten" => array(
         "Timestamp" => "150",
         "MNr"       => "100",
         "Aktion"    => "300"
         )
 );
+
 ######################################################################################################
 
 # Statistik: Mitglieder in Sparten
