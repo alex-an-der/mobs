@@ -294,8 +294,9 @@ $tabelle_upper = strtoupper($tabelle);
             let isUserAjax = 0;
             if (event && event.target && event.target.hasAttribute('data-userajax')) {
                 isUserAjax = event.target.getAttribute('data-userajax');
-            }           
-            let tab = <?=$selectedTableID?>;
+            }     
+                // selectedTableID als Zahl, falls vorhanden, sonst 0
+                let tab = "<?=$selectedTableID !== '' ? (int)$selectedTableID : 0?>";
             
             if (isUserAjax>0) {console.log("A");
                 ajaxFile = "./user_code/" + ajaxFile;
