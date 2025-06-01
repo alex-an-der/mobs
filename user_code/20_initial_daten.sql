@@ -1,3 +1,15 @@
+------------------------------------------
+Dieser Abschnitt funktioniert nur manuell:
+------------------------------------------
+SET @new_id = 100000;
+UPDATE b_mitglieder SET id = (@new_id := @new_id + 1) ORDER BY id;
+SELECT MAX(id) + 1 AS neuer_wert FROM b_mitglieder;
+ALTER TABLE b_mitglieder AUTO_INCREMENT = <neuer_wert_hier_eintragen>;
+(z.B. ALTER TABLE b_mitglieder AUTO_INCREMENT = 100043;)
+------------------------------------------
+
+
+
 INSERT INTO `b___an_aus` (`id`, `wert`) VALUES (1, 'JA');
 INSERT INTO `b___an_aus` (`id`, `wert`) VALUES (2, 'NEIN');
 
@@ -6,7 +18,7 @@ INSERT INTO `b___geschlecht` (`id`, `auswahl`) VALUES (2, 'weiblich');
 INSERT INTO `b___geschlecht` (`id`, `auswahl`) VALUES (3, 'divers');
 
 INSERT INTO `y_roles` (`bit`, `name`, `role_comment`, `role_active`) VALUES (0, 'Administrator', 'Automatisch bei der Installation hinzugefügt', 1);
-INSERT INTO `y_roles` (`bit`, `name`, `role_comment`, `role_active`) VALUES (1, '', '', 1);
+INSERT INTO `y_roles` (`bit`, `name`, `role_comment`, `role_active`) VALUES (1, 'Regional-Admin', 'Admintätigkeiten im Regionalverband', 1);
 INSERT INTO `y_roles` (`bit`, `name`, `role_comment`, `role_active`) VALUES (2, '', '', 1);
 INSERT INTO `y_roles` (`bit`, `name`, `role_comment`, `role_active`) VALUES (3, 'Mitglied (D)', '', 1);
 INSERT INTO `y_roles` (`bit`, `name`, `role_comment`, `role_active`) VALUES (4, '', '', 1);
