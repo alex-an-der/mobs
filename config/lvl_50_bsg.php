@@ -167,6 +167,7 @@ $anzuzeigendeDaten[] = array(
                     WHERE Nutzer = $uid 
                     ORDER BY anzeige;"
     ),
+    // Stand 1.6.25: suchqueries OHNE info zuweisen (nach bestem Wissen)
     "suchqueries" => array(
         "Sparte" => "SELECT s.id, s.Sparte, v.Verband, v.Kurzname
                     from b_sparte as s
