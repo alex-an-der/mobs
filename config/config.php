@@ -25,6 +25,7 @@ define("TITEL", "LBSV Nds. Mitgliederverwaltung");
 # Wie sollen NULL-Werte (=keine Zuordnung) dargestellt werden?
 define("NULL_WERT", "---");
 define("NULL_BUT_NOT_NULLABLE", "Fehler: Mindestens eine Auswahlmöglichkeit muss vorhanden sein.");
+define("PLEASE_CHOOSE", "Bitte auswählen...");
 
 # Rechtemanagement (YPUM)
 // $berechtigung = $ypum->getUserData();

@@ -987,10 +987,18 @@ $tabelle_upper = strtoupper($tabelle);
                 return;
             }
 
+            // Prüfe, ob alle Felder mit 'info:' beginnen
+            let $allFieldsAreInfo = true;
+            for (let i = 0; i < headers.length; i++) {
+                if (!headers[i].startsWith('info:')) {
+                    $allFieldsAreInfo = false;
+                    break;
+                }
+            }
             headers.forEach(
                 fieldName => 
-                    {  // Info-Felder überspringen
-                        if (fieldName.startsWith('info:')) return;
+                    {  // Info-Felder überspringen, wenn nicht ALLE Felder info: sind                    
+                            if (!$allFieldsAreInfo && fieldName.startsWith('info:')) return;
                         const div = document.createElement('div'); 
                         div.className = 'form-group mb-3';
                     // Info-Label-Handling
@@ -1013,14 +1021,14 @@ $tabelle_upper = strtoupper($tabelle);
                     const select = document.createElement('select');
                     select.className = 'form-control';
                     select.name = fieldName;
-                    /* Infofelder werden gar nicht mehr angezeigt. Könnte also weg  (1.6.25)
-                    // Add NULL option only if not info:-field
-                    if (!isInfo) {
-                        const nullOption = document.createElement('option');
-                        nullOption.value = "NULL";
-                        nullOption.textContent = "< ?=NULL_WERT?>";
-                        select.appendChild(nullOption);
-                    }*/
+                    
+                    // Add "---" Feld
+                    /*
+                    const nullOption = document.createElement('option');
+                    nullOption.value = "NULL";
+                    nullOption.textContent = "< ?=NULL_WERT?>";
+                    select.appendChild(nullOption);
+                    */
 
 
                     // Optionen sammeln
@@ -1045,7 +1053,14 @@ $tabelle_upper = strtoupper($tabelle);
                     // If there's only one valid option (besides NULL), automatically select it
                     if (validOptions.length === 1) {
                         validOptions[0].selected = true;
-                    }                    
+                    }else if(validOptions.length > 1){
+                        const pleaseChooseOption = document.createElement('option');
+                        pleaseChooseOption.value = "null";
+                        pleaseChooseOption.textContent = "<?=PLEASE_CHOOSE?>";
+                        pleaseChooseOption.disabled = true;
+                        pleaseChooseOption.selected = true;
+                        select.insertBefore(pleaseChooseOption, select.firstChild);
+                    }               
                     
                     div.appendChild(select); 
                 } else { // else = no Foreign Key
