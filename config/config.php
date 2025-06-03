@@ -22,10 +22,26 @@ error_reporting(E_ALL);
 require_once(__DIR__."/db_connect.php");
 
 define("TITEL", "LBSV Nds. Mitgliederverwaltung");
-# Wie sollen NULL-Werte (=keine Zuordnung) dargestellt werden?
-define("NULL_WERT", "---");
-define("NULL_BUT_NOT_NULLABLE", "Fehler: Mindestens eine Auswahlmöglichkeit muss vorhanden sein.");
+
+# Wie soll dargestellt werden...
+
+# ...wenn etwas ausgewählt werden muss
 define("PLEASE_CHOOSE", "Bitte auswählen...");
+
+# ...wenn es keinen Wert im Feld gibt (=NULL)?
+define("NULL_WERT", "---");
+
+# ...wenn eine Pflicht-Auswahl keinen Inhalt hat?
+define("NULL_BUT_NOT_NULLABLE", "Diese Liste ist noch leer. Bitte zunächst Auswahlmöglichkeiten eintragen.");
+
+# ...wenn die Datenbank einen Fehler zurückgibt
+# #FEHLERID# wird bei der Anzeige mit der Fehler-ID (ID im Error-Log) ersetzt.
+define("DB_ERROR", "Die Datenbank kann die Daten so nicht speichern. Ist alles korrekt eingegeben? Wenn du keine Lösung findest, kannst du dich mit der Fehler-ID <b>#FEHLERID#</b> gerne an <a href='mailto:support@mobs24.de?subject=mobs24%20-%20Ich%20erhalte%20die%20Fehler-ID%20#FEHLERID#'>mailto:support@mobs24.de</a> wenden. Die Bearbeitung kann aber ggf. etwas Zeit in Anspruch nehmen. ");
+
+# ...wenn es zu einem Serverfehler (kann auch fehlerhafter code sein) kommt
+define("SRV_ERROR", "Es kam zu einen allgemeinen Fehler. Wenn dies wiederholt auftritt, schildere mir bitte das Problem unter <a href='support@mobs24.de'>support@mobs24.de</a>. Danke.");
+
+
 
 # Rechtemanagement (YPUM)
 // $berechtigung = $ypum->getUserData();

@@ -76,8 +76,8 @@ $anzuzeigendeDaten[] = array(
                     DATE_FORMAT(m.Geburtsdatum, '%d.%m.%Y') as info:Geburtsdatum
                 FROM b_mitglieder as m
                 WHERE 
-                    (FIND_IN_SET(BSG, berechtigte_elemente(102, 'BSG')) > 0 or 
-                    ( BSG IS NULL AND FIND_IN_SET(m.id, berechtigte_elemente(102, 'individuelle_mitglieder')) > 0))
+                    (FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 or 
+                    ( BSG IS NULL AND FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0))
                 AND m.BSG IS NOT NULL
                 AND m.Geburtsdatum IN (
                     SELECT Geburtsdatum

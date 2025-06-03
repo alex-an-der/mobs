@@ -22,7 +22,7 @@ class Datenbank {
 
 
     // Führt pdo-Query aus und liefert das Ergebnis als Array zurück
-    public function query($query, $arguments = array(), $rollback=true) {
+    public function query($query, $arguments = array(), $rollback=true) { 
         require_once(__DIR__ . "/../../user_includes/before_sending_query.php");
 
         // Handle info: columns by correctly escaping them in MySQL
@@ -42,12 +42,12 @@ class Datenbank {
         }
 
         try{
-            $success = $stmt->execute();
+            $success = $stmt->execute(); 
         } catch (PDOException $e) {
             $errmsg = $e->getMessage();
 
-            $this->log($query." with the arguments: ".json_encode($arguments)." led to a query error in ".__FILE__.": " . $errmsg);
-            return ['error' => "Ein Fehler ist aufgetreten: <b>$errmsg</b>"];
+            $errorID = $this->log($query." with the arguments: ".json_encode($arguments)." led to a query error in ".__FILE__.": " . $errmsg);            
+            return ['error' => $errorID];
         }
         // Prüfen, ob die Abfrage ein SELECT oder SHOW ist - dann mit return raus
         if (stripos(trim($query), 'SELECT') === 0 || stripos(trim($query), 'SHOW') === 0) {
@@ -83,6 +83,7 @@ class Datenbank {
             $stmt = $this->pdo->prepare($query);
             $stmt->bindParam(':eintrag', $eintrag, PDO::PARAM_STR);
             $stmt->execute();
+            return $this->pdo->lastInsertId();
         } catch (PDOException $e) {
             error_log("Log error: " . $e->getMessage());
         }

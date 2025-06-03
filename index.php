@@ -1143,15 +1143,24 @@ $tabelle_upper = strtoupper($tabelle);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     try {
-                        const response = JSON.parse(xhr.responseText);
+                        const response = JSON.parse(xhr.responseText); 
                         if (response.status === "success") {
                             $('#insertModal').modal('hide');
                             resetPage();
                         } else {
-                            showErrorMsg("Fehler beim Speichern" + (response.message ? ": " + response.message : ""));
+                            let errorMessage = "<?=DB_ERROR?>";
+                            
+                            if (isNaN(response.message)) {
+                                errorMessage = errorMessage.replace(/#FEHLERID#/g, "000");                                
+                            } else {
+                                errorMessage = errorMessage.replace(/#FEHLERID#/g, response.message);
+                            }
+                        
+                           showErrorMsg(serrorMessage);
+                           
                         }
-                    } catch (e) {
-                        showErrorMsg("Fehler beim Verarbeiten der Serverantwort.");
+                    } catch (e) {                        
+                        showErrorMsg("<?=SRV_ERROR?>");
                     }
                 }
             };
@@ -1584,7 +1593,7 @@ function hatUserBerechtigungen(){
     return false;
 }
 
-function renderTableHeaders($data) {
+function renderTableHeaders($data) { 
     global $anzuzeigendeDaten;
     global $selectedTableID;
     global $importErlaubt;
@@ -1608,7 +1617,8 @@ function renderTableHeaders($data) {
                 }
                 // Check if it's an ajax column and extract the real display name
                 if (strpos($header, 'ajax:') === 0) {
-                    $displayHeader = substr($header, 5); // Remove 'ajax:' prefix
+                    $displayHeader = substr($header, 5); // Remove 'ajax:' prefix 
+                    die("KI");
                 }
                 echo "<th $style data-field='" . htmlspecialchars($header) . "'>" . htmlspecialchars($displayHeader) . "</th>";
             }

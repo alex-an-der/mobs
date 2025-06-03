@@ -36,7 +36,7 @@ $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_zahlungseingaenge",
     "auswahltext" => "Zahlungseingänge ".$curyear,
     "writeaccess" => true,
-    "query" => "SELECT  z.id as id, z.BSG as BSG, z.Eingangsdatum, z.Abrechnungsjahr, z.Haben
+    "query" => "SELECT  z.id as id, z.BSG as BSG, z.Eingangsdatum, z.Abrechnungsjahr as Abrechnungsjahr, z.Haben
                 FROM b_zahlungseingaenge as z
                 JOIN b_bsg as b on b.id=z.BSG
                 JOIN b_regionalverband as r on r.id = b.Verband 
@@ -48,7 +48,10 @@ $anzuzeigendeDaten[] = array(
     "BSG" => "SELECT b.id as id, b.BSG as anzeige
                 FROM b_bsg as b
                 WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0
-                ORDER BY anzeige;",
+                ORDER BY anzeige;"/*,
+    "Abrechnungsjahr" => "SELECT 
+                            YEAR(CURDATE()) as id,
+                            YEAR(CURDATE()) as anzeige;"*/
     ),
     "spaltenbreiten" => array(
         "BSG"                          => "380",
