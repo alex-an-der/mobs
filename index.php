@@ -1618,7 +1618,6 @@ function renderTableHeaders($data) {
                 // Check if it's an ajax column and extract the real display name
                 if (strpos($header, 'ajax:') === 0) {
                     $displayHeader = substr($header, 5); // Remove 'ajax:' prefix 
-                    die("KI");
                 }
                 echo "<th $style data-field='" . htmlspecialchars($header) . "'>" . htmlspecialchars($displayHeader) . "</th>";
             }
