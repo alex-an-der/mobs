@@ -298,12 +298,12 @@ $tabelle_upper = strtoupper($tabelle);
                 // selectedTableID als Zahl, falls vorhanden, sonst 0
                 let tab = "<?=$selectedTableID !== '' ? (int)$selectedTableID : 0?>";
             
-            if (isUserAjax>0) {console.log("A");
+            if (isUserAjax>0) {
                 ajaxFile = "./user_code/" + ajaxFile;
             }else{
                 ajaxFile = "ajax.php";
             }
-
+       
             if(datatype){
                 if (datatype.startsWith("decimal")) {
                     value = value.replace(',', '.'); // Replace all commas with dots
@@ -1159,8 +1159,18 @@ $tabelle_upper = strtoupper($tabelle);
                            showErrorMsg(serrorMessage);
                            
                         }
-                    } catch (e) {                        
-                        showErrorMsg("<?=SRV_ERROR?>");
+                    } catch (e) { 
+                        const response = JSON.parse(xhr.responseText); 
+                        
+                        let errorMessage = "<?=SRV_ERROR?>";
+                            
+                        if (isNaN(response.message)) {
+                            errorMessage = errorMessage.replace(/#FEHLERID#/g, "000");                                
+                        } else {
+                            errorMessage = errorMessage.replace(/#FEHLERID#/g, response.message);
+                        }
+
+                        showErrorMsg(errorMessage + "<br><br><i>Fehlerinformation: " + e + "</i>");
                     }
                 }
             };
@@ -1673,6 +1683,15 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                 // Info-Spalte: Wert ggf. aus Feld ohne info:-Prefix holen
                 $isInfoColumn = strpos($key, 'info:') === 0;
                 $isAjaxColumn = strpos($key, 'ajax:') === 0; // Immer initialisieren!
+                if ($isAjaxColumn) {                                                        
+                            $key = substr($key, 5);             
+                            if (isset($anzuzeigendeDaten[$selectedTableID]['ajaxfile'])) {
+                                $ajaxfile = $anzuzeigendeDaten[$selectedTableID]['ajaxfile'];
+                            } else {
+                                $ajaxfile = 'no_file_configured';
+                            }
+                }
+
                 $displayValue = $value;
                 
                 // Unterscheidung zwischen Auswahllisten ("Foreign-Keys-Spalten") wie z.B. "BSG" und normale Text-Spalten wie z.B. "Vorname"
@@ -1694,7 +1713,13 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                     if ($readwrite && !$isInfoColumn) {
                         // SELECT ZUSAMMENSTELLEN //
                         echo '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0)">';
-                        
+                        /*echo "<select 
+                        oncontextmenu=\"filter_that(this, 'select');\" 
+                        class=\"form-control border-0\" 
+                        style=\"background-color: inherit; word-wrap: break-word; white-space: normal;\"
+                        onchange=\"updateField('{$tabelle}', '{$row['id']}', '{$key}', this.value, 0, '" . ($ajaxfile ?? '') . "')\"
+                        >";*/
+
                         // Nur wenn Spalte nullable ist, die "---" anbieten (und nur bei r/w + non-info-Spalten)
                         if( $columnMayBeNULL[$key]) {
                             echo '<option value="NULL"' . (empty($value) ? ' selected' : '') . '>'.NULL_WERT.'</option>';
@@ -1739,6 +1764,7 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                 } else { // normale Textspalte 
                     if ($readwrite && !$isInfoColumn) {                        
                         $inputType = 'text';
+                        
                         $columnType = $columnTypes[$key];
                         if (strpos($columnType, 'date') !== false) {
                             if (strpos($columnType, 'datetime') !== false) {
@@ -1749,7 +1775,20 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                             }
                         }
                         $updateKey = $isInfoColumn ? substr($key, 5) : $key;
-                        echo '<input oncontextmenu="filter_that(this, \'input\');" data-type="' . htmlspecialchars((string)$columnType) . '" data-fkIDkey="' . htmlspecialchars((string)$data_fk_ID_key, ENT_QUOTES) . '" data-fkIDvalue="' . htmlspecialchars((string)$data_fk_ID_value, ENT_QUOTES) . '" data-userajax="' . htmlspecialchars($isAjaxColumn ? '1' : '0', ENT_QUOTES) . '" type="' . $inputType . '" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" value="' . htmlspecialchars((string)$value, ENT_QUOTES) . '" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, \'' . htmlspecialchars((string)$columnType, ENT_QUOTES) . '\')" onfocus="clearCellColor(this)">';
+                        //echo '<input oncontextmenu="filter_that(this, \'input\');" data-type="' . htmlspecialchars((string)$columnType) . '" data-fkIDkey="' . htmlspecialchars((string)$data_fk_ID_key, ENT_QUOTES) . '" data-fkIDvalue="' . htmlspecialchars((string)$data_fk_ID_value, ENT_QUOTES) . '" data-userajax="' . htmlspecialchars($isAjaxColumn ? '1' : '0', ENT_QUOTES) . '" type="' . $inputType . '" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" value="' . htmlspecialchars((string)$value, ENT_QUOTES) . '" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, \'' . htmlspecialchars((string)$columnType, ENT_QUOTES) . '\')" onfocus="clearCellColor(this)">';
+                        echo "<input 
+                        oncontextmenu=\"filter_that(this, 'input');\"
+                        data-type=\"" . htmlspecialchars((string)$columnType) . "\"
+                        data-fkIDkey=\"" . htmlspecialchars((string)$data_fk_ID_key, ENT_QUOTES) . "\"
+                        data-fkIDvalue=\"" . htmlspecialchars((string)$data_fk_ID_value, ENT_QUOTES) . "\"
+                        data-userajax=\"" . htmlspecialchars($isAjaxColumn ? '1' : '0', ENT_QUOTES) . "\"
+                        type=\"" . $inputType . "\"
+                        class=\"form-control border-0\"
+                        style=\"background-color: inherit; word-wrap: break-word; white-space: normal;\"
+                        value=\"" . htmlspecialchars((string)$value, ENT_QUOTES) . "\"
+                        onchange=\"updateField('{$tabelle}', '{$row['id']}', '{$key}', this.value, '" . htmlspecialchars((string)$columnType, ENT_QUOTES) . "', '" . ($ajaxfile ?? '') . "')\"
+                        onfocus=\"clearCellColor(this)\"
+                    >";
                     } else {
                         // Spezialbehandlung für Info-Spalten: Wenn leer, aber Plain-Feld vorhanden, dieses anzeigen
                         if ($isInfoColumn) {

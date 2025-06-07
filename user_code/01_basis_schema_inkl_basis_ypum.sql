@@ -510,7 +510,7 @@ CREATE TABLE `b_mitglieder_historie` (
   `MNr` BIGINT UNSIGNED NOT NULL,
   `Aktion` VARCHAR(500) NOT NULL,
    PRIMARY KEY (`id`),
-  CONSTRAINT `FK_historie_mNr_betroffenes_Mitglied` FOREIGN KEY (`MNr`) REFERENCES `b_mitglieder` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE
+  CONSTRAINT `FK_historie_mNr_betroffenes_Mitglied` FOREIGN KEY (`MNr`) REFERENCES `b_mitglieder` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 )
 ENGINE = InnoDB
 COMMENT = 'Der Akteur kann über das Rollback-Log ermittelt werden.';

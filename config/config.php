@@ -36,10 +36,10 @@ define("NULL_BUT_NOT_NULLABLE", "Diese Liste ist noch leer. Bitte zunächst Ausw
 
 # ...wenn die Datenbank einen Fehler zurückgibt
 # #FEHLERID# wird bei der Anzeige mit der Fehler-ID (ID im Error-Log) ersetzt.
-define("DB_ERROR", "Die Datenbank kann die Daten so nicht speichern. Ist alles korrekt eingegeben? Wenn du keine Lösung findest, kannst du dich mit der Fehler-ID <b>#FEHLERID#</b> gerne an <a href='mailto:support@mobs24.de?subject=mobs24%20-%20Ich%20erhalte%20die%20Fehler-ID%20#FEHLERID#'>mailto:support@mobs24.de</a> wenden. Die Bearbeitung kann aber ggf. etwas Zeit in Anspruch nehmen. ");
+define("DB_ERROR", "Die Datenbank kann die Daten so nicht speichern. <b>Ist alles korrekt eingegeben?</b><br><br>Wenn du keine Lösung findest, kannst du dich mit der Fehler-ID <b>#FEHLERID#</b> gerne an <a href='mailto:support@mobs24.de?subject=mobs24%20-%20Ich%20erhalte%20die%20Fehler-ID%20#FEHLERID#'>support@mobs24.de</a> wenden. Die Bearbeitung kann aber ggf. etwas Zeit in Anspruch nehmen. ");
 
 # ...wenn es zu einem Serverfehler (kann auch fehlerhafter code sein) kommt
-define("SRV_ERROR", "Es kam zu einen allgemeinen Fehler. Wenn dies wiederholt auftritt, schildere mir bitte das Problem unter <a href='support@mobs24.de'>support@mobs24.de</a>. Danke.");
+define("SRV_ERROR", "Es kam zu einen allgemeinen Fehler. <b>Ist alles korrekt eingegeben?</b><br><br>Wenn du keine Lösung findest, kannst du dich mit der Fehler-ID <b>#FEHLERID#</b> gerne an <a href='mailto:support@mobs24.de?subject=mobs24%20-%20Ich%20erhalte%20die%20Fehler-ID%20#FEHLERID#'>support@mobs24.de</a> wenden. Die Bearbeitung kann aber ggf. etwas Zeit in Anspruch nehmen.");
 
 
 

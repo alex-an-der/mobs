@@ -47,11 +47,13 @@ switch($action) {
                 // CHECK 2
                 // Überprüfe, ob das Geburtsdatum der beiden Datensätze übereinstimmt
                 // Hole Geburtsdatum und Stammmitglied_seit für den anderen Datensatz
-                $stmt = $pdo->prepare("SELECT geburtsdatum, Stammmitglied_seit FROM b_mitglieder WHERE y_id = :yid AND id <> :id");
+                $stmt = $pdo->prepare("SELECT id as registrierteMNr, geburtsdatum, Stammmitglied_seit FROM b_mitglieder WHERE y_id = :yid AND id <> :id");
                 $stmt->execute([':yid' => $value, ':id' => $id]);
                 $otherRow = $stmt->fetch(PDO::FETCH_ASSOC);
                 $otherGeburtsdatum = $otherRow['geburtsdatum'] ?? null;
                 $otherStammmitgliedSeit = $otherRow['Stammmitglied_seit'] ?? null;
+                // MNr des registrierten MItglieds
+                $registrierteMNr = $otherRow['registrierteMNr'];
 
                 // Hole Geburtsdatum und Stammmitglied_seit für den aktuellen Datensatz
                 $stmt = $pdo->prepare("SELECT geburtsdatum, Stammmitglied_seit FROM b_mitglieder WHERE id = :id");
@@ -68,14 +70,30 @@ switch($action) {
                 // GO!
                 $pdo->beginTransaction();
     
-                // 1. Lösche ggf. den alten Datensatz mit dieser y_id (außer dem aktuellen)
+                // Ich habe jetzt 2 Einträge. Den manuell hinzugefügten "MAN" und den registrieren "REG"
+                // Am Ende soll von REG nur die Credentials bleiben (in y_user), der Rest soll von "MAN" ghenommen werden. So der user-case.
+                //
+                // MNr | Y-ID | Mail | PW | BSG | Sparten |  
+                // --- | ---- | ---- | -- | --- | ------- |
+                // MAN |      | m@xx |    | MMM | m1, m2  |
+                // REG | 123  | r@xx | ab | RRR | r1, r2  |
+                // 
+                // ergbit =>
+                //
+                // MAN | 123  | r@xx | ab | MMM | m1, m2  |
+                //
+
+                // 1. Entferne (falls vorhanden) das REG-Mitglied aus der Meldeliste (auch wegen FK-constraint)
+                $stmt = $pdo->prepare("DELETE FROM b_meldeliste WHERE MNr = :registrierteMNr");
+                $stmt->execute([':registrierteMNr' => $registrierteMNr]);
+
+                // 2. Lösche REG aus b_mitglieder (Mail & PW sind in y_user gespeichert, achte sicherheitshalber darauf, nicht MAN mitzulöschen (id ist von MAN)
                 $stmt = $pdo->prepare("DELETE FROM b_mitglieder WHERE y_id = :yid AND id <> :id");
                 $stmt->execute([':yid' => $value, ':id' => $id]);
-    
-                // 2. Setze die y_id beim gewünschten Datensatz
+
+                // 3. Setze die y_id beim gewünschten Datensatz
                 $stmt = $pdo->prepare("UPDATE b_mitglieder SET y_id = :yid WHERE id = :id");
                 $stmt->execute([':yid' => $value, ':id' => $id]);
-
 
 
                 // Bestimme das älteste Datum aus $otherStammmitgliedSeit, $currentStammmitgliedSeit und NOW()
