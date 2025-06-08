@@ -797,6 +797,7 @@ $tabelle_upper = strtoupper($tabelle);
             headers.forEach(header => {
                 header.addEventListener('click', () => {
                     const column = header.getAttribute('data-field');
+                    if (!column) return; // Fix: nur sortieren, wenn data-field existiert
                     const currentOrder = header.getAttribute('data-order') || 'asc';
                     const newOrder = currentOrder === 'asc' ? 'desc' : 'asc';
 
@@ -1363,6 +1364,13 @@ $tabelle_upper = strtoupper($tabelle);
 
             // Set button heights
             setButtonHeights();
+
+            // Spaltenfilter-Logik aktivieren
+            const columnFilters = document.querySelectorAll('.column-filter');
+            columnFilters.forEach(input => {
+                input.value = ''; // Clear column filter fields on page load
+                input.addEventListener('input', filterTableByColumns);
+            });
         });
 
         function exportData(format, spreadsheetFormat) {
@@ -1473,6 +1481,40 @@ $tabelle_upper = strtoupper($tabelle);
                 filterTable();
             }
         }
+
+        function filterTableByColumns() {
+    const filters = {};
+    document.querySelectorAll('.column-filter').forEach(input => {
+        const value = input.value.trim().toLowerCase();
+        if (value) {
+            filters[input.dataset.field] = value;
+        }
+    });
+    const rows = document.querySelectorAll('table tbody tr');
+    rows.forEach(row => {
+        let show = true;
+        for (const [field, filterValue] of Object.entries(filters)) {
+            const cell = row.querySelector(`td[data-field='${field}']`);
+            let cellValue = '';
+            if (cell) {
+                const input = cell.querySelector('input');
+                const select = cell.querySelector('select');
+                if (input) {
+                    cellValue = input.value.trim().toLowerCase();
+                } else if (select) {
+                    cellValue = select.options[select.selectedIndex].text.trim().toLowerCase();
+                } else {
+                    cellValue = cell.textContent.trim().toLowerCase();
+                }
+            }
+            if (!cellValue.includes(filterValue)) {
+                show = false;
+                break;
+            }
+        }
+        row.style.display = show ? '' : 'none';
+    });
+}
 
     </script>
 
@@ -1618,25 +1660,28 @@ function renderTableHeaders($data) {
                 $style = "style='width: ".$anzuzeigendeDaten[$selectedTableID]['spaltenbreiten'][$header]."px;'";
             }
             if (strcasecmp($header, 'id') !== 0) {
-                
                 $displayHeader = $header;
-
-                // Check if it's an info column and extract the real display name
                 if (strpos($header, 'info:') === 0) {
                     $displayHeader = substr($header, 5); // Remove 'info:' prefix
                 }
-                // Check if it's an ajax column and extract the real display name
                 if (strpos($header, 'ajax:') === 0) {
                     $displayHeader = substr($header, 5); // Remove 'ajax:' prefix 
                 }
                 echo "<th $style data-field='" . htmlspecialchars($header) . "'>" . htmlspecialchars($displayHeader) . "</th>";
             }
         }
+        // Filterzeile einfügen
+        echo "</tr><tr id='columnFilters'>";
+        if($importErlaubt || $deleteAnyway) echo "<th></th>"; // Leeres Feld für Checkbox
+        foreach (array_keys($data[0]) as $header) {
+            if (strcasecmp($header, 'id') !== 0) {
+                echo "<th><input type='text' class='form-control form-control-sm column-filter' data-field='" . htmlspecialchars($header) . "' placeholder='Filter...'></th>";
+            }
+        }
     } else {
         if ($selectedTableID !== "") {
             echo "<div class='container mt-4'><div class='alert alert-light' role='alert'>Diese Liste ist noch leer.</div></div>";
         } else {
-            //echo "<div class='container mt-4'><div class='alert alert-light' role='alert'>Bitte wählen Sie eine Tabelle aus.</div></div>";
             echo "<style>::-webkit-scrollbar { display: none; }</style><div class='container mt-4' style='overflow-y: hidden;'><div class='alert alert-light' role='alert'>Bitte wählen Sie eine Tabelle aus.</div></div>";
         }
     }
@@ -1718,7 +1763,7 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                         class=\"form-control border-0\" 
                         style=\"background-color: inherit; word-wrap: break-word; white-space: normal;\"
                         onchange=\"updateField('{$tabelle}', '{$row['id']}', '{$key}', this.value, 0, '" . ($ajaxfile ?? '') . "')\"
-                        >";*/
+                        >*/;
 
                         // Nur wenn Spalte nullable ist, die "---" anbieten (und nur bei r/w + non-info-Spalten)
                         if( $columnMayBeNULL[$key]) {
@@ -1834,7 +1879,10 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
             <?php 
             if($tabelle!=""){
                 echo "<p><form class='d-flex align-items-center'><input type='text' id='tableFilter' class='form-control' placeholder='Filtern entweder durch manuelle Eingabe oder Rechtsklick auf ein Datenfeld.'>";
-                // Löschen-Button auskommentiert
+                // Löschen-Button auskomment
+
+
+
                 //echo "<button id='clearFilterButton' type='button' class='btn btn-secondary ms-2' onclick='clearFilter()'>Löschen</button>";
                 echo "</form></p>";
             }
