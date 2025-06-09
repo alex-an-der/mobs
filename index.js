@@ -1349,7 +1349,7 @@ function detectColumnDataTypes() {
         
         // Wenn keine Werte vorhanden, als TXT markieren
         if (values.length === 0) {
-            setColumnType(header, 'TXT');
+            setColumnFilterType(header, 'TXT');
             return;
         }
         
@@ -1372,13 +1372,33 @@ function detectColumnDataTypes() {
         
         // Datentyp setzen
         if (isNumber) {
-            setColumnType(header, 'NUM');
+            setColumnFilterType(header, 'NUM');
         } else if (isDate) {
-            setColumnType(header, 'DAT');
+            setColumnFilterType(header, 'DAT');
         } else {
-            setColumnType(header, 'TXT');
+            setColumnFilterType(header, 'TXT');
         }
     });
+}
+
+function setColumnFilterType(header, type) {
+    // Finde das Filterelement für diese Spalte
+    const filterInput = document.querySelector(`.column-filter[data-field='${header}']`);
+    if (filterInput) {
+        // Setze den data-filtertyp
+        filterInput.setAttribute('data-filtertyp', type);
+        
+        // Optional: Füge CSS-Klassen für visuelle Unterscheidung hinzu
+        filterInput.classList.remove('filter-type-num', 'filter-type-dat', 'filter-type-txt');
+        filterInput.classList.add(`filter-type-${type.toLowerCase()}`);
+    }
+    
+    // Entferne die separate Anzeige des Datentyps (falls vorhanden)
+    const typeIndicator = document.querySelector(`.data-type-indicator[data-field='${header}']`);
+    if (typeIndicator) {
+        // Element ausblenden
+        typeIndicator.style.display = 'none';
+    }
 }
 
 // Hilfsfunktion zum Prüfen von Datumsformaten
