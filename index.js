@@ -1381,12 +1381,26 @@ function detectColumnDataTypes() {
     });
 }
 
+// Neue Funktion zum Setzen des Datentyps als data-filtertyp im Filterelement
 function setColumnFilterType(header, type) {
     // Finde das Filterelement für diese Spalte
     const filterInput = document.querySelector(`.column-filter[data-field='${header}']`);
     if (filterInput) {
         // Setze den data-filtertyp
         filterInput.setAttribute('data-filtertyp', type);
+        
+        // Setze den Platzhaltertext je nach Datentyp
+        switch(type) {
+            case 'NUM':
+                filterInput.placeholder = 'Numerischer Filter';
+                break;
+            case 'DAT':
+                filterInput.placeholder = 'Datumsfilter';
+                break;
+            case 'TXT':
+                filterInput.placeholder = 'Textfilter';
+                break;
+        }
         
         // Optional: Füge CSS-Klassen für visuelle Unterscheidung hinzu
         filterInput.classList.remove('filter-type-num', 'filter-type-dat', 'filter-type-txt');
