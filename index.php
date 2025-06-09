@@ -1670,7 +1670,20 @@ function renderTableHeaders($data) {
                 echo "<th $style data-field='" . htmlspecialchars($header) . "'>" . htmlspecialchars($displayHeader) . "</th>";
             }
         }
-        // Filterzeile einfügen
+        
+        // Neue Zeile für Datentyp-Anzeige
+        echo "</tr><tr id='dataTypes'>";
+        if($importErlaubt || $deleteAnyway) echo "<th></th>"; // Leeres Feld für Checkbox
+        
+        // Analysiere Spalten und zeige Datentyp an
+        foreach (array_keys($data[0]) as $header) {
+            if (strcasecmp($header, 'id') !== 0) {
+                // Wir erstellen ein leeres Feld für jeden Header, das später via JavaScript gefüllt wird
+                echo "<th><input type='text' class='form-control form-control-sm data-type-indicator' data-field='" . htmlspecialchars($header) . "' readonly></th>";
+            }
+        }
+        
+        // Filterzeile einfügen (bestehender Code)
         echo "</tr><tr id='columnFilters'>";
         if($importErlaubt || $deleteAnyway) echo "<th></th>"; // Leeres Feld für Checkbox
         foreach (array_keys($data[0]) as $header) {
@@ -1997,6 +2010,9 @@ document.addEventListener('DOMContentLoaded', function() {
         })
     );
 
+    // Datentypen erkennen und anzeigen
+    setTimeout(detectColumnDataTypes, 500); // Kurze Verzögerung, um sicherzustellen, dass alle Daten geladen sind
+
     // Add tooltips dynamically to table cells
     document.addEventListener('mouseover', function(e) {
         const td = e.target.closest('td');
@@ -2052,6 +2068,104 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+function detectColumnDataTypes() {
+    const table = document.querySelector('table');
+    if (!table) return;
+    
+    // Alle Spaltenheader finden
+    const headers = Array.from(table.querySelectorAll('thead th[data-field]'))
+        .map(th => th.getAttribute('data-field'));
+    
+    // Für jede Spalte den Datentyp ermitteln
+    headers.forEach(header => {
+        if (header === 'id') return; // ID-Spalte überspringen
+        
+        const cells = Array.from(table.querySelectorAll(`tbody td[data-field='${header}']`));
+        let isNumber = true;
+        let isDate = true;
+        let values = [];
+        
+        // Werte aus den Zellen sammeln
+        cells.forEach(cell => {
+            let value = '';
+            const input = cell.querySelector('input');
+            const select = cell.querySelector('select');
+            
+            if (input) {
+                value = input.value.trim();
+            } else if (select) {
+                // Bei Select-Feldern den angezeigten Text verwenden, nicht den Value
+                value = select.options[select.selectedIndex]?.text.trim() || '';
+            } else {
+                value = cell.textContent.trim();
+            }
+            
+            if (value) {
+                values.push(value);
+            }
+        });
+        
+        // Wenn keine Werte vorhanden, als TXT markieren
+        if (values.length === 0) {
+            setColumnType(header, 'TXT');
+            return;
+        }
+        
+        // Prüfen, ob alle Werte Zahlen sind
+        for (const value of values) {
+            if (!/^-?\d+(\.\d+)?$/.test(value)) {
+                isNumber = false;
+            }
+            
+            // Prüfen, ob alle Werte Datumsformate sind
+            if (!isDateFormat(value)) {
+                isDate = false;
+            }
+            
+            // Wenn weder Zahl noch Datum, sofort als TXT markieren und abbrechen
+            if (!isNumber && !isDate) {
+                break;
+            }
+        }
+        
+        // Datentyp setzen
+        if (isNumber) {
+            setColumnType(header, 'NUM');
+        } else if (isDate) {
+            setColumnType(header, 'DAT');
+        } else {
+            setColumnType(header, 'TXT');
+        }
+    });
+}
+
+// Hilfsfunktion zum Prüfen von Datumsformaten
+function isDateFormat(value) {
+    // Verschiedene Datumsformate prüfen
+    const datePatterns = [
+        /^\d{4}-\d{2}-\d{2}$/, // YYYY-MM-DD
+        /^\d{2}\.\d{2}\.\d{4}$/, // DD.MM.YYYY
+        /^\d{2}\/\d{2}\/\d{4}$/, // MM/DD/YYYY oder DD/MM/YYYY
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/, // ISO datetime
+        /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/ // SQL datetime
+    ];
+    
+    // Prüfen, ob der Wert einem der Datumsformate entspricht
+    return datePatterns.some(pattern => pattern.test(value));
+}
+
+// Hilfsfunktion zum Setzen des Datentyps im entsprechenden Textfeld
+function setColumnType(header, type) {
+    const typeInput = document.querySelector(`.data-type-indicator[data-field='${header}']`);
+    if (typeInput) {
+        typeInput.value = type;
+        
+        // Optionale visuelle Unterscheidung durch Farben
+        typeInput.classList.remove('data-type-num', 'data-type-dat', 'data-type-txt');
+        typeInput.classList.add(`data-type-${type.toLowerCase()}`);
+    }
+}
+
     </script>
     <script language="javascript" type="text/javascript" src="./user_includes/index_document_ready.js"></script>
 
