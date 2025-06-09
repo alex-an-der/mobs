@@ -1305,7 +1305,6 @@ function matchesNumericFilter(cellValue, filterValue) {
 }
 
 // Hilfsfunktion für Datumsfilter
-// Hilfsfunktion für Datumsfilter
 function matchesDateFilter(cellValue, filterValue) {
     // Zelldatum parsen
     const cellDate = parseDate(cellValue);
@@ -1326,7 +1325,7 @@ function matchesDateFilter(cellValue, filterValue) {
         }
     }
 
-    // Nur Jahreszahl eingegeben
+    // Nur Jahreszahl eingegeben - exakte Jahresübereinstimmung
     if (/^\d{4}$/.test(filterValue)) {
         const year = parseInt(filterValue);
         return cellDate.getFullYear() === year;
@@ -1360,21 +1359,29 @@ function matchesDateFilter(cellValue, filterValue) {
         return cellDate.getTime() !== compareDate.getTime();
     }
     if (filterValue.startsWith('>')) {
+        // Spezialfall für Jahresangabe
+        if (/^\d{4}$/.test(filterValue.substring(1))) {
+            const year = parseInt(filterValue.substring(1));
+            return cellDate.getFullYear() > year; // Wirklich größer, nicht gleich
+        }
+        
         const compareDate = parseDate(filterValue.substring(1));
         if (!compareDate) return false;
         
-        // Bei > setzen wir die Zeit für den Vergleichstag auf 23:59:59
-        if (filterValue.substring(1).length <= 10) { // Wenn kein Zeitanteil vorhanden
-            compareDate.setHours(23, 59, 59, 999);
-        }
         return cellDate > compareDate;
     }
     if (filterValue.startsWith('<')) {
+        // Spezialfall für Jahresangabe
+        if (/^\d{4}$/.test(filterValue.substring(1))) {
+            const year = parseInt(filterValue.substring(1));
+            return cellDate.getFullYear() < year; // Wirklich kleiner, nicht gleich
+        }
+        
         const compareDate = parseDate(filterValue.substring(1));
         return compareDate && cellDate < compareDate;
     }
 
-    // Prüfen auf Jahr mit < oder >
+    // Prüfen auf Jahr mit <= oder >=
     if (filterValue.startsWith('<=') && /^\d{4}$/.test(filterValue.substring(2))) {
         const year = parseInt(filterValue.substring(2));
         return cellDate.getFullYear() <= year;
@@ -1382,14 +1389,6 @@ function matchesDateFilter(cellValue, filterValue) {
     if (filterValue.startsWith('>=') && /^\d{4}$/.test(filterValue.substring(2))) {
         const year = parseInt(filterValue.substring(2));
         return cellDate.getFullYear() >= year;
-    }
-    if (filterValue.startsWith('<') && /^\d{4}$/.test(filterValue.substring(1))) {
-        const year = parseInt(filterValue.substring(1));
-        return cellDate.getFullYear() < year;
-    }
-    if (filterValue.startsWith('>') && /^\d{4}$/.test(filterValue.substring(1))) {
-        const year = parseInt(filterValue.substring(1));
-        return cellDate.getFullYear() > year;
     }
 
     // Exakte Übereinstimmung
