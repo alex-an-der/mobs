@@ -1305,6 +1305,7 @@ function matchesNumericFilter(cellValue, filterValue) {
 }
 
 // Hilfsfunktion für Datumsfilter
+// Hilfsfunktion für Datumsfilter
 function matchesDateFilter(cellValue, filterValue) {
     // Zelldatum parsen
     const cellDate = parseDate(cellValue);
@@ -1317,6 +1318,10 @@ function matchesDateFilter(cellValue, filterValue) {
         const endDate = parseDate(endStr);
         
         if (startDate && endDate) {
+            // Bei Bereichsfiltern setzen wir die Zeit für den Endtag auf 23:59:59
+            if (endStr.length <= 10) { // Wenn kein Zeitanteil vorhanden
+                endDate.setHours(23, 59, 59, 999);
+            }
             return cellDate >= startDate && cellDate <= endDate;
         }
     }
@@ -1327,22 +1332,42 @@ function matchesDateFilter(cellValue, filterValue) {
         return cellDate.getFullYear() === year;
     }
 
-    // Operatoren prüfen
+    // Operatoren prüfen - wichtig: Reihenfolge beachten (längere zuerst)
     if (filterValue.startsWith('>=')) {
         const compareDate = parseDate(filterValue.substring(2));
         return compareDate && cellDate >= compareDate;
     }
     if (filterValue.startsWith('<=')) {
         const compareDate = parseDate(filterValue.substring(2));
-        return compareDate && cellDate <= compareDate;
-    }
-    if (filterValue.startsWith('>')) {
-        const compareDate = parseDate(filterValue.substring(1));
-        return compareDate && cellDate > compareDate;
+        if (!compareDate) return false;
+        
+        // Bei <= setzen wir die Zeit für den Vergleichstag auf 23:59:59
+        if (filterValue.substring(2).length <= 10) { // Wenn kein Zeitanteil vorhanden
+            compareDate.setHours(23, 59, 59, 999);
+        }
+        return cellDate <= compareDate;
     }
     if (filterValue.startsWith('<>')) {
         const compareDate = parseDate(filterValue.substring(2));
-        return compareDate && cellDate.getTime() !== compareDate.getTime();
+        if (!compareDate) return false;
+        
+        // Bei <> vergleichen wir nur das Datum, nicht die Uhrzeit, wenn kein Zeitanteil angegeben
+        if (filterValue.substring(2).length <= 10) {
+            return cellDate.getFullYear() !== compareDate.getFullYear() || 
+                  cellDate.getMonth() !== compareDate.getMonth() || 
+                  cellDate.getDate() !== compareDate.getDate();
+        }
+        return cellDate.getTime() !== compareDate.getTime();
+    }
+    if (filterValue.startsWith('>')) {
+        const compareDate = parseDate(filterValue.substring(1));
+        if (!compareDate) return false;
+        
+        // Bei > setzen wir die Zeit für den Vergleichstag auf 23:59:59
+        if (filterValue.substring(1).length <= 10) { // Wenn kein Zeitanteil vorhanden
+            compareDate.setHours(23, 59, 59, 999);
+        }
+        return cellDate > compareDate;
     }
     if (filterValue.startsWith('<')) {
         const compareDate = parseDate(filterValue.substring(1));
@@ -1350,6 +1375,14 @@ function matchesDateFilter(cellValue, filterValue) {
     }
 
     // Prüfen auf Jahr mit < oder >
+    if (filterValue.startsWith('<=') && /^\d{4}$/.test(filterValue.substring(2))) {
+        const year = parseInt(filterValue.substring(2));
+        return cellDate.getFullYear() <= year;
+    }
+    if (filterValue.startsWith('>=') && /^\d{4}$/.test(filterValue.substring(2))) {
+        const year = parseInt(filterValue.substring(2));
+        return cellDate.getFullYear() >= year;
+    }
     if (filterValue.startsWith('<') && /^\d{4}$/.test(filterValue.substring(1))) {
         const year = parseInt(filterValue.substring(1));
         return cellDate.getFullYear() < year;
@@ -1361,7 +1394,15 @@ function matchesDateFilter(cellValue, filterValue) {
 
     // Exakte Übereinstimmung
     const compareDate = parseDate(filterValue);
-    return compareDate && cellDate.getTime() === compareDate.getTime();
+    if (!compareDate) return false;
+    
+    // Bei exakten Vergleichen ohne Zeitanteil vergleichen wir nur das Datum
+    if (filterValue.length <= 10) {
+        return cellDate.getFullYear() === compareDate.getFullYear() && 
+               cellDate.getMonth() === compareDate.getMonth() && 
+               cellDate.getDate() === compareDate.getDate();
+    }
+    return cellDate.getTime() === compareDate.getTime();
 }
 
 // Hilfsfunktion zum Parsen verschiedener Datumsformate
