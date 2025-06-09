@@ -1205,35 +1205,203 @@ function clearFilter() {
 function filterTableByColumns() {
     const filters = {};
     document.querySelectorAll('.column-filter').forEach(input => {
-        const value = input.value.trim().toLowerCase();
+        const value = input.value.trim();
         if (value) {
-            filters[input.dataset.field] = value;
+            const field = input.dataset.field;
+            const filterType = input.getAttribute('data-filtertyp') || 'TXT';
+            filters[field] = {
+                value: value,
+                type: filterType
+            };
         }
     });
+
     const rows = document.querySelectorAll('table tbody tr');
     rows.forEach(row => {
         let show = true;
-        for (const [field, filterValue] of Object.entries(filters)) {
+        for (const [field, filterInfo] of Object.entries(filters)) {
             const cell = row.querySelector(`td[data-field='${field}']`);
+            if (!cell) continue;
+
+            // Zellwert ermitteln
             let cellValue = '';
-            if (cell) {
-                const input = cell.querySelector('input');
-                const select = cell.querySelector('select');
-                if (input) {
-                    cellValue = input.value.trim().toLowerCase();
-                } else if (select) {
-                    cellValue = select.options[select.selectedIndex].text.trim().toLowerCase();
-                } else {
-                    cellValue = cell.textContent.trim().toLowerCase();
-                }
+            const input = cell.querySelector('input');
+            const select = cell.querySelector('select');
+            if (input) {
+                cellValue = input.value.trim();
+            } else if (select) {
+                cellValue = select.options[select.selectedIndex].text.trim();
+            } else {
+                cellValue = cell.textContent.trim();
             }
-            if (!cellValue.includes(filterValue)) {
-                show = false;
-                break;
+
+            // Je nach Filtertyp unterschiedlich filtern
+            switch (filterInfo.type) {
+                case 'NUM':
+                    if (!matchesNumericFilter(cellValue, filterInfo.value)) {
+                        show = false;
+                    }
+                    break;
+
+                case 'DAT':
+                    if (!matchesDateFilter(cellValue, filterInfo.value)) {
+                        show = false;
+                    }
+                    break;
+
+                case 'TXT':
+                default:
+                    if (!cellValue.toLowerCase().includes(filterInfo.value.toLowerCase())) {
+                        show = false;
+                    }
+                    break;
             }
+
+            if (!show) break;
         }
         row.style.display = show ? '' : 'none';
     });
+}
+
+// Hilfsfunktion für numerische Filter
+function matchesNumericFilter(cellValue, filterValue) {
+    // Zellwert als Zahl parsen
+    const numValue = parseFloat(cellValue.replace(',', '.'));
+    if (isNaN(numValue)) return false;
+
+    // Bereichsfilter (x-y)
+    if (filterValue.includes('-')) {
+        const [min, max] = filterValue.split('-').map(v => parseFloat(v.replace(',', '.')));
+        if (!isNaN(min) && !isNaN(max)) {
+            return numValue >= min && numValue <= max;
+        }
+    }
+
+    // Operatoren prüfen
+    if (filterValue.startsWith('>=')) {
+        const compareValue = parseFloat(filterValue.substring(2).replace(',', '.'));
+        return !isNaN(compareValue) && numValue >= compareValue;
+    }
+    if (filterValue.startsWith('<=')) {
+        const compareValue = parseFloat(filterValue.substring(2).replace(',', '.'));
+        return !isNaN(compareValue) && numValue <= compareValue;
+    }
+    if (filterValue.startsWith('>')) {
+        const compareValue = parseFloat(filterValue.substring(1).replace(',', '.'));
+        return !isNaN(compareValue) && numValue > compareValue;
+    }
+    if (filterValue.startsWith('<>')) {
+        const compareValue = parseFloat(filterValue.substring(2).replace(',', '.'));
+        return !isNaN(compareValue) && numValue !== compareValue;
+    }
+    if (filterValue.startsWith('<')) {
+        const compareValue = parseFloat(filterValue.substring(1).replace(',', '.'));
+        return !isNaN(compareValue) && numValue < compareValue;
+    }
+
+    // Exakte Übereinstimmung
+    const compareValue = parseFloat(filterValue.replace(',', '.'));
+    return !isNaN(compareValue) && numValue === compareValue;
+}
+
+// Hilfsfunktion für Datumsfilter
+function matchesDateFilter(cellValue, filterValue) {
+    // Zelldatum parsen
+    const cellDate = parseDate(cellValue);
+    if (!cellDate) return false;
+
+    // Bereichsfilter (x-y)
+    if (filterValue.includes('-')) {
+        const [startStr, endStr] = filterValue.split('-');
+        const startDate = parseDate(startStr);
+        const endDate = parseDate(endStr);
+        
+        if (startDate && endDate) {
+            return cellDate >= startDate && cellDate <= endDate;
+        }
+    }
+
+    // Nur Jahreszahl eingegeben
+    if (/^\d{4}$/.test(filterValue)) {
+        const year = parseInt(filterValue);
+        return cellDate.getFullYear() === year;
+    }
+
+    // Operatoren prüfen
+    if (filterValue.startsWith('>=')) {
+        const compareDate = parseDate(filterValue.substring(2));
+        return compareDate && cellDate >= compareDate;
+    }
+    if (filterValue.startsWith('<=')) {
+        const compareDate = parseDate(filterValue.substring(2));
+        return compareDate && cellDate <= compareDate;
+    }
+    if (filterValue.startsWith('>')) {
+        const compareDate = parseDate(filterValue.substring(1));
+        return compareDate && cellDate > compareDate;
+    }
+    if (filterValue.startsWith('<>')) {
+        const compareDate = parseDate(filterValue.substring(2));
+        return compareDate && cellDate.getTime() !== compareDate.getTime();
+    }
+    if (filterValue.startsWith('<')) {
+        const compareDate = parseDate(filterValue.substring(1));
+        return compareDate && cellDate < compareDate;
+    }
+
+    // Prüfen auf Jahr mit < oder >
+    if (filterValue.startsWith('<') && /^\d{4}$/.test(filterValue.substring(1))) {
+        const year = parseInt(filterValue.substring(1));
+        return cellDate.getFullYear() < year;
+    }
+    if (filterValue.startsWith('>') && /^\d{4}$/.test(filterValue.substring(1))) {
+        const year = parseInt(filterValue.substring(1));
+        return cellDate.getFullYear() > year;
+    }
+
+    // Exakte Übereinstimmung
+    const compareDate = parseDate(filterValue);
+    return compareDate && cellDate.getTime() === compareDate.getTime();
+}
+
+// Hilfsfunktion zum Parsen verschiedener Datumsformate
+function parseDate(dateStr) {
+    if (!dateStr || typeof dateStr !== 'string') return null;
+    dateStr = dateStr.trim();
+    
+    // ISO-Format: YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+        return new Date(dateStr);
+    }
+    
+    // Deutsches Format: DD.MM.YYYY
+    if (/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(dateStr)) {
+        const [day, month, year] = dateStr.split('.').map(Number);
+        return new Date(year, month - 1, day);
+    }
+    
+    // US-Format: MM/DD/YYYY
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) {
+        const [month, day, year] = dateStr.split('/').map(Number);
+        return new Date(year, month - 1, day);
+    }
+    
+    // ISO datetime: YYYY-MM-DDTHH:MM:SS
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(dateStr)) {
+        return new Date(dateStr);
+    }
+    
+    // SQL datetime: YYYY-MM-DD HH:MM:SS
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/.test(dateStr)) {
+        return new Date(dateStr.replace(' ', 'T'));
+    }
+    
+    // Nur Jahr (für Vergleiche)
+    if (/^\d{4}$/.test(dateStr)) {
+        return new Date(parseInt(dateStr), 0, 1);
+    }
+    
+    return null;
 }
 
 // ////////////////////////////////////////////////////////////////////////////////////////
