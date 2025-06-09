@@ -258,17 +258,7 @@ function renderTableHeaders($data) {
             }
         }
         
-        // Neue Zeile für Datentyp-Anzeige
-        echo "</tr><tr id='dataTypes'>";
-        if($importErlaubt || $deleteAnyway) echo "<th></th>"; // Leeres Feld für Checkbox
-        
-        // Analysiere Spalten und zeige Datentyp an
-        foreach (array_keys($data[0]) as $header) {
-            if (strcasecmp($header, 'id') !== 0) {
-                // Wir erstellen ein leeres Feld für jeden Header, das später via JavaScript gefüllt wird
-                echo "<th><input type='text' class='form-control form-control-sm data-type-indicator' data-field='" . htmlspecialchars($header) . "' readonly></th>";
-            }
-        }
+        // Die Zeile mit den Datentyp-Anzeigen wird komplett entfernt
         
         // Filterzeile einfügen (bestehender Code)
         echo "</tr><tr id='columnFilters'>";

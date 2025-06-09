@@ -1614,13 +1614,6 @@ function setColumnFilterType(header, type) {
         filterInput.classList.remove('filter-type-num', 'filter-type-dat', 'filter-type-txt');
         filterInput.classList.add(`filter-type-${type.toLowerCase()}`);
     }
-    
-    // Entferne die separate Anzeige des Datentyps (falls vorhanden)
-    const typeIndicator = document.querySelector(`.data-type-indicator[data-field='${header}']`);
-    if (typeIndicator) {
-        // Element ausblenden
-        typeIndicator.style.display = 'none';
-    }
 }
 
 // Hilfsfunktion zum Prüfen von Datumsformaten
@@ -1636,16 +1629,4 @@ function isDateFormat(value) {
     
     // Prüfen, ob der Wert einem der Datumsformate entspricht
     return datePatterns.some(pattern => pattern.test(value));
-}
-
-// Hilfsfunktion zum Setzen des Datentyps im entsprechenden Textfeld
-function setColumnType(header, type) {
-    const typeInput = document.querySelector(`.data-type-indicator[data-field='${header}']`);
-    if (typeInput) {
-        typeInput.value = type;
-        
-        // Optionale visuelle Unterscheidung durch Farben
-        typeInput.classList.remove('data-type-num', 'data-type-dat', 'data-type-txt');
-        typeInput.classList.add(`data-type-${type.toLowerCase()}`);
-    }
 }
