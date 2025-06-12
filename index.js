@@ -16,7 +16,7 @@ function updateField(tabelle, id, field, value, datatype, ajaxFile) {
         isUserAjax = event.target.getAttribute('data-userajax');
     }     
         // selectedTableID als Zahl, falls vorhanden, sonst 0
-        let tab = "<?=$selectedTableID !== '' ? (int)$selectedTableID : 0?>";
+        let tab = php_tab;
     
     if (isUserAjax>0) {
         ajaxFile = "./user_code/" + ajaxFile;
@@ -604,7 +604,7 @@ function insertDefaultRecord(tabelle) {
     const data = JSON.stringify({
         action: 'get_table_structure',
         tabelle: tabelle,
-        selectedTableID: '<?=$selectedTableID?>'
+        selectedTableID: php_selectedTableID
     });
 
     xhr.onreadystatechange = function () {
@@ -778,7 +778,7 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
             }else if(validOptions.length > 1){
                 const pleaseChooseOption = document.createElement('option');
                 pleaseChooseOption.value = "null";
-                pleaseChooseOption.textContent = "<?=PLEASE_CHOOSE?>";
+                pleaseChooseOption.textContent = php_PLEASE_CHOOSE;
                 pleaseChooseOption.disabled = true;
                 pleaseChooseOption.selected = true;
                 select.insertBefore(pleaseChooseOption, select.firstChild);
@@ -857,7 +857,7 @@ function saveNewRecord() {
 
     const requestData = JSON.stringify({
         action: 'insert_record',
-        tabelle: '<?=$tabelle?>',
+        tabelle: php_tabelle,
         data: data
     });
 
@@ -869,7 +869,7 @@ function saveNewRecord() {
                     $('#insertModal').modal('hide');
                     resetPage();
                 } else {
-                    let errorMessage = "<?=DB_ERROR?>";
+                    let errorMessage = php_DB_ERROR;
                     
                     if (isNaN(response.message)) {
                         errorMessage = errorMessage.replace(/#FEHLERID#/g, "000");                                
@@ -883,7 +883,7 @@ function saveNewRecord() {
             } catch (e) { 
                 const response = JSON.parse(xhr.responseText); 
                 
-                let errorMessage = "<?=SRV_ERROR?>";
+                let errorMessage = php_SRV_ERROR;
                     
                 if (isNaN(response.message)) {
                     errorMessage = errorMessage.replace(/#FEHLERID#/g, "000");                                
@@ -1062,13 +1062,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const insertButton = document.getElementById('insertDefaultButton');
     if (insertButton) {
         insertButton.addEventListener('click', function() {
-            insertDefaultRecord('<?=$tabelle?>');
+            insertDefaultRecord(php_tabelle);
         });
     }
     const deleteButton = document.getElementById('deleteSelectedButton');
     if (deleteButton) {
         deleteButton.addEventListener('click', function() {
-            deleteSelectedRows('<?=$tabelle?>');
+            deleteSelectedRows(php_tabelle);
         });
     }
     const checkDuplicatesButton = document.getElementById('check-duplicates');
@@ -1139,8 +1139,8 @@ function exportData(format, spreadsheetFormat) {
 
     const params = {
         format: format,
-        tabelle: '<?=$tabelle?>',
-        tabid: '<?=$selectedTableID?>',
+        tabelle: php_tabelle,
+        tabid: php_selectedTableID,
         exportAll: exportAll ? '1' : '0',
         ids: visibleRows.join(','),
         spreadsheet_format: spreadsheetFormat
