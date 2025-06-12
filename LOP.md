@@ -20,7 +20,9 @@ VALUES ('Tommy Manuell','Nocker',1,'1966-06-06','NeueMail@Nocker.de',3,'1966-06-
 ## Nächste Schritte
 
 
-## In der Prod-DB einfügen 
+
+
+## In der Prod-DB einfügen und neue Version v0.1.9-qa.1
 
 ### b_mitglieder.BSG: NULL -> NOT NULL  (nicht mehr nullable).
 Dazu müssen zuerst die FK angepasst werden. Wenn rollback, dann muss das auch wieder geradegezogen werden:
@@ -43,6 +45,19 @@ ALTER TABLE `b_mitglieder` ADD CONSTRAINT `FK_b_mitglieder_b___an_aus__aktiv` FO
 #### NULL verbieten:
 **Achtung - es dürfen keine NULL-Einträge gespeichert sein!**
 ALTER TABLE `b_mitglieder` CHANGE COLUMN `BSG` `BSG` BIGINT UNSIGNED NOT NULL;
+
+### Bemerkungsfeld
+ALTER TABLE `b_mitglieder` ADD  `Bemerkung` VARCHAR(1000) NULL;
+
+### Meldeliste
+Meldeliste nicht auf Mitglieder referenzieren, sondern Daten (Vn, Nn, Geb., MNr) direkt eintragen. Sonst kann niemend unterjährig gelöscht werden!
+(QS-open issues)
+
+
+
+
+
+
 
 
 

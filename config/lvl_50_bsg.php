@@ -94,12 +94,43 @@ $anzuzeigendeDaten[] = array(
 # Mitglieder in der Stamm-BSG bearbeiten
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder",
-    "auswahltext" => "Stamm-Mitglieder bearbeiten",
-    "hinweis" => "<b>ACHTUNG!</b> Das Feld <b>Stammmitglied_seit</b> wird <b>automatisch</b> angepasst, wenn sich die BSG ändert. Dies wird erst 
-    nach dem erneuten Laden sichtbar und kann dann manuell verändert werden. Dieses Angabe dient nur zur Information und  wird bei der Rechnungsstellung nicht berücksichtigt.",
+    "auswahltext" => "Stamm-Mitglieder bearbeiten (kompakt)",
     "writeaccess" => true,
     "import" => false,
-    "query" => "SELECT m.id as id, m.id as info:Nr, Vorname, Nachname, BSG, Stammmitglied_seit, Mail, m.Geschlecht, m.Geburtsdatum, aktiv
+    "query" => "SELECT m.id as id, Vorname, Nachname, Bemerkung, BSG, aktiv
+                from b_mitglieder as m
+                WHERE 
+                    (FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 or 
+                    ( BSG IS NULL AND FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0))
+                and m.BSG IS NOT NULL
+                order by BSG, Vorname, Nachname;
+    ",
+    "referenzqueries" => array(
+        "BSG" => "SELECT b.id, b.BSG as anzeige
+        from b_bsg as b
+        WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0
+        ORDER BY anzeige;
+        ",
+        "aktiv" => "SELECT id, wert as anzeige
+                        from b___an_aus;
+        "
+    ),
+    "spaltenbreiten" => array(
+        "BSG"                       => "300",
+        "Bemerkung"                 => "300",
+        "Vorname"                   => "150",
+        "Nachname"                  => "150",
+        "aktiv"                     => "100")
+);
+
+# Mitglieder in der Stamm-BSG bearbeiten
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_mitglieder",
+    "auswahltext" => "Stamm-Mitglieder bearbeiten",
+    "writeaccess" => true,
+    "import" => false,
+    "deleteanyway" => true,
+    "query" => "SELECT m.id as id, m.id as info:Nr, Vorname, Nachname, Bemerkung, BSG, Stammmitglied_seit, Mail, m.Geschlecht, m.Geburtsdatum, aktiv
                 from b_mitglieder as m
                 WHERE 
                     (FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 or 
@@ -123,6 +154,7 @@ $anzuzeigendeDaten[] = array(
     "spaltenbreiten" => array(
         "info:Nr"               => "70", 
         "BSG"                       => "300",
+        "Bemerkung"                 => "300",
         "Vorname"                   => "150",
         "Nachname"                  => "150",
         "Mail"                      => "250",
