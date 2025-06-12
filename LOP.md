@@ -22,6 +22,34 @@ VALUES ('Tommy Manuell','Nocker',1,'1966-06-06','NeueMail@Nocker.de',3,'1966-06-
 
 ## In der Prod-DB einfügen 
 
+### b_mitglieder.BSG: NULL -> NOT NULL  (nicht mehr nullable).
+Dazu müssen zuerst die FK angepasst werden. Wenn rollback, dann muss das auch wieder geradegezogen werden:
+
+#### FK_mitglieder_bsg
+**JETZT:** FK_mitglieder_bsg, ON DELETE:  SET NULL
+Was passiert, wenn eine nicht leere BSG gelöscht wird?
+RESTRICT verhindert, dass eine BSG gelöscht wird, wenn es Mitglieder gibt.
+**NEU:**   FK_mitglieder_bsg, ON DELETE:  RESTRICT
+ALTER TABLE `b_mitglieder` DROP FOREIGN KEY `FK_mitglieder_bsg`;
+ALTER TABLE `b_mitglieder` ADD CONSTRAINT `FK_mitglieder_bsg` FOREIGN KEY (`BSG`) REFERENCES `b_bsg` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+#### FK_mitglieder_bsg
+Wie oben...
+**JETZT:** FK_b_mitglieder_b___an_aus__aktiv, ON DELETE:  SET NULL
+**NEU:**   FK_b_mitglieder_b___an_aus__aktiv, ON DELETE:  RESTRICT
+ALTER TABLE `b_mitglieder` DROP FOREIGN KEY `FK_b_mitglieder_b___an_aus__aktiv`;
+ALTER TABLE `b_mitglieder` ADD CONSTRAINT `FK_b_mitglieder_b___an_aus__aktiv` FOREIGN KEY (`aktiv`) REFERENCES `b___an_aus` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+#### NULL verbieten:
+**Achtung - es dürfen keine NULL-Einträge gespeichert sein!**
+ALTER TABLE `b_mitglieder` CHANGE COLUMN `BSG` `BSG` BIGINT UNSIGNED NOT NULL;
+
+
+
+
+
+## ERLEDIGT (sollte eigentlich)
+
 ```
 
 SET @new_id = 100000;

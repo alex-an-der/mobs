@@ -15,6 +15,7 @@
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_bsg",
     "auswahltext" => "BSG einfügen, löschen und bearbeiten",
+    "hinweis" => "Es können nur BSG ohne Mitglieder gelöscht werden! Bitte vor dem löschen die Mitglieder entweder löschen oder in andere BSG transferieren.",
     "writeaccess" => true,
     "query" => "SELECT 
         id, Verband, VKZ, BSG, 
