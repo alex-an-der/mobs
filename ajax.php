@@ -622,60 +622,27 @@ try {
 function checkDaten($data, $db){
     $importDatenzeilen = $data['rows'];
 
-    //show($importDatenzeilen);
-
     $importDatensaetze = array();
     $zeilenNummer = 0;
     $FK_Spalten = array();
     foreach($importDatenzeilen as $zeile){
-        // Hinterer Trenner sorgt für sauberen Algorhithmus
-        $zeile = $zeile.",";
-        $currentField = '';
-        $inQuotes = false;
-        $quoteChar = '';
+        // Nutze str_getcsv für robustes CSV-Parsing (Komma, Anführungszeichen, Escape)
+        $feldArray = str_getcsv($zeile, ',', '"', '\\');
         $feldNummer = 0;
-
-        for ($i = 0; $i < strlen($zeile); $i++) {
-            $char = $zeile[$i];
-
-            // Quote handling, nur für FK-Spalten
-            if (in_array($feldNummer,$FK_Spalten) && ($char === '"' || $char === "'") && ($i === 0 || $zeile[$i-1] !== '\\')) {
-                if (!$inQuotes) {
-                $inQuotes = true;
-                $quoteChar = $char;
-                } elseif ($char === $quoteChar) {
-                    $inQuotes = false;
-                }
-            }else{
-                // separator gefunden
-                // Fall 1: FK-Spalte, dann nur nich in Quotes und " " oder ","
-                // Fall 2: Nicht FK-Spalte, dann nur bei ",", Quotes egal.
-                if(in_array($feldNummer,$FK_Spalten) && !$inQuotes && ($char === ',' || ($char === ' ')) ||
-                (!in_array($feldNummer,$FK_Spalten) && $char === ',')){
-                 
-                    //if (!$inQuotes && ($char === ',' || ($char === ' ' && in_array($feldNummer,$FK_Spalten)))) {
-                        // Immer einen neuen Suchbegriff hinzufügen (der jetzige ist abgeschlossen)
-                        // Einzige Ausnahme: Leerzeichen hintereinander oder hinter dem Komma.
-                        // Nicht FK-Spalten überspringen, die Header aber immer mitnehmen.
-                        //&& ($zeilenNummer===0 || in_array($feldNummer,$FK_Spalten)))
-                        if(!($currentField === '' && $char===' ')){
-                            $importDatensaetze[$zeilenNummer][$feldNummer][] = trim($currentField);
-                        }
-                        
-                        // Bei einem Komme => neues Feld
-                        if($char === ','){
-                            // Im Header die FK-Spalten identifizieren (Indizes sammeln)
-                            if($zeilenNummer === 0 && isset($data['suchQueries'][$currentField])){
-                                $FK_Spalten[] = $feldNummer;
-                            }
-                            $feldNummer++;
-                        }
-                        $currentField = '';
-                    }else{
-                        // Weiter lesen
-                        $currentField .= $char;
-                    }
+        foreach($feldArray as $feldWert) {
+            // Im Header die FK-Spalten identifizieren (Indizes sammeln)
+            if($zeilenNummer === 0 && isset($data['suchQueries'][$feldWert])){
+                $FK_Spalten[] = $feldNummer;
             }
+            // Wenn es eine FK-Spalte ist und nicht Header, teile bei Leerzeichen auf
+            if(in_array($feldNummer, $FK_Spalten) && $zeilenNummer > 0) {
+                $suchBegriffe = array_filter(explode(' ', trim($feldWert)));
+                $importDatensaetze[$zeilenNummer][$feldNummer] = $suchBegriffe;
+            } else {
+                // Header oder normale Spalte: als einzelner Wert
+                $importDatensaetze[$zeilenNummer][$feldNummer][] = trim($feldWert);
+            }
+            $feldNummer++;
         }
         $zeilenNummer++;
     }
