@@ -1,3 +1,7 @@
+# Name
+Framework: FUDA - Framework for univerlsal data applications
+BSV: MOBS
+
 Was ist der Unterschied individuell und BSG? Kann man das nicht über BSG-Check machen?
 Beide checken die BSG-Berechtigungen. Der Unterschied ist lediglich der Eingangsparameter:
 FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 => Darf $uid die BSG sehen?
@@ -16,6 +20,12 @@ VALUES ('Tommy Manuell','Nocker',1,'1966-06-06','NeueMail@Nocker.de',3,'1966-06-
 # Rechnungserstellung
 - Rechnungserzeugung? PDF??
 - Rechnungen können in der Cloud abgelegt werden - Link kann gespeichert werden
+
+# FUDA Framework-Ideen
+Fehlermeldungen in eines sys_errormsg - Tabelle sammeln und dort einen Anzeigetext hinterlegen lassen.
+Beispiel: unique-constraint "Spieler_Sparte" verletzt => Fehler: Der SPieler ist dieser Sparte bereits zugewiesen.
+
+
 
 ## Nächste Schritte
 
@@ -62,6 +72,7 @@ CREATE TABLE `b_meldeliste` (
   `Zuordnung` INT UNSIGNED NULL,
   `Zuordnung_ID` BIGINT UNSIGNED NULL COMMENT 'Wenn der Zweck eine ID erfordert' ,
   `Betrag` DECIMAL(10,2) NULL DEFAULT 0.00 ,
+  `Beitragsstelle` BIGINT UNSIGNED NOT NULL,
    PRIMARY KEY (`id`),
   CONSTRAINT `FK_medleliste_beitragszuordnungen` FOREIGN KEY (`Zuordnung`) REFERENCES `b___beitragszuordnungen` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `unique_kombinationen` UNIQUE (`Mitglied`, `Beitragsjahr`, `Zuordnung`, `Zuordnung_ID`)
@@ -71,6 +82,7 @@ CREATE INDEX `FK_medleliste_beitragszuordnungen`
 ON `b_meldeliste` (
   `Zuordnung` ASC
 );
+
 
 **ACHTUNG ## Den Meldelisteneintrag schützen (aus dem docRoot raus). Das darf nicht vor dem 15.2. ausgelöst werden und kann auch für DoS genutzt werden. ## ACHTUNG**
 
@@ -156,3 +168,31 @@ LÖSUNG: Keine BSG = kein Basisbeitrag, aber auch keine Sparten möglich -> pass
 
 - Alle DB-Operationen (hier) bei der prod $ QS-DB machen
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+select DATE_FORMAT(Timestamp, '%d.%m.%y') AS Erfasst_am, ml.Mitglied, ml.BSG, bz.Zweck, rv.Verband as Empfänger
+from b_meldeliste as ml
+join b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
+join b_regionalverband as rv on rv.id = ml.Zuordnung_ID
+WHERE bz.id = 1;
+
+select DATE_FORMAT(Timestamp, '%d.%m.%y') AS Erfasst_am, ml.Mitglied, ml.BSG, bz.Zweck, sp.Sparte as Empfänger
+from b_meldeliste as ml
+join b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
+join b_sparte as sp on sp.id = ml.Zuordnung_ID
+WHERE bz.id = 2;
+
+select * from b_regionalverband;
+
+truncate TABLE b_meldeliste;

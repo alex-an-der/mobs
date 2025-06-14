@@ -247,7 +247,7 @@ $anzuzeigendeDaten[] = array(
     )
 );
 
-$anzuzeigendeDaten[] = array(
+/*$anzuzeigendeDaten[] = array(
     "tabellenname" => "b_v_meldeliste_dieses_jahr",
     "auswahltext" => "$bericht Meldeliste ".$curyear." auf Ebene BSG",
     "writeaccess" => false,
@@ -274,8 +274,64 @@ $anzuzeigendeDaten[] = array(
         "Beschreibung"            => "150",
         "Betrag"                  => "100",
         )
-);
+);*/
+/*
+select DATE_FORMAT(Timestamp, '%d.%m.%y') AS Erfasst_am, ml.Mitglied, ml.BSG, bz.Zweck, rv.Verband as Empfänger
+from b_meldeliste as ml
+join b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
+join b_regionalverband as rv on rv.id = ml.Zuordnung_ID
+WHERE bz.id = 1
 
+union all 
+
+select DATE_FORMAT(Timestamp, '%d.%m.%y') AS Erfasst_am, ml.Mitglied, ml.BSG, bz.Zweck, sp.Sparte as Empfänger 
+from b_meldeliste as ml
+join b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
+join b_sparte as sp on sp.id = ml.Zuordnung_ID
+WHERE bz.id = 2;
+*//*
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "b_meldeliste",
+    "auswahltext" => "$bericht Meldeliste ".$curyear." auf Ebene BSG",
+    "writeaccess" => false,
+    "import" => false,
+    "query" => "SELECT 
+            subsel.id, 
+            Erfasst_am, 
+            Mitglied, 
+            BSG, 
+            Zweck, 
+            Empfänger,
+            Beitragsstelle, 
+            jahr, 
+            FROM  
+            (SELECT ml.id as id, DATE_FORMAT(Timestamp, '%d.%m.%y') AS Erfasst_am, ml.Mitglied, ml.BSG, bz.Zweck, rv.Verband as Empfänger, ml.Beitragsjahr as jahr, ml.Beitragsstelle as Beitragsstelle
+                FROM b_meldeliste as ml
+                JOIN b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
+                JOIN b_regionalverband as rv on rv.id = ml.Zuordnung_ID
+                WHERE bz.id = 1
+                
+                UNION ALL 
+                
+                SELECT ml.id as id, DATE_FORMAT(Timestamp, '%d.%m.%y') AS Erfasst_am, ml.Mitglied, ml.BSG, bz.Zweck, sp.Sparte as Empfänger, ml.Beitragsjahr as jah, ml.Beitragsstelle as Beitragsstelle
+                FROM b_meldeliste as ml
+                JOIN b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
+                JOIN b_sparte as sp on sp.id = ml.Zuordnung_ID
+                WHERE bz.id = 2) as subsel
+            JOIN b_regionalverband as rv on rv.id = Beitragsstelle
+            WHERE jahr = $curyear AND FIND_IN_SET(Beitragsstelle, berechtigte_elemente($uid, 'verband')) > 0;",
+
+    "spaltenbreiten" => array(
+        "Erfasst_am"              => "200",
+        "Beitragsjahr"            => "100",
+        "Mitglied"                => "250",
+        "Zahlungspflichtige_BSG"  => "200",
+        "Zuordnung"               => "150",
+        "Beschreibung"            => "150",
+        "Betrag"                  => "100",
+        "Beitragsstelle"          => "250",
+        )
+);
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_v_meldeliste_letztes_jahr",
     "auswahltext" => "$bericht Meldeliste ".($curyear-1)." auf Ebene BSG",
@@ -304,7 +360,7 @@ $anzuzeigendeDaten[] = array(
         "Betrag"                  => "100",
         )
 );
-
+*/
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
     "auswahltext" => "$bericht Beiträge der Mitglieder",
