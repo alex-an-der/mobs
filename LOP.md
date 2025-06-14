@@ -53,7 +53,26 @@ ALTER TABLE `b_mitglieder` ADD  `Bemerkung` VARCHAR(1000) NULL;
 Meldeliste nicht auf Mitglieder referenzieren, sondern Daten (Vn, Nn, Geb., MNr) direkt eintragen. Sonst kann niemend unterjährig gelöscht werden!
 (QS-open issues)
 
+CREATE TABLE `b_meldeliste` ( 
+  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `Timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  `Beitragsjahr` YEAR NOT NULL,
+  `Mitglied` VARCHAR(500) NOT NULL,
+  `BSG` VARCHAR(500) NOT NULL,
+  `Zuordnung` INT UNSIGNED NULL,
+  `Zuordnung_ID` BIGINT UNSIGNED NULL COMMENT 'Wenn der Zweck eine ID erfordert' ,
+  `Betrag` DECIMAL(10,2) NULL DEFAULT 0.00 ,
+   PRIMARY KEY (`id`),
+  CONSTRAINT `FK_medleliste_beitragszuordnungen` FOREIGN KEY (`Zuordnung`) REFERENCES `b___beitragszuordnungen` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `unique_kombinationen` UNIQUE (`Mitglied`, `Beitragsjahr`, `Zuordnung`, `Zuordnung_ID`)
+)
+ENGINE = InnoDB;
+CREATE INDEX `FK_medleliste_beitragszuordnungen` 
+ON `b_meldeliste` (
+  `Zuordnung` ASC
+);
 
+**ACHTUNG ## Den Meldelisteneintrag schützen (aus dem docRoot raus). Das darf nicht vor dem 15.2. ausgelöst werden und kann auch für DoS genutzt werden. ## ACHTUNG**
 
 
 
