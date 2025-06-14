@@ -307,15 +307,15 @@ $anzuzeigendeDaten[] = array(
     "import" => false,
     "query" => "SELECT 
             subsel.id, 
-            Erfasst_am, 
+            DATE_FORMAT(Timestamp, '%d.%m.%Y') AS Erfasst_am, 
             Mitglied, 
             BSG as Zahlungspflichtige_BSG, 
             Kategorie, 
             Zuordnung,
-            CONCAT(Betrag,'€') as Betrag,
+            Betrag as €,
             rv.Kurzname as Beitragsstelle
             FROM  
-            (SELECT ml.id as id, DATE_FORMAT(Timestamp, '%d.%m.%y') AS Erfasst_am, ml.Mitglied, ml.BSG, bz.Zweck as Kategorie, rv.Kurzname as Zuordnung, ml.Beitragsjahr as jahr, ml.Beitragsstelle as Beitragsstelle, Betrag
+            (SELECT ml.id as id, Timestamp, ml.Mitglied, ml.BSG, bz.Zweck as Kategorie, rv.Kurzname as Zuordnung, ml.Beitragsjahr as jahr, ml.Beitragsstelle as Beitragsstelle, Betrag
                 FROM b_meldeliste as ml
                 JOIN b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
                 JOIN b_regionalverband as rv on rv.id = ml.Zuordnung_ID
@@ -323,7 +323,7 @@ $anzuzeigendeDaten[] = array(
                 
                 UNION ALL 
                 
-                SELECT ml.id as id, DATE_FORMAT(Timestamp, '%d.%m.%y') AS Erfasst_am, ml.Mitglied, ml.BSG, bz.Zweck as Kategorie, sp.Sparte as Zuordnung, ml.Beitragsjahr as jah, ml.Beitragsstelle as Beitragsstelle, Betrag
+                SELECT ml.id as id, Timestamp, ml.Mitglied, ml.BSG, bz.Zweck as Kategorie, sp.Sparte as Zuordnung, ml.Beitragsjahr as jah, ml.Beitragsstelle as Beitragsstelle, Betrag
                 FROM b_meldeliste as ml
                 JOIN b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
                 JOIN b_sparte as sp on sp.id = ml.Zuordnung_ID
@@ -349,15 +349,15 @@ $anzuzeigendeDaten[] = array(
     "import" => false,
     "query" => "SELECT 
             subsel.id, 
-            Erfasst_am, 
+            DATE_FORMAT(Timestamp, '%d.%m.%Y') AS Erfasst_am, 
             Mitglied, 
             BSG as Zahlungspflichtige_BSG, 
             Kategorie, 
             Zuordnung,
-            CONCAT(Betrag,'€') as Betrag,
+            Betrag,
             rv.Kurzname as Beitragsstelle
             FROM  
-            (SELECT ml.id as id, DATE_FORMAT(Timestamp, '%d.%m.%y') AS Erfasst_am, ml.Mitglied, ml.BSG, bz.Zweck as Kategorie, rv.Kurzname as Zuordnung, ml.Beitragsjahr as jahr, ml.Beitragsstelle as Beitragsstelle, Betrag
+            (SELECT ml.id as id, Timestamp, ml.Mitglied, ml.BSG, bz.Zweck as Kategorie, rv.Kurzname as Zuordnung, ml.Beitragsjahr as jahr, ml.Beitragsstelle as Beitragsstelle, Betrag
                 FROM b_meldeliste as ml
                 JOIN b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
                 JOIN b_regionalverband as rv on rv.id = ml.Zuordnung_ID
@@ -365,7 +365,7 @@ $anzuzeigendeDaten[] = array(
                 
                 UNION ALL 
                 
-                SELECT ml.id as id, DATE_FORMAT(Timestamp, '%d.%m.%y') AS Erfasst_am, ml.Mitglied, ml.BSG, bz.Zweck as Kategorie, sp.Sparte as Zuordnung, ml.Beitragsjahr as jah, ml.Beitragsstelle as Beitragsstelle, Betrag
+                SELECT ml.id as id, Timestamp, ml.Mitglied, ml.BSG, bz.Zweck as Kategorie, sp.Sparte as Zuordnung, ml.Beitragsjahr as jah, ml.Beitragsstelle as Beitragsstelle, Betrag
                 FROM b_meldeliste as ml
                 JOIN b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
                 JOIN b_sparte as sp on sp.id = ml.Zuordnung_ID
