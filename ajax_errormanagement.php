@@ -24,12 +24,30 @@ try {
 
             // Aufgabe: Speicher Fehler in DB, gebe Fehlermeldung zurück.
             // 1. Hole Meldung zum code
-            $query = "select user_message from sys_error_manager where sql_error_code = ?";
+            $query = "SELECT user_message, add_fulltext_constraint FROM sys_error_manager WHERE sql_error_code = ?";
             $args = array();
             $args[] = $data['errorcode'];
             try {
                 $response = $db->query($query, $args, false);
-                $user_message = $response['data'][0]['user_message'];
+                $user_message = "";
+                // Prüfe alle gefundenen $user_message auf eine zusätzliche Volltextvorgabe (z.B. um bestimmte DB-Constraints zu identifizieren und die Fehlermeldung noch granularer auszugeben
+                // Bevorzuge dabei MIT add_fulltext_constraint bei mehrfachen Ergebnissen
+                
+                foreach($response['data'] as $fehlerDaten){
+                    if(!empty($fehlerDaten['user_message'])){
+                    // Es gibt zum code eine user_message
+                        if(empty($fehlerDaten['add_fulltext_constraint'])){
+                        // Es gibt KEINEN fulltext-constraint
+                            $user_message = $fehlerDaten['user_message'];
+                        }elseif (strpos($data['errorMessage'], $fehlerDaten['add_fulltext_constraint']) !== false) {
+                            // Es gibt einen full-text-constraint, der passt => Behalte diese Meldung, was besseres kommt nicht!
+                            $user_message = $fehlerDaten['user_message'];
+                            break;
+                        }
+                        // Medldung mit unpassendem full-text-constraint werden ignoriert.
+                    }
+                }
+
                 if (empty($user_message)) {
                     $response = ["status" => "error", "message" => "Kein user_message für diesen Fehlercode gefunden."];
                 }else{

@@ -39,6 +39,10 @@ CREATE TABLE `sys_error_manager` (
 )
 ENGINE = InnoDB;
 
+ALTER TABLE `sys_error_manager` ADD  `add_fulltext_constraint` VARCHAR(50) NULL;
+ALTER TABLE `sys_error_manager` DROP CONSTRAINT `unique_fehlercode`;
+ALTER TABLE `sys_error_manager` ADD CONSTRAINT `unique_code_plus_text` UNIQUE (`sql_error_code`, `add_fulltext_constraint`);
+
 
 
 
