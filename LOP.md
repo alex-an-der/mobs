@@ -42,11 +42,12 @@ ALTER TABLE `sys_error_manager` ADD CONSTRAINT `UNIQUE_cat_code` UNIQUE (`catego
 ## Nächste Schritte
 ### Sicherheit!
 - **ACHTUNG ## Den Meldelisteneintrag schützen (aus dem docRoot raus). Das darf nicht vor dem 15.2. ausgelöst werden und kann auch für DoS genutzt werden. ## ACHTUNG**
+
 - Auch yconf rausholen! Zumindest die dbconnect.
 
+- adm_log ist in FUDA eingebunden! Ich muss hier klar zwischen FUDA und MOBS unterscheiden! user_code oder nicht. Aber user_code darf nicht in FUDA eingebunden sein! TRENNEN (entweder user oder sys ... sys ginge ja auch). Vielleicht mach ich eine install.php? 
 
-
-
+ 
 ## In der Prod-DB einfügen und neue Version v0.1.9-qa.1
 
 ### b_mitglieder.BSG: NULL -> NOT NULL  (nicht mehr nullable).
