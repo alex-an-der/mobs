@@ -147,7 +147,7 @@ DROP TABLE IF EXISTS `b_mitglieder`;
 CREATE TABLE `b_mitglieder` ( 
   `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
   `y_id` BIGINT UNSIGNED NULL,
-  `BSG` BIGINT UNSIGNED NULL,
+  `BSG` BIGINT UNSIGNED NOT NULL,
   `Vorname` VARCHAR(100) NULL,
   `Nachname` VARCHAR(100) NULL,
   `Mail` VARCHAR(50) NULL COMMENT 'y_user - Verknüpfung' ,
@@ -155,11 +155,13 @@ CREATE TABLE `b_mitglieder` (
   `Geburtsdatum` DATE NULL,
   `Mailbenachrichtigung` TINYINT UNSIGNED NULL,
   `aktiv` TINYINT UNSIGNED NULL DEFAULT 1 ,
+  `Stammmitglied_seit` DATE NULL DEFAULT 'curdate()' ,
+  `Bemerkung` VARCHAR(1000) NULL,
    PRIMARY KEY (`id`),
-  CONSTRAINT `FK_mitglieder_yuser` FOREIGN KEY (`y_id`) REFERENCES `y_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_mitglieder_Mailbenachrichtigung` FOREIGN KEY (`Mailbenachrichtigung`) REFERENCES `b___an_aus` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_mitglieder_bsg` FOREIGN KEY (`BSG`) REFERENCES `b_bsg` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `FK_b_mitglieder_b___an_aus__aktiv` FOREIGN KEY (`aktiv`) REFERENCES `b___an_aus` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `FK_mitglieder_yuser` FOREIGN KEY (`y_id`) REFERENCES `y_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_mitglieder_bsg` FOREIGN KEY (`BSG`) REFERENCES `b_bsg` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `FK_b_mitglieder_b___an_aus__aktiv` FOREIGN KEY (`aktiv`) REFERENCES `b___an_aus` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `y_id` UNIQUE (`y_id`)
 )
 ENGINE = InnoDB;
@@ -175,6 +177,7 @@ CREATE INDEX `FK_b_mitglieder_b___an_aus__aktiv`
 ON `b_mitglieder` (
   `aktiv` ASC
 );
+
 
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -535,23 +538,18 @@ CREATE TABLE `b_meldeliste` (
   `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
   `Timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
   `Beitragsjahr` YEAR NOT NULL,
-  `MNr` BIGINT UNSIGNED NOT NULL,
-  `BSG` BIGINT UNSIGNED NOT NULL,
+  `Mitglied` VARCHAR(500) NOT NULL,
+  `BSG` VARCHAR(500) NOT NULL,
   `Zuordnung` INT UNSIGNED NULL,
-  `Zuordnung_ID` BIGINT NULL COMMENT 'Wenn der Zweck eine ID erfordert' ,
+  `Zuordnung_ID` BIGINT UNSIGNED NULL COMMENT 'Wenn der Zweck eine ID erfordert' ,
   `Betrag` DECIMAL(10,2) NULL DEFAULT 0.00 ,
+  `Beitragsstelle` BIGINT UNSIGNED NOT NULL,
    PRIMARY KEY (`id`),
   CONSTRAINT `FK_medleliste_beitragszuordnungen` FOREIGN KEY (`Zuordnung`) REFERENCES `b___beitragszuordnungen` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `FK_meldeliste_BSG` FOREIGN KEY (`BSG`) REFERENCES `b_bsg` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE,
-  CONSTRAINT `FK_meldeliste_mitglieder` FOREIGN KEY (`MNr`) REFERENCES `b_mitglieder` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE,
-  CONSTRAINT `unique_kombinationen` UNIQUE (`MNr`, `Beitragsjahr`, `Zuordnung`, `Zuordnung_ID`)
+  CONSTRAINT `unique_kombinationen` UNIQUE (`Mitglied`, `Beitragsjahr`, `Zuordnung`, `Zuordnung_ID`)
 )
 ENGINE = InnoDB;
 CREATE INDEX `FK_medleliste_beitragszuordnungen` 
 ON `b_meldeliste` (
   `Zuordnung` ASC
-);
-CREATE INDEX `FK_meldeliste_BSG` 
-ON `b_meldeliste` (
-  `BSG` ASC
 );

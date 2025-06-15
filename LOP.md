@@ -63,6 +63,8 @@ ALTER TABLE `b_mitglieder` ADD  `Bemerkung` VARCHAR(1000) NULL;
 Meldeliste nicht auf Mitglieder referenzieren, sondern Daten (Vn, Nn, Geb., MNr) direkt eintragen. Sonst kann niemend unterjährig gelöscht werden!
 (QS-open issues)
 
+#### Neue Tabelle
+DROP TABLE IF EXISTS `b_meldeliste`;
 CREATE TABLE `b_meldeliste` ( 
   `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
   `Timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
@@ -82,6 +84,10 @@ CREATE INDEX `FK_medleliste_beitragszuordnungen`
 ON `b_meldeliste` (
   `Zuordnung` ASC
 );
+
+#### DROP VIEWS
+DROP VIEW `b_v_meldeliste_letztes_jahr`;
+DROP VIEW `b_v_meldeliste_dieses_jahr`;
 
 
 **ACHTUNG ## Den Meldelisteneintrag schützen (aus dem docRoot raus). Das darf nicht vor dem 15.2. ausgelöst werden und kann auch für DoS genutzt werden. ## ACHTUNG**
