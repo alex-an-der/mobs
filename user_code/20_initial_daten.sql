@@ -1,15 +1,3 @@
-------------------------------------------
-Dieser Abschnitt funktioniert nur manuell:
-------------------------------------------
-SET @new_id = 100000;
-UPDATE b_mitglieder SET id = (@new_id := @new_id + 1) ORDER BY id;
-SELECT MAX(id) + 1 AS neuer_wert FROM b_mitglieder;
-ALTER TABLE b_mitglieder AUTO_INCREMENT = <neuer_wert_hier_eintragen>;
-(z.B. ALTER TABLE b_mitglieder AUTO_INCREMENT = 100043;)
-------------------------------------------
-
-
-
 INSERT INTO `b___an_aus` (`id`, `wert`) VALUES (1, 'JA');
 INSERT INTO `b___an_aus` (`id`, `wert`) VALUES (2, 'NEIN');
 

@@ -90,6 +90,13 @@ DROP VIEW `b_v_meldeliste_letztes_jahr`;
 DROP VIEW `b_v_meldeliste_dieses_jahr`;
 
 
+### Stammmitglied seit und seit entfernen
+ALTER TABLE `b_mitglieder` DROP COLUMN `Stammmitglied_seit`;
+ALTER TABLE `b_mitglieder_in_sparten` DROP COLUMN `seit`;
+DROP TRIGGER IF EXISTS `update_stammmitglied_seit`;
+
+
+
 **ACHTUNG ## Den Meldelisteneintrag schützen (aus dem docRoot raus). Das darf nicht vor dem 15.2. ausgelöst werden und kann auch für DoS genutzt werden. ## ACHTUNG**
 
 

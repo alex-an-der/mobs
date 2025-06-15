@@ -135,8 +135,7 @@ CREATE TABLE `b_individuelle_berechtigungen` (
   CONSTRAINT `FK_indiv_rechte_BSG` FOREIGN KEY (`BSG`) REFERENCES `b_bsg` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_indiv_rechte_mitglied` FOREIGN KEY (`Mitglied`) REFERENCES `b_mitglieder` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Mitglieder können BSG freigeben, sie zu sehen um sie zB aufzunehmen.';
-!/40101 SET character_set_client = @saved_cs_client */;
-
+/*!40101 SET character_set_client = @saved_cs_client */;
 --
 -- Table structure for table `b_mitglieder`
 --
