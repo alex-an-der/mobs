@@ -868,41 +868,48 @@ function saveNewRecord() {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
             try {
-                const response = JSON.parse(xhr.responseText); console.log(response);
+                const response = JSON.parse(xhr.responseText); 
                 if (response.status === "success") {
                     $('#insertModal').modal('hide');
                     resetPage();
                 } else {
-                    errorManagement(response.message, errDB)
+                    errorManagement(response.message, errDB, response.error_code)
                     
                 }
             } catch (e) { 
+                console.log(xhr.responseText);
                 const response = JSON.parse(xhr.responseText); 
                 
-                errorManagement(response.message, errSRV)
+                errorManagement(response.message, errSRV, response.error_code)
             }
         }
     };
     xhr.send(requestData);
 }
 
-function errorManagement(errorMessage, errCode){
+function errorManagement(errorMessage, errSrc, sqlErrCode){
 
-    // Ist der Fehler bekannt?
+    // Ist der Fehler schon behandelt?
+    /*$row = "SELECT count(*) ".
+            "FROM sys_error_manager ".
+            "WHERE raw_message=\"SQLSTATE[HY000]: General error: 1364 Field 'Sparte' doesn't have a default value\" ".
+            "AND regex IS NULL";*/
 
-    // Nein: Trage den Fehler in die DB
-    let cat = "";
-    if (errCode==errDB) cat = "database";
-    else if (errCode==errSRV) cat = "ajax-call";
+    // Nein: Trage den Fehler in die DB (Doppeleinträge werden durch den unique-constraint abgefangen
+    let src = "";
+    if (errSrc==errDB) cat = "database";
+    else if (errSrc==errSRV) cat = "ajax-call";
     
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "ajax_errormanagement.php", true);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.send(JSON.stringify({
         action: 'new_error',
-        cat: cat,
+        src: src,
+        errorcode: sqlErrCode,
         errorMessage: errorMessage
     }));
+
 
 
 /*

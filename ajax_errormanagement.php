@@ -22,9 +22,10 @@ try {
     switch($action) {
         case 'new_error':
             $args = array();
-            $args[] = $data['cat'];
+            $args[] = $data['src'];
+            $args[] = $data['errorcode'];
             $args[] = $data['errorMessage'];
-            $query=("INSERT INTO sys_error_manager (category, raw_message) VALUES (?, ?);");
+            $query=("INSERT INTO sys_error_manager (source, sql_error_code, raw_message) VALUES (?, ?, ?);");
 
             try {
                 if($db->query($query, $args)) $response = ["status" => "success"];

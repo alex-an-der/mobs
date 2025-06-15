@@ -495,7 +495,9 @@ try {
                     ob_end_clean();
                     echo json_encode([
                         'status' => 'error',
-                        'message' => $result['error']
+                        'error_ID' => $result['error'], 
+                        'error_code' => $result['errorcode'], 
+                        'message' => $result['message']
                     ]);
                 } else {
                     ob_end_clean();

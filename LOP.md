@@ -37,7 +37,12 @@ CREATE TABLE `sys_error_manager` (
 ENGINE = InnoDB;
 
 ALTER TABLE `sys_error_manager` CHANGE COLUMN `raw_message` `raw_message` VARCHAR(500) NOT NULL;
-ALTER TABLE `sys_error_manager` ADD CONSTRAINT `UNIQUE_cat_code` UNIQUE (`category`, `raw_message`);
+ALTER TABLE `sys_error_manager` ADD  `description` VARCHAR(1000) NULL;
+ALTER TABLE `sys_error_manager` ADD  `sql_error_code` INT UNSIGNED NULL;
+ALTER TABLE `sys_error_manager` ADD CONSTRAINT `unique_fehlercode` UNIQUE (`sql_error_code`);
+ALTER TABLE `sys_error_manager` CHANGE COLUMN `category` `source` VARCHAR(100) NULL;
+
+
 
 ## Nächste Schritte
 ### Sicherheit!
@@ -45,7 +50,7 @@ ALTER TABLE `sys_error_manager` ADD CONSTRAINT `UNIQUE_cat_code` UNIQUE (`catego
 
 - Auch yconf rausholen! Zumindest die dbconnect.
 
-- adm_log ist in FUDA eingebunden! Ich muss hier klar zwischen FUDA und MOBS unterscheiden! user_code oder nicht. Aber user_code darf nicht in FUDA eingebunden sein! TRENNEN (entweder user oder sys ... sys ginge ja auch). Vielleicht mach ich eine install.php? 
+- adm_log ist in FUDA eingebunden! Ich muss hier klar zwischen FUDA und MOBS unterscheiden! user_code oder nicht. Aber user_code darf nicht in FUDA eingebunden sein! TRENNEN (entweder user oder sys ... sys ginge ja auch). Vielleicht mach ich eine install.php? Das Log kann ich ins FUDA übernehmen, **aber ohne Nutzer-Bezug** (Angabe 'thomas@bsv.de')
 
  
 ## In der Prod-DB einfügen und neue Version v0.1.9-qa.1
