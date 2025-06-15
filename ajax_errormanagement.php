@@ -20,7 +20,31 @@ try {
     $action = $data['action'] ?? '';
 
     switch($action) {
-        case 'new_error':
+        case 'error_occured':
+
+            // Aufgabe: Speicher Fehler in DB, gebe Fehlermeldung zurück.
+            // 1. Hole Meldung zum code
+            $query = "select user_message from sys_error_manager where sql_error_code = ?";
+            $args = array();
+            $args[] = $data['errorcode'];
+            try {
+                $response = $db->query($query, $args, false);
+                $user_message = $response['data'][0]['user_message'];
+                if (empty($user_message)) {
+                    $response = ["status" => "error", "message" => "Kein user_message für diesen Fehlercode gefunden."];
+                }else{
+                    $response = ["status" => "success", "message" => $user_message];
+                    // Ende
+                    ob_end_clean();
+                    echo json_encode($response);
+                    break;
+                }
+            } catch (Exception $e) {
+                logError($e);
+                $response = ["status" => "error", "message" => "Konnte user_message nicht aus sys_error_manager holen."];
+            }
+
+            // 2. Wenn es keine Meldung gibt: Speichere den Fehlercode (wenn es ihn schon gibt, weist UNIQUE ihn zurück
             $args = array();
             $args[] = $data['src'];
             $args[] = $data['errorcode'];
@@ -28,12 +52,12 @@ try {
             $query=("INSERT INTO sys_error_manager (source, sql_error_code, raw_message) VALUES (?, ?, ?);");
 
             try {
-                if($db->query($query, $args)) $response = ["status" => "success"];
-                else                          $response = ["status" => "error", "message" => "Konnte neuen Fehlercode nicht eintragen"];
+                $db->query($query, $args);
             } catch (Exception $e) {
                 logError($e);
-                $response = ["status" => "error", "message" => "Konnte neuen Fehlercode nicht eintragen"];
             }
+            
+
             ob_end_clean();
             echo json_encode($response);
 

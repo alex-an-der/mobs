@@ -48,5 +48,18 @@ $anzuzeigendeDaten[] = array(
     )
 );
 
+$anzuzeigendeDaten[] = array(
+    "tabellenname" => "sys_error_manager",
+    "auswahltext" => "Fehlermeldungen anpassen",
+    "writeaccess" => true,
+    "query" => "SELECT id, source, raw_message, sql_error_code, description, user_message 
+                FROM sys_error_manager order by user_message asc",
+    "spaltenbreiten" => array(
+        "Nr"        => "80",
+        "Timestamp" => "220",
+        "Log"       => "1620"
+    )
+);
+
 
 ?>

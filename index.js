@@ -873,58 +873,54 @@ function saveNewRecord() {
                     $('#insertModal').modal('hide');
                     resetPage();
                 } else {
-                    errorManagement(response.message, errDB, response.error_code)
+                    errorManagement(response.message, errDB, response.error_code, response.error_ID)
                     
                 }
             } catch (e) { 
-                console.log(xhr.responseText);
+
                 const response = JSON.parse(xhr.responseText); 
                 
-                errorManagement(response.message, errSRV, response.error_code)
+                errorManagement(response.message, errSRV, response.error_code, response.error_ID)
             }
         }
     };
     xhr.send(requestData);
 }
 
-function errorManagement(errorMessage, errSrc, sqlErrCode){
+function errorManagement(errorMessage, errSrc, sqlErrCode, error_log_ID){
 
-    // Ist der Fehler schon behandelt?
-    /*$row = "SELECT count(*) ".
-            "FROM sys_error_manager ".
-            "WHERE raw_message=\"SQLSTATE[HY000]: General error: 1364 Field 'Sparte' doesn't have a default value\" ".
-            "AND regex IS NULL";*/
-
-    // Nein: Trage den Fehler in die DB (Doppeleinträge werden durch den unique-constraint abgefangen
+  
     let src = "";
-    if (errSrc==errDB) cat = "database";
-    else if (errSrc==errSRV) cat = "ajax-call";
+    if (errSrc==errDB) src = "database";
+    else if (errSrc==errSRV) src = "ajax-call";
     
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "ajax_errormanagement.php", true);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.send(JSON.stringify({
-        action: 'new_error',
+        action: 'error_occured',
         src: src,
         errorcode: sqlErrCode,
         errorMessage: errorMessage
     }));
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            // Done successfully
+            // Optional: handle response if needed
+            const response = JSON.parse(xhr.responseText); 
+            if(response.status == "error"){
+                if (isNaN(error_log_ID)) {
+                    errorMessage = php_DB_ERROR.replace(/#FEHLERID#/g, "000");                                
+                } else {
+                    errorMessage = php_DB_ERROR.replace(/#FEHLERID#/g, error_log_ID);
+                }
+            }else{
+                errorMessage = response.message;
+            }
+        }
+        showErrorMsg(errorMessage);
+    };
 
-
-
-/*
-    let errorMessage = php_DB_ERROR;
-    let errorMessage = php_SRV_ERROR;
-
-    if (isNaN(response.message)) {
-        errorMessage = errorMessage.replace(/#FEHLERID#/g, "000");                                
-    } else {
-        errorMessage = errorMessage.replace(/#FEHLERID#/g, response.message);
-    }
-
-    showErrorMsg(errorMessage);
-    showErrorMsg(errorMessage + "<br><br><i>Fehlerinformation: " + e + "</i>");
-*/
 
 }
 

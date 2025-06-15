@@ -26,21 +26,19 @@ Fehlermeldungen in eines sys_errormsg - Tabelle sammeln und dort einen Anzeigete
 Beispiel: unique-constraint "Spieler_Sparte" verletzt => Fehler: Der SPieler ist dieser Sparte bereits zugewiesen.
 
 ## Query für FUDA - nicht user_code, sondern FUDA-core!
+DROP TABLE IF EXISTS `sys_error_manager`;
 CREATE TABLE `sys_error_manager` ( 
   `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
-  `category` VARCHAR(100) NULL,
-  `raw_message` VARCHAR(1000) NOT NULL,
-  `regex` VARCHAR(500) NULL,
+  `raw_message` VARCHAR(500) NOT NULL,
+  `sql_error_code` INT UNSIGNED NULL,
+  `description` VARCHAR(1000) NULL,
   `user_message` VARCHAR(500) NULL,
-   PRIMARY KEY (`id`)
+  `source` VARCHAR(100) NULL,  
+   PRIMARY KEY (`id`),
+  CONSTRAINT `unique_fehlercode` UNIQUE (`sql_error_code`)
 )
 ENGINE = InnoDB;
 
-ALTER TABLE `sys_error_manager` CHANGE COLUMN `raw_message` `raw_message` VARCHAR(500) NOT NULL;
-ALTER TABLE `sys_error_manager` ADD  `description` VARCHAR(1000) NULL;
-ALTER TABLE `sys_error_manager` ADD  `sql_error_code` INT UNSIGNED NULL;
-ALTER TABLE `sys_error_manager` ADD CONSTRAINT `unique_fehlercode` UNIQUE (`sql_error_code`);
-ALTER TABLE `sys_error_manager` CHANGE COLUMN `category` `source` VARCHAR(100) NULL;
 
 
 
