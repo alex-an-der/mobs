@@ -25,9 +25,24 @@ VALUES ('Tommy Manuell','Nocker',1,'1966-06-06','NeueMail@Nocker.de',3,'1966-06-
 Fehlermeldungen in eines sys_errormsg - Tabelle sammeln und dort einen Anzeigetext hinterlegen lassen.
 Beispiel: unique-constraint "Spieler_Sparte" verletzt => Fehler: Der SPieler ist dieser Sparte bereits zugewiesen.
 
+## Query für FUDA - nicht user_code, sondern FUDA-core!
+CREATE TABLE `sys_error_manager` ( 
+  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `category` VARCHAR(100) NULL,
+  `raw_message` VARCHAR(1000) NOT NULL,
+  `regex` VARCHAR(500) NULL,
+  `user_message` VARCHAR(500) NULL,
+   PRIMARY KEY (`id`)
+)
+ENGINE = InnoDB;
 
+ALTER TABLE `sys_error_manager` CHANGE COLUMN `raw_message` `raw_message` VARCHAR(500) NOT NULL;
+ALTER TABLE `sys_error_manager` ADD CONSTRAINT `UNIQUE_cat_code` UNIQUE (`category`, `raw_message`);
 
 ## Nächste Schritte
+### Sicherheit!
+- **ACHTUNG ## Den Meldelisteneintrag schützen (aus dem docRoot raus). Das darf nicht vor dem 15.2. ausgelöst werden und kann auch für DoS genutzt werden. ## ACHTUNG**
+- Auch yconf rausholen! Zumindest die dbconnect.
 
 
 
@@ -97,7 +112,7 @@ DROP TRIGGER IF EXISTS `update_stammmitglied_seit`;
 
 
 
-**ACHTUNG ## Den Meldelisteneintrag schützen (aus dem docRoot raus). Das darf nicht vor dem 15.2. ausgelöst werden und kann auch für DoS genutzt werden. ## ACHTUNG**
+
 
 
 

@@ -1,3 +1,7 @@
+const errDB = 1;
+const errSRV = 2;
+
+
 function showErrorMsg(message) {
     const errorDiv = document.getElementById('insertErrorMsg');
     if (errorDiv) {
@@ -864,39 +868,57 @@ function saveNewRecord() {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
             try {
-                const response = JSON.parse(xhr.responseText); 
+                const response = JSON.parse(xhr.responseText); console.log(response);
                 if (response.status === "success") {
                     $('#insertModal').modal('hide');
                     resetPage();
                 } else {
-                    let errorMessage = php_DB_ERROR;
-                    
-                    if (isNaN(response.message)) {
-                        errorMessage = errorMessage.replace(/#FEHLERID#/g, "000");                                
-                    } else {
-                        errorMessage = errorMessage.replace(/#FEHLERID#/g, response.message);
-                    }
-                
-                    showErrorMsg(serrorMessage);
+                    errorManagement(response.message, errDB)
                     
                 }
             } catch (e) { 
                 const response = JSON.parse(xhr.responseText); 
                 
-                let errorMessage = php_SRV_ERROR;
-                    
-                if (isNaN(response.message)) {
-                    errorMessage = errorMessage.replace(/#FEHLERID#/g, "000");                                
-                } else {
-                    errorMessage = errorMessage.replace(/#FEHLERID#/g, response.message);
-                }
-
-                showErrorMsg(errorMessage + "<br><br><i>Fehlerinformation: " + e + "</i>");
+                errorManagement(response.message, errSRV)
             }
         }
     };
-
     xhr.send(requestData);
+}
+
+function errorManagement(errorMessage, errCode){
+
+    // Ist der Fehler bekannt?
+
+    // Nein: Trage den Fehler in die DB
+    let cat = "";
+    if (errCode==errDB) cat = "database";
+    else if (errCode==errSRV) cat = "ajax-call";
+    
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "ajax_errormanagement.php", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(JSON.stringify({
+        action: 'new_error',
+        cat: cat,
+        errorMessage: errorMessage
+    }));
+
+
+/*
+    let errorMessage = php_DB_ERROR;
+    let errorMessage = php_SRV_ERROR;
+
+    if (isNaN(response.message)) {
+        errorMessage = errorMessage.replace(/#FEHLERID#/g, "000");                                
+    } else {
+        errorMessage = errorMessage.replace(/#FEHLERID#/g, response.message);
+    }
+
+    showErrorMsg(errorMessage);
+    showErrorMsg(errorMessage + "<br><br><i>Fehlerinformation: " + e + "</i>");
+*/
+
 }
 
 function toggleSelectAll(source) {
