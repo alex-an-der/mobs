@@ -46,21 +46,18 @@ switch($action) {
 
                 // CHECK 2
                 // Überprüfe, ob das Geburtsdatum der beiden Datensätze übereinstimmt
-                // Hole Geburtsdatum und Stammmitglied_seit für den anderen Datensatz
-                $stmt = $pdo->prepare("SELECT id as registrierteMNr, geburtsdatum, Stammmitglied_seit FROM b_mitglieder WHERE y_id = :yid AND id <> :id");
+                $stmt = $pdo->prepare("SELECT id as registrierteMNr, geburtsdatum FROM b_mitglieder WHERE y_id = :yid AND id <> :id");
                 $stmt->execute([':yid' => $value, ':id' => $id]);
                 $otherRow = $stmt->fetch(PDO::FETCH_ASSOC);
                 $otherGeburtsdatum = $otherRow['geburtsdatum'] ?? null;
-                $otherStammmitgliedSeit = $otherRow['Stammmitglied_seit'] ?? null;
                 // MNr des registrierten MItglieds
                 $registrierteMNr = $otherRow['registrierteMNr'];
 
-                // Hole Geburtsdatum und Stammmitglied_seit für den aktuellen Datensatz
-                $stmt = $pdo->prepare("SELECT geburtsdatum, Stammmitglied_seit FROM b_mitglieder WHERE id = :id");
+                // Hole Geburtsdatum für den aktuellen Datensatz
+                $stmt = $pdo->prepare("SELECT geburtsdatum FROM b_mitglieder WHERE id = :id");
                 $stmt->execute([':id' => $id]);
                 $currentRow = $stmt->fetch(PDO::FETCH_ASSOC);
                 $currentGeburtsdatum = $currentRow['geburtsdatum'] ?? null;
-                $currentStammmitgliedSeit = $currentRow['Stammmitglied_seit'] ?? null;
 
                 if ($otherGeburtsdatum !== $currentGeburtsdatum) {
                     $db->log("Aus Sicherheitsgründen muss das Geburtsdatum der zu zusammenzuführenden Konten übereinstimmen.");
@@ -94,34 +91,6 @@ switch($action) {
                 // 3. Setze die y_id beim gewünschten Datensatz
                 $stmt = $pdo->prepare("UPDATE b_mitglieder SET y_id = :yid WHERE id = :id");
                 $stmt->execute([':yid' => $value, ':id' => $id]);
-
-
-                // Bestimme das älteste Datum aus $otherStammmitgliedSeit, $currentStammmitgliedSeit und NOW()
-                $toIso = function($d) {
-                    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $d)) {
-                        return $d;
-                    } elseif (preg_match('/^(\d{2})\.(\d{2})\.(\d{4})$/', $d, $m)) {
-                        return "$m[3]-$m[2]-$m[1]";
-                    }
-                    return null;
-                };
-                $dates = [];
-                $isoOther = $toIso($otherStammmitgliedSeit);
-                $isoCurrent = $toIso($currentStammmitgliedSeit);
-                $now = date('Y-m-d');
-                if ($isoOther) $dates[] = $isoOther;
-                if ($isoCurrent) $dates[] = $isoCurrent;
-                $dates[] = $now;
-                // Vergleiche als Zeitstempel
-                $minDate = $dates[0];
-                foreach ($dates as $d) {
-                    if (strtotime($d) < strtotime($minDate)) {
-                        $minDate = $d;
-                    }
-                }
-                // Trage das älteste Datum in den verbleibenden Datensatz ein (ISO-Format)
-                $stmt = $pdo->prepare("UPDATE b_mitglieder SET Stammmitglied_seit = :datum WHERE id = :id");
-                $stmt->execute([':datum' => $minDate, ':id' => $id]);
 
                 $pdo->commit();
 
@@ -204,18 +173,6 @@ switch($action) {
                 foreach ($changedFields as $field => [$old, $new]) {
                     $changesText .= $labelMap[$field] . ": " . $formatValue($field, $old) . " -> " . $formatValue($field, $new) . "\n";
                 }
-                // "Stammmitglied seit"-Änderung immer in die Liste aufnehmen
-                $oldStammmitglied = $currentStammmitgliedSeit; // Wert vor dem Update merken
-                $newStammmitglied = $minDate;
-                // Formatierung ins deutsche Datumsformat
-                $formatDate = function($d) {
-                    if (preg_match('/^\\d{4}-\\d{2}-\\d{2}$/', $d)) {
-                        $parts = explode('-', $d);
-                        return $parts[2] . '.' . $parts[1] . '.' . $parts[0];
-                    }
-                    return $d;
-                };
-                $changesText .= "Stammmitglied seit: " . $formatDate($oldStammmitglied) . " -> " . $formatDate($newStammmitglied) . "\n";
 
                 $msg = "Die Datensätze wurden erfolgreich zusammengelegt.";
                 if ($changesText) {

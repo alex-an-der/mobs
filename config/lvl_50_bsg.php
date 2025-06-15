@@ -130,7 +130,7 @@ $anzuzeigendeDaten[] = array(
     "writeaccess" => true,
     "import" => false,
     "deleteanyway" => true,
-    "query" => "SELECT m.id as id, m.id as info:Nr, Vorname, Nachname, Bemerkung, BSG, Stammmitglied_seit, Mail, m.Geschlecht, m.Geburtsdatum, aktiv
+    "query" => "SELECT m.id as id, m.id as info:Nr, Vorname, Nachname, Bemerkung, BSG, Mail, m.Geschlecht, m.Geburtsdatum, aktiv
                 from b_mitglieder as m
                 WHERE 
                     (FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 or 
@@ -160,14 +160,12 @@ $anzuzeigendeDaten[] = array(
         "Mail"                      => "250",
         "Geschlecht"                => "100",
         "Geburtsdatum"              => "100",
-        "aktiv"                     => "100",
-        "Stammmitglied_seit"        => "100",
+        "aktiv"                     => "100"
     )
 );
 
 
 # Mitglieder in den Sparten 
-// -- DATE_FORMAT(seit, '%d.%m.%Y') as info:seit
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
     "auswahltext" => "BSG-Mitglieder in Sparten anmelden", 
@@ -213,13 +211,10 @@ $anzuzeigendeDaten[] = array(
     "spaltenbreiten" => array(
         "Mitglied"                  => "400",
         "BSG"                       => "400",
-        "Sparte"                    => "300",
-        "seit"                      => "150"
+        "Sparte"                    => "300"
     )
 );
 
-
-// WHERE FIND_IN_SET(mis.Mitglied, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
     "auswahltext" => "$bericht Mitglieder und ihre Sparten",
@@ -228,8 +223,7 @@ $anzuzeigendeDaten[] = array(
                 concat(Vorname,' ', Nachname) as Mitglied , 
                 stamm.BSG as Stamm_BSG , 
                 s.Sparte as Sparte, 
-                b.BSG as Sparten_BSG, 
-                DATE_FORMAT(mis.seit, '%d.%m.%Y') as seit
+                b.BSG as Sparten_BSG
                 from b_mitglieder_in_sparten as mis
                 join b_mitglieder as m on mis.Mitglied = m.id
                 join b_bsg as b on mis.BSG = b.id
@@ -242,138 +236,23 @@ $anzuzeigendeDaten[] = array(
         "Mitglied"                  => "400",
         "Stamm-BSG"                 => "400",
         "Sparte"                    => "300",
-        "Sparten-BSG"               => "400",
-        "seit"                      => "150"
+        "Sparten-BSG"               => "400"
     )
 );
 
-/*$anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_v_meldeliste_dieses_jahr",
-    "auswahltext" => "$bericht Meldeliste ".$curyear." auf Ebene BSG",
-    "writeaccess" => false,
-    "import" => false,
-    "query" => "SELECT
-        rv_id           as id,
-        Erfasst_am           ,
-        Beitragsjahr         ,
-        Mitglied             ,
-        Zahlungspflichtige_BSG,
-        Zuordnung            ,
-        Beschreibung         ,
-        Betrag               
-
-                FROM b_v_meldeliste_dieses_jahr
-                WHERE FIND_IN_SET(bsg_id, berechtigte_elemente($uid, 'BSG')) > 0
-                ORDER BY Erfasst_am DESC;",
-    "spaltenbreiten" => array(
-        "Erfasst_am"              => "200",
-        "Beitragsjahr"            => "100",
-        "Mitglied"                => "250",
-        "Zahlungspflichtige_BSG"  => "200",
-        "Zuordnung"               => "150",
-        "Beschreibung"            => "150",
-        "Betrag"                  => "100",
-        )
-);*/
-/*
-select DATE_FORMAT(Timestamp, '%d.%m.%y') AS Erfasst_am, ml.Mitglied, ml.BSG, bz.Zweck, rv.Verband as Empfänger
-from b_meldeliste as ml
-join b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
-join b_regionalverband as rv on rv.id = ml.Zuordnung_ID
-WHERE bz.id = 1
-
-union all 
-
-select DATE_FORMAT(Timestamp, '%d.%m.%y') AS Erfasst_am, ml.Mitglied, ml.BSG, bz.Zweck, sp.Sparte as Empfänger 
-from b_meldeliste as ml
-join b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
-join b_sparte as sp on sp.id = ml.Zuordnung_ID
-WHERE bz.id = 2;
-*//*
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_meldeliste",
-    "auswahltext" => "$bericht Meldeliste ".$curyear." auf Ebene BSG",
-    "writeaccess" => false,
-    "import" => false,
-    "query" => "SELECT 
-            subsel.id, 
-            Erfasst_am, 
-            Mitglied, 
-            BSG, 
-            Zweck, 
-            Empfänger,
-            Beitragsstelle, 
-            jahr, 
-            FROM  
-            (SELECT ml.id as id, DATE_FORMAT(Timestamp, '%d.%m.%y') AS Erfasst_am, ml.Mitglied, ml.BSG, bz.Zweck, rv.Verband as Empfänger, ml.Beitragsjahr as jahr, ml.Beitragsstelle as Beitragsstelle
-                FROM b_meldeliste as ml
-                JOIN b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
-                JOIN b_regionalverband as rv on rv.id = ml.Zuordnung_ID
-                WHERE bz.id = 1
-                
-                UNION ALL 
-                
-                SELECT ml.id as id, DATE_FORMAT(Timestamp, '%d.%m.%y') AS Erfasst_am, ml.Mitglied, ml.BSG, bz.Zweck, sp.Sparte as Empfänger, ml.Beitragsjahr as jah, ml.Beitragsstelle as Beitragsstelle
-                FROM b_meldeliste as ml
-                JOIN b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
-                JOIN b_sparte as sp on sp.id = ml.Zuordnung_ID
-                WHERE bz.id = 2) as subsel
-            JOIN b_regionalverband as rv on rv.id = Beitragsstelle
-            WHERE jahr = $curyear AND FIND_IN_SET(Beitragsstelle, berechtigte_elemente($uid, 'verband')) > 0;",
-
-    "spaltenbreiten" => array(
-        "Erfasst_am"              => "200",
-        "Beitragsjahr"            => "100",
-        "Mitglied"                => "250",
-        "Zahlungspflichtige_BSG"  => "200",
-        "Zuordnung"               => "150",
-        "Beschreibung"            => "150",
-        "Betrag"                  => "100",
-        "Beitragsstelle"          => "250",
-        )
-);
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_v_meldeliste_letztes_jahr",
-    "auswahltext" => "$bericht Meldeliste ".($curyear-1)." auf Ebene BSG",
-    "writeaccess" => false,
-    "import" => false,
-    "query" => "SELECT
-        rv_id           as id,
-        Erfasst_am           ,
-        Beitragsjahr         ,
-        Mitglied             ,
-        Zahlungspflichtige_BSG,
-        Zuordnung            ,
-        Beschreibung         ,
-        Betrag               
-
-                FROM b_v_meldeliste_letztes_jahr
-                WHERE FIND_IN_SET(bsg_id, berechtigte_elemente($uid, 'BSG')) > 0
-                ORDER BY Erfasst_am DESC;",
-    "spaltenbreiten" => array(
-        "Erfasst_am"              => "200",
-        "Beitragsjahr"            => "100",
-        "Mitglied"                => "250",
-        "Zahlungspflichtige_BSG"  => "200",
-        "Zuordnung"               => "150",
-        "Beschreibung"            => "150",
-        "Betrag"                  => "100",
-        )
-);
-*/
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_mitglieder_in_sparten",
     "auswahltext" => "$bericht Beiträge der Mitglieder",
     "writeaccess" => false,
     "query" => "SELECT * FROM 
-                (SELECT m.id as id, b.VKZ, b.BSG, concat(m.Vorname, ' ', m.Nachname) as Name, 'Verbandsbeitrag' as Sparte, concat(r.Basisbeitrag, '€') as Beitrag, DATE_FORMAT(m.Stammmitglied_seit, '%d.%m.%Y') as seit
+                (SELECT m.id as id, b.VKZ, b.BSG, concat(m.Vorname, ' ', m.Nachname) as Name, 'Verbandsbeitrag' as Sparte, concat(r.Basisbeitrag, '€') as Beitrag
                 from b_mitglieder as m
                 join b_bsg as b on m.BSG=b.id
                 join b_regionalverband as r on b.Verband = r.id
 
                 union
 
-                select m.id as id, b.VKZ, b.bsg, concat(m.Vorname, ' ', m.Nachname) as Name, s.Sparte, concat(s.Spartenbeitrag, '€') as Beitrag,  DATE_FORMAT(mis.seit, '%d.%m.%Y') as seit
+                select m.id as id, b.VKZ, b.bsg, concat(m.Vorname, ' ', m.Nachname) as Name, s.Sparte, concat(s.Spartenbeitrag, '€') as Beitrag
                 from b_mitglieder_in_sparten as mis 
                 join b_sparte as s on mis.Sparte = s.id
                 join b_mitglieder as m on mis.Mitglied = m.id
@@ -387,12 +266,9 @@ $anzuzeigendeDaten[] = array(
         "BSG"                       => "300",
         "Name"                      => "400",
         "Sparte"                    => "300",
-        "Beitrag"                   => "150",
-        "seit"                      => "150"
+        "Beitrag"                   => "150"
     )
 );
-
-
 
 
 ######################################################################################################

@@ -8,7 +8,7 @@ $anzuzeigendeDaten[] = array(
      dass sich das Mitglied selbst registriert.",
     "writeaccess" => true,
     "import" => true,
-    "query" => "SELECT m.id as id, Vorname, Nachname, BSG, Stammmitglied_seit, Mail, m.Geschlecht, m.Geburtsdatum, aktiv
+    "query" => "SELECT m.id as id, Vorname, Nachname, BSG, Mail, m.Geschlecht, m.Geburtsdatum, aktiv
                 from b_mitglieder as m
                 WHERE 
                     (FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 or 
@@ -38,8 +38,7 @@ $anzuzeigendeDaten[] = array(
         "Mail"                      => "250",
         "Geschlecht"                => "100",
         "Geburtsdatum"              => "100",
-        "aktiv"                     => "100",
-        "Stammmitglied_seit"        => "100",
+        "aktiv"                     => "100"
     )
 );
 
