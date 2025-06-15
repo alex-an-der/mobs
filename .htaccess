@@ -1,1 +1,15 @@
+# Verzeichnislisting deaktivieren
 Options -Indexes
+
+# Zugriff auf MD- und TXT-Dateien blockieren (Apache 2.4+ Syntax)
+<FilesMatch "\.(md|txt)$">
+    Require all denied
+</FilesMatch>
+
+# Fehlermeldung für blockierte Dateien anpassen
+ErrorDocument 403 "Zugriff auf diese Datei ist nicht gestattet."
+
+# Sicherheitsheader hinzufügen
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+</IfModule>
