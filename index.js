@@ -901,7 +901,8 @@ function errorManagement(errorMessage, errSrc, sqlErrCode, error_log_ID){
         action: 'error_occured',
         src: src,
         errorcode: sqlErrCode,
-        errorMessage: errorMessage
+        errorMessage: errorMessage,
+        error_log_ID: error_log_ID
     }));
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {

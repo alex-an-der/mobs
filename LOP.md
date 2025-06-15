@@ -29,19 +29,19 @@ Beispiel: unique-constraint "Spieler_Sparte" verletzt => Fehler: Der SPieler ist
 DROP TABLE IF EXISTS `sys_error_manager`;
 CREATE TABLE `sys_error_manager` ( 
   `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `error_log_id` BIGINT UNSIGNED NULL,
   `raw_message` VARCHAR(500) NOT NULL,
   `sql_error_code` INT UNSIGNED NULL,
   `description` VARCHAR(1000) NULL,
   `user_message` VARCHAR(500) NULL,
-  `source` VARCHAR(100) NULL,  
-   PRIMARY KEY (`id`),
-  CONSTRAINT `unique_fehlercode` UNIQUE (`sql_error_code`)
-)
+  `source` VARCHAR(100) NULL,
+  `add_fulltext_constraint` VARCHAR(50) NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `unique_code_plus_text` UNIQUE (`sql_error_code`, `add_fulltext_constraint`)
+) 
 ENGINE = InnoDB;
 
-ALTER TABLE `sys_error_manager` ADD  `add_fulltext_constraint` VARCHAR(50) NULL;
-ALTER TABLE `sys_error_manager` DROP CONSTRAINT `unique_fehlercode`;
-ALTER TABLE `sys_error_manager` ADD CONSTRAINT `unique_code_plus_text` UNIQUE (`sql_error_code`, `add_fulltext_constraint`);
+
 
 
 
@@ -119,7 +119,8 @@ ALTER TABLE `b_mitglieder_in_sparten` DROP COLUMN `seit`;
 DROP TRIGGER IF EXISTS `update_stammmitglied_seit`;
 
 
-
+### ALTER TABLE `adm_log`
+ALTER TABLE `adm_log` CHANGE COLUMN `ID` `ID` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL;
 
 
 

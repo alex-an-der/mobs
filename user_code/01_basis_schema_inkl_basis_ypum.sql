@@ -296,7 +296,7 @@ DROP TABLE IF EXISTS `adm_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `adm_log` (
-  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `ID` bigint NOT NULL UNSIGNED AUTO_INCREMENT,
   `zeit` datetime DEFAULT CURRENT_TIMESTAMP,
   `eintrag` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`ID`)
@@ -563,3 +563,6 @@ ALTER TABLE `adm_issues` CHANGE COLUMN `Issue` `Issue` VARCHAR(2000) NULL;
 ALTER TABLE `b_regionalverband` ADD  `Basisbeitrag` DECIMAL(10,2) NOT NULL DEFAULT 0.00 ;
 ALTER TABLE `b_sparte` ADD  `Spartenbeitrag` DECIMAL(10,2) NOT NULL DEFAULT 0.00 ;
 ALTER TABLE b_mitglieder AUTO_INCREMENT = 100001;
+
+
+

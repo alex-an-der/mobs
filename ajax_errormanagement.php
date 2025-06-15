@@ -67,7 +67,9 @@ try {
             $args[] = $data['src'];
             $args[] = $data['errorcode'];
             $args[] = $data['errorMessage'];
-            $query=("INSERT INTO sys_error_manager (source, sql_error_code, raw_message) VALUES (?, ?, ?);");
+            $args[] = $data['error_log_id'];
+
+            $query=("INSERT INTO sys_error_manager (source, sql_error_code, raw_message, error_log_id) VALUES (?, ?, ?, ?);");
 
             try {
                 $db->query($query, $args);
