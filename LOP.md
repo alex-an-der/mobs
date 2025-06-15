@@ -25,13 +25,36 @@ VALUES ('Tommy Manuell','Nocker',1,'1966-06-06','NeueMail@Nocker.de',3,'1966-06-
 Fehlermeldungen in eines sys_errormsg - Tabelle sammeln und dort einen Anzeigetext hinterlegen lassen.
 Beispiel: unique-constraint "Spieler_Sparte" verletzt => Fehler: Der SPieler ist dieser Sparte bereits zugewiesen.
 
+## Query für FUDA - nicht user_code, sondern FUDA-core!
+DROP TABLE IF EXISTS `sys_error_manager`;
+CREATE TABLE `sys_error_manager` ( 
+  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `error_log_id` BIGINT UNSIGNED NULL,
+  `raw_message` VARCHAR(500) NOT NULL,
+  `sql_error_code` INT UNSIGNED NULL,
+  `description` VARCHAR(1000) NULL,
+  `user_message` VARCHAR(500) NULL,
+  `source` VARCHAR(100) NULL,
+  `add_fulltext_constraint` VARCHAR(50) NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `unique_code_plus_text` UNIQUE (`sql_error_code`, `add_fulltext_constraint`)
+) 
+ENGINE = InnoDB;
+
+
+
+
 
 
 ## Nächste Schritte
+### Sicherheit!
+- **ACHTUNG ## Den Meldelisteneintrag schützen (aus dem docRoot raus). Das darf nicht vor dem 15.2. ausgelöst werden und kann auch für DoS genutzt werden. ## ACHTUNG**
 
+- Auch yconf rausholen! Zumindest die dbconnect.
 
+- adm_log ist in FUDA eingebunden! Ich muss hier klar zwischen FUDA und MOBS unterscheiden! user_code oder nicht. Aber user_code darf nicht in FUDA eingebunden sein! TRENNEN (entweder user oder sys ... sys ginge ja auch). Vielleicht mach ich eine install.php? Das Log kann ich ins FUDA übernehmen, **aber ohne Nutzer-Bezug** (Angabe 'thomas@bsv.de')
 
-
+ 
 ## In der Prod-DB einfügen und neue Version v0.1.9-qa.1
 
 ### b_mitglieder.BSG: NULL -> NOT NULL  (nicht mehr nullable).
@@ -96,8 +119,9 @@ ALTER TABLE `b_mitglieder_in_sparten` DROP COLUMN `seit`;
 DROP TRIGGER IF EXISTS `update_stammmitglied_seit`;
 
 
+### ALTER TABLE `adm_log`
+ALTER TABLE `adm_log` CHANGE COLUMN `ID` `ID` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL;
 
-**ACHTUNG ## Den Meldelisteneintrag schützen (aus dem docRoot raus). Das darf nicht vor dem 15.2. ausgelöst werden und kann auch für DoS genutzt werden. ## ACHTUNG**
 
 
 

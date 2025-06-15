@@ -588,17 +588,9 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
         var php_PLEASE_CHOOSE   = <?= json_encode(PLEASE_CHOOSE)?>;
         var php_tabelle         = <?= json_encode($tabelle)?>;
         var php_DB_ERROR        = <?= json_encode(DB_ERROR)?>;
-        var php_SRV_ERROR       = <?= json_encode(SRV_ERROR)?>;
+        // var php_SRV_ERROR       = <?= json_encode(SRV_ERROR)?>;
         var php_selectedTableID = <?= json_encode($selectedTableID)?>
 
-        /*
-        console.log("php_tab:", php_tab);
-        console.log("php_selectedTableID:", php_selectedTableID);
-        console.log("php_PLEASE_CHOOSE:", php_PLEASE_CHOOSE);
-        console.log("php_tabelle:", php_tabelle);
-        console.log("php_DB_ERROR:", php_DB_ERROR);
-        console.log("php_SRV_ERROR:", php_SRV_ERROR);
-        */
     </script>
 
 

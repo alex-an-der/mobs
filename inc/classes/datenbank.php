@@ -45,9 +45,14 @@ class Datenbank {
             $success = $stmt->execute(); 
         } catch (PDOException $e) {
             $errmsg = $e->getMessage();
+            $errorInfo = $e->errorInfo;
+            $errorCode = $errorInfo[1] ?? $e->getCode();
+    
+            $errorID = $this->log($query." with the arguments: ".json_encode($arguments)." led to a query error in ".__FILE__.": " . $errmsg);    
+            // errorId ist der entsprechende Eintrag im Error-Log
+            // errorCode ist der 'offizielle' SQL-Fehlercode (z.B. 1365 (='Field 'xyz' doesn't have a default value')
 
-            $errorID = $this->log($query." with the arguments: ".json_encode($arguments)." led to a query error in ".__FILE__.": " . $errmsg);            
-            return ['error' => $errorID];
+            return ['error' => $errorID, 'message' => $errmsg, 'errorcode' => $errorCode];
         }
         // Prüfen, ob die Abfrage ein SELECT oder SHOW ist - dann mit return raus
         if (stripos(trim($query), 'SELECT') === 0 || stripos(trim($query), 'SHOW') === 0) {

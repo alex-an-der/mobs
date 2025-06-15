@@ -1,3 +1,7 @@
+const errDB = 1;
+const errSRV = 2;
+
+
 function showErrorMsg(message) {
     const errorDiv = document.getElementById('insertErrorMsg');
     if (errorDiv) {
@@ -869,34 +873,56 @@ function saveNewRecord() {
                     $('#insertModal').modal('hide');
                     resetPage();
                 } else {
-                    let errorMessage = php_DB_ERROR;
-                    
-                    if (isNaN(response.message)) {
-                        errorMessage = errorMessage.replace(/#FEHLERID#/g, "000");                                
-                    } else {
-                        errorMessage = errorMessage.replace(/#FEHLERID#/g, response.message);
-                    }
-                
-                    showErrorMsg(serrorMessage);
+                    errorManagement(response.message, errDB, response.error_code, response.error_ID)
                     
                 }
             } catch (e) { 
+
                 const response = JSON.parse(xhr.responseText); 
                 
-                let errorMessage = php_SRV_ERROR;
-                    
-                if (isNaN(response.message)) {
-                    errorMessage = errorMessage.replace(/#FEHLERID#/g, "000");                                
-                } else {
-                    errorMessage = errorMessage.replace(/#FEHLERID#/g, response.message);
-                }
-
-                showErrorMsg(errorMessage + "<br><br><i>Fehlerinformation: " + e + "</i>");
+                errorManagement(response.message, errSRV, response.error_code, response.error_ID)
             }
         }
     };
-
     xhr.send(requestData);
+}
+
+function errorManagement(errorMessage, errSrc, sqlErrCode, error_log_ID){
+
+  
+    let src = "";
+    if (errSrc==errDB) src = "database";
+    else if (errSrc==errSRV) src = "ajax-call";
+    
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "ajax_errormanagement.php", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(JSON.stringify({
+        action: 'error_occured',
+        src: src,
+        errorcode: sqlErrCode,
+        errorMessage: errorMessage,
+        error_log_ID: error_log_ID
+    }));
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            // Done successfully
+            // Optional: handle response if needed
+            const response = JSON.parse(xhr.responseText); 
+            if(response.status == "error"){
+                if (isNaN(error_log_ID)) {
+                    errorMessage = php_DB_ERROR.replace(/#FEHLERID#/g, "000");                                
+                } else {
+                    errorMessage = php_DB_ERROR.replace(/#FEHLERID#/g, error_log_ID);
+                }
+            }else{
+                errorMessage = response.message;
+            }
+        }
+        showErrorMsg(errorMessage);
+    };
+
+
 }
 
 function toggleSelectAll(source) {
