@@ -688,7 +688,7 @@ function insertDefaultRecord(tabelle) {
         handleError("Fehler beim Senden der Anfrage: " + e.message);
     }
 }
-
+/*
 function populateInsertModal(columns, foreignKeys, configQuery) { 
     const form = document.getElementById('insertForm');
     if (!form) {
@@ -714,17 +714,17 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
     }
 
     // Prüfe, ob alle Felder mit 'info:' beginnen
-    let $allFieldsAreInfo = true;
-    for (let i = 0; i < headers.length; i++) {
-        if (!headers[i].startsWith('info:')) {
-            $allFieldsAreInfo = false;
-            break;
-        }
-    }
+    // let $allFieldsAreInfo = true;
+    // for (let i = 0; i < headers.length; i++) {
+    //     if (!headers[i].startsWith('info:')) {
+    //         $allFieldsAreInfo = false;
+    //         break;
+    //     }
+    // }
     headers.forEach(
         fieldName => 
             {  // Info-Felder überspringen, wenn nicht ALLE Felder info: sind                    
-                    if (!$allFieldsAreInfo && fieldName.startsWith('info:')) return;
+                    // if (!$allFieldsAreInfo && fieldName.startsWith('info:')) return;
                 const div = document.createElement('div'); 
                 div.className = 'form-group mb-3';
             // Info-Label-Handling
@@ -749,12 +749,12 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
             select.name = fieldName;
             
             // Add "---" Feld
-            /*
-            const nullOption = document.createElement('option');
-            nullOption.value = "NULL";
-            nullOption.textContent = "< ?=NULL_WERT?>";
-            select.appendChild(nullOption);
-            */
+           
+            // const nullOption = document.createElement('option');
+            // nullOption.value = "NULL";
+            // nullOption.textContent = "< ?=NULL_WERT?>";
+            // select.appendChild(nullOption);
+            
 
 
             // Optionen sammeln
@@ -787,6 +787,173 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
                 pleaseChooseOption.selected = true;
                 select.insertBefore(pleaseChooseOption, select.firstChild);
             }               
+            
+            div.appendChild(select); 
+        } else { // else = no Foreign Key
+            // Input für normale Felder und info:-Felder
+            const input = document.createElement('input');
+            input.className = 'form-control';
+            input.name = fieldName;
+            input.placeholder = ""; 
+
+            // Nur für Felder ohne info:-Prefix Typ bestimmen
+            if (!isInfo) {
+                // Finde passenden Spaltendefinitionseintrag für diesen Header
+                let column = columns.find(col => {
+                    let colName = col.Field || col.field || col.name || col.Name;
+                    return colName === fieldName;
+                });  
+                
+                if (column) {
+                    const columnType = column.Type || column.type || 'text';
+                    if (columnType.includes('date')) {
+                        input.type = columnType.includes('datetime') ? 'datetime-local' : 'date';
+                        // Setze Standardwert auf heute, falls kein Default vorhanden
+                        if (!input.value) {
+                            const now = new Date();
+                            if (input.type === 'date') {
+                                input.value = now.toISOString().slice(0, 10);
+                            } else if (input.type === 'datetime-local') {
+                                input.value = now.toISOString().slice(0, 16);
+                            }
+                        }
+                    } else if (columnType.includes('int') || columnType.includes('decimal') || columnType.includes('float') || columnType.includes('double')) {
+                        input.type = 'number';
+                        if (columnType.includes('decimal') || columnType.includes('float') || columnType.includes('double')) {
+                            input.step = '0.01';
+                        }
+                    } else {
+                        input.type = 'text';
+                    }
+                } else {
+                    input.type = 'text';
+                }
+            } else {
+                // info:-Felder immer als readonly text
+                input.type = 'text';
+                input.readOnly = true;
+                input.style.backgroundColor = "#f5f5f5";
+            }
+
+            div.appendChild(input);
+        }
+
+        form.appendChild(div);
+    });
+}*/
+
+function populateInsertModal(columns, foreignKeys, configQuery) { 
+    const form = document.getElementById('insertForm');
+    if (!form) {
+        alert("Insert form not found");
+        return;
+    }
+    form.innerHTML = '';
+
+    // Hole die Reihenfolge und Namen aus den Table-Headers
+    let headers = [];
+    const tableHeaders = document.querySelectorAll('table thead th[data-field]');
+    if (tableHeaders && tableHeaders.length > 0) {
+        headers = Array.from(tableHeaders)
+            .map(th => th.getAttribute('data-field'))
+            .filter(field => field && field !== 'id');
+    } else {
+        headers = columns.map(col => col.Field || col.field || col.name || col.Name)
+            .filter(field => field && field !== 'id');
+    }
+    if (headers.length === 0) {
+        alert("Fehler: Keine Feldnamen gefunden.");
+        return;
+    }
+
+    // Prüfe, ob alle Felder mit 'info:' beginnen
+    // Hintergrund: Info-Felder werden im Modal als read/only angezeigt.
+    // ABER: Wenn ALLE Felder Info sind, ist das ein Sonderfall
+    // Das ist dann eine Liste, die zwar delete und insert hat, aber die Daten sollen
+    // dort nicht editiert werden. Also aus irgendwelchen Gründen nur GANZE DATENSÄTZE
+    // gehandelt werden. Also muss das Modal Eingaben zulassen.
+    let allFieldsAreInfo = true;
+    for (let i = 0; i < headers.length; i++) {
+        if (!headers[i].startsWith('info:')) {
+            allFieldsAreInfo = false;
+            break;
+        }
+    }
+
+    headers.forEach(
+        fieldName => 
+            {  
+                const div = document.createElement('div'); 
+                div.className = 'form-group mb-3';
+                // Info-Label-Handling
+                let isInfo = false;
+                let displayFieldName = fieldName; 
+                if (fieldName.startsWith('info:')) { 
+                    isInfo = true;
+                    displayFieldName = fieldName.substring(5);
+                }
+
+
+        const label = document.createElement('label');
+        label.className = 'form-label';
+        label.textContent = displayFieldName;
+        div.appendChild(label);
+
+        // Verzweigung:
+        // if FK-Spalte             => select
+        // else                     => Text
+        //                                      if noInfo => normal
+        //                                      else      => readonly
+
+
+        // Ist die COL eine Spalte mit Referenzquery/"foreignKeys-Spalte", dann mach einen Select, sonst ein Input
+        let content = "";
+
+        if (foreignKeys[fieldName]) {
+            // Create select dropdown for foreign key fields
+            const select = document.createElement('select');
+            select.className = 'form-control';
+            select.name = fieldName;
+            
+            // Optionen sammeln
+            const validOptions = []; 
+            // Add all foreign key options
+            if (foreignKeys[fieldName].length > 0) {
+                foreignKeys[fieldName].forEach(fk => {
+                    if (fk && fk.id !== undefined && fk.anzeige !== undefined) {                                
+                        const option = document.createElement('option');
+                        option.value = fk.id;
+                        option.textContent = fk.anzeige;
+                        select.appendChild(option);
+                        validOptions.push(option);
+                        if(fk.id==-1){
+                            // Select nach dem Hinzufügen der Option deaktivieren
+                            select.disabled = true;
+                        }
+                    }
+                });
+            }
+            
+            // If there's only one valid option (besides NULL), automatically select it
+            if (validOptions.length === 1) {
+                validOptions[0].selected = true;
+            }else if(validOptions.length > 1){
+                const pleaseChooseOption = document.createElement('option');
+                pleaseChooseOption.value = "null";
+                pleaseChooseOption.textContent = php_PLEASE_CHOOSE;
+                pleaseChooseOption.disabled = true;
+                pleaseChooseOption.selected = true;
+                select.insertBefore(pleaseChooseOption, select.firstChild);
+            }               
+
+        // INFO-Felder lassen sich als FK nicht als read-only-select anzeigen
+        // read-only gibt es nicht und disabled submittet dann nicht die Daten.
+        // Workaround: so tun als ob:
+            if (isInfo && !allFieldsAreInfo) {
+                select.style.backgroundColor = "#f5f5f5";
+                select.style.pointerEvents = "none";
+                select.style.opacity = "1";
+            }
             
             div.appendChild(select); 
         } else { // else = no Foreign Key
