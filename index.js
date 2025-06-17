@@ -1108,10 +1108,9 @@ function toggleRowSelection(checkbox) {
 }
 
 function deleteSelectedRows(tabelle) {
-    const deleteButton = document.getElementById('deleteSelectedButton');
     const selectedIds = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => cb.getAttribute('data-id'));
     if (selectedIds.length === 0) {
-        showDeleteErrorMsg('Keine Zeilen ausgewählt.');
+        showErrorMsg('Keine Zeilen ausgewählt.');
         return;
     }
 
@@ -1119,7 +1118,7 @@ function deleteSelectedRows(tabelle) {
     const selectedData = selectedIds.map(id => {
         const row = document.querySelector(`tr[data-id='${id}']`);
         if (row) {
-            const cells = Array.from(row.querySelectorAll('td')).slice(1).map(td => { // Exclude the first column (checkbox)
+            const cells = Array.from(row.querySelectorAll('td')).slice(1).map(td => {
                 const input = td.querySelector('input');
                 const select = td.querySelector('select');
                 if (input) {
@@ -1158,17 +1157,23 @@ function deleteSelectedRows(tabelle) {
         (tableHead ? `<thead style='background:#eee'><tr>${tableHead}</tr></thead>` : '') +
         `<tbody>${tableRows}</tbody></table></div>` + additionalCount;
 
-    // Set modal content
-    document.getElementById('deleteModalBody').innerHTML = confirmationMessage;
-    document.getElementById('deleteErrorMsg').classList.add('d-none');
+    // Modal für Delete vorbereiten
+    document.getElementById('insertForm').style.display = 'none';
+    document.getElementById('insertDeleteBody').innerHTML = confirmationMessage;
+    document.getElementById('insertDeleteBody').style.display = '';
+    document.getElementById('insertErrorMsg').classList.add('d-none');
+    document.getElementById('insertSaveButton').classList.add('d-none');
+    document.getElementById('insertDeleteButton').classList.remove('d-none');
+    document.getElementById('insertCancelButton').innerText = 'Abbrechen';
+    document.getElementById('insertModalLabel').innerText = 'Datensätze löschen';
+
     // Show modal
-    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-    deleteModal.show();
+    const insertModal = new bootstrap.Modal(document.getElementById('insertModal'));
+    insertModal.show();
 
     // Remove previous event listener to avoid stacking
-    const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+    const confirmDeleteButton = document.getElementById('insertDeleteButton');
     confirmDeleteButton.onclick = function() {
-        // Show spinner and disable button
         confirmDeleteButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Lösche...';
         confirmDeleteButton.disabled = true;
 
@@ -1191,16 +1196,16 @@ function deleteSelectedRows(tabelle) {
                         const response = JSON.parse(xhr.responseText);
                         if (response.status === "success") {
                             // Modal schließen und Seite neu laden
-                            deleteModal.hide();
+                            insertModal.hide();
                             resetPage();
                         } else {
-                            showDeleteErrorMsg("Fehler beim Löschen der Daten." + (response.message ? ": " + response.message : ""));
+                            showErrorMsg(response.message || "Fehler beim Löschen der Daten.");
                         }
                     } catch (e) {
-                        showDeleteErrorMsg("Fehler beim Verarbeiten der Serverantwort.");
+                        showErrorMsg("Fehler beim Verarbeiten der Serverantwort.");
                     }
                 } else {
-                    showDeleteErrorMsg("Serverfehler beim Löschen der Daten.");
+                    showErrorMsg("Serverfehler beim Löschen der Daten.");
                 }
             }
         };
@@ -1208,14 +1213,16 @@ function deleteSelectedRows(tabelle) {
     };
 }
 
-function showDeleteErrorMsg(message) {
-    const errorDiv = document.getElementById('deleteErrorMsg');
-    if (errorDiv) {
-        errorDiv.innerHTML = message || "Unbekannter Fehler";
-        errorDiv.classList.remove('d-none');
-    } else {
-        alert((message || "Unbekannter Fehler").replace(/<[^>]+>/g, ''));
-    }
+// Zeigt das Insert-Modal wieder im Insert-Modus an
+function showInsertModal() {
+    document.getElementById('insertForm').style.display = '';
+    document.getElementById('insertDeleteBody').innerHTML = '';
+    document.getElementById('insertDeleteBody').style.display = 'none';
+    document.getElementById('insertErrorMsg').classList.add('d-none');
+    document.getElementById('insertSaveButton').classList.remove('d-none');
+    document.getElementById('insertDeleteButton').classList.add('d-none');
+    document.getElementById('insertCancelButton').innerText = 'Abbrechen';
+    document.getElementById('insertModalLabel').innerText = 'Neuen Datensatz erstellen';
 }
 
 function resetPage(){

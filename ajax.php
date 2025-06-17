@@ -133,12 +133,19 @@ try {
                 $response = ["status" => "success"];
             } catch (Exception $e) {
                 $db->log("Delete error: " . $e->getMessage());
-                // Fehlertext aus sys_error_manager holen
+                // Fehlertext aus sys_error_manager holen ODER neuen Eintrag anlegen
                 $errMsg = $e->getMessage();
-                $sql = "SELECT user_message FROM sys_error_manager WHERE ? LIKE CONCAT('%', raw_message, '%') LIMIT 1";
+                $sql = "SELECT * FROM sys_error_manager WHERE raw_message = ? LIMIT 1";
                 $errResult = $db->query($sql, [$errMsg]);
-                if ($errResult && isset($errResult['data'][0]['user_message']) && $errResult['data'][0]['user_message']) {
+                $userMsg = null;
+                if ($errResult && isset($errResult['data'][0])) {
                     $userMsg = $errResult['data'][0]['user_message'];
+                } else {
+                    // Neuen Fehler in sys_error_manager eintragen
+                    $insertSql = "INSERT INTO sys_error_manager (raw_message, user_message, sql_error_code, source) VALUES (?, ?, ?, ?)";
+                    $db->query($insertSql, [$errMsg, '', null, 'delete']);
+                }
+                if ($userMsg) {
                     $response = ["status" => "error", "message" => $userMsg];
                 } else {
                     $response = ["status" => "error", "message" => "Fehler beim Löschen der Daten." . ($errMsg ? (": " . $errMsg) : "")];

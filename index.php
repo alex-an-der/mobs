@@ -549,7 +549,66 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
         <a href="./user_code/impressum.php" target="_blank" style="color: #888; font-size: 0.95em; text-decoration: underline dotted;">Impressum und Datenschutzerklärung</a>
     </footer>
 
-    <!-- Insert Modal -->
+    <!-- Universal Modal (für Insert & Delete) -->
+    <style>
+        #insertModal .modal-dialog {
+            max-width: 80vw;
+        }
+        #insertModal .table-responsive {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        @media (min-width: 900px) {
+            #insertModal .table-responsive {
+                max-width: 60vw;
+                overflow-x: visible;
+            }
+            #insertModal .modal-dialog {
+                max-width: 60vw;
+            }
+        }
+        @media (min-width: 1200px) {
+            #insertModal .modal-dialog {
+                max-width: 80vw;
+            }
+            #insertModal .table-responsive {
+                max-width: 80vw;
+            }
+        }
+        #insertModal .table-responsive::-webkit-scrollbar {
+            height: 18px;
+            background: #eee;
+        }
+        #insertModal .table-responsive::-webkit-scrollbar-thumb {
+            background: #bbb;
+            border-radius: 8px;
+            border: 4px solid #eee;
+        }
+        #insertModal .table-responsive {
+            scrollbar-width: thin;
+            scrollbar-color: #bbb #eee;
+        }
+        #insertModal .table-responsive + .delete-modal-spacer {
+            height: 24px;
+        }
+        #insertModal tr.delete-modal-zebra-1 td {
+            background: #f7f7f7 !important;
+        }
+        #insertModal tr.delete-modal-zebra-0 td {
+            background: #fff !important;
+        }
+        #insertModal .delete-modal-th, #insertModal .delete-modal-td {
+            white-space: nowrap;
+            max-width: 350px;
+            min-width: 60px;
+            width: 1%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #insertModal .delete-modal-th {
+            font-weight: bold;
+        }
+    </style>
     <div class="modal fade" id="insertModal" tabindex="-1" aria-labelledby="insertModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -561,97 +620,14 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                     <form id="insertForm">
                         <!-- Felder werden dynamisch eingefügt -->
                     </form>
+                    <div id="insertDeleteBody"></div>
+                    <div class="delete-modal-spacer"></div>
                     <div id="insertErrorMsg" class="alert alert-danger d-none" role="alert"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
-                    <button type="button" class="btn btn-primary" onclick="saveNewRecord()">Speichern</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Delete Modal -->
-    <style>
-        /* Modal breiter machen */
-        #deleteModal .modal-dialog {
-            max-width: 80vw;
-        }
-        /* Tabelle: Scrollbar erst ab 60% Breite, sonst overflow:visible */
-        #deleteModal .table-responsive {
-            max-width: 100%;
-            overflow-x: auto;
-        }
-        @media (min-width: 900px) {
-            #deleteModal .table-responsive {
-                max-width: 60vw;
-                overflow-x: visible;
-            }
-            #deleteModal .modal-dialog {
-                max-width: 60vw;
-            }
-        }
-        @media (min-width: 1200px) {
-            #deleteModal .modal-dialog {
-                max-width: 80vw;
-            }
-            #deleteModal .table-responsive {
-                max-width: 80vw;
-            }
-        }
-        /* Breite, klassischere Scrollbar */
-        #deleteModal .table-responsive::-webkit-scrollbar {
-            height: 18px;
-            background: #eee;
-        }
-        #deleteModal .table-responsive::-webkit-scrollbar-thumb {
-            background: #bbb;
-            border-radius: 8px;
-            border: 4px solid #eee;
-        }
-        #deleteModal .table-responsive {
-            scrollbar-width: thin;
-            scrollbar-color: #bbb #eee;
-        }
-        /* Freier Bereich unter der Tabelle */
-        #deleteModal .table-responsive + .delete-modal-spacer {
-            height: 24px;
-        }
-        /* Zebra-Streifen für Delete-Modal */
-        #deleteModal tr.delete-modal-zebra-1 td {
-            background: #f7f7f7 !important;
-        }
-        #deleteModal tr.delete-modal-zebra-0 td {
-            background: #fff !important;
-        }
-        /* Optimale Spaltenbreite für Delete-Modal */
-        #deleteModal .delete-modal-th, #deleteModal .delete-modal-td {
-            white-space: nowrap;
-            max-width: 350px;
-            min-width: 60px;
-            width: 1%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        #deleteModal .delete-modal-th {
-            font-weight: bold;
-        }
-    </style>
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Datensätze löschen</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="deleteModalBody"></div>
-                    <div class="delete-modal-spacer"></div>
-                    <div id="deleteErrorMsg" class="alert alert-danger d-none" role="alert"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteButton">Löschen</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="insertCancelButton">Abbrechen</button>
+                    <button type="button" class="btn btn-primary" id="insertSaveButton" onclick="saveNewRecord()">Speichern</button>
+                    <button type="button" class="btn btn-danger d-none" id="insertDeleteButton">Löschen</button>
                 </div>
             </div>
         </div>
