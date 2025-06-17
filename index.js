@@ -1155,7 +1155,7 @@ function deleteSelectedRows(tabelle) {
     const confirmationMessage = `Wollen Sie diese ${selectedData.length} Datensätze löschen?` +
         `<div class='table-responsive mt-3'><table class='table table-sm table-bordered' style='min-width:400px'>` +
         (tableHead ? `<thead style='background:#eee'><tr>${tableHead}</tr></thead>` : '') +
-        `<tbody>${tableRows}</tbody></table></div>` + additionalCount;
+        `<tbody>${tableRows}</tbody></table></div>` + additionalCount + "<br>";
 
     // Modal für Delete vorbereiten
     document.getElementById('insertForm').style.display = 'none';
@@ -1199,7 +1199,8 @@ function deleteSelectedRows(tabelle) {
                             insertModal.hide();
                             resetPage();
                         } else {
-                            showErrorMsg(response.message || "Fehler beim Löschen der Daten.");
+                            // Fehlerhandling wie beim Insert: Fehler an errorManagement übergeben
+                            errorManagement(response.message || "Fehler beim Löschen der Daten.", errDB, response.error_code, response.error_ID);
                         }
                     } catch (e) {
                         showErrorMsg("Fehler beim Verarbeiten der Serverantwort.");

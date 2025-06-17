@@ -130,23 +130,8 @@ try {
             $query = "DELETE FROM `$tabelle` WHERE `id` IN ($placeholders)";
             $result = $db->query($query, $ids);
             if (is_array($result) && isset($result['error'])) {
-                // Fehlertext aus sys_error_manager holen ODER neuen Eintrag anlegen
-                $errMsg = $result['message'];
-                $sql = "SELECT * FROM sys_error_manager WHERE raw_message = ? LIMIT 1";
-                $errResult = $db->query($sql, [$errMsg]);
-                $userMsg = null;
-                if ($errResult && isset($errResult['data'][0])) {
-                    $userMsg = $errResult['data'][0]['user_message'];
-                } else {
-                    // Neuen Fehler in sys_error_manager eintragen
-                    $insertSql = "INSERT INTO sys_error_manager (raw_message, user_message, sql_error_code, source) VALUES (?, '', ?, 'delete')";
-                    $db->query($insertSql, [$errMsg, $result['errorcode'] ?? null]);
-                }
-                if ($userMsg) {
-                    $response = ["status" => "error", "message" => $userMsg];
-                } else {
-                    $response = ["status" => "error", "message" => "Fehler beim Löschen der Daten." . ($errMsg ? (": " . $errMsg) : "")];
-                }
+                // Fehler nur an den Client zurückgeben, NICHT sys_error_manager hier pflegen!
+                $response = ["status" => "error", "message" => $result['message'], "error_code" => $result['errorcode'] ?? null, "error_ID" => $result['error'] ?? null];
             } else {
                 $response = ["status" => "success"];
             }

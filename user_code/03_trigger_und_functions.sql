@@ -586,13 +586,19 @@ BEGIN
     FROM b_mitglieder
     WHERE id = OLD.Mitglied AND BSG = OLD.BSG;
     
-    -- Wenn einer der Counts > 0 ist, dann verhindern wir das Löschen
-    IF v_count_mitglieder_in_sparten > 0 THEN
+    -- Prüfung aller drei Fälle
+    IF v_count_mitglieder_in_sparten > 0 AND v_count_mitglieder > 0 THEN
+        -- Fall 1: Mitglied ist sowohl in BSG als auch in Sparte
         SIGNAL SQLSTATE '45000' 
-        SET MESSAGE_TEXT = 'Mitglied ist noch über diese BSG in einer Sparte angemeldet';
+        SET MESSAGE_TEXT = '_MITGLIEDINBSGUNDSPARTE_ Mitglied ist sowohl in dieser BSG als auch in einer Sparte angemeldet';
+    ELSEIF v_count_mitglieder_in_sparten > 0 THEN
+        -- Fall 2: Mitglied ist nur in Sparte
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = '_MITGLIEDINSPARTE_ Mitglied ist noch über diese BSG in einer Sparte angemeldet';
     ELSEIF v_count_mitglieder > 0 THEN
+        -- Fall 3: Mitglied ist nur in BSG
         SIGNAL SQLSTATE '45000' 
-        SET MESSAGE_TEXT = 'Mitglied ist noch in dieser BSG angemeldet';
+        SET MESSAGE_TEXT = '_MITGLIEDINBSG_ Mitglied ist noch in dieser BSG angemeldet';
     END IF;
 END //
 

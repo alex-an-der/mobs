@@ -589,7 +589,7 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
             scrollbar-color: #bbb #eee;
         }
         #insertModal .table-responsive + .delete-modal-spacer {
-            height: 24px;
+            height: 2.5em;
         }
         #insertModal tr.delete-modal-zebra-1 td {
             background: #f7f7f7 !important;
