@@ -114,10 +114,11 @@ $register_link = $conf->getYpumRoot()."/yfront/register.php";
 $version = "<span style='font-weight:bold; color:red;'>Keine Versionsnummer im root-Verzeichnis abgelegt</span>";
 
 $rootDir = __DIR__ . "/../../";
-$files = glob($rootDir . "v[0-9]*.[0-9]*.[0-9]*");
+$files = glob($rootDir . "v[0-9]*.[0-9]*.[0-9]*.ver");
 
 if (count($files) === 1) {
     $version = basename($files[0]);
+    $version = substr($version, 0, -4); // Dateiendung .ver abschneiden
 }
 $version = "Version: " . $version;
 ?>
