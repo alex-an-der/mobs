@@ -133,7 +133,16 @@ try {
                 $response = ["status" => "success"];
             } catch (Exception $e) {
                 $db->log("Delete error: " . $e->getMessage());
-                $response = ["status" => "error", "message" => "Fehler beim Löschen der Daten."];
+                // Fehlertext aus sys_error_manager holen
+                $errMsg = $e->getMessage();
+                $sql = "SELECT user_message FROM sys_error_manager WHERE ? LIKE CONCAT('%', raw_message, '%') LIMIT 1";
+                $errResult = $db->query($sql, [$errMsg]);
+                if ($errResult && isset($errResult['data'][0]['user_message']) && $errResult['data'][0]['user_message']) {
+                    $userMsg = $errResult['data'][0]['user_message'];
+                    $response = ["status" => "error", "message" => $userMsg];
+                } else {
+                    $response = ["status" => "error", "message" => "Fehler beim Löschen der Daten." . ($errMsg ? (": " . $errMsg) : "")];
+                }
             }
             ob_end_clean();
             echo json_encode($response);

@@ -1109,11 +1109,9 @@ function toggleRowSelection(checkbox) {
 
 function deleteSelectedRows(tabelle) {
     const deleteButton = document.getElementById('deleteSelectedButton');
-    const originalText = deleteButton.innerHTML;
-
     const selectedIds = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => cb.getAttribute('data-id'));
     if (selectedIds.length === 0) {
-        alert('Keine Zeilen ausgewählt.');
+        showDeleteErrorMsg('Keine Zeilen ausgewählt.');
         return;
     }
 
@@ -1132,51 +1130,92 @@ function deleteSelectedRows(tabelle) {
                     return td.innerText.trim();
                 }
             });
-            return cells.join(' | ');
+            return cells;
         }
-        return '';
+        return [];
     });
 
-    const displayData = selectedData.slice(0, 5).join('\n');
-    const additionalCount = selectedData.length > 5 ? `\n...und ${selectedData.length - 5} weitere` : '';
-    const confirmationMessage = `Wollen Sie diese ${selectedData.length} Datensätze löschen?\n\n${displayData}${additionalCount}`;
+    // Tabellenkopf aus erster Zeile extrahieren
+    let tableHead = '';
+    const firstRow = document.querySelector('tr[data-id]');
+    if (firstRow) {
+        const ths = Array.from(firstRow.querySelectorAll('td')).slice(1).map(td => {
+            let h = td.getAttribute('data-field') || '';
+            h = h.replace(/^info:/, '').replace(/^ajax:/, '');
+            return `<th class='delete-modal-th'>${h}</th>`;
+        });
+        tableHead = ths.join('');
+    }
 
-    const confirmation = confirm(confirmationMessage);
-    if (!confirmation) return;
-
-    // Show spinner and disable button
-    deleteButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Lösche...';
-    deleteButton.disabled = true;
-
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "ajax.php", true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-
-    const data = JSON.stringify({
-        action: 'delete',
-        tabelle: tabelle,
-        ids: selectedIds
+    let tableRows = '';
+    selectedData.forEach((row, idx) => {
+        tableRows += `<tr class='delete-modal-zebra-${idx % 2}'>${row.map(cell => `<td class='delete-modal-td'>${cell}</td>`).join('')}</tr>`;
     });
 
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            try {
-                const response = JSON.parse(xhr.responseText);
-                if (response.status === "success") {
-                    resetPage(); // Reload the page to see the changes
+    const additionalCount = selectedData.length > 5 ? `<div class='text-muted mt-2'>...und ${selectedData.length - 5} weitere</div>` : '';
+    const confirmationMessage = `Wollen Sie diese ${selectedData.length} Datensätze löschen?` +
+        `<div class='table-responsive mt-3'><table class='table table-sm table-bordered' style='min-width:400px'>` +
+        (tableHead ? `<thead style='background:#eee'><tr>${tableHead}</tr></thead>` : '') +
+        `<tbody>${tableRows}</tbody></table></div>` + additionalCount;
+
+    // Set modal content
+    document.getElementById('deleteModalBody').innerHTML = confirmationMessage;
+    document.getElementById('deleteErrorMsg').classList.add('d-none');
+    // Show modal
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    deleteModal.show();
+
+    // Remove previous event listener to avoid stacking
+    const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+    confirmDeleteButton.onclick = function() {
+        // Show spinner and disable button
+        confirmDeleteButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Lösche...';
+        confirmDeleteButton.disabled = true;
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "ajax.php", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+
+        const data = JSON.stringify({
+            action: 'delete',
+            tabelle: tabelle,
+            ids: selectedIds
+        });
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                confirmDeleteButton.innerHTML = 'Löschen';
+                confirmDeleteButton.disabled = false;
+                if (xhr.status === 200) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.status === "success") {
+                            // Modal schließen und Seite neu laden
+                            deleteModal.hide();
+                            resetPage();
+                        } else {
+                            showDeleteErrorMsg("Fehler beim Löschen der Daten." + (response.message ? ": " + response.message : ""));
+                        }
+                    } catch (e) {
+                        showDeleteErrorMsg("Fehler beim Verarbeiten der Serverantwort.");
+                    }
                 } else {
-                    showErrorMsg("Fehler beim Löschen der Daten." + (response.message ? ": " + response.message : ""));
+                    showDeleteErrorMsg("Serverfehler beim Löschen der Daten.");
                 }
-            } catch (e) {
-                showErrorMsg("Fehler beim Verarbeiten der Serverantwort.");
             }
-        } else if (xhr.readyState === 4 && xhr.status !== 200) {
-            showErrorMsg("Serverfehler beim Löschen der Daten.");
-        }
-        // ...existing code...
+        };
+        xhr.send(data);
     };
+}
 
-    xhr.send(data);
+function showDeleteErrorMsg(message) {
+    const errorDiv = document.getElementById('deleteErrorMsg');
+    if (errorDiv) {
+        errorDiv.innerHTML = message || "Unbekannter Fehler";
+        errorDiv.classList.remove('d-none');
+    } else {
+        alert((message || "Unbekannter Fehler").replace(/<[^>]+>/g, ''));
+    }
 }
 
 function resetPage(){
@@ -1511,9 +1550,9 @@ function matchesDateFilter(cellValue, filterValue) {
         
         if (startDate && endDate) {
             // Bei Bereichsfiltern setzen wir die Zeit für den Endtag auf 23:59:59
-            if (endStr.length <= 10) { // Wenn kein Zeitanteil vorhanden
+            if (endStr.length <= 10) // Wenn kein Zeitanteil vorhanden
                 endDate.setHours(23, 59, 59, 999);
-            }
+            
             return cellDate >= startDate && cellDate <= endDate;
         }
     }
@@ -1620,12 +1659,12 @@ function parseDate(dateStr) {
     }
     
     // ISO datetime: YYYY-MM-DDTHH:MM:SS
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(dateStr)) {
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/i.test(dateStr)) {
         return new Date(dateStr);
     }
     
     // SQL datetime: YYYY-MM-DD HH:MM:SS
-    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/.test(dateStr)) {
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/i.test(dateStr)) {
         return new Date(dateStr.replace(' ', 'T'));
     }
     
