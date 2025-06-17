@@ -128,13 +128,10 @@ try {
 
             $placeholders = implode(',', array_fill(0, count($ids), '?'));
             $query = "DELETE FROM `$tabelle` WHERE `id` IN ($placeholders)";
-            try {
-                $result = $db->query($query, $ids);
-                $response = ["status" => "success"];
-            } catch (Exception $e) {
-                $db->log("Delete error: " . $e->getMessage());
+            $result = $db->query($query, $ids);
+            if (is_array($result) && isset($result['error'])) {
                 // Fehlertext aus sys_error_manager holen ODER neuen Eintrag anlegen
-                $errMsg = $e->getMessage();
+                $errMsg = $result['message'];
                 $sql = "SELECT * FROM sys_error_manager WHERE raw_message = ? LIMIT 1";
                 $errResult = $db->query($sql, [$errMsg]);
                 $userMsg = null;
@@ -142,14 +139,16 @@ try {
                     $userMsg = $errResult['data'][0]['user_message'];
                 } else {
                     // Neuen Fehler in sys_error_manager eintragen
-                    $insertSql = "INSERT INTO sys_error_manager (raw_message, user_message, sql_error_code, source) VALUES (?, ?, ?, ?)";
-                    $db->query($insertSql, [$errMsg, '', null, 'delete']);
+                    $insertSql = "INSERT INTO sys_error_manager (raw_message, user_message, sql_error_code, source) VALUES (?, '', ?, 'delete')";
+                    $db->query($insertSql, [$errMsg, $result['errorcode'] ?? null]);
                 }
                 if ($userMsg) {
                     $response = ["status" => "error", "message" => $userMsg];
                 } else {
                     $response = ["status" => "error", "message" => "Fehler beim Löschen der Daten." . ($errMsg ? (": " . $errMsg) : "")];
                 }
+            } else {
+                $response = ["status" => "success"];
             }
             ob_end_clean();
             echo json_encode($response);
