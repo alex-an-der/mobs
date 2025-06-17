@@ -564,3 +564,36 @@ END$$
 DELIMITER ;
 
 -- -----------------------------------------------------------------------------------
+
+DROP TRIGGER IF EXISTS tr_before_delete_individuelle_berechtigungen;
+
+DELIMITER //
+
+CREATE TRIGGER tr_before_delete_individuelle_berechtigungen
+BEFORE DELETE ON b_individuelle_berechtigungen
+FOR EACH ROW
+BEGIN
+    DECLARE v_count_mitglieder_in_sparten INT;
+    DECLARE v_count_mitglieder INT;
+    
+    -- Prüfung 1: Ist das Mitglied noch über diese BSG in einer Sparte angemeldet?
+    SELECT COUNT(*) INTO v_count_mitglieder_in_sparten
+    FROM b_mitglieder_in_sparten
+    WHERE Mitglied = OLD.Mitglied AND BSG = OLD.BSG;
+    
+    -- Prüfung 2: Ist das Mitglied noch in dieser BSG angemeldet?
+    SELECT COUNT(*) INTO v_count_mitglieder
+    FROM b_mitglieder
+    WHERE id = OLD.Mitglied AND BSG = OLD.BSG;
+    
+    -- Wenn einer der Counts > 0 ist, dann verhindern wir das Löschen
+    IF v_count_mitglieder_in_sparten > 0 THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Mitglied ist noch über diese BSG in einer Sparte angemeldet';
+    ELSEIF v_count_mitglieder > 0 THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Mitglied ist noch in dieser BSG angemeldet';
+    END IF;
+END //
+
+DELIMITER ;
