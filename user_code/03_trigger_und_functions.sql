@@ -113,8 +113,8 @@ BEGIN
         SET success = FALSE;
         SET error_msg = CONCAT('Error occurred while backing up user data for deletion. User ID: ', OLD.id);
         
-        -- Log the error to the existing adm_log table
-        INSERT INTO `adm_log` (`zeit`, `eintrag`) 
+        -- Log the error to the existing sys_log table
+        INSERT INTO `sys_log` (`zeit`, `eintrag`) 
         VALUES (NOW(), error_msg);
         
         -- Signal to prevent the delete operation
@@ -145,12 +145,12 @@ BEGIN
             `y_id` = OLD.id;
             
         -- Log member data backup
-        INSERT INTO `adm_log` (`zeit`, `eintrag`)
+        INSERT INTO `sys_log` (`zeit`, `eintrag`)
         VALUES (NOW(), CONCAT('Member data for user ID: ', OLD.id, ' has been backed up to b_mitglieder_deleted and y_deleted_user.'));
     END IF;
     
     -- Log successful backup before deletion
-    INSERT INTO `adm_log` (`zeit`, `eintrag`)
+    INSERT INTO `sys_log` (`zeit`, `eintrag`)
     VALUES (NOW(), CONCAT('User with ID: ', OLD.id, ' and email: ', OLD.mail, ' will be deleted. Data backed up.'));
     
     -- Zähle die Mitglieder mit Stamm-BSG
@@ -179,8 +179,8 @@ BEGIN
         SET success = FALSE;
         SET error_msg = CONCAT('Error occurred while backing up BSG data for deletion. BSG ID: ', OLD.id);
         
-        -- Log the error to the adm_log table
-        INSERT INTO `adm_log` (`zeit`, `eintrag`) 
+        -- Log the error to the sys_log table
+        INSERT INTO `sys_log` (`zeit`, `eintrag`) 
         VALUES (NOW(), error_msg);
         
         -- Signal to prevent the delete operation
@@ -201,7 +201,7 @@ BEGIN
     );
     
     -- Log successful backup before deletion
-    INSERT INTO `adm_log` (`zeit`, `eintrag`)
+    INSERT INTO `sys_log` (`zeit`, `eintrag`)
     VALUES (NOW(), CONCAT('BSG with ID: ', OLD.id, ' (', OLD.BSG, ') will be deleted. Data backed up.'));
     
     -- Zähle die Mitglieder mit Stamm-BSG

@@ -61,7 +61,7 @@ function updateField(tabelle, id, field, value, datatype, ajaxFile) {
                     checkRow(tabelle, id, field, value);
                 } else {
                     markCellError(id, field);
-                    showErrorMsg("Fehler beim Update. Stimmt das Datenformat? Für Details siehe adm_log-Tabelle in der Datenbank.");
+                    showErrorMsg("Fehler beim Update. Stimmt das Datenformat? Für Details siehe sys_log-Tabelle in der Datenbank.");
                 }
             } catch (e) {
                 markCellError(id, field);
@@ -69,7 +69,7 @@ function updateField(tabelle, id, field, value, datatype, ajaxFile) {
             }
         } else if (xhr.readyState === 4 && xhr.status !== 200) {
             markCellError(id, field);
-            showErrorMsg("Serverfehler beim Update. Stimmt das Datenformat? Für Details siehe adm_log-Tabelle in der Datenbank.");
+            showErrorMsg("Serverfehler beim Update. Stimmt das Datenformat? Für Details siehe sys_log-Tabelle in der Datenbank.");
         }
     };
 

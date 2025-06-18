@@ -642,19 +642,15 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
     }
     ?>
 
-
     <script>
-        
         var php_tab             = <?=json_encode($tab)?>;
         var php_selectedTableID = <?= json_encode($selectedTableID)?>;
         var php_PLEASE_CHOOSE   = <?= json_encode(PLEASE_CHOOSE)?>;
         var php_tabelle         = <?= json_encode($tabelle)?>;
         var php_DB_ERROR        = <?= json_encode(DB_ERROR)?>;
-        // var php_SRV_ERROR       = <?= json_encode(SRV_ERROR)?>;
+        // var php_SRV_ERROR       = < ?= json_encode(SRV_ERROR)?>;
         var php_selectedTableID = <?= json_encode($selectedTableID)?>
-
     </script>
-
 
 
     <script src="./index.js"></script>

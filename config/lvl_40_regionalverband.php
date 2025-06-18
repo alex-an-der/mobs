@@ -18,9 +18,7 @@ $anzuzeigendeDaten[] = array(
     "hinweis" => "Es können nur BSG ohne Mitglieder gelöscht werden! Bitte vor dem löschen die Mitglieder entweder löschen oder in andere BSG transferieren.",
     "writeaccess" => true,
     "query" => "SELECT 
-        id, Verband, VKZ, BSG, 
-        (SELECT COUNT(*) FROM b_mitglieder m WHERE m.BSG = b.id) AS `info:Mitglieder`,
-        (SELECT COUNT(*) FROM b_bsg_rechte as r WHERE r.BSG = b.id) AS `info:Berechtigte`
+        id, Verband, VKZ, BSG
         from b_bsg as b
         WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0 
         order by id desc;
@@ -270,36 +268,6 @@ $anzuzeigendeDaten[] = array(
                 
 );
 
-/*
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_v_meldeliste_dieses_jahr",
-    "auswahltext" => "$bericht Meldeliste ".$curyear." auf Ebene Regionalverband",
-    "writeaccess" => false,
-    "import" => false,
-    "query" => "SELECT
-        rv_id           as id,
-        Erfasst_am           ,
-        Beitragsjahr         ,
-        Mitglied             ,
-        Zahlungspflichtige_BSG,
-        Zuordnung            ,
-        Beschreibung         ,
-        Betrag               
-
-                FROM b_v_meldeliste_dieses_jahr
-                WHERE FIND_IN_SET(rv_id, berechtigte_elemente($uid, 'verband')) > 0
-                ORDER BY Erfasst_am DESC;",
-    "spaltenbreiten" => array(
-        "Erfasst_am"              => "200",
-        "Beitragsjahr"            => "100",
-        "Mitglied"                => "250",
-        "Zahlungspflichtige_BSG"  => "200",
-        "Zuordnung"               => "150",
-        "Beschreibung"            => "150",
-        "Betrag"                  => "100",
-        )
-);
-*/
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_v_meldeliste_dieses_jahr",
     "auswahltext" => "$bericht Meldeliste ".$curyear." auf Ebene Regionalverband",

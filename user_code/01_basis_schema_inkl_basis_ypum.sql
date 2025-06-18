@@ -70,7 +70,7 @@ CREATE TABLE `b_bsg` (
   `RE_Strasse_Nr` VARCHAR(100) NULL,
   `RE_Strasse2` VARCHAR(100) NULL,
   `RE_PLZ_Ort` VARCHAR(100) NULL,
-  `VKZ` SMALLINT UNSIGNED NULL,
+  `VKZ` VARCHAR(8) NULL,
    PRIMARY KEY (`id`),
   CONSTRAINT `FK_bsg_verband` FOREIGN KEY (`Verband`) REFERENCES `b_regionalverband` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `VKZ_pro_Verband_unique` UNIQUE (`Verband`, `VKZ`)
@@ -135,13 +135,13 @@ CREATE TABLE `b_individuelle_berechtigungen` (
   CONSTRAINT `FK_indiv_rechte_BSG` FOREIGN KEY (`BSG`) REFERENCES `b_bsg` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_indiv_rechte_mitglied` FOREIGN KEY (`Mitglied`) REFERENCES `b_mitglieder` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Mitglieder können BSG freigeben, sie zu sehen um sie zB aufzunehmen.';
-!/40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET character_set_client = @saved_cs_client */;
 --
 -- Table structure for table `b_mitglieder`
 --
 
 DROP TABLE IF EXISTS `b_mitglieder`;
-!/40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `b_mitglieder` ( 
   `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
@@ -162,7 +162,7 @@ CREATE TABLE `b_mitglieder` (
   CONSTRAINT `FK_b_mitglieder_b___an_aus__aktiv` FOREIGN KEY (`aktiv`) REFERENCES `b___an_aus` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `y_id` UNIQUE (`y_id`)
 )
-ENGINE = InnoDB;
+ENGINE = InnoDB AUTO_INCREMENT=100001;
 CREATE INDEX `FK_mitglieder_Mailbenachrichtigung` 
 ON `b_mitglieder` (
   `Mailbenachrichtigung` ASC
@@ -288,36 +288,7 @@ CREATE TABLE `b_sparte` (
 ) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Table structure for table `adm_log`
---
 
-DROP TABLE IF EXISTS `adm_log`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `adm_log` (
-  `ID` bigint NOT NULL UNSIGNED AUTO_INCREMENT,
-  `zeit` datetime DEFAULT CURRENT_TIMESTAMP,
-  `eintrag` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `adm_rollback`
---
-
-DROP TABLE IF EXISTS `adm_rollback`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `adm_rollback` (
-  `ID` bigint NOT NULL AUTO_INCREMENT,
-  `zeit` datetime DEFAULT CURRENT_TIMESTAMP,
-  `autor` varchar(200) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `eintrag` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=357 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `adm_issues`
@@ -329,8 +300,9 @@ DROP TABLE IF EXISTS `adm_issues`;
 CREATE TABLE `adm_issues` ( 
   `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
   `Prio` TINYINT UNSIGNED NULL,
-  `Kommentar` VARCHAR(100) NULL,
-  `Issue` VARCHAR(200) NULL,
+  `Kommentar` VARCHAR(2000) NULL,
+  `Issue` VARCHAR(2000) NULL,
+  `version` VARCHAR(50) NULL,
    PRIMARY KEY (`id`)
 )
 ENGINE = InnoDB;
@@ -554,15 +526,4 @@ CREATE INDEX `FK_medleliste_beitragszuordnungen`
 ON `b_meldeliste` (
   `Zuordnung` ASC
 );
-
-ALTER TABLE `b_mitglieder_in_sparten` ADD CONSTRAINT `Mitglied_in_Sparte` UNIQUE (`Sparte`, `Mitglied`);
-ALTER TABLE `b_bsg` CHANGE COLUMN `VKZ` `VKZ` VARCHAR(8) NULL;
-ALTER TABLE `adm_issues` ADD  `version` VARCHAR(50) NULL;
-ALTER TABLE `adm_issues` CHANGE COLUMN `Kommentar` `Kommentar` VARCHAR(2000) NULL;
-ALTER TABLE `adm_issues` CHANGE COLUMN `Issue` `Issue` VARCHAR(2000) NULL;
-ALTER TABLE `b_regionalverband` ADD  `Basisbeitrag` DECIMAL(10,2) NOT NULL DEFAULT 0.00 ;
-ALTER TABLE `b_sparte` ADD  `Spartenbeitrag` DECIMAL(10,2) NOT NULL DEFAULT 0.00 ;
-ALTER TABLE b_mitglieder AUTO_INCREMENT = 100001;
-
-
 

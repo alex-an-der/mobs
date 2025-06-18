@@ -52,7 +52,7 @@ ENGINE = InnoDB;
 
 - Auch yconf rausholen! Zumindest die dbconnect.
 
-- adm_log ist in FUDA eingebunden! Ich muss hier klar zwischen FUDA und MOBS unterscheiden! user_code oder nicht. Aber user_code darf nicht in FUDA eingebunden sein! TRENNEN (entweder user oder sys ... sys ginge ja auch). Vielleicht mach ich eine install.php? Das Log kann ich ins FUDA übernehmen, **aber ohne Nutzer-Bezug** (Angabe 'thomas@bsv.de')
+- sys_log ist in FUDA eingebunden! Ich muss hier klar zwischen FUDA und MOBS unterscheiden! user_code oder nicht. Aber user_code darf nicht in FUDA eingebunden sein! TRENNEN (entweder user oder sys ... sys ginge ja auch). Vielleicht mach ich eine install.php? Das Log kann ich ins FUDA übernehmen, **aber ohne Nutzer-Bezug** (Angabe 'thomas@bsv.de')
 
  
 ## In der Prod-DB einfügen und neue Version v0.1.9-qa.x
@@ -119,8 +119,8 @@ ALTER TABLE `b_mitglieder_in_sparten` DROP COLUMN `seit`;
 DROP TRIGGER IF EXISTS `update_stammmitglied_seit`;
 
 
-### ALTER TABLE `adm_log`
-ALTER TABLE `adm_log` CHANGE COLUMN `ID` `ID` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL;
+### ALTER TABLE `sys_log`
+ALTER TABLE `sys_log` CHANGE COLUMN `ID` `ID` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL;
 
 
 ### Trigger, um das Löschen der indiv. Berechtigung zu verhindern, wenn Mitglied noch eingeschrieben ist.
@@ -164,7 +164,31 @@ END //
 DELIMITER ;
 
 
+## adm_* => sys_*
+DROP TABLE IF EXISTS `adm__log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `sys_log` (
+  `ID` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `zeit` datetime DEFAULT CURRENT_TIMESTAMP,
+  `eintrag` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
+
+
+DROP TABLE IF EXISTS `adm__rollback`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `sys_rollback` (
+  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `zeit` datetime DEFAULT CURRENT_TIMESTAMP,
+  `autor` varchar(200) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `eintrag` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=357 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 
 
