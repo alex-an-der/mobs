@@ -1,3 +1,33 @@
+- [Registrierung](#registrierung)
+  - [Hinweis zu Regionalverbänden und Betriebssportgemeinschaften](#hinweis-zu-regionalverbänden-und-betriebssportgemeinschaften)
+  - [Erste Schritte](#erste-schritte)
+- [Grundlegende Bedienung](#grundlegende-bedienung)
+    - [Wahl Ansicht](#wahl-ansicht)
+    - [Informationsbereich](#informationsbereich)
+    - [Filteroptionen](#filteroptionen)
+      - [Tabellenfilter](#tabellenfilter)
+      - [Spaltenfilter](#spaltenfilter)
+        - [Beispiele für Zahlenfilter](#beispiele-für-zahlenfilter)
+        - [Beispiele für Datumsfilter](#beispiele-für-datumsfilter)
+    - [Schaltflächen](#schaltflächen)
+    - [Impressum und Datenschutzerklärung](#impressum-und-datenschutzerklärung)
+- [Ansichten für Mitglieder](#ansichten-für-mitglieder)
+  - [Übersicht](#übersicht)
+  - [Funktionsumfang](#funktionsumfang)
+    - [Meine Daten bearbeiten](#meine-daten-bearbeiten)
+    - [Meine Daten zur Bearbeitung freigeben](#meine-daten-zur-bearbeitung-freigeben)
+    - [Antrag zum Wechsel der Stamm-BSG](#antrag-zum-wechsel-der-stamm-bsg)
+    - [Lösche meine Daten](#lösche-meine-daten)
+- [Ansichten für BSG Organisatoren](#ansichten-für-bsg-organisatoren)
+  - [BSG-Stammdaten bearbeiten](#bsg-stammdaten-bearbeiten)
+  - [Stamm-Mitglieder aufnehmen](#stamm-mitglieder-aufnehmen)
+  - [Stamm-Mitglieder bearbeiten (kompakt)](#stamm-mitglieder-bearbeiten-kompakt)
+  - [Stamm-Mitglieder bearbeiten](#stamm-mitglieder-bearbeiten)
+  - [BSG-Mitglieder in Sparten anmelden](#bsg-mitglieder-in-sparten-anmelden)
+  - [Stamm-Mitglieder ohne Zugang eintragen](#stamm-mitglieder-ohne-zugang-eintragen)
+  - [Mitgliederkonten zusammenführen](#mitgliederkonten-zusammenführen)
+
+
 # Registrierung
 
 Solltest du noch keinen Zugang besitzen, klicke bitte auf der Startseite von 
@@ -128,9 +158,22 @@ verwalten und für Sparten anmelden kann. Damit eine BSG deine Daten verarbeiten
 Eine Berechtigung kannst du erst löschen, wenn du bei dieser BSG nicht mehr angemeldet bist - weder als Stamm-BSG, noch als BSG für eine Sparte.
 
 ### Antrag zum Wechsel der Stamm-BSG
-Möchtest du eine BSG wechseln, musst du dies hier initiieren. Bitte speche dich vorher mit den entsprechenden Organisatoren ab.
+Möchtest du eine BSG wechseln, musst du dies hier initiieren. Bitte speche dich vorher mit den entsprechenden Organisatoren ab. Trägst du hier eine BSG ein, wird automatisch dieser BSG das Bearbeitungsrecht deiner Daten eingeräumt. Dies geschieht, bevor du in dieser BSG aufgenommen wirst und wird nicht wieder automatisch entfernt. Kontrolliere daher bitte regelmäßig deine erteilten Berechtigungen.
 
 ### Lösche meine Daten
 Hier kannst du deine Daten unwiderbringlich aus dem System entfernen. Bedenke, dass deine Daten möglicherweise bis zum Beginn des übernächsten Jahres aufbewahrt werden müssen.
 
+# Ansichten für BSG Organisatoren
+Um das Recht zu erhalten, eine BSG im System zu verwalten, muss ein Berechtigter des Regionalverbandes dir dieses zuweisen.
 
+## BSG-Stammdaten bearbeiten
+Bitte vervollstänfige die Daten deiner BSG. Es muss eine Rechnungsadresse und ein registrierter Hauptansprechpartner hinterlegt werden. Hier kannst du diese Daten später auch anpassen.
+
+## Stamm-Mitglieder aufnehmen
+
+
+## Stamm-Mitglieder bearbeiten (kompakt)
+## Stamm-Mitglieder bearbeiten
+## BSG-Mitglieder in Sparten anmelden
+## Stamm-Mitglieder ohne Zugang eintragen
+## Mitgliederkonten zusammenführen
