@@ -575,6 +575,7 @@ FOR EACH ROW
 BEGIN
     DECLARE v_count_mitglieder_in_sparten INT;
     DECLARE v_count_mitglieder INT;
+    DECLARE v_count_wechselantrag INT;
     
     -- Prüfung 1: Ist das Mitglied noch über diese BSG in einer Sparte angemeldet?
     SELECT COUNT(*) INTO v_count_mitglieder_in_sparten
@@ -586,7 +587,12 @@ BEGIN
     FROM b_mitglieder
     WHERE id = OLD.Mitglied AND BSG = OLD.BSG;
     
-    -- Prüfung aller drei Fälle
+    -- Prüfung 3: Liegt ein Wechselantrag für dieses Mitglied zu dieser BSG vor?
+    SELECT COUNT(*) INTO v_count_wechselantrag
+    FROM b_bsg_wechselantrag
+    WHERE m_id = OLD.Mitglied AND Ziel_BSG = OLD.BSG;
+    
+    -- Prüfung aller Fälle
     IF v_count_mitglieder_in_sparten > 0 AND v_count_mitglieder > 0 THEN
         -- Fall 1: Mitglied ist sowohl in BSG als auch in Sparte
         SIGNAL SQLSTATE '45000' 
@@ -599,6 +605,10 @@ BEGIN
         -- Fall 3: Mitglied ist nur in BSG
         SIGNAL SQLSTATE '45000' 
         SET MESSAGE_TEXT = '_MITGLIEDINBSG_ Mitglied ist noch in dieser BSG angemeldet';
+    ELSEIF v_count_wechselantrag > 0 THEN
+        -- Fall 4: Wechselantrag liegt vor (eigenständiger Fall, keine Kombination)
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = '_WECHSELBSG_ Ein Wechselantrag zu dieser BSG liegt vor';
     END IF;
 END //
 

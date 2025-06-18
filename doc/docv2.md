@@ -21,8 +21,7 @@
 - [Ansichten für BSG Organisatoren](#ansichten-für-bsg-organisatoren)
   - [BSG-Stammdaten bearbeiten](#bsg-stammdaten-bearbeiten)
   - [Stamm-Mitglieder aufnehmen](#stamm-mitglieder-aufnehmen)
-  - [Stamm-Mitglieder bearbeiten (kompakt)](#stamm-mitglieder-bearbeiten-kompakt)
-  - [Stamm-Mitglieder bearbeiten](#stamm-mitglieder-bearbeiten)
+  - [Stamm-Mitglieder bearbeiten - kompakt und erweitert](#stamm-mitglieder-bearbeiten---kompakt-und-erweitert)
   - [BSG-Mitglieder in Sparten anmelden](#bsg-mitglieder-in-sparten-anmelden)
   - [Stamm-Mitglieder ohne Zugang eintragen](#stamm-mitglieder-ohne-zugang-eintragen)
   - [Mitgliederkonten zusammenführen](#mitgliederkonten-zusammenführen)
@@ -170,10 +169,12 @@ Um das Recht zu erhalten, eine BSG im System zu verwalten, muss ein Berechtigter
 Bitte vervollstänfige die Daten deiner BSG. Es muss eine Rechnungsadresse und ein registrierter Hauptansprechpartner hinterlegt werden. Hier kannst du diese Daten später auch anpassen.
 
 ## Stamm-Mitglieder aufnehmen
+Hier siehst du Mitglieder, die derne in eine von die verwaltete BSG möchten. Um ein Mitglied aufzunehmen, wähle in der Spalte *BSG* die entsprechende BSG. In der Spalte *will_nach* siehst du den angegebenen Wechselwunsch. Der Basisbeitrag wird im Allgemeinen von der BSG abgeführt, in der das Mitglied im Abrechnungsjahr zuerst war.
 
+## Stamm-Mitglieder bearbeiten - kompakt und erweitert
+Du hast auch die Möglichkeit, die Daten der Mitglieder deiner BSG zu bearbeiten.
+// DBI    LÖSCHEN VON MITGLIEDER ????
 
-## Stamm-Mitglieder bearbeiten (kompakt)
-## Stamm-Mitglieder bearbeiten
 ## BSG-Mitglieder in Sparten anmelden
 ## Stamm-Mitglieder ohne Zugang eintragen
 ## Mitgliederkonten zusammenführen
