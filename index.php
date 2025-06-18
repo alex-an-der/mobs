@@ -660,4 +660,21 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
     <script src="./index.js"></script>
     <script language="javascript" type="text/javascript" src="./user_includes/index_document_ready.js"></script>
 
+    <style>
+        /* Tabelle auf Fensterbreite limitieren und Zellenumbruch erzwingen */
+        .table-container {
+            max-width: 100vw;
+            overflow-x: auto;
+        }
+        table.table {
+            width: 100%;
+            max-width: 100vw;
+            table-layout: auto;
+        }
+        table.table th, table.table td {
+            word-break: break-word;
+            white-space: normal;
+        }
+    </style>
+
 </html>
