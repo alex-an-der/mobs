@@ -657,20 +657,56 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
     <script language="javascript" type="text/javascript" src="./user_includes/index_document_ready.js"></script>
 
     <style>
-        /* Tabelle auf Fensterbreite limitieren und Zellenumbruch erzwingen */
+        /* --- Responsive Tabellen-Logik (Tabelle darf scrollen, wenn nötig) --- */
         .table-container {
-            max-width: 100vw;
-            overflow-x: auto;
-        }
-        table.table {
             width: 100%;
             max-width: 100vw;
-            table-layout: auto;
+            overflow-x: auto;
+            padding: 0;
+            scrollbar-width: auto; /* normale Breite */
         }
-        table.table th, table.table td {
-            word-break: break-word;
-            white-space: normal;
+        .table-container::-webkit-scrollbar {
+            height: 16px; /* normale Breite */
+            background: #eee;
         }
+        .table-container::-webkit-scrollbar-thumb {
+            background: #bbb;
+            border-radius: 8px;
+            border: 4px solid #eee;
+        }
+        /* Verhindere doppelte Scrollbars */
+        body {
+            overflow-x: hidden;
+        }
+        /* ...existing code... */
     </style>
+
+    <script>
+        function setResponsiveTableStage() {
+    const container = document.querySelector('.table-container');
+    if (!container) return;
+    // Entferne alle Stufenklassen
+    container.classList.remove('table-responsive-stage1', 'table-responsive-stage2', 'table-responsive-stage3');
+    const table = container.querySelector('table');
+    if (!table) return;
+    // 1. Stufe: Fester Container, kein Umbruch
+    if (container.offsetWidth >= table.scrollWidth && window.innerWidth > 900) {
+        container.classList.add('table-responsive-stage1');
+    } 
+    // 2. Stufe: Fluid-Container, kein Umbruch
+    else if (window.innerWidth > 700) {
+        container.classList.add('table-responsive-stage2');
+    } 
+    // 3. Stufe: Fluid-Container, mit Umbruch
+    else {
+        container.classList.add('table-responsive-stage3');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    setResponsiveTableStage();
+    window.addEventListener('resize', setResponsiveTableStage);
+});
+    </script>
 
 </html>
