@@ -31,6 +31,7 @@ VALUES ('Tommy Manuell','Nocker',1,'1966-06-06','NeueMail@Nocker.de',3,'1966-06-
 
 
 
+                            
 
 
 
@@ -65,16 +66,21 @@ ALTER TABLE `b_mitglieder` ADD CONSTRAINT `FK_b_mitglieder_b___an_aus__aktiv` FO
 
 #### NULL verbieten:
 **Achtung - es dürfen keine NULL-Einträge gespeichert sein!**
+```
 ALTER TABLE `b_mitglieder` CHANGE COLUMN `BSG` `BSG` BIGINT UNSIGNED NOT NULL;
+```
 
 ### Bemerkungsfeld
+```
 ALTER TABLE `b_mitglieder` ADD  `Bemerkung` VARCHAR(1000) NULL;
+```
 
 ### Meldeliste
 Meldeliste nicht auf Mitglieder referenzieren, sondern Daten (Vn, Nn, Geb., MNr) direkt eintragen. Sonst kann niemend unterjährig gelöscht werden!
 (QS-open issues)
 
 #### Neue Tabelle
+```
 DROP TABLE IF EXISTS `b_meldeliste`;
 CREATE TABLE `b_meldeliste` ( 
   `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
@@ -95,23 +101,28 @@ CREATE INDEX `FK_medleliste_beitragszuordnungen`
 ON `b_meldeliste` (
   `Zuordnung` ASC
 );
+```
 
 #### DROP VIEWS
+```
 DROP VIEW `b_v_meldeliste_letztes_jahr`;
 DROP VIEW `b_v_meldeliste_dieses_jahr`;
-
+```
 
 ### Stammmitglied seit und seit entfernen
+```
 ALTER TABLE `b_mitglieder` DROP COLUMN `Stammmitglied_seit`;
 ALTER TABLE `b_mitglieder_in_sparten` DROP COLUMN `seit`;
 DROP TRIGGER IF EXISTS `update_stammmitglied_seit`;
 
-
+```
 ### ALTER TABLE `sys_log`
+```
 ALTER TABLE `sys_log` CHANGE COLUMN `ID` `ID` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL;
-
+```
 
 ### Trigger, um das Löschen der indiv. Berechtigung zu verhindern, wenn Mitglied noch eingeschrieben ist.
+```
 DROP TRIGGER IF EXISTS tr_before_delete_individuelle_berechtigungen;
 
 DELIMITER //
@@ -150,9 +161,10 @@ BEGIN
 END //
 
 DELIMITER ;
-
+```
 
 ## adm_* => sys_*
+```
 DROP TABLE IF EXISTS `adm__log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -177,9 +189,30 @@ CREATE TABLE `sys_rollback` (
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=357 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+```
 
+## BSG NULL zulassen, aber prüfen.
+```
+ALTER TABLE `b_mitglieder` CHANGE COLUMN `BSG` `BSG` BIGINT UNSIGNED NULL;
+```
 
+## Trigger in der prod nochmal komplett einlesen
+Hat ja keine AUswirkungen. Es wurde an vesch. Stellen adm_log zu sys_log geändert.
+Datei 03_trigger...sql
 
+## YPUM Verbessern
+```
+return $uid; 
+```
+im Usermanager nach dem Senden der Mail einfügen - ganz am Ende..natürlich
+
+Damit kann ich in register (user_code) das b_mitglied eintragen.
+
+Dann auch die alten first-login-trigger droppen
+```
+DROP TRIGGER IF EXISTS tr_user_insert_create_member;
+DROP TRIGGER IF EXISTS tr_user_first_login;
+```
 
 # ERLEDIGT (sollte eigentlich)
 

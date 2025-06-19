@@ -78,8 +78,8 @@ $anzuzeigendeDaten[] = array(
         "BSG" => "SELECT b.id, b.BSG as anzeige
         from b_bsg as b
         WHERE FIND_IN_SET(b.id, berechtigte_elemente($uid, 'BSG')) > 0
-        UNION ALL
-        SELECT 0 as id, 'Bitte wählen...' as anzeige
+        -- UNION ALL
+        -- SELECT 0 as id, 'Bitte wählen...' as anzeige
         ORDER BY id;
         ",
     ),

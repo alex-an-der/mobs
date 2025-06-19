@@ -5,7 +5,8 @@
 <meta name='viewport' content='width=device-width, initial-scale=1.0'>
 <title>Form-Vorlage</title>
 <?php 
-require_once(__DIR__.'/../yback/include/inc_main.php')
+require_once(__DIR__.'/../yback/include/inc_main.php');
+require_once(__DIR__."/../../config/db_connect.php");
 // register
 // ypum-Details
 // TRIGGER
@@ -33,6 +34,40 @@ require_once(__DIR__.'/../yback/include/inc_main.php')
             <div class='card'>
                 <div class='card-body'>
                     <form method='post'>
+
+                    
+                        <!-- New BSG Selection Section -->
+                        <div class='mb-3'>
+                            <label for='verband' class='form-label'><p>Welche Betriebssportgemeinschaft (BSG) darf deine Daten verarbeiten? Mit deiner Registrierung reichst du dort einen Aufnahmeantrag ein. Erst wenn du einer BGS zugewiesen bist, kannst du dich hier einloggen.</p>
+                            <p>Sollte dein Verband und/oder deine BSG noch fehlen, müssen diese zunächst eingerichtet werden.</p></label>
+                            
+                            <!-- Regional association dropdown -->
+                            <?php
+                            $verband_options = '';
+                            $query_verband = "SELECT id, Verband FROM b_regionalverband ORDER BY Verband";
+                            $result_verband = $db->query($query_verband);
+                            foreach ($result_verband['data'] as $row) {
+                                $selected = (isset($_POST['verband']) && $_POST['verband'] == $row['id']) ? 'selected' : '';
+                                $verband_options .= "<option value='".$row['id']."' $selected>".htmlspecialchars($row['Verband'])."</option>";
+                            }
+                            ?>
+                            <label for='verband' class='form-label'>Regionalverband</label><br>
+                            <select class='form-select mb-2' id='verband' name='verband' onchange="loadBSGs(this.value)">
+                                <option value='' disabled selected>Bitte wählen...</option>
+                                <?= $verband_options ?>
+                            </select>
+                            
+                            <!-- BSG dropdown, will be populated by JavaScript -->
+                            <label for='bsg' class='form-label'>Betriebssportgemeinschaft</label><br>
+                            <select required class='form-select' id='bsg' name='bsg'>
+                                <option value='' disabled selected>Bitte erst Regionalverband wählen...</option>
+                            </select>
+                        </div>
+
+
+
+
+
                         <div class='mb-3'>
                             <label for='mail' class='form-label'>Mailadresse</label>
                             <input required class='form-control' required type='email' id='mail' name='mail' value='<?= isset($_POST['mail']) ? $_POST['mail'] : '' ?>'/>
@@ -46,7 +81,7 @@ require_once(__DIR__.'/../yback/include/inc_main.php')
                             <input required class='form-control' type='text' id='nname' name='nname' value='<?= isset($_POST['nname']) ? $_POST['nname'] : '' ?>' />
                         </div>
                         <?php
-                        require_once(__DIR__."/../../config/db_connect.php");
+
                         $options = '';
                         $query = "SELECT id, auswahl FROM b___geschlecht";
                         $result = $db->query($query);
@@ -82,33 +117,6 @@ require_once(__DIR__.'/../yback/include/inc_main.php')
                             </select>
                         </div>
 
-                        <!-- New BSG Selection Section -->
-                        <div class='mb-3'>
-                            <label for='verband' class='form-label'>Welche Betriebssportgemeinschaft (BSG) darf deine Daten verarbeiten? Willst du die Berechtigungen erweitern, kannst du das jederzeit in der Tabelle <b>'Wer darf meine Daten sehen?'</b> einstellen. Ist deine BSG noch nicht in der Liste, wende dich bitte an die Spartenleitung - die BSG muss zuerst erstellt werden.</label>
-                            
-                            <!-- Regional association dropdown -->
-                            <?php
-                            $verband_options = '';
-                            $query_verband = "SELECT id, Verband FROM b_regionalverband ORDER BY Verband";
-                            $result_verband = $db->query($query_verband);
-                            foreach ($result_verband['data'] as $row) {
-                                $selected = (isset($_POST['verband']) && $_POST['verband'] == $row['id']) ? 'selected' : '';
-                                $verband_options .= "<option value='".$row['id']."' $selected>".htmlspecialchars($row['Verband'])."</option>";
-                            }
-                            ?>
-                            <label for='verband' class='form-label'>Regionalverband</label><br>
-                            <select class='form-select mb-2' id='verband' name='verband' onchange="loadBSGs(this.value)">
-                                <option value='' disabled selected>Bitte wählen...</option>
-                                <?= $verband_options ?>
-                            </select>
-                            
-                            <!-- BSG dropdown, will be populated by JavaScript -->
-                            <label for='bsg' class='form-label'>Betriebssportgemeinschaft</label><br>
-                            <select required class='form-select' id='bsg' name='bsg'>
-                                <option value='' disabled selected>Bitte erst Regionalverband wählen...</option>
-                            </select>
-                        </div>
-
                         <div class="form-check mb-3">
                             <input type="checkbox" class="form-check-input" id="datenschutz" name="datenschutz" required>
                             <label class="form-check-label" for="datenschutz">Ich habe die <a href="https://lbsv-nds.de/datenschutz/" target="_blank">Datenschutzerklärung</a> gelesen und bin damit einverstanden.</label>
@@ -117,6 +125,7 @@ require_once(__DIR__.'/../yback/include/inc_main.php')
                             <button type='submit' class='btn btn-success' name='saveandmail'>Speichern und Bestätigungsmail senden</button>
                             <a href='./login.php' class='btn btn-primary'>Abbrechen</a>
                         </div>
+
                     </form>
                 </div>
             </div>
@@ -214,8 +223,39 @@ if(isset($_POST['saveandmail'])){
             'bsg' => $bsg
         ]);
         
-        $usm->writeUserData($userData, false, true);
+        $uid = $usm->writeUserData($userData, false, true);
+        
+        // b_mitglieder-Eintrag mit BSG = NULL
+        $query = "INSERT INTO b_mitglieder (y_id, Mail, Vorname, Nachname, Geschlecht, Geburtsdatum, Mailbenachrichtigung, BSG)
+                VALUES (?, ?, ?, ?, ?, ?, ?, NULL)";
+        $args = [
+            $uid,
+            $userData['mail'],
+            $userData['vname'],
+            $userData['nname'],
+            $userData['geschlecht'],
+            $userData['gebdatum'],
+            $userData['okformail']
+        ];
+        $db->query($query, $args,0);
+
+        // Die neue Mitglieds-ID holen
+        $query = "SELECT id FROM b_mitglieder WHERE y_id = ?";
+        $res = $db->query($query, [$uid]);
+        $mid = $res['data'][0]['id']; 
+
+        // Individuelle Berechtigungen setzen
+        $query = "INSERT INTO b_individuelle_berechtigungen (Mitglied, BSG) VALUES (?, ?)";
+        $res = $db->query($query, [$mid, $bsg], 0);
+
+        // Wechselantrag anlegen
+        $query = "INSERT INTO b_bsg_wechselantrag (m_id, Ziel_BSG) VALUES (?, ?)";
+        $res = $db->query($query, [$mid, $bsg], 0);
+        
+
+
         $conf->redirect('registermail_sent.php');
+
     } catch(Exception $e) {
         echo('<b>Fehler! </b>'.$e->getMessage());
     }
