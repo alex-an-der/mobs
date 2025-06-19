@@ -16,30 +16,20 @@ Beides in Kombination: Alex darf die Daten von Martin sehen und das funktioniert
 INSERT INTO b_mitglieder (Vorname,Nachname,BSG,Stammmitglied_seit,Mail,Geschlecht,Geburtsdatum,aktiv) 
 VALUES ('Tommy Manuell','Nocker',1,'1966-06-06','NeueMail@Nocker.de',3,'1966-06-06',1);
 
+# Offene Sofort-Issues
 
-# Rechnungserstellung
-- Rechnungserzeugung? PDF??
-- Rechnungen können in der Cloud abgelegt werden - Link kann gespeichert werden
+## LÖSCHEN VON MITGLIEDER ????   
+=> Auf RV-Ebene: Liste zeigen, MG entfernen?
 
-# FUDA Framework-Ideen
-Fehlermeldungen in eines sys_errormsg - Tabelle sammeln und dort einen Anzeigetext hinterlegen lassen.
-Beispiel: unique-constraint "Spieler_Sparte" verletzt => Fehler: Der SPieler ist dieser Sparte bereits zugewiesen.
+## Registrieren melder direkt in BSG? Besser: ANtrag und dann aufnehmen und erst dann LogIn möglich
+1. Antrag stellen
+2. Beim LogIn:
+     - Wie bisher in b_mitglieder aufnehmen (wie ist das jetzt?)
+     -  Aber BSG nicht automatisch übertragen
+     -  Generelle Abfrage: BSG IS NULL -> Kein LogIn
+     -  SQL: NOT NULL wieder rausnehmen
 
-## Query für FUDA - nicht user_code, sondern FUDA-core!
-DROP TABLE IF EXISTS `sys_error_manager`;
-CREATE TABLE `sys_error_manager` ( 
-  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
-  `error_log_id` BIGINT UNSIGNED NULL,
-  `raw_message` VARCHAR(500) NOT NULL,
-  `sql_error_code` INT UNSIGNED NULL,
-  `description` VARCHAR(1000) NULL,
-  `user_message` VARCHAR(500) NULL,
-  `source` VARCHAR(100) NULL,
-  `add_fulltext_constraint` VARCHAR(50) NULL,
-  PRIMARY KEY (`id`),
-  CONSTRAINT `unique_code_plus_text` UNIQUE (`sql_error_code`, `add_fulltext_constraint`)
-) 
-ENGINE = InnoDB;
+
 
 
 
@@ -52,10 +42,8 @@ ENGINE = InnoDB;
 
 - Auch yconf rausholen! Zumindest die dbconnect.
 
-- sys_log ist in FUDA eingebunden! Ich muss hier klar zwischen FUDA und MOBS unterscheiden! user_code oder nicht. Aber user_code darf nicht in FUDA eingebunden sein! TRENNEN (entweder user oder sys ... sys ginge ja auch). Vielleicht mach ich eine install.php? Das Log kann ich ins FUDA übernehmen, **aber ohne Nutzer-Bezug** (Angabe 'thomas@bsv.de')
-
  
-## In der Prod-DB einfügen und neue Version v0.1.9-qa.x
+# In der Prod-DB einfügen und neue Version v0.1.9-qa.x
 
 ### b_mitglieder.BSG: NULL -> NOT NULL  (nicht mehr nullable).
 Dazu müssen zuerst die FK angepasst werden. Wenn rollback, dann muss das auch wieder geradegezogen werden:
@@ -193,7 +181,7 @@ CREATE TABLE `sys_rollback` (
 
 
 
-## ERLEDIGT (sollte eigentlich)
+# ERLEDIGT (sollte eigentlich)
 
 ```
 
@@ -257,28 +245,6 @@ WHERE TABLE_SCHEMA = 'MOBS_local_DEV';
 
 
 
-SONNTAG
-- Ansicht der b_v - Views einbauen (ACHTUNG - Leserechte beachten! Ebene Regionalverband (aber Achtung - was ist,
- wenn Mitglied wechselt? Es müsste immer
-die zahlungspflichtige BSG sein - aber was ist, wenn NULL und wie kann das überhaupt passieren?
-Wie ist es JETZT geregelt?
-LÖSUNG: Keine BSG = kein Basisbeitrag, aber auch keine Sparten möglich -> passt
-
-
-- Alle DB-Operationen (hier) bei der prod $ QS-DB machen
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 select DATE_FORMAT(Timestamp, '%d.%m.%y') AS Erfasst_am, ml.Mitglied, ml.BSG, bz.Zweck, rv.Verband as Empfänger
 from b_meldeliste as ml
@@ -295,3 +261,30 @@ WHERE bz.id = 2;
 select * from b_regionalverband;
 
 truncate TABLE b_meldeliste;
+
+
+
+
+
+
+## FUDA Framework-Ideen
+Fehlermeldungen in eines sys_errormsg - Tabelle sammeln und dort einen Anzeigetext hinterlegen lassen.
+Beispiel: unique-constraint "Spieler_Sparte" verletzt => Fehler: Der SPieler ist dieser Sparte bereits zugewiesen.
+
+
+## Query für FUDA - nicht user_code, sondern FUDA-core! (jetzt in  config/install.sql)
+DROP TABLE IF EXISTS `sys_error_manager`;
+CREATE TABLE `sys_error_manager` ( 
+  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `error_log_id` BIGINT UNSIGNED NULL,
+  `raw_message` VARCHAR(500) NOT NULL,
+  `sql_error_code` INT UNSIGNED NULL,
+  `description` VARCHAR(1000) NULL,
+  `user_message` VARCHAR(500) NULL,
+  `source` VARCHAR(100) NULL,
+  `add_fulltext_constraint` VARCHAR(50) NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `unique_code_plus_text` UNIQUE (`sql_error_code`, `add_fulltext_constraint`)
+) 
+ENGINE = InnoDB;
+

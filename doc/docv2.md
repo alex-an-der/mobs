@@ -173,7 +173,6 @@ Hier siehst du Mitglieder, die derne in eine von die verwaltete BSG möchten. Um
 
 ## Stamm-Mitglieder bearbeiten - kompakt und erweitert
 Du hast auch die Möglichkeit, die Daten der Mitglieder deiner BSG zu bearbeiten.
-// DBI    LÖSCHEN VON MITGLIEDER ????
 
 ## BSG-Mitglieder in Sparten anmelden
 ## Stamm-Mitglieder ohne Zugang eintragen
