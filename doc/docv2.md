@@ -235,4 +235,13 @@ LOP:
 ### Stamm BSG
 ## Eine BSG neu Einrichten
 
+LOP2:
+Doku für Systemadmin:
+- config.php (inkl. info: und ajax:)
+- sys-tables
+- cronjobs
+- ypum (lock-Backdoor über Konsole)
+- user_code
+- user-includes
+
 

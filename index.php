@@ -1,7 +1,9 @@
 <?php // Ganz oben wegen session_start(). Auch kein <!DOCTYPE html> vorher!
+ob_start();
 require_once(__DIR__ . "/user_includes/all.head.php");
 require_once(__DIR__ . "/user_includes/index.head.php");
 require_once(__DIR__ . "/inc/include.php");
+ob_clean();
 ?>
 <!DOCTYPE html>
 <html lang="de">

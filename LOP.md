@@ -22,6 +22,9 @@ VALUES ('Tommy Manuell','Nocker',1,'1966-06-06','NeueMail@Nocker.de',3,'1966-06-
 
 
 ## Nächste Schritte
+Bitte prüfe, ob die ob_clean();-Anweisung im ajax richtig ist, oder ob die Ausgaben dann an den Browser gesammelt gesendet werden sollen?
+ob_clean LÖSCHT den Output-Buffer. Was wird da gelöscht? Funktioniert ypum dann noch? Scanne code nach ob_clean, ob das woanders (wahrscheinlich!) auch genutzt wird - gleiche Fragestellung.
+
 ### Sicherheit!
 - **ACHTUNG ## Den Meldelisteneintrag schützen (aus dem docRoot raus). Das darf nicht vor dem 15.2. ausgelöst werden und kann auch für DoS genutzt werden. ## ACHTUNG**
 
