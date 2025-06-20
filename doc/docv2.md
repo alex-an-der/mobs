@@ -12,12 +12,10 @@
         - [Beispiele für Datumsfilter](#beispiele-für-datumsfilter)
     - [Impressum und Datenschutzerklärung](#impressum-und-datenschutzerklärung)
 - [Ansichten für Mitglieder](#ansichten-für-mitglieder)
-  - [Übersicht](#übersicht)
-  - [Funktionsumfang](#funktionsumfang)
-    - [Meine Daten bearbeiten](#meine-daten-bearbeiten)
-    - [Meine Daten zur Bearbeitung freigeben](#meine-daten-zur-bearbeitung-freigeben)
-    - [Antrag zum Wechsel der Stamm-BSG](#antrag-zum-wechsel-der-stamm-bsg)
-    - [Lösche meine Daten](#lösche-meine-daten)
+  - [Meine Daten bearbeiten](#meine-daten-bearbeiten)
+  - [Meine Daten zur Bearbeitung freigeben](#meine-daten-zur-bearbeitung-freigeben)
+  - [Antrag zum Wechsel der Stamm-BSG](#antrag-zum-wechsel-der-stamm-bsg)
+  - [Lösche meine Daten](#lösche-meine-daten)
 - [Ansichten für BSG Organisatoren](#ansichten-für-bsg-organisatoren)
   - [BSG-Stammdaten bearbeiten](#bsg-stammdaten-bearbeiten)
   - [Stamm-Mitglieder aufnehmen](#stamm-mitglieder-aufnehmen)
@@ -34,6 +32,7 @@
   - [Wechsel der BSG](#wechsel-der-bsg)
     - [für eine Sparte](#für-eine-sparte)
     - [Stamm BSG](#stamm-bsg)
+  - [Eine BSG neu Einrichten](#eine-bsg-neu-einrichten)
 
 
 # Registrierung
@@ -133,16 +132,12 @@ für weitere rechtliche Informationen.
 
 # Ansichten für Mitglieder
 
-## Übersicht
-
 Die Rolle "Mitglied" stellt die grundlegende Benutzerebene in unserem System dar. 
 Jeder registrierte Nutzer erhält automatisch die Berechtigungen dieser Rolle, ohne 
 dass zusätzliche Aktivierungen erforderlich sind. Die Mitgliedsrolle bietet Zugang 
 zu allen persönlichen Basisfunktionen und -einstellungen.
 
-## Funktionsumfang
-
-### Meine Daten bearbeiten
+## Meine Daten bearbeiten
 In diesem Bereich kannst du deine persönlichen Informationen einsehen und 
 aktualisieren. Die folgenden Daten werden angezeigt und können bearbeitet werden:
 
@@ -158,17 +153,17 @@ aktualisieren. Die folgenden Daten werden angezeigt und können bearbeitet werde
 Die Daten werden in einer übersichtlichen Tabellenform dargestellt und können nach 
 Bedarf aktualisiert werden.
 
-### Meine Daten zur Bearbeitung freigeben
+## Meine Daten zur Bearbeitung freigeben
 In diesem Bereich wird angezeigt, welche Betriebssportgruppen (BSG) Zugriff auf deine 
 persönlichen Daten haben. Diese Dateneinsicht ist notwendig, damit die BSG dich 
 verwalten und für Sparten anmelden kann. Damit eine BSG deine Daten verarbeiten kann, musst du diese hier zunächst freigeben. Dies geschieht, indem du auf *Einfügen* klickst und damit eine neue Datenzeile mit den entsprechenden Daten hinzugügst.
 
 Eine Berechtigung kannst du erst löschen, wenn du bei dieser BSG nicht mehr angemeldet bist - weder als Stamm-BSG, noch als BSG für eine Sparte.
 
-### Antrag zum Wechsel der Stamm-BSG
+## Antrag zum Wechsel der Stamm-BSG
 Möchtest du eine BSG wechseln, musst du dies hier initiieren. Bitte speche dich vorher mit den entsprechenden Organisatoren ab. Trägst du hier eine BSG ein, wird automatisch dieser BSG das Bearbeitungsrecht deiner Daten eingeräumt. Dies geschieht, bevor du in dieser BSG aufgenommen wirst und wird nicht wieder automatisch entfernt. Kontrolliere daher bitte regelmäßig deine erteilten Berechtigungen.
 
-### Lösche meine Daten
+## Lösche meine Daten
 Hier kannst du deine Daten unwiderbringlich aus dem System entfernen. Bedenke, dass deine Daten möglicherweise bis zum Beginn des übernächsten Jahres aufbewahrt werden müssen.
 
 # Ansichten für BSG Organisatoren
@@ -204,9 +199,27 @@ Im **Ausnahmefall** ist es möglich, Mitglieder aufzunehmen, die sich noch nicht
 - Sowohl der Import von Daten, als auch die Zusammenführung von Datensätzen ist sehr fehleranfällig, insbesondere auf der Seite des Anwenders. Alle Eingaben sind sorgfältigst zu prüfen - vor und nach dem Import oder Zusammenführung. MOBS24 hat nur sehr bedingte Möglichkeiten von Plausibilitätsprüfungen. 
 
 ### Stamm-Mitglieder ohne Zugang eintragen
-Einzelne Mitglieder können über *Einfügen* hinzugefügt werden. Mehrere Mitglieder (auch mehrere hundert) können über die Importfunktion eingelesen werden.
+Einzelne Mitglieder können über *Einfügen* hinzugefügt werden. Mehrere Mitglieder (auch mehrere hundert) können über die Importfunktion eingelesen werden.Näheres zur Importfunktion ist [im Anhang](#import) beschrieben.
 
 ### Mitgliederkonten zusammenführen
+Ist ein Mitglied [manuell](#stamm-mitglieder-ohne-zugang-eintragen) angelegt worden und hat sich das selbe Mitglied auch [registriert](#registrierung), müssen beide Konten zusammengefügt werden. Solange dies nicht geschieht gibt es folgende Einschränkungen:
+
+- Das Mitglied ist doppelt in einer (oder mehreren) Stamm-BSG geführt und wird auch entsprechend abgerechnet
+- Beide Konten des selben Mitglieds werden unabhängig voneinander in Sparten angemeldet
+- Doppelanmeldungen in Sparten sind möglich, da die Konten für das System wie zwei unterschiedliche Mitglieder geführt werden
+- Ein nachträgliches Zusammenführen ist mit hohem manuellen Aufwand verbunden.
+
+Es wird daher empfolen, die Konten **möglichst zeitnah** zusammen zu führen. In der ausgewählten Ansicht werden nur jene Mitglieder aufgeführt, die
+
+- von dir gesehen werden dürfen (s. [*Meine Daten zur Bearbeitung freigeben*](#meine-daten-zur-bearbeitung-freigeben)) und
+- einen 'Partner-Datensatz' mit identischem Geburtsdatum haben
+
+Nach der Zusammenführung werden vom registriertem Konto die Mailadresse und das Passwort übernommen. Der Rest (**Stamm-BSG**, **Sparten**, etc.) werden vom **unregistrierten/manuellen** Konto übernommen.
+
+Das registrierte Konto hat in der Spalte **y_id** eine Zahl stehen - die ID im Log-In-System. Um ein registriertes Konto (mit y_id) mit einem manuell angelegtem konto (keine y_id) zusammenzuführen, muss die y_id des einen Kontos in das freie Feld des anderen Kontos eingetragen werden. Danach neu laden und die Datensätze verschwinden aus der Ansicht, wenn nicht ein weiteres Konto mit dem gleichen Geburtsdatum gibt.
+
+**Neben der Überprüfung der Geburtsdaten gibt es systemseitig keine weitere Validierung! Diese Funktion daher bitte mit großer Sorgfalt nutzen. Es wird empfolen, diesen Vorgang nicht am Handy, sondern am PC zu erledigen.** 
+
 
 
 
@@ -220,5 +233,6 @@ LOP:
 ## Wechsel der BSG 
 ### für eine Sparte
 ### Stamm BSG
+## Eine BSG neu Einrichten
 
 
