@@ -2,14 +2,14 @@
   - [Hinweis zu Regionalverbänden und Betriebssportgemeinschaften](#hinweis-zu-regionalverbänden-und-betriebssportgemeinschaften)
   - [Erste Schritte](#erste-schritte)
 - [Grundlegende Bedienung](#grundlegende-bedienung)
-    - [Wahl Ansicht](#wahl-ansicht)
+    - [Auswahl der Ansicht](#auswahl-der-ansicht)
     - [Informationsbereich](#informationsbereich)
     - [Filteroptionen](#filteroptionen)
       - [Tabellenfilter](#tabellenfilter)
+    - [Schaltflächen](#schaltflächen)
       - [Spaltenfilter](#spaltenfilter)
         - [Beispiele für Zahlenfilter](#beispiele-für-zahlenfilter)
         - [Beispiele für Datumsfilter](#beispiele-für-datumsfilter)
-    - [Schaltflächen](#schaltflächen)
     - [Impressum und Datenschutzerklärung](#impressum-und-datenschutzerklärung)
 - [Ansichten für Mitglieder](#ansichten-für-mitglieder)
   - [Übersicht](#übersicht)
@@ -23,8 +23,17 @@
   - [Stamm-Mitglieder aufnehmen](#stamm-mitglieder-aufnehmen)
   - [Stamm-Mitglieder bearbeiten - kompakt und erweitert](#stamm-mitglieder-bearbeiten---kompakt-und-erweitert)
   - [BSG-Mitglieder in Sparten anmelden](#bsg-mitglieder-in-sparten-anmelden)
-  - [Stamm-Mitglieder ohne Zugang eintragen](#stamm-mitglieder-ohne-zugang-eintragen)
-  - [Mitgliederkonten zusammenführen](#mitgliederkonten-zusammenführen)
+  - [Mitgliede ohne Registrierung](#mitgliede-ohne-registrierung)
+    - [Stamm-Mitglieder ohne Zugang eintragen](#stamm-mitglieder-ohne-zugang-eintragen)
+    - [Mitgliederkonten zusammenführen](#mitgliederkonten-zusammenführen)
+- [Workflows (ggf. mit Hintergründe) / grafisch?](#workflows-ggf-mit-hintergründe--grafisch)
+  - [Registrieren / inkl. BSG-Sicht bis zur AUfnahme in die Stamm-BSG](#registrieren--inkl-bsg-sicht-bis-zur-aufnahme-in-die-stamm-bsg)
+  - [Meldeliste](#meldeliste)
+  - [Spartenanmeldung](#spartenanmeldung)
+  - [Import](#import)
+  - [Wechsel der BSG](#wechsel-der-bsg)
+    - [für eine Sparte](#für-eine-sparte)
+    - [Stamm BSG](#stamm-bsg)
 
 
 # Registrierung
@@ -57,7 +66,7 @@ Nach der Registrierung empfehlen wir:
 
 # Grundlegende Bedienung
 
-### Wahl Ansicht
+### Auswahl der Ansicht
 
 In der ersen Zeile kannst du die gewünschte Ansicht wählen. Je nach deiner Rolle und deinen Berechtigungen stehen die verschiedene Ansichten zur Verfügung.
 
@@ -69,6 +78,18 @@ Im blauen Infobereich erhältst du wichtige Hinweise zur aktuellen Ansich.
 
 #### Tabellenfilter
 Um Begriffe in der gesamten Tabelle zu finden, kannst du den Tabellenfilter über den Schaltflächen verwenden. Die Treffer werden in der Tabelle markiert. Du kannst auch mit der **rechten Maustaste** auf eine Tabellenzelle klicken und der Inhalt dieser Zelle wird in den Tabellenfilter übernommen.
+
+### Schaltflächen
+
+Was eine Datenzeile ist, ergibt sich aus dem Kontext der Ansicht. Werden Mitglieder in Sparten angemeldet, ist ein Datenzeile die Anmeldung des Mitglieds. Werden Mitglieder einer BSG gelistet ist ein Datenzeile das einzelne Mitglied. 
+
+Folgende Aktionen stehen dir mit den Schaltflächen zur Verfügung:
+- **Neu laden**: Aktualisiert die Tabelle
+- **Einfügen**: Fügt eine neue Datenzeile hinzu
+- **Ausgewählte löschen**: Entfernt alle markierten Datenzeilen
+- **Dubletten suchen**: Identifiziert doppelte Einträge. Hier weden aber tatsächlich nur komplett übereinstimmende Einträge gefunden.
+- **Daten importieren**: Ermöglicht das Importieren von Datenzeilen im CSV-Format. Für Details siehe bitte die [Import-Beschreibung im Anhang](#import).
+- **Exportieren**: Öffnet ein Menü mit verschiedenen Exportformaten
 
 #### Spaltenfilter
 Über jeder Spalte befindet sich ein weiteres Filterfeld. Der dortige Eintrag wird dann nur in der entsprechenden Spalte gesucht. Neben dem Textfilter gibt es auch Zahlen- und Datumsfilter, die dann aktiviert werden, wenn entsprechende Inhalte erkannt werden. Dort gibt es dann weitere Filteroptionen:
@@ -102,18 +123,6 @@ Auch komplette Daten folgen diesem Muster:
 >=1.7.2026
 ...
 ``` 
-
-### Schaltflächen
-
-Was eine Datenzeile ist, ergibt sich aus dem Kontext der Ansicht. Werden Mitglieder in Sparten angemeldet, ist ein Datenzeile die Anmeldung des Mitglieds. Werden Mitglieder einer BSG gelistet ist ein Datenzeile das einzelne Mitglied. 
-
-Folgende Aktionen stehen dir mit den Schaltflächen zur Verfügung:
-- **Neu laden**: Aktualisiert die Tabelle
-- **Einfügen**: Fügt eine neue Datenzeile hinzu
-- **Ausgewählte löschen**: Entfernt alle markierten Datenzeilen
-- **Dubletten suchen**: Identifiziert doppelte Einträge. Hier weden aber tatsächlich nur komplett übereinstimmende Einträge gefunden.
-- **Daten importieren**: Ermöglicht das Importieren von Datenzeilen im CSV-Format
-- **Exportieren**: Öffnet ein Menü mit verschiedenen Exportformaten
 
 
 ### Impressum und Datenschutzerklärung
@@ -172,8 +181,44 @@ Bitte vervollstänfige die Daten deiner BSG. Es muss eine Rechnungsadresse und e
 Hier siehst du Mitglieder, die derne in eine von die verwaltete BSG möchten. Um ein Mitglied aufzunehmen, wähle in der Spalte *BSG* die entsprechende BSG. In der Spalte *will_nach* siehst du den angegebenen Wechselwunsch. Der Basisbeitrag wird im Allgemeinen von der BSG abgeführt, in der das Mitglied im Abrechnungsjahr zuerst war.
 
 ## Stamm-Mitglieder bearbeiten - kompakt und erweitert
-Du hast auch die Möglichkeit, die Daten der Mitglieder deiner BSG zu bearbeiten.
+Neben den Mitgliedern selbst, hat auch der BSG-Verantwortliche die Möglichkeit, die Daten der Mitglieder der jeweiligen BSG zu bearbeiten. Das Kommentarfeld sowie die Angabe, ob aktiv ohder nicht sind Felder, die nur innerhalb deiner BSG relevant sind und du daher frei belegen kannst. Die Mitgliedschaft in einer BSG ist nur die Grundvorraussetzung, um an einer Sportart bzw. in einer Sparte teilnehmen zu können. Um dies zu tun, musst du deine Mitglieder in einer oder mehreren Sparten anmelden. Bitte beachte: Ein Mitglied kann auch Stammmitglied einer anderen BSG sein und trotzdem für deine BSG in einer Sparte angemeldet werden. Näheres dazu findest du im Kapitel *BSG-Mitglieder in Sparten anmelden*.
 
 ## BSG-Mitglieder in Sparten anmelden
-## Stamm-Mitglieder ohne Zugang eintragen
-## Mitgliederkonten zusammenführen
+Damit du ein Mitglied in einer Sparte anmelden kannst, müssen folgende Voraussetzungen erfüllt sein:  
+
+Das Mitglied...  
+- ... muss in einer (beliebigen) Stamm-BSG gemeldet sein.  
+- ... muss deiner BSG die Bearbeitungsrechte seiner Daten geben (siehe *Meine Daten zur Bearbeitung freigeben*)
+- ... darf in dieser Sparte noch nicht gemeldet sein
+  
+Vorhandene Datenzeilen können nicht modifiziert werden. Es können nur komplette Datenzeilen gelöscht (Abmeldung) oder eingefügt (Anmeldung) werden. Eine Anmeldung führt immer den jeweiligen Spartenbeitrag für das laufende Jahr nach sich, auch wenn das Mitglied unterjährig wieder abgemeldet wird. 
+
+Bitte beachte, dass nicht alle spartenspezifischen Voraussetzungen in diesem System abgebildet sind, z.B. wenn eine Sparte nur Anmeldungen vor einem Stichtag entgegennimmt oder wenn bestimmte Zusatzvoraussetzungen notwendig sind. Bitte wende dich im Zweifelsfall an die jeweilige Spartenleitung.
+
+## Mitgliede ohne Registrierung
+Im **Ausnahmefall** ist es möglich, Mitglieder aufzunehmen, die sich noch nicht registriert haben. Dies sollte nur als letzte Lösung genutzt werden und soll nur den Übergang vom alten System zu MOBS24 in speziellen Fällen erleichtern. Bitte beachte folgende Punkte:
+
+- Für Mitglieder ohne Registrierung übernimmt das Mitglied, welches die Daten importiert, die Verantwortung, dass die jeweiligen eingespielten Personen der Datenverarbeitung zustimmen.
+- Eine eigene Registrierung ist weiterhin möglich. Diese soll auch angestrebt werden.
+- Sollten das Mitglied sowohl registriert, als auch unregistriert eingetragen sein, kann das System dies nicht selbständig erkennen. Daher müssen diese beiden Datensätze so schnell wie möglich zusammengeführt werden, um eine doppelte Buchführung zu vermeiden.
+- Sowohl der Import von Daten, als auch die Zusammenführung von Datensätzen ist sehr fehleranfällig, insbesondere auf der Seite des Anwenders. Alle Eingaben sind sorgfältigst zu prüfen - vor und nach dem Import oder Zusammenführung. MOBS24 hat nur sehr bedingte Möglichkeiten von Plausibilitätsprüfungen. 
+
+### Stamm-Mitglieder ohne Zugang eintragen
+Einzelne Mitglieder können über *Einfügen* hinzugefügt werden. Mehrere Mitglieder (auch mehrere hundert) können über die Importfunktion eingelesen werden.
+
+### Mitgliederkonten zusammenführen
+
+
+
+LOP:
+# Workflows (ggf. mit Hintergründe) / grafisch?
+## Registrieren / inkl. BSG-Sicht bis zur AUfnahme in die Stamm-BSG
+
+## Meldeliste
+## Spartenanmeldung
+## Import
+## Wechsel der BSG 
+### für eine Sparte
+### Stamm BSG
+
+
