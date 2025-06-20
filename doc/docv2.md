@@ -24,6 +24,7 @@
   - [Mitgliede ohne Registrierung](#mitgliede-ohne-registrierung)
     - [Stamm-Mitglieder ohne Zugang eintragen](#stamm-mitglieder-ohne-zugang-eintragen)
     - [Mitgliederkonten zusammenführen](#mitgliederkonten-zusammenführen)
+- [Ansichten für Mitarbeiter im Regionalverband](#ansichten-für-mitarbeiter-im-regionalverband)
 - [Workflows (ggf. mit Hintergründe) / grafisch?](#workflows-ggf-mit-hintergründe--grafisch)
   - [Registrieren / inkl. BSG-Sicht bis zur AUfnahme in die Stamm-BSG](#registrieren--inkl-bsg-sicht-bis-zur-aufnahme-in-die-stamm-bsg)
   - [Meldeliste](#meldeliste)
@@ -169,6 +170,16 @@ Hier kannst du deine Daten unwiderbringlich aus dem System entfernen. Bedenke, d
 # Ansichten für BSG Organisatoren
 Um das Recht zu erhalten, eine BSG im System zu verwalten, muss ein Berechtigter des Regionalverbandes dir dieses zuweisen.
 
+Mit dieser Berechtigung kannst du innerhalb deiner BSG (nachdem diese vom Regionalverband angelegt wurde):
+
+- Die Stammdaten der BSG anlegen und ändern (Ansprechpartner, Rechnungsdaten)
+- Registrierte Mitglieder aufnehmen
+- Die Mitgliederdaten deiner Stammmitglieder ändern
+- Mitglieder in Sparten an- und abmelden  
+- Mitgliederdaten manuell importieren oder anlegen
+
+Du kannst auch für mehrere BSG verantwortlich sein.
+
 ## BSG-Stammdaten bearbeiten
 Bitte vervollstänfige die Daten deiner BSG. Es muss eine Rechnungsadresse und ein registrierter Hauptansprechpartner hinterlegt werden. Hier kannst du diese Daten später auch anpassen.
 
@@ -219,6 +230,16 @@ Nach der Zusammenführung werden vom registriertem Konto die Mailadresse und das
 Das registrierte Konto hat in der Spalte **y_id** eine Zahl stehen - die ID im Log-In-System. Um ein registriertes Konto (mit y_id) mit einem manuell angelegtem konto (keine y_id) zusammenzuführen, muss die y_id des einen Kontos in das freie Feld des anderen Kontos eingetragen werden. Danach neu laden und die Datensätze verschwinden aus der Ansicht, wenn nicht ein weiteres Konto mit dem gleichen Geburtsdatum gibt.
 
 **Neben der Überprüfung der Geburtsdaten gibt es systemseitig keine weitere Validierung! Diese Funktion daher bitte mit großer Sorgfalt nutzen. Es wird empfolen, diesen Vorgang nicht am Handy, sondern am PC zu erledigen.** 
+
+# Ansichten für Mitarbeiter im Regionalverband
+Um das Recht zu erhalten, den Regionalverband zu verwalten, muss ein Berechtigter des Landesverbandes dir dieses zuweisen.
+
+Mit dieser Berechtigung kannst du innerhalb deines Regionalverbandes (nachdem dieser vom Landesverband angelegt wurde):
+
+- Betriebssportgemeinschaften (BSG) anlegen
+
+
+
 
 
 
