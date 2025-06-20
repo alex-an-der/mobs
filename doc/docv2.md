@@ -25,6 +25,8 @@
     - [Stamm-Mitglieder ohne Zugang eintragen](#stamm-mitglieder-ohne-zugang-eintragen)
     - [Mitgliederkonten zusammenführen](#mitgliederkonten-zusammenführen)
 - [Ansichten für Mitarbeiter im Regionalverband](#ansichten-für-mitarbeiter-im-regionalverband)
+    - [Umstellung RV-Admin auf Frontend](#umstellung-rv-admin-auf-frontend)
+    - [](#)
 - [Workflows (ggf. mit Hintergründe) / grafisch?](#workflows-ggf-mit-hintergründe--grafisch)
   - [Registrieren / inkl. BSG-Sicht bis zur AUfnahme in die Stamm-BSG](#registrieren--inkl-bsg-sicht-bis-zur-aufnahme-in-die-stamm-bsg)
   - [Meldeliste](#meldeliste)
@@ -239,7 +241,14 @@ Mit dieser Berechtigung kannst du innerhalb deines Regionalverbandes (nachdem di
 - Betriebssportgemeinschaften (BSG) anlegen
 
 
+### Umstellung RV-Admin auf Frontend
+ALTER TABLE `b_regionalverband_rechte` ADD  `erweiterte_Rechte` TINYINT UNSIGNED NULL DEFAULT 1 ;
+ALTER TABLE `b_regionalverband_rechte` ADD CONSTRAINT `FK_verbandrechte_an_aus` FOREIGN KEY (`erweiterte_Rechte`) REFERENCES `b___an_aus` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
 
+
+
+
+###
 
 
 
