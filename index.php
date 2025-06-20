@@ -3,7 +3,7 @@ ob_start();
 require_once(__DIR__ . "/user_includes/all.head.php");
 require_once(__DIR__ . "/user_includes/index.head.php");
 require_once(__DIR__ . "/inc/include.php");
-ob_clean();
+ob_end_flush();
 ?>
 <!DOCTYPE html>
 <html lang="de">
