@@ -16,7 +16,7 @@ from
 
 DROP VIEW IF EXISTS `y_v_userdata`;
 CREATE VIEW `y_v_userdata` AS
-(select
+select
   distinct `t_uid`.`userID` AS `userID`,
   `y_user`.`mail` AS `mail`,
   `t_bsg`.`fieldvalue` AS `bsg`,
@@ -138,6 +138,6 @@ from
   )
 where
   (`y_user`.`locked` = 0)
-)
+
 
 -- ----------------------------------------------------------------------------------------

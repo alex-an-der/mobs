@@ -151,3 +151,5 @@ INSERT INTO `b___sportart` (`id`, `Sportart`, `Sportart_Nr`) VALUES (110, 'Sonst
 
 INSERT INTO `b_regionalverband` (id, `Verband`) VALUES (1, 'Dummy - bitte anpassen');
 INSERT INTO `b_bsg` (`Verband`, `BSG`) VALUES (1, 'Dummy - bitte anpassen');
+
+

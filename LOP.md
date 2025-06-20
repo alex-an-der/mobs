@@ -18,22 +18,6 @@ VALUES ('Tommy Manuell','Nocker',1,'1966-06-06','NeueMail@Nocker.de',3,'1966-06-
 
 # Offene Sofort-Issues
 
-## LÖSCHEN VON MITGLIEDER ????   
-=> Auf RV-Ebene: Liste zeigen, MG entfernen?
-
-## Registrieren melder direkt in BSG? Besser: ANtrag und dann aufnehmen und erst dann LogIn möglich
-1. Antrag stellen
-2. Beim LogIn:
-     - Wie bisher in b_mitglieder aufnehmen (wie ist das jetzt?)
-     -  Aber BSG nicht automatisch übertragen
-     -  Generelle Abfrage: BSG IS NULL -> Kein LogIn
-     -  SQL: NOT NULL wieder rausnehmen
-
-
-
-                            
-
-
 
 
 
@@ -116,10 +100,7 @@ ALTER TABLE `b_mitglieder_in_sparten` DROP COLUMN `seit`;
 DROP TRIGGER IF EXISTS `update_stammmitglied_seit`;
 
 ```
-### ALTER TABLE `sys_log`
-```
-ALTER TABLE `sys_log` CHANGE COLUMN `ID` `ID` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL;
-```
+
 
 ### Trigger, um das Löschen der indiv. Berechtigung zu verhindern, wenn Mitglied noch eingeschrieben ist.
 ```
@@ -191,6 +172,12 @@ CREATE TABLE `sys_rollback` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 ```
 
+### ALTER TABLE `sys_log`
+```
+ALTER TABLE `sys_log` CHANGE COLUMN `ID` `ID` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL;
+```
+
+
 ## BSG NULL zulassen, aber prüfen.
 ```
 ALTER TABLE `b_mitglieder` CHANGE COLUMN `BSG` `BSG` BIGINT UNSIGNED NULL;
@@ -204,7 +191,7 @@ Datei 03_trigger...sql
 ```
 return $uid; 
 ```
-im Usermanager nach dem Senden der Mail einfügen - ganz am Ende..natürlich
+im Usermanager (writeUserData) nach dem Senden der Mail einfügen - ganz am Ende..natürlich
 
 Damit kann ich in register (user_code) das b_mitglied eintragen.
 
@@ -321,3 +308,10 @@ CREATE TABLE `sys_error_manager` (
 ) 
 ENGINE = InnoDB;
 
+## Registrieren melder direkt in BSG? Besser: ANtrag und dann aufnehmen und erst dann LogIn möglich
+1. Antrag stellen
+2. Beim LogIn:
+     - Wie bisher in b_mitglieder aufnehmen (wie ist das jetzt?)
+     -  Aber BSG nicht automatisch übertragen
+     -  Generelle Abfrage: BSG IS NULL -> Kein LogIn
+     -  SQL: NOT NULL wieder rausnehmen
