@@ -191,7 +191,7 @@ Hat ja keine AUswirkungen. Es wurde an vesch. Stellen adm_log zu sys_log geände
 Datei 03_trigger...sql
 
 ## YPUM Verbessern
-```
+``` php
 return $uid; 
 ```
 im Usermanager (writeUserData) nach dem Senden der Mail einfügen - ganz am Ende..natürlich
@@ -199,9 +199,18 @@ im Usermanager (writeUserData) nach dem Senden der Mail einfügen - ganz am Ende
 Damit kann ich in register (user_code) das b_mitglied eintragen.
 
 Dann auch die alten first-login-trigger droppen
-```
+``` sql
 DROP TRIGGER IF EXISTS tr_user_insert_create_member;
 DROP TRIGGER IF EXISTS tr_user_first_login;
+```
+
+### Umstellung RV-Admin auf Frontend
+``` sql
+ALTER TABLE `b_regionalverband_rechte` ADD  `erweiterte_Rechte` TINYINT UNSIGNED NULL DEFAULT 1 ;
+ALTER TABLE `b_regionalverband_rechte` ADD CONSTRAINT `FK_verbandrechte_an_aus` FOREIGN KEY (`erweiterte_Rechte`) REFERENCES `b___an_aus` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+UPDATE `b_regionalverband_rechte` SET `erweiterte_Rechte` = 1 WHERE `erweiterte_Rechte` IS NULL;
+ALTER TABLE `b_regionalverband_rechte` CHANGE COLUMN `erweiterte_Rechte` `erweiterte_Rechte` TINYINT UNSIGNED NOT NULL DEFAULT 1 ;
+ALTER TABLE `b___an_aus` ADD COLUMN `bool` TINYINT UNSIGNED NOT NULL DEFAULT 0;
 ```
 
 # ERLEDIGT (sollte eigentlich)

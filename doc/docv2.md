@@ -241,12 +241,7 @@ Mit dieser Berechtigung kannst du innerhalb deines Regionalverbandes (nachdem di
 - Betriebssportgemeinschaften (BSG) anlegen
 
 
-### Umstellung RV-Admin auf Frontend
-ALTER TABLE `b_regionalverband_rechte` ADD  `erweiterte_Rechte` TINYINT UNSIGNED NULL DEFAULT 1 ;
-ALTER TABLE `b_regionalverband_rechte` ADD CONSTRAINT `FK_verbandrechte_an_aus` FOREIGN KEY (`erweiterte_Rechte`) REFERENCES `b___an_aus` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
-UPDATE `b_regionalverband_rechte` SET `erweiterte_Rechte` = 1 WHERE `erweiterte_Rechte` IS NULL;
-ALTER TABLE `b_regionalverband_rechte` CHANGE COLUMN `erweiterte_Rechte` `erweiterte_Rechte` TINYINT UNSIGNED NOT NULL DEFAULT 1 ;
-ALTER TABLE `b___an_aus` ADD COLUMN `bool` TINYINT UNSIGNED NOT NULL DEFAULT 0;
+
 
 
 ###
