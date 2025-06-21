@@ -83,23 +83,33 @@ if($ypum->isBerechtigt(64)){
 #                                                                                                      #
 ## BERECHTIGUNG 30 #####################################################################################
 
-if($ypum->isBerechtigt(2)){
-    $anzuzeigendeDaten[] = array("trenner" => "-");
-    require_once(__DIR__ . "/lvl_30_regional_admin.php");
-}
+$countRechteQ = $db->query("SELECT count(*) as count, MAX(bool) AS bErweiterteRechte
+                            FROM b_regionalverband_rechte as r
+                            JOIN b___an_aus as aa on aa.id = r.erweiterte_rechte 
+                            WHERE Nutzer = $uid");
 
-########################################################################################################
-#                                                                                                      #
-#                                                                                                      #
-## BERECHTIGUNG 40 #####################################################################################
+// Gibt es überhaupt eine RV-Berechtigung?
+if(isset($countRechteQ['data'][0]['count'])){
 
-$countRechteQ = $db->query("SELECT count(*) as count FROM b_regionalverband_rechte WHERE Nutzer = $uid");
-if(isset($countRechteQ['data'][0]['count'])) $countRechte = $countRechteQ['data'][0]['count'];
-else                                         $countRechte = 0;  
+    if($countRechteQ['data'][0]['count'] > 0){
 
-if($countRechte > 0){
-    $anzuzeigendeDaten[] = array("trenner" => "-");
-    require_once(__DIR__ . "/lvl_40_regionalverband.php");
+        $countRechte = $countRechteQ['data'][0]['count'];
+        $erweiterteRechte = $countRechteQ['data'][0]['bErweiterteRechte'];
+
+        // Zusätzlich eine erweiterte Berechtigung?
+        if($erweiterteRechte){
+            $anzuzeigendeDaten[] = array("trenner" => "-");
+            require_once(__DIR__ . "/lvl_30_regional_admin.php");
+        }
+
+        ########################################################################################################
+        #                                                                                                      #
+        #                                                                                                      #
+        ## BERECHTIGUNG 40 #####################################################################################
+
+        $anzuzeigendeDaten[] = array("trenner" => "-");
+        require_once(__DIR__ . "/lvl_40_regionalverband.php");
+    }
 }
 
 ########################################################################################################
