@@ -211,6 +211,7 @@ ALTER TABLE `b_regionalverband_rechte` ADD CONSTRAINT `FK_verbandrechte_an_aus` 
 UPDATE `b_regionalverband_rechte` SET `erweiterte_Rechte` = 1 WHERE `erweiterte_Rechte` IS NULL;
 ALTER TABLE `b_regionalverband_rechte` CHANGE COLUMN `erweiterte_Rechte` `erweiterte_Rechte` TINYINT UNSIGNED NOT NULL DEFAULT 1 ;
 ALTER TABLE `b___an_aus` ADD COLUMN `bool` TINYINT UNSIGNED NOT NULL DEFAULT 0;
+UPDATE `b___an_aus` SET`bool`=1 WHERE `id`=1;
 ```
 
 # ERLEDIGT (sollte eigentlich)
