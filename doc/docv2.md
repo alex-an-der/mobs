@@ -29,11 +29,9 @@
 - [Mitarbeiter im Landesverband](#mitarbeiter-im-landesverband)
 - [Systemadministratoren](#systemadministratoren)
   - [Wichtige Ansichten](#wichtige-ansichten)
-  - [Error-Log](#error-log)
-  - [Rollback](#rollback)
-  - [Nutzerzahlen](#nutzerzahlen)
-  - [Zuweisung von Landesverbans- und Systemadminrechten](#zuweisung-von-landesverbans--und-systemadminrechten)
-  - [Backdoor](#backdoor)
+  - [How Tos](#how-tos)
+    - [Zuweisung von Landesverbans- und Systemadminrechten](#zuweisung-von-landesverbans--und-systemadminrechten)
+    - [Backdoor](#backdoor)
 - [Workflows (ggf. mit Hintergründe) / grafisch?](#workflows-ggf-mit-hintergründe--grafisch)
   - [Registrieren / inkl. BSG-Sicht bis zur AUfnahme in die Stamm-BSG](#registrieren--inkl-bsg-sicht-bis-zur-aufnahme-in-die-stamm-bsg)
   - [Meldeliste](#meldeliste)
@@ -289,28 +287,36 @@ Allgemeinen Fehlern - insbesondere SQL-Fehler - kann hier eine individuelle Fehl
 | MOBS24 prüft, ob es für diese Fehlermeldung bereits einen Eintrag gibt. | <ul><li>Das System prüft zunächst den **sql_error_code**.</li><li> Gibt es mehrere Treffer wird derjenige bevorzugt, der auch bei der Volltextsuche (**add_fulltext_constraint**) einen Treffer hat.</li><li> Unter den Doppeltreffer gibt es kein weiteres Ranking.</li><li>Bei einem Treffer wird dem Anwender anstelle der **ray_message** die **user_message** angezeigt.</li><li>Die **description** dient internen Notizen innerhalb der Tabelle und wird nicht ausgegeben.</li></ul>|  
 | Gibt es noch keinen Eintrag: |
 | Diese Meldung wird in die Fehler-Management-Tabelle eingetragen und in dieser Ansicht angezeigt | <ul><li>ID: interne ID</li><li>error_log_id: Im Error Log wird dieser Fehler ebenfalls geloggt</li><li>source: Derzeit implementiert: *database* und *server*</li><li>raw_message: Die obige Meldung von der Datenbank/vom Server</li><li>sql_error_code: Offizieller Error-Code wenn verfügbar</li></ul> Die anderen Spalten sind zunächst leer.|
+| Erscheint eine neue Fehlermeldung kann diese dann mit einer geeigneten **user_message** begegnet werden. Bedenke, dass der Algorhithmus nur nach dem **sql_error_code** scannt. Sollte dieser genauer differentiert werden, muss auch die **add_fulltext_constraint** benutzt werden. | Ein Beispiel ist die nachfolgenden Tabelle |  
+  
+| ID | error_log_id | source | raw_message | sql_error_code | add_fulltext_constraint | description | user_message |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 17 | --- | database | SQLSTATE[HY000]: General error: 1364 Field 'xxx' doesn't have a default value | 1364 | Mitglied | Mitglied wurde nicht angegeben | Das Mitglied muss angegeben werden |
+| 2 | --- | database | SQLSTATE[HY000]: General error: 1364 Field 'Sparte' doesn't have a default value | 1364 | Sparte | Sparte wurde nicht angegeben | Die Sparte muss angegeben werden |
+| 1 | --- | database | SQLSTATE[HY000]: General error: 1364 Field 'Sparte' doesn't have a default value | 1364 |  | Ein erwarteter Wert wurde nicht angegeben. | Es sind nicht alle erforderlichen Felder ausgefüllt. Bitte ergänze die norwendigen Angaben. |
 
 
 
 - **Offene Issues**  
 Was ist noch zu zun? Erledigte Issues bekommen die Prio 222 (quick & dirty wegen der Sorierung) und die Versionsnummer, in der das Issue umgesetzt wurde.
 
-## Error-Log
+- **Error-Log**
 Alle Fehler mit eingeloggtem Nutzer.
 
-## Rollback
+- **Rollback**
 Experimental. Entwickle ich ggf. für das Framework weiter.
 
-## Nutzerzahlen
+- **Nutzerzahlen**
 Wieviele Nutzer sind angemeldet? Ein Überblick, um Performanceproblemen vorzubeugen, Fehleranzahlen besser einschätzen zu können und einer Featureüberproduktion vorzubeugen.
 
-
-
-## Zuweisung von Landesverbans- und Systemadminrechten
-## Backdoor
-  
-  
 <hr style="border: 3px solid red;">
+
+
+## How Tos
+### Zuweisung von Landesverbans- und Systemadminrechten
+### Backdoor
+  
+  
   
     
 
