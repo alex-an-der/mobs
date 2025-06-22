@@ -11,12 +11,12 @@
         - [Beispiele für Zahlenfilter](#beispiele-für-zahlenfilter)
         - [Beispiele für Datumsfilter](#beispiele-für-datumsfilter)
     - [Impressum und Datenschutzerklärung](#impressum-und-datenschutzerklärung)
-- [Ansichten für Mitglieder](#ansichten-für-mitglieder)
+- [Mitglieder](#mitglieder)
   - [Meine Daten bearbeiten](#meine-daten-bearbeiten)
   - [Meine Daten zur Bearbeitung freigeben](#meine-daten-zur-bearbeitung-freigeben)
   - [Antrag zum Wechsel der Stamm-BSG](#antrag-zum-wechsel-der-stamm-bsg)
   - [Lösche meine Daten](#lösche-meine-daten)
-- [Ansichten für BSG Organisatoren](#ansichten-für-bsg-organisatoren)
+- [BSG Organisatoren](#bsg-organisatoren)
   - [BSG-Stammdaten bearbeiten](#bsg-stammdaten-bearbeiten)
   - [Stamm-Mitglieder aufnehmen](#stamm-mitglieder-aufnehmen)
   - [Stamm-Mitglieder bearbeiten - kompakt und erweitert](#stamm-mitglieder-bearbeiten---kompakt-und-erweitert)
@@ -24,17 +24,17 @@
   - [Mitgliede ohne Registrierung](#mitgliede-ohne-registrierung)
     - [Stamm-Mitglieder ohne Zugang eintragen](#stamm-mitglieder-ohne-zugang-eintragen)
     - [Mitgliederkonten zusammenführen](#mitgliederkonten-zusammenführen)
-- [Ansichten für Mitarbeiter im Regionalverband](#ansichten-für-mitarbeiter-im-regionalverband)
+- [Mitarbeiter im Regionalverband](#mitarbeiter-im-regionalverband)
   - [Erweiterte Rechte](#erweiterte-rechte)
-- [Ansichten für Mitarbeiter im Landesverband](#ansichten-für-mitarbeiter-im-landesverband)
-  - [Regionalverbände einfügen, löschen und bearbeiten](#regionalverbände-einfügen-löschen-und-bearbeiten)
-  - [Rechte zur Verwaltung in den Regionalverbänden vergeben](#rechte-zur-verwaltung-in-den-regionalverbänden-vergeben)
-- [Ansichten für Systemadministratoren](#ansichten-für-systemadministratoren)
+- [Mitarbeiter im Landesverband](#mitarbeiter-im-landesverband)
+- [Systemadministratoren](#systemadministratoren)
   - [Offene Issues](#offene-issues)
   - [Error-Log](#error-log)
   - [Rollback](#rollback)
   - [Nutzerzahlen](#nutzerzahlen)
   - [Fehlermeldungen anpassen](#fehlermeldungen-anpassen)
+  - [Zuweisung von Landesverbans- und Systemadminrechten](#zuweisung-von-landesverbans--und-systemadminrechten)
+  - [Backdoor](#backdoor)
 - [Workflows (ggf. mit Hintergründe) / grafisch?](#workflows-ggf-mit-hintergründe--grafisch)
   - [Registrieren / inkl. BSG-Sicht bis zur AUfnahme in die Stamm-BSG](#registrieren--inkl-bsg-sicht-bis-zur-aufnahme-in-die-stamm-bsg)
   - [Meldeliste](#meldeliste)
@@ -148,7 +148,7 @@ Am unteren Bildrand findest du einen Link zu "Impressum und Datenschutzerklärun
 für weitere rechtliche Informationen.
 
 
-# Ansichten für Mitglieder
+# Mitglieder
 
 Die Rolle "Mitglied" stellt die grundlegende Benutzerebene in unserem System dar. 
 Jeder registrierte Nutzer erhält automatisch die Berechtigungen dieser Rolle, ohne 
@@ -184,7 +184,7 @@ Möchtest du eine BSG wechseln, musst du dies hier initiieren. Bitte speche dich
 ## Lösche meine Daten
 Hier kannst du deine Daten unwiderbringlich aus dem System entfernen. Bedenke, dass deine Daten möglicherweise bis zum Beginn des übernächsten Jahres aufbewahrt werden müssen.
 
-# Ansichten für BSG Organisatoren
+# BSG Organisatoren
 Um das Recht zu erhalten, eine BSG im System zu verwalten, muss ein Berechtigter des Regionalverbandes dir dieses zuweisen.
 
 Mit dieser Berechtigung kannst du innerhalb deiner BSG (nachdem diese vom Regionalverband angelegt wurde):
@@ -248,7 +248,7 @@ Das registrierte Konto hat in der Spalte **y_id** eine Zahl stehen - die ID im L
 
 **Neben der Überprüfung der Geburtsdaten gibt es systemseitig keine weitere Validierung! Diese Funktion daher bitte mit großer Sorgfalt nutzen. Es wird empfolen, diesen Vorgang nicht am Handy, sondern am PC zu erledigen.** 
 
-# Ansichten für Mitarbeiter im Regionalverband
+# Mitarbeiter im Regionalverband
 Um das Recht zu erhalten, den Regionalverband zu verwalten, muss ein Berechtigter des Landesverbandes dir dieses zuweisen.
 
 Mit dieser Berechtigung kannst du innerhalb deines Regionalverbandes (nachdem dieser vom Landesverband angelegt wurde):
@@ -269,19 +269,22 @@ Der Landesverband kann auch erweiterte Rechte auf der Ebene des Regionalverbands
   Diese Ansicht dient lediglich als Notizbuch z.B. zur Verfolgung offener Forderungen, da Rechnungsverfolgung und Mahnwesen außerhalb von MOBS24 stattfindet.
 
 
-# Ansichten für Mitarbeiter im Landesverband
+# Mitarbeiter im Landesverband
+Um das Recht zu erhalten, den Landesverband zu verwalten, muss ein Systemadministrator dir dieses Recht zuweisen.
 
+- **Regionalverbände einfügen, löschen und bearbeiten**  
+- **Rechte zur Verwaltung in den Regionalverbänden vergeben**  
+  Die Rechtevergabe ist analog zur Rechtevergabe für BSG. Der einzige Unterschied ist das Feld 'erweiterte Rechte'. Dies bestimmt, ob das Mitglied Zugriff auf die oben beschriebenen [erweiterten Rechte](#erweiterte-rechte) erhält.  
 
-## Regionalverbände einfügen, löschen und bearbeiten
-## Rechte zur Verwaltung in den Regionalverbänden vergeben
-
-# Ansichten für Systemadministratoren
+# Systemadministratoren
 
 ## Offene Issues
 ## Error-Log
 ## Rollback
 ## Nutzerzahlen
 ## Fehlermeldungen anpassen
+## Zuweisung von Landesverbans- und Systemadminrechten
+## Backdoor
   
   
 <hr style="border: 3px solid red;">
