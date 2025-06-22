@@ -25,7 +25,11 @@
     - [Stamm-Mitglieder ohne Zugang eintragen](#stamm-mitglieder-ohne-zugang-eintragen)
     - [Mitgliederkonten zusammenführen](#mitgliederkonten-zusammenführen)
 - [Ansichten für Mitarbeiter im Regionalverband](#ansichten-für-mitarbeiter-im-regionalverband)
-    - [Umstellung RV-Admin auf Frontend](#umstellung-rv-admin-auf-frontend)
+  - [Erweiterte Rechte](#erweiterte-rechte)
+    - [Sparten im Regionalverband einfügen, löschen und bearbeiten](#sparten-im-regionalverband-einfügen-löschen-und-bearbeiten)
+    - [Zahlungseingänge 2025](#zahlungseingänge-2025)
+    - [Zahlungseingänge 2024](#zahlungseingänge-2024)
+    - [Offene Forderungen (Notizen)](#offene-forderungen-notizen)
     - [](#)
 - [Workflows (ggf. mit Hintergründe) / grafisch?](#workflows-ggf-mit-hintergründe--grafisch)
   - [Registrieren / inkl. BSG-Sicht bis zur AUfnahme in die Stamm-BSG](#registrieren--inkl-bsg-sicht-bis-zur-aufnahme-in-die-stamm-bsg)
@@ -239,9 +243,19 @@ Um das Recht zu erhalten, den Regionalverband zu verwalten, muss ein Berechtigte
 Mit dieser Berechtigung kannst du innerhalb deines Regionalverbandes (nachdem dieser vom Landesverband angelegt wurde):
 
 - Betriebssportgemeinschaften (BSG) anlegen
+- Das Recht zur Verwaltung bestimmter BSG vergeben
+- Diverse Berichte lesen
+  
+Alle Ansichten und Aktionen sind selbsterklärend. Bitte beachte, dass du nur Regionalverbände siehst, auf die du vom Landesverband berechtigt wurdest.
 
+## Erweiterte Rechte
+Der Landesverband kann auch erweiterte Rechte auf der Ebene des Regionalverbands erteilen. Damit werden Eingaben zur Kasse und für die Einrichtung und Löschung von Sparten ermöglicht.
 
+### Sparten im Regionalverband einfügen, löschen und bearbeiten
 
+### Zahlungseingänge 2025
+### Zahlungseingänge 2024
+### Offene Forderungen (Notizen)
 
 
 ###

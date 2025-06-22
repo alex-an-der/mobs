@@ -109,7 +109,7 @@ $tabelle_upper = strtoupper($tabelle);
 
 </head>
 <body>
- 
+
 <?php
 // Manche Spalten sind per ID via Fremdschlüssel zu anderen Tabellen verknüpft. Die ID anzuzeigen (und zu bearbeiten) 
 // bringt dem Anwender wenig. Es muss daher in config pro FK eine Referenzquery definiert, die die ID in eine für den
@@ -200,7 +200,7 @@ function renderTableSelectBox($db) {
             $tableComment = htmlspecialchars($table['auswahltext']);
             $displayText = !empty($tableComment) ? "$tableComment" : $tableName;
             $selected = ($index == $selectedTableID) ? 'selected' : '';
-            $options[] = '<option value="' . $index . '" ' . $selected . '>' . $displayText . '</option>';
+            $options[] = '<option  value="' . $index . '" ' . $selected . '>' . $displayText . '</option>';
         }
     }
     foreach ($trennerindizies as $trennerindex) {
