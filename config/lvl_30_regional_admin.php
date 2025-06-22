@@ -31,47 +31,16 @@ $anzuzeigendeDaten[] = array(
 
 $curyear = (int)date("Y");
 
-# Zahlungseingänge laufendes Jahr
+# Zahlungseingänge
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_zahlungseingaenge",
-    "auswahltext" => "Zahlungseingänge ".$curyear,
-    "writeaccess" => true,
-    "query" => "SELECT  z.id as id, z.BSG as BSG, z.Eingangsdatum, z.Abrechnungsjahr as Abrechnungsjahr, z.Haben
-                FROM b_zahlungseingaenge as z
-                JOIN b_bsg as b on b.id=z.BSG
-                JOIN b_regionalverband as r on r.id = b.Verband 
-                WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0
-                AND z.Abrechnungsjahr = YEAR(CURDATE())
-                ORDER BY Eingangsdatum desc;
-    ",
-    "referenzqueries" => array(
-    "BSG" => "SELECT b.id as id, b.BSG as anzeige
-                FROM b_bsg as b
-                WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0
-                ORDER BY anzeige;"/*,
-    "Abrechnungsjahr" => "SELECT 
-                            YEAR(CURDATE()) as id,
-                            YEAR(CURDATE()) as anzeige;"*/
-    ),
-    "spaltenbreiten" => array(
-        "BSG"                          => "380",
-        "Eingangsdatum"                => "150",
-        "Abrechnungsjahr"              => "150",
-        "Haben"                        => "150"
-    ) 
-);
-
-# Zahlungseingänge letztes Jahr
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_zahlungseingaenge",
-    "auswahltext" => "Zahlungseingänge ".($curyear-1),
+    "auswahltext" => "Zahlungseingänge ",
     "writeaccess" => true,
     "query" => "SELECT  z.id as id, z.BSG as BSG, z.Eingangsdatum, z.Abrechnungsjahr, z.Haben
                 FROM b_zahlungseingaenge as z
                 JOIN b_bsg as b on b.id=z.BSG
                 JOIN b_regionalverband as r on r.id = b.Verband 
                 WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0
-                AND z.Abrechnungsjahr = YEAR(CURDATE())-1
                 ORDER BY Eingangsdatum desc;
     ",
     "referenzqueries" => array(
@@ -79,6 +48,16 @@ $anzuzeigendeDaten[] = array(
                 FROM b_bsg as b
                 WHERE FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0
                 ORDER BY anzeige;",
+    "Abrechnungsjahr" => "SELECT 
+                YEAR(CURDATE()) - 3 + n AS id,
+                YEAR(CURDATE()) - 3 + n AS anzeige
+                FROM 
+                    (SELECT 0 AS n UNION ALL 
+                    SELECT 1 AS n UNION ALL 
+                    SELECT 2 AS n UNION ALL 
+                    SELECT 3 AS n UNION ALL 
+                    SELECT 4 AS n UNION ALL 
+                    SELECT 5 AS n) AS years;"
     ),
     "spaltenbreiten" => array(
         "BSG"                          => "380",
@@ -88,6 +67,10 @@ $anzuzeigendeDaten[] = array(
     ) 
 );
 
+
+
+
+## Notizen Offene Forderungen
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_forderungen",
     "auswahltext" => "Offene Forderungen (Notizen)",

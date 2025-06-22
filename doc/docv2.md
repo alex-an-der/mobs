@@ -26,11 +26,6 @@
     - [Mitgliederkonten zusammenführen](#mitgliederkonten-zusammenführen)
 - [Ansichten für Mitarbeiter im Regionalverband](#ansichten-für-mitarbeiter-im-regionalverband)
   - [Erweiterte Rechte](#erweiterte-rechte)
-    - [Sparten im Regionalverband einfügen, löschen und bearbeiten](#sparten-im-regionalverband-einfügen-löschen-und-bearbeiten)
-    - [Zahlungseingänge 2025](#zahlungseingänge-2025)
-    - [Zahlungseingänge 2024](#zahlungseingänge-2024)
-    - [Offene Forderungen (Notizen)](#offene-forderungen-notizen)
-    - [](#)
 - [Workflows (ggf. mit Hintergründe) / grafisch?](#workflows-ggf-mit-hintergründe--grafisch)
   - [Registrieren / inkl. BSG-Sicht bis zur AUfnahme in die Stamm-BSG](#registrieren--inkl-bsg-sicht-bis-zur-aufnahme-in-die-stamm-bsg)
   - [Meldeliste](#meldeliste)
@@ -40,6 +35,13 @@
     - [für eine Sparte](#für-eine-sparte)
     - [Stamm BSG](#stamm-bsg)
   - [Eine BSG neu Einrichten](#eine-bsg-neu-einrichten)
+- [Auswirkungen von UPDATE und DELETE auf die Datenbank](#auswirkungen-von-update-und-delete-auf-die-datenbank)
+  - [UPDATE (Ändern von Daten)](#update-ändern-von-daten)
+  - [DELETE (Löschen von Daten)](#delete-löschen-von-daten)
+    - [Übersicht der wichtigsten Kettenreaktionen beim Löschen](#übersicht-der-wichtigsten-kettenreaktionen-beim-löschen)
+    - [Was wird **nicht** automatisch gelöscht?](#was-wird-nicht-automatisch-gelöscht)
+  - [Zusammengefasst](#zusammengefasst)
+  - [Prompt für die automatische Dokumentation der Auswirkungen von UPDATE und DELETE im Datenbankschema:](#prompt-für-die-automatische-dokumentation-der-auswirkungen-von-update-und-delete-im-datenbankschema)
 
 
 # Registrierung
@@ -78,7 +80,7 @@ In der ersen Zeile kannst du die gewünschte Ansicht wählen. Je nach deiner Rol
 
 ### Informationsbereich
 
-Im blauen Infobereich erhältst du wichtige Hinweise zur aktuellen Ansich.
+Im blauen Infobereich erhältst du wichtige Hinweise zur aktuellen Ansicht.
 
 ### Filteroptionen
 
@@ -249,19 +251,21 @@ Mit dieser Berechtigung kannst du innerhalb deines Regionalverbandes (nachdem di
 Alle Ansichten und Aktionen sind selbsterklärend. Bitte beachte, dass du nur Regionalverbände siehst, auf die du vom Landesverband berechtigt wurdest.
 
 ## Erweiterte Rechte
-Der Landesverband kann auch erweiterte Rechte auf der Ebene des Regionalverbands erteilen. Damit werden Eingaben zur Kasse und für die Einrichtung und Löschung von Sparten ermöglicht.
+Der Landesverband kann auch erweiterte Rechte auf der Ebene des Regionalverbands erteilen. Damit werden Eingaben zur Kasse und für die Einrichtung und Löschung von Sparten ermöglicht. Im einzelnen sind dies:
 
-### Sparten im Regionalverband einfügen, löschen und bearbeiten
-
-### Zahlungseingänge 2025
-### Zahlungseingänge 2024
-### Offene Forderungen (Notizen)
-
-
-###
+- **Sparten im Regionalverband einfügen, löschen und bearbeiten**
+- **Zahlungseingänge**  
+  Hier können die Zahlungseingänge der BSG eingegeben werden. In einer späteren Programmversion könnte dies automatisiert eingelesen werden. Die Zahlungseingänge werden im Bericht 'Salden' für alle Verwalter im Regionalverband und für die jedeilige BSG auch den Verwalter der BSG mit den fälligen Mitgliedsbeiträgen, die MOBS24 aus den Anmeldungen zusammenstellt, zur Verfügung gestellt.
+- **Offene Forderungen (Notizen)**  
+  Diese Ansicht dient lediglich als Notizbuch z.B. zur Verfolgung offener Forderungen, da Rechnungsverfolgung und Mahnwesen außerhalb von MOBS24 stattfindet.
 
 
 
+  
+  
+<hr style="border: 3px solid red;">
+  
+    
 
 LOP:
 # Workflows (ggf. mit Hintergründe) / grafisch?
@@ -285,3 +289,70 @@ Doku für Systemadmin:
 - user-includes
 
 
+
+
+
+# Auswirkungen von UPDATE und DELETE auf die Datenbank
+
+Dieses Dokument erklärt für Sie als Anwender, was passiert, wenn Sie Datensätze in der Datenbank **ändern (UPDATE)** oder **löschen (DELETE)**. Es wird besonders auf sogenannte „Kettenreaktionen“ geachtet, also was mit verbundenen Daten passiert.
+
+---
+
+## UPDATE (Ändern von Daten)
+
+**Was bedeutet UPDATE?**  
+Wenn Sie einen Datensatz ändern (z.B. den Namen eines Vereins oder einer Sparte), wird der neue Wert in der Datenbank gespeichert.  
+**Wichtig:**  
+- In den meisten Fällen werden die Änderungen automatisch auch in allen verbundenen Tabellen übernommen, sodass die Verknüpfungen erhalten bleiben.
+- Es gehen keine Daten verloren.
+
+**Beispiel:**  
+- Sie ändern den Namen einer Sparte. Alle Mitglieder, die dieser Sparte zugeordnet sind, bleiben weiterhin korrekt zugeordnet.
+
+---
+
+## DELETE (Löschen von Daten)
+
+**Was bedeutet DELETE?**  
+Wenn Sie einen Datensatz löschen (z.B. eine Sparte, ein Mitglied oder einen Verein), kann dies Auswirkungen auf andere Daten haben, die mit diesem Datensatz verbunden sind.  
+Je nach Einstellung werden diese Daten entweder **mitgelöscht** oder das Löschen wird **verhindert**.
+
+### Übersicht der wichtigsten Kettenreaktionen beim Löschen
+
+| Tabelle (was wird gelöscht?) | Was passiert mit verbundenen Daten? | Erklärung für Sie |
+|-----------------------------|-------------------------------------|-------------------|
+| **Sparte**                  | Alle Zuordnungen von Mitgliedern zu dieser Sparte werden ebenfalls gelöscht. | Die Mitglieder bleiben erhalten, aber ihre Zugehörigkeit zu dieser Sparte wird entfernt. |
+| **Mitglied**                | Alle Zuordnungen zu Sparten, Berechtigungen und Historien werden ebenfalls gelöscht. | Das Mitglied wird komplett entfernt, inklusive aller Verknüpfungen. |
+| **Verein (BSG)**            | Alle Mitglieder, Zahlungen, Forderungen, Berechtigungen und Zuordnungen zu diesem Verein werden ebenfalls gelöscht. | Der Verein und alle zugehörigen Daten werden entfernt. |
+| **Regionalverband**         | Alle Vereine und Sparten dieses Verbands werden ebenfalls gelöscht, inklusive aller deren Verknüpfungen. | Der Verband und alles, was dazu gehört, wird entfernt. |
+| **Mitglied in Sparte**      | Nur diese eine Zuordnung wird gelöscht. | Das Mitglied bleibt, ist aber nicht mehr in dieser Sparte. |
+| **Benutzer (User)**         | Alle Rechte und Details zu diesem Benutzer werden ebenfalls gelöscht. | Der Benutzer und alle zugehörigen Informationen werden entfernt. |
+
+### Was wird **nicht** automatisch gelöscht?
+
+- Wenn Sie einen Datensatz löschen, der noch von anderen Daten benötigt wird (z.B. ein Verein, dem noch Mitglieder zugeordnet sind), kann das Löschen manchmal **verhindert** werden, um Datenverlust zu vermeiden.
+- In manchen Fällen werden Verknüpfungen einfach entfernt, ohne dass weitere Daten gelöscht werden.
+
+---
+
+## Zusammengefasst
+
+- **Ändern (UPDATE):**  
+  Ihre Änderungen werden überall übernommen, Verknüpfungen bleiben erhalten.
+
+- **Löschen (DELETE):**  
+  Es können automatisch auch andere, verbundene Daten gelöscht werden. In manchen Fällen wird das Löschen verhindert, um wichtige Daten zu schützen.
+
+## Prompt für die automatische Dokumentation der Auswirkungen von UPDATE und DELETE im Datenbankschema:
+
+Analysiere das folgende SQL-Datenbankschema. Erstelle eine verständliche, tabellarische Übersicht für Nicht-ITler, die erklärt, was beim Ändern (UPDATE) und Löschen (DELETE) von Datensätzen in jeder Tabelle passiert.  
+
+- Berücksichtige alle Fremdschlüssel-Constraints und deren ON DELETE/ON UPDATE-Regeln.
+- Beschreibe für jede Tabelle, welche Kettenreaktionen beim Löschen oder Ändern auftreten (z.B. welche verbundenen Daten mitgelöscht werden oder erhalten bleiben).
+- Gib für UPDATE eine kurze allgemeine Erklärung, was das bedeutet.
+- Gib für DELETE eine Tabelle mit: „Was wird gelöscht?“, „Was passiert mit verbundenen Daten?“, „Erklärung für den Anwender“.
+- Formatiere das Ergebnis als Markdown-Code.
+- Die Aussagen sollen exakt zum vorliegenden Schema passen, nicht allgemein gehalten sein.
+
+Hier ist das Schema:
+[Füge hier das aktuelle SQL-Schema ein]
