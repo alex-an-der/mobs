@@ -1,0 +1,30 @@
+@startuml
+|Nutzer|
+start
+:Registrierung starten;
+:Regionalverband/BSG auswählen;
+
+if (Ist die BSG verfügbar?) then (ja)
+  :Persönliche Daten eingeben;
+  :Registrierung abschließen;
+else (nein)
+  |Systemadministrator|
+  :BSG/Regionalverband anlegen;
+  stop 
+  note right
+    Danach kann 
+    die Registrierung 
+    erneut gestartet werden.
+  end note
+endif
+
+:Bestätigungsmail erhalten;
+:Passwort festlegen;
+:Login durchführen;
+
+|BSG-Organisator|
+:Mitglied in der BSG aufnehmen;
+:Mitglied in Sparten anmelden;
+
+stop
+@enduml

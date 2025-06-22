@@ -29,17 +29,20 @@
 - [Mitarbeiter im Landesverband](#mitarbeiter-im-landesverband)
 - [Systemadministratoren](#systemadministratoren)
   - [Wichtige Ansichten](#wichtige-ansichten)
-  - [How Tos](#how-tos)
+  - [Kochrezepte](#kochrezepte)
     - [Zuweisung von Landesverbans- und Systemadminrechten](#zuweisung-von-landesverbans--und-systemadminrechten)
-    - [Backdoor](#backdoor)
-- [Workflows (ggf. mit Hintergründe) / grafisch?](#workflows-ggf-mit-hintergründe--grafisch)
-  - [Registrieren / inkl. BSG-Sicht bis zur AUfnahme in die Stamm-BSG](#registrieren--inkl-bsg-sicht-bis-zur-aufnahme-in-die-stamm-bsg)
-  - [Meldeliste](#meldeliste)
-  - [Spartenanmeldung](#spartenanmeldung)
-  - [Import](#import)
-  - [Wechsel der BSG](#wechsel-der-bsg)
-    - [für eine Sparte](#für-eine-sparte)
-    - [Stamm BSG](#stamm-bsg)
+      - [Setzen über das YPUM-Frontend](#setzen-über-das-ypum-frontend)
+      - [Setzen direkt in der Datenbank](#setzen-direkt-in-der-datenbank)
+- [Wie...](#wie)
+  - [...kann ich mich in einer Sparte anmelden](#kann-ich-mich-in-einer-sparte-anmelden)
+    - [Ablauf der Registrierung](#ablauf-der-registrierung)
+  - [...werden die fälligen Beiträge ermittelt?](#werden-die-fälligen-beiträge-ermittelt)
+  - [...kann ich Daten massenhaft importieren?](#kann-ich-daten-massenhaft-importieren)
+    - [Vorgehensweise](#vorgehensweise)
+    - [Bezug auf bereits gespeicherte Daten](#bezug-auf-bereits-gespeicherte-daten)
+    - [Beispiel](#beispiel)
+  - [...trete ich für eine andere (nicht Stamm-) BSG in einer Sparte an?](#trete-ich-für-eine-andere-nicht-stamm--bsg-in-einer-sparte-an)
+    - [...wechsle ich die Stamm-BSG?](#wechsle-ich-die-stamm-bsg)
   - [Eine BSG neu Einrichten](#eine-bsg-neu-einrichten)
 - [Auswirkungen von UPDATE und DELETE auf die Datenbank](#auswirkungen-von-update-und-delete-auf-die-datenbank)
   - [UPDATE (Ändern von Daten)](#update-ändern-von-daten)
@@ -309,27 +312,153 @@ Experimental. Entwickle ich ggf. für das Framework weiter.
 - **Nutzerzahlen**
 Wieviele Nutzer sind angemeldet? Ein Überblick, um Performanceproblemen vorzubeugen, Fehleranzahlen besser einschätzen zu können und einer Featureüberproduktion vorzubeugen.
 
-<hr style="border: 3px solid red;">
 
-
-## How Tos
+## Kochrezepte
 ### Zuweisung von Landesverbans- und Systemadminrechten
-### Backdoor
-  
-  
-  
+Die Zuweisung dieser Rechte kann über zwei Wege geschehen, welche nachfolgend beschrieben werden. Die Berechtigung werden als Bits geschrieben, wobei folgende Bits belegt sind:
+| Rolle         | Bit | Dezimalwert | 
+| -----         | --- | ----------- | 
+| Administrator |  0  |           1 |
+| Landesverband |  6  |          64 | 
+| Automatischer Standardwert:       |
+| Mitglied      |  3  |           8 |
+
+- Ein Systemadmin benötigt daher den Wert ```9``` (Mitglied + Systemadmin)  
+- Ein Mitarbeiter des Landesverbands entsprechend ```72```  
+- Alle Rechte erlangt man mit ```73```  
+- Die Standardberechtigung (Mitglied) ist 8
+
+
+#### Setzen über das YPUM-Frontend
+YPUM steht für Yet Another PHP User Manager und kümmert sich um die User-Authentifizierung. Die Implementierung in MOBS24 ist nach dem Einloggen als Systemadministrator erreichbar unter ```https://www.mobs24.de/ypum``` -> Administration/Nutzerverwaltung -> Übersicht, bzw direkt: ```hhttps://www.mobs24.de/ypum/yback/y-admin/usertabelle.php```. 
+
+#### Setzen direkt in der Datenbank
+Der entsprechende Wert kann auch in der Datenbank direkt in der Tabelle ```y_user```, Spalte ```roles```. Dieser Weg ist auch dann möglich, wenn es keinen Systemadministrator gibt.
+
+
+<hr style="border: 3px solid red;">
     
 
 LOP:
-# Workflows (ggf. mit Hintergründe) / grafisch?
-## Registrieren / inkl. BSG-Sicht bis zur AUfnahme in die Stamm-BSG
+# Wie...
+## ...kann ich mich in einer Sparte anmelden
+### Ablauf der Registrierung
 
-## Meldeliste
-## Spartenanmeldung
-## Import
-## Wechsel der BSG 
-### für eine Sparte
-### Stamm BSG
+| **Schritt** | **Aktion**                                                                                     | **Status**                       |
+|-------------|------------------------------------------------------------------------------------------------|----------------------------------
+| **Vom Mitglied durchzuführen:**                                                                                                                 |
+| 1           | Registrierung starten                                                                          |                                  |
+| 2           | Regionalverband/BSG auswählen<br>**Hinweis**: Wenn der Regionalverband (RV) oder die BSG nicht verfügbar ist, muss<br> der RV zunächst vom Landesverband  bzw. die BSG vom RV angelegt werden. |            |
+| 3           | Persönliche Daten und Stamm-BSG eingeben                                                       |                                  |
+| 4           | Bestätigungsmail erhalten                                                                      |                                  |
+| 5           | Passwort festlegen                                                                             |                                  |
+| 6           | Login durchführen                                                                              | Registriert                      |
+| **Von der BSG durchzuführen:**                                                                                                                  |
+| 7           | Mitglied in der BSG aufnehmen                                                                  | In einer Stamm-BSG aufgenommen   |
+| 8           | Mitglied in Sparten anmelden                                                                   | In einer Sparte angemeldet       |
+
+## ...werden die fälligen Beiträge ermittelt?
+Es gibt eine Meldeliste, auf der alle Mitglieder stehen, die in einer Stamm-BSG und/oder in Sparten angemeldet sind. Einmal pro Nacht gleicht MOBS24 die aktuellen Anmeldungen im System mit dieser Meldeliste ab und fügt fehlende Einträge der Meldeliste hinzu. Abmeldungen führen nicht automatisch zu einem Löschen von der Meldeliste. Dieses Meldesystem ist in der Meldezeit eines jeden Jahres vom **1.1.** bis zum **15.2.** ausgesetzt, damit dort die An- und Abmeldungen aktualisiert werden können. Zum Stichtag 15.2. wird die Meldeliste angelegt und für den Rest des Jahres automatisch gepflegt. Die Beiträge berechnen sich aus den jeweiligen Verbands-/Basisbeitrag und den Staffelbeiträgen. In Rechnung gestellt werden diese wie folgt:
+  
+- Der Basisbeitrag der **erstgenannten** Stamm-BSG (keine Änderung bei unterjährigem Wechsel)  
+- Der Spartenbeitrag der BSG, für die das Mitglied antritt. Das muss nicht die Stamm-BSG sein.   
+
+## ...kann ich Daten massenhaft importieren?
+
+### Vorgehensweise
+1. **Schaltfläche *Daten importieren* drücken**  
+   
+2. **Kopfzeile erstellen**  
+   Im gelben Hinweisblock siehst du, welche Spalten dir als Importspalten zur Verfügung stehen.  
+   Bitte nutze alle Spalten, die du benötigst oder die für den Datensatz erforderlich sind.  
+   Beim Import von Mitgliederdaten müssen z. B. folgende Angaben gemacht werden:  
+
+   - **BSG**: Stamm-BSG des Mitglieds (Achtung: Mitglieder ohne BSG-Angabe werden automatisch gelöscht und können von MOBS24 nicht zugewiesen und damit auch nicht angezeigt werden.)  
+   - **Vorname, Nachname, Geburtsdatum**: Diese Angaben sind für die Anmeldung bei der Versicherung erforderlich.  
+   - **Geschlecht**  
+
+   Es kann vorkommen, dass du Spalten siehst, die nur für interne Referenzen genutzt werden (z.B. y_id). Bitte importiere dort nichts hinein. Importiere immer nur bewusst Daten in Spalten, die du kennst. Wenn du unsicher bist, ob die Daten korrekt sind, kannst du einen Probeimport mit einem einzelnen Datensatz durchführen. Diesen kannst du später problemlos wieder löschen.  
+
+3. **Daten einfügen**  
+
+   - **Pro Datensatz eine Zeile**:  
+     Jede Zeile enthält die Daten für einen Datensatz.  
+   - **Spalten trennen**:  
+     Trennen Sie die Werte in einer Zeile durch Kommas.  
+   - **Leere Felder**:  
+     Lasse leere Felder einfach leer, ohne etwas zwischen die Kommas zu schreiben. Ist ein kompletter Datensatz z.B. **a,b,c,d** und du willst die Felder a und d leer lassen, schreibe **,b,,d**. Nur das Feld b wäre dieser Syntax: **,b,,**. Es gibt kein abschließendes Komma.
+   - **Felder, die ein Komma enthalten**  
+     Wenn in ein Feld ein Komma eingetragen werden muss, dann muss das Feld mit Anführungszeichen versehen (*'maskiert'*) werden. Beispiel:  
+    ``` csv
+    Vorname, Nachname, BSG, Mail
+    Cécile, "Teich, Dr.", Nutzfahrzeuge,,
+    ```  
+
+### Bezug auf bereits gespeicherte Daten
+Unter dem Begriff **Fremdschlüssel-Spalten** siehst du im gelben Hinweisblock Feldnamen, die sich auf bereits gespeicherte Daten beziehen. Das System übernimmt hier nicht einfach den Text, den du eingibst, sondern schaut in einer Liste nach, welche passende Information dazu gehört.  
+
+**Ein Beispiel:**  
+Stell dir vor, das System hat eine Liste mit Betriebssportgruppen:  
+- 1 = BSG Nutzfahrzeuge  
+- 2 = SG Stern  
+- 3 = Uestra Hannover  
+
+Wenn du z. B. in der Spalte BSG *Nutzfahrzeuge* eingibst, sucht das System in dieser Liste nach der Betriebssportgruppe, die am besten zu *Nutzfahrzeuge* passt, und übernimmt den Bezug zu dieser BSG.  
+
+Bei mehreren Treffern (z. B. bei *SG*) gibt MOBS24 eine Fehlermeldung aus und weist darauf hin.  
+
+**Was bedeutet das für dich?**  
+- Du kannst den Namen oder einen Teil des Namens eingeben (z. B. „Nutzfahrzeuge“ statt „BSG Nutzfahrzeuge“).  
+- Groß- und Kleinschreibung ist egal (z. B. „nutzfahrzeuge“ oder „NUTZFAHRZEUGE“ funktioniert genauso).  
+- Wichtig ist nur, dass das System genau weiß, was du meinst. Wenn es mehrere Möglichkeiten gibt, musst du die Eingabe präzisieren, damit das System den richtigen Bezug herstellen kann.  
+
+**Warum macht das System das?**  
+Das System arbeitet im Hintergrund mit Nummern (IDs), weil das schneller und genauer ist. Du musst dir aber keine Sorgen um diese Nummern machen – das System erledigt das für dich.  
+
+---
+
+### Beispiel  
+
+Folgende CSV-Eingabe:  
+```csv
+Mail,Vorname,Nachname,BSG
+hans.meier@example.com,Hans,Meier,Nutzfahrzeuge
+,Lisa,Müller,Stern
+peter@example.com,Peter,,uestra
+,Cécile,"Teich, Dr.",Nutzfahrzeuge
+```
+
+führt zu diesen Datensätzen:
+
+| Mail                     | Vorname | Nachname      | BSG               |
+|--------------------------|---------|---------------|-------------------|
+| hans.meier@example.com   | Hans    | Meier         | BSG Nutzfahrzeuge |
+|                          | Lisa    | Müller        | SG Stern          |
+| peter@example.com        | Peter   |               | Uestra Hannover   |
+|                          | Cécile  | Teich, Dr.    | BSG Nutzfahrzeuge |
+
+
+## ...trete ich für eine andere (nicht Stamm-) BSG in einer Sparte an?
+Bist du z.B. bei der *BSG Wassersport* gemeldet, möchtest aber für die *BSG Hallensport* Handball spielen, kannst du das tun, ohne deine Stamm-BSG verlassen zu müssen:
+
+| **Schritt** | **Aktion**                                          |
+|-------------|-----------------------------------------------------|
+| **Vom Mitglied durchzuführen:**                                   | 
+| 1           | Der neuen BSG deine Daten zur Bearbeitung freigeben | 
+| **Von der BSG durchzuführen:**                                    | 
+| 2           | Mitglied in Sparte(n) anmelden                      |
+
+### ...wechsle ich die Stamm-BSG?
+
+Du kannst auch die Stamm-BSG über das System wechseln:
+
+| **Schritt** | **Aktion**                                                                                            |
+|-------------|-------------------------------------------------------------------------------------------------------|
+| **Vom Mitglied durchzuführen:**                                                                                     | 
+| 1           | Ändere in der Ansicht *Antrag zum Wechsel der Stamm BSG* das Feld *Ziel_BSG* auf deine neue Stamm-BSG | 
+| **Von der BSG durchzuführen:**                                    | 
+| 2           | Mitglied in Sparte(n) anmelden                      |
+
 ## Eine BSG neu Einrichten
 
 LOP2:

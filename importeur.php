@@ -738,7 +738,7 @@ function findForeignKeyMatch($db, $searchValue, $referenzquery) {
                         <div class="collapse show" id="importHelpContent">
                             <p class="mt-3"><strong>Anleitung zum Import:</strong></p>
                             <ol>
-                                <p>1. Kopfzeile erstellen mit den Spalten:</p>
+                                <p>1. Kopfzeile erstellen. Folgende Spalten stehen zur Verfügung:</p>
                                 <p><code><strong><?= implode(",", $tableColumns) ?></strong></code></p>
                                 
                                 <p>2. Daten einfügen:</p>
