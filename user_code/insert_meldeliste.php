@@ -49,6 +49,9 @@ $cnt2 = $db->query("INSERT IGNORE INTO b_meldeliste
             JOIN b_sparte                AS s ON s.id = mis.Sparte;
             ",array(),0);
 
+
+
+
 // ALT: Beitragsstelle (Empfänger) = Verband der BSG. Das muss aber Verband der Sparte sein, weil dort muss das Geld ja hin!
 /*
 $cnt2 = $db->query("INSERT IGNORE INTO b_meldeliste

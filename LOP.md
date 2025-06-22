@@ -17,7 +17,17 @@ INSERT INTO b_mitglieder (Vorname,Nachname,BSG,Stammmitglied_seit,Mail,Geschlech
 VALUES ('Tommy Manuell','Nocker',1,'1966-06-06','NeueMail@Nocker.de',3,'1966-06-06',1);
 
 # Offene Sofort-Issues
+DBI
+lvl_30 binde ich gerade die Saldenansicht ein.
 
+Wenn ein Nutzi in einer Sparte in Celle ist, ist der Empfänger der Spartenbeiträge nicht Hannover, sondern Celle, also nicht, wo die BSG ist, sondern, wo die Sparte ist. Das führt jetzt zu einer Komplexität in den Salden - aber machbar:
+
+- Bei Zahlungseingang muss auch angegeben werden, welcher RV der Zahlungsempfänger ist (Achtung - Berechtigungen). 
+- In der Meldeliste steht bereits die richtige Beitragsstelle (habe ich gerade geändert)
+- In die Meldeliste muss aber so oder so die ID der BSG, sonst können die Zahlungseingänge nicht zugewiesen werden.
+- Final muss in den Salden das alles berücksichtigt werden. Es gibt dann also pro BSG ein Saldo gegenüber jedem Gläubiger.
+
+Kann ich die Salden in lvl_30 hängen? Oder 40? 
 
 
 
