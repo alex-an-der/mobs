@@ -28,11 +28,10 @@
   - [Erweiterte Rechte](#erweiterte-rechte)
 - [Mitarbeiter im Landesverband](#mitarbeiter-im-landesverband)
 - [Systemadministratoren](#systemadministratoren)
-  - [Offene Issues](#offene-issues)
+  - [Wichtige Ansichten](#wichtige-ansichten)
   - [Error-Log](#error-log)
   - [Rollback](#rollback)
   - [Nutzerzahlen](#nutzerzahlen)
-  - [Fehlermeldungen anpassen](#fehlermeldungen-anpassen)
   - [Zuweisung von Landesverbans- und Systemadminrechten](#zuweisung-von-landesverbans--und-systemadminrechten)
   - [Backdoor](#backdoor)
 - [Workflows (ggf. mit Hintergründe) / grafisch?](#workflows-ggf-mit-hintergründe--grafisch)
@@ -278,11 +277,35 @@ Um das Recht zu erhalten, den Landesverband zu verwalten, muss ein Systemadminis
 
 # Systemadministratoren
 
-## Offene Issues
+## Wichtige Ansichten
+
+- **Fehlermeldungen anpassen**
+Allgemeinen Fehlern - insbesondere SQL-Fehler - kann hier eine individuelle Fehlermeldung zugewiesen werden. Funktionsweise:
+
+
+| Aktion | Beispiel |  
+| --- | --- |  
+| Die Datenbank gibt einen Fehler zurück  | Der Nutzer gibt bei der Spartenanmeldung die Sparte nicht an. Die Datenbank meldet zurück: **SQLSTATE[HY000]: General error: 1364 Field 'Sparte' doesn't have a default value** |
+| MOBS24 prüft, ob es für diese Fehlermeldung bereits einen Eintrag gibt. | <ul><li>Das System prüft zunächst den **sql_error_code**.</li><li> Gibt es mehrere Treffer wird derjenige bevorzugt, der auch bei der Volltextsuche (**add_fulltext_constraint**) einen Treffer hat.</li><li> Unter den Doppeltreffer gibt es kein weiteres Ranking.</li><li>Bei einem Treffer wird dem Anwender anstelle der **ray_message** die **user_message** angezeigt.</li><li>Die **description** dient internen Notizen innerhalb der Tabelle und wird nicht ausgegeben.</li></ul>|  
+| Gibt es noch keinen Eintrag: |
+| Diese Meldung wird in die Fehler-Management-Tabelle eingetragen und in dieser Ansicht angezeigt | <ul><li>ID: interne ID</li><li>error_log_id: Im Error Log wird dieser Fehler ebenfalls geloggt</li><li>source: Derzeit implementiert: *database* und *server*</li><li>raw_message: Die obige Meldung von der Datenbank/vom Server</li><li>sql_error_code: Offizieller Error-Code wenn verfügbar</li></ul> Die anderen Spalten sind zunächst leer.|
+
+
+
+- **Offene Issues**  
+Was ist noch zu zun? Erledigte Issues bekommen die Prio 222 (quick & dirty wegen der Sorierung) und die Versionsnummer, in der das Issue umgesetzt wurde.
+
 ## Error-Log
+Alle Fehler mit eingeloggtem Nutzer.
+
 ## Rollback
+Experimental. Entwickle ich ggf. für das Framework weiter.
+
 ## Nutzerzahlen
-## Fehlermeldungen anpassen
+Wieviele Nutzer sind angemeldet? Ein Überblick, um Performanceproblemen vorzubeugen, Fehleranzahlen besser einschätzen zu können und einer Featureüberproduktion vorzubeugen.
+
+
+
 ## Zuweisung von Landesverbans- und Systemadminrechten
 ## Backdoor
   
