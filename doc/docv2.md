@@ -43,7 +43,6 @@
     - [Beispiel](#beispiel)
   - [...trete ich für eine andere (nicht Stamm-) BSG in einer Sparte an?](#trete-ich-für-eine-andere-nicht-stamm--bsg-in-einer-sparte-an)
     - [...wechsle ich die Stamm-BSG?](#wechsle-ich-die-stamm-bsg)
-  - [Eine BSG neu Einrichten](#eine-bsg-neu-einrichten)
 - [Auswirkungen von UPDATE und DELETE auf die Datenbank](#auswirkungen-von-update-und-delete-auf-die-datenbank)
   - [UPDATE (Ändern von Daten)](#update-ändern-von-daten)
   - [DELETE (Löschen von Daten)](#delete-löschen-von-daten)
@@ -459,7 +458,13 @@ Du kannst auch die Stamm-BSG über das System wechseln:
 | **Von der BSG durchzuführen:**                                    | 
 | 2           | Mitglied in Sparte(n) anmelden                      |
 
-## Eine BSG neu Einrichten
+
+**##########################**
+- qs-alex: insert into meldeliste geht nicht
+- localhost: Es wird noch immer auf b_v_meldeliste referenziert. Die habe ich doch raus...?!
+**##########################**
+
+
 
 LOP2:
 Doku für Systemadmin:
