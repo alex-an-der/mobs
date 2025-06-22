@@ -321,10 +321,52 @@ CREATE TABLE `sys_error_manager` (
 ) 
 ENGINE = InnoDB;
 
-## Registrieren melder direkt in BSG? Besser: ANtrag und dann aufnehmen und erst dann LogIn möglich
-1. Antrag stellen
-2. Beim LogIn:
-     - Wie bisher in b_mitglieder aufnehmen (wie ist das jetzt?)
-     -  Aber BSG nicht automatisch übertragen
-     -  Generelle Abfrage: BSG IS NULL -> Kein LogIn
-     -  SQL: NOT NULL wieder rausnehmen
+``` sql
+-- Definiere die Datenbank als Variable
+SET @database_name = 'db_445253_7';
+
+-- Ändere den Zeichensatz und die Collation der gesamten Datenbank
+-- Dieser Befehl muss direkt ausgeführt werden, da ALTER DATABASE nicht dynamisch funktioniert
+ALTER DATABASE db_445253_7 CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+
+-- Generiere SQL-Befehle, um den Zeichensatz und die Collation aller Tabellen zu ändern
+SELECT CONCAT(
+    'ALTER TABLE ', @database_name, '.', TABLE_NAME, 
+    ' CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;'
+) AS sql_command
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_SCHEMA = @database_name;
+
+-- Generiere SQL-Befehle, um den Zeichensatz und die Collation aller Spalten zu ändern
+SELECT CONCAT(
+    'ALTER TABLE ', @database_name, '.', TABLE_NAME, 
+    ' MODIFY ', COLUMN_NAME, ' ', COLUMN_TYPE, 
+    ' CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;'
+) AS sql_command
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = @database_name
+  AND CHARACTER_SET_NAME IS NOT NULL;
+
+-- Setze die globalen Standardwerte für Zeichensatz und Collation (falls möglich)
+SET GLOBAL character_set_server = 'utf8mb4';
+SET GLOBAL collation_server = 'utf8mb4_german2_ci';
+
+-- Überprüfe den Zeichensatz und die Collation der Datenbank
+SELECT SCHEMA_NAME, DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME
+FROM INFORMATION_SCHEMA.SCHEMATA
+WHERE SCHEMA_NAME = @database_name;
+
+-- Überprüfe den Zeichensatz und die Collation aller Tabellen
+SELECT TABLE_NAME, TABLE_COLLATION
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_SCHEMA = @database_name;
+
+-- Überprüfe den Zeichensatz und die Collation aller Spalten
+SELECT TABLE_NAME, COLUMN_NAME, CHARACTER_SET_NAME, COLLATION_NAME
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = @database_name;
+
+-- Überprüfe die Verbindungseinstellungen
+SHOW VARIABLES LIKE 'character_set_connection';
+SHOW VARIABLES LIKE 'collation_connection';
+```

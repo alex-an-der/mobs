@@ -12,8 +12,10 @@ class Datenbank {
         $dbpass = DB_PASS;
     
         try {
-            $dsn = "mysql:host=$dbhost;dbname=$dbname;charset=utf8";
+            $dsn = "mysql:host=$dbhost;dbname=$dbname;charset=utf8mb4";
             $this->pdo = new PDO($dsn, $dbuser, $dbpass);
+            $this->pdo->exec("SET NAMES 'utf8mb4' COLLATE 'utf8mb4_german2_ci'");
+     
             $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
             echo 'Connection to Database failed: ' . $e->getMessage();
