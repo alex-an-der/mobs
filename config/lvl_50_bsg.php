@@ -19,40 +19,6 @@ WHERE m.id IS NULL;
 ######################################################################################################
 
 
-  $anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_mitglieder",
-    "auswahltext" => "$bericht Salden ".($curyear-1),
-    "writeaccess" => false,
-    "import" => false,
-    "query" =>
-    "SELECT 
-  Beitragsjahr, 
-  BSG, 
-  Beitragsstelle, 
-  SUM(Betrag) AS Summe_Betrag
-FROM b_meldeliste
-GROUP BY 
-  Beitragsjahr, 
-  BSG, 
-  Beitragsstelle
-ORDER BY 
-  Beitragsjahr, 
-  BSG, 
-  Beitragsstelle;
-                ",
-    "referenzqueries" => array(
-        "Beitragsstelle" => "SELECT id, Verband as anzeige
-        FROM b_regionalverband;"
-    ),         
-    "spaltenbreiten" => array(
-        "Beitragsjahr"    => "150",
-        "BSG"             => "400",
-        "Haben/€"         => "100",
-        "Soll/€"          => "100",
-        "Saldo/€"         => "100"
-    )   
-                
-);
 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_bsg",

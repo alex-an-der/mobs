@@ -145,128 +145,6 @@ $anzuzeigendeDaten[] = array(
                 WHERE m.Mailbenachrichtigung=1"
 );
 
-/*
-$curyear = (int)date("Y");
-# Mitglieder nach Sportarten / Turniereinladungen
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_mitglieder",
-    "auswahltext" => "$bericht Salden ".$curyear,
-    "writeaccess" => false,
-    "import" => false,
-    "query" =>
-    "SELECT 
-        kombi.BSG as id,
-        COALESCE(MIN(r.Kurzname), MIN(r_bsg.Kurzname)) as Verband,
-        kombi.BSG as Zahlungspflichtige_BSG,
-        CONCAT(IFNULL(SUM(ml.Betrag), 0.00),'€') AS Beiträge,
-        CONCAT(IFNULL(SUM(ze.Haben), 0.00),'€') as Einzahlungen,
-        CONCAT(IFNULL(SUM(ze.Haben), 0.00) - IFNULL(SUM(ml.Betrag), 0.00), '€') AS Saldo
-    FROM (
-        SELECT bsg_id AS BSG, Beitragsjahr AS Jahr
-        FROM b_v_meldeliste_dieses_jahr
-        WHERE Zahlungspflichtige_BSG IS NOT NULL
-        UNION
-        SELECT BSG, Abrechnungsjahr AS Jahr
-        FROM b_zahlungseingaenge
-        WHERE Abrechnungsjahr = YEAR(CURDATE())
-    ) AS kombi
-    LEFT JOIN b_v_meldeliste_dieses_jahr AS ml
-        ON ml.bsg_id = kombi.BSG AND ml.Beitragsjahr = kombi.Jahr
-    LEFT JOIN (
-        SELECT 
-            BSG, 
-            Abrechnungsjahr,
-            SUM(Haben) AS Haben
-        FROM b_zahlungseingaenge
-        WHERE Abrechnungsjahr = YEAR(CURDATE())
-        GROUP BY BSG, Abrechnungsjahr
-    ) AS ze 
-        ON ze.BSG = kombi.BSG AND ze.Abrechnungsjahr = kombi.Jahr
-    LEFT JOIN b_regionalverband as r on r.id = ml.rv_id
-    LEFT JOIN b_bsg AS bsg ON bsg.id = kombi.BSG
-    LEFT JOIN b_regionalverband AS r_bsg ON r_bsg.id = bsg.Verband
-    WHERE (ml.Zahlungspflichtige_BSG IS NOT NULL OR ze.Haben IS NOT NULL)
-    AND (
-            (ml.rv_id IS NULL AND FIND_IN_SET(bsg.Verband, berechtigte_elemente(1, 'verband')) > 0)
-            OR
-            (ml.rv_id IS NOT NULL AND FIND_IN_SET(ml.rv_id, berechtigte_elemente(1, 'verband')) > 0)
-        )
-    GROUP BY kombi.BSG
-    ORDER BY (IFNULL(SUM(ze.Haben), 0.00) - IFNULL(SUM(ml.Betrag), 0.00));
-                ",
-    "referenzqueries" => array(
-        "Zahlungspflichtige_BSG" => "SELECT bsg.id as id, bsg.BSG as anzeige
-                FROM b_bsg as bsg;"
-    ),         
-    "spaltenbreiten" => array(
-        "Verband"         => "150",
-        "BSG_Name"        => "300",
-        "Haben/€"         => "100",
-        "Soll/€"          => "100",
-        "Saldo/€"         => "100"
-    )   
-                
-);
-
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_mitglieder",
-    "auswahltext" => "$bericht Salden ".($curyear-1),
-    "writeaccess" => false,
-    "import" => false,
-    "query" =>
-    "SELECT 
-        kombi.BSG as id,
-        COALESCE(MIN(r.Kurzname), MIN(r_bsg.Kurzname)) as Verband,
-        kombi.BSG as Zahlungspflichtige_BSG,
-        CONCAT(IFNULL(SUM(ml.Betrag), 0.00),'€') AS Beiträge,
-        CONCAT(IFNULL(SUM(ze.Haben), 0.00),'€') as Einzahlungen,
-        CONCAT(IFNULL(SUM(ze.Haben), 0.00) - IFNULL(SUM(ml.Betrag), 0.00), '€') AS Saldo
-    FROM (
-        SELECT bsg_id AS BSG, Beitragsjahr AS Jahr
-        FROM b_v_meldeliste_letztes_jahr
-        WHERE Zahlungspflichtige_BSG IS NOT NULL
-        UNION
-        SELECT BSG, Abrechnungsjahr AS Jahr
-        FROM b_zahlungseingaenge
-        WHERE Abrechnungsjahr = YEAR(CURDATE())-1
-    ) AS kombi
-    LEFT JOIN b_v_meldeliste_letztes_jahr AS ml
-        ON ml.bsg_id = kombi.BSG AND ml.Beitragsjahr = kombi.Jahr
-    LEFT JOIN (
-        SELECT 
-            BSG, 
-            Abrechnungsjahr,
-            SUM(Haben) AS Haben
-        FROM b_zahlungseingaenge
-        WHERE Abrechnungsjahr = YEAR(CURDATE())-1
-        GROUP BY BSG, Abrechnungsjahr
-    ) AS ze 
-        ON ze.BSG = kombi.BSG AND ze.Abrechnungsjahr = kombi.Jahr
-    LEFT JOIN b_regionalverband as r on r.id = ml.rv_id
-    LEFT JOIN b_bsg AS bsg ON bsg.id = kombi.BSG
-    LEFT JOIN b_regionalverband AS r_bsg ON r_bsg.id = bsg.Verband
-    WHERE (ml.Zahlungspflichtige_BSG IS NOT NULL OR ze.Haben IS NOT NULL)
-    AND (
-            (ml.rv_id IS NULL AND FIND_IN_SET(bsg.Verband, berechtigte_elemente(1, 'verband')) > 0)
-            OR
-            (ml.rv_id IS NOT NULL AND FIND_IN_SET(ml.rv_id, berechtigte_elemente(1, 'verband')) > 0)
-        )
-    GROUP BY kombi.BSG
-    ORDER BY (IFNULL(SUM(ze.Haben), 0.00) - IFNULL(SUM(ml.Betrag), 0.00));
-                ",
-    "referenzqueries" => array(
-        "Zahlungspflichtige_BSG" => "SELECT bsg.id as id, bsg.BSG as anzeige
-                FROM b_bsg as bsg;"
-    ),         
-    "spaltenbreiten" => array(
-        "Verband"         => "150",
-        "BSG_Name"        => "300",
-        "Haben/€"         => "100",
-        "Soll/€"          => "100",
-        "Saldo/€"         => "100"
-    )   
-                
-);*/
 
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_meldeliste",
@@ -362,124 +240,42 @@ $anzuzeigendeDaten[] = array(
     "writeaccess" => false,
     "import" => false,
     "query" => "SELECT 
-            jahre.Jahr AS Abrechnungsjahr,
-            bsg.id AS id,
-            rv.Kurzname AS Verband,
-            bsg.BSG AS BSG_Name,
-            CONCAT(IFNULL(SUM(ml.Betrag), 0.00), '€') AS Soll,
-            CONCAT(IFNULL(SUM(ze.Haben), 0.00), '€') AS Haben,
-            CONCAT(IFNULL(SUM(ze.Haben), 0.00) - IFNULL(SUM(ml.Betrag), 0.00), '€') AS Saldo
-        FROM 
-            (
-                SELECT BSG, Beitragsjahr AS Jahr FROM b_meldeliste
-                UNION
-                SELECT BSG, Abrechnungsjahr AS Jahr FROM b_zahlungseingaenge
-            ) AS jahre
-        JOIN b_bsg AS bsg ON bsg.id = jahre.BSG
-        JOIN b_regionalverband AS rv ON rv.id = bsg.Verband
-        LEFT JOIN b_meldeliste AS ml 
-            ON ml.BSG = jahre.BSG AND ml.Beitragsjahr = jahre.Jahr
-        LEFT JOIN b_zahlungseingaenge AS ze 
-            ON ze.BSG = jahre.BSG AND ze.Abrechnungsjahr = jahre.Jahr
-        WHERE FIND_IN_SET(bsg.Verband, berechtigte_elemente($uid, 'verband')) > 0
-        GROUP BY bsg.id, rv.Kurzname, bsg.BSG, jahre.Jahr
-        ORDER BY rv.Kurzname, bsg.BSG, jahre.Jahr DESC;
+MAX(a.BSG) as id, -- Pflicht-id, hier nicht relevant
+b.BSG as BSG,
+a.Abrechnungsjahr,
+SUM(a.HABEN) as HABEN,
+SUM(a.SOLL) as SOLL,
+(SUM(a.HABEN) - SUM(a.SOLL)) AS Saldo,
+r.Verband as Empfaenger
+
+FROM (
+SELECT BSG_ID as BSG, Beitragsjahr as Abrechnungsjahr, Betrag as SOLL, 0 as HABEN, Beitragsstelle as Empfaenger
+FROM b_meldeliste
+
+UNION ALL
+
+SELECT BSG, Abrechnungsjahr, 0 as SOLL, Haben as HABEN, Empfaenger
+FROM b_zahlungseingaenge
+) as a
+JOIN b_bsg as b on b.id = a.BSG
+JOIN b_regionalverband as r on a.Empfaenger = r.id
+
+WHERE 
+FIND_IN_SET(b.id, berechtigte_elemente($uid, 'bsg')) > 0 OR
+FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0 
+GROUP BY BSG, Abrechnungsjahr, r.Verband;
+
     ",
     "spaltenbreiten" => array(
-        "Verband"         => "150",
-        "BSG_Name"        => "300",
+        "BSG"             => "300",
         "Abrechnungsjahr" => "120",
         "Soll"            => "100",
         "Haben"           => "100",
-        "Saldo"           => "100"
+        "Saldo"           => "100",
+        "Empfaenger"      => "300"
     )
 );
 
-/*
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_v_meldeliste_dieses_jahr",
-    "auswahltext" => "$bericht Meldeliste ".$curyear." auf Ebene Regionalverband",
-    "writeaccess" => false,
-    "import" => false,
-    "query" => "SELECT 
-            subsel.id, 
-            DATE_FORMAT(Timestamp, '%d.%m.%Y') AS Erfasst_am, 
-            Mitglied, 
-            BSG as Zahlungspflichtige_BSG, 
-            Kategorie, 
-            Zuordnung,
-            Betrag as €,
-            rv.Kurzname as Beitragsstelle
-            FROM  
-            (SELECT ml.id as id, Timestamp, ml.Mitglied, ml.BSG, bz.Zweck as Kategorie, rv.Kurzname as Zuordnung, ml.Beitragsjahr as jahr, ml.Beitragsstelle as Beitragsstelle, Betrag
-                FROM b_meldeliste as ml
-                JOIN b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
-                JOIN b_regionalverband as rv on rv.id = ml.Zuordnung_ID
-                WHERE bz.id = 1
-                
-                UNION ALL 
-                
-                SELECT ml.id as id, Timestamp, ml.Mitglied, ml.BSG, bz.Zweck as Kategorie, sp.Sparte as Zuordnung, ml.Beitragsjahr as jah, ml.Beitragsstelle as Beitragsstelle, Betrag
-                FROM b_meldeliste as ml
-                JOIN b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
-                JOIN b_sparte as sp on sp.id = ml.Zuordnung_ID
-                WHERE bz.id = 2) as subsel
-            JOIN b_regionalverband as rv on rv.id = Beitragsstelle
-            WHERE jahr = $curyear AND FIND_IN_SET(Beitragsstelle, berechtigte_elemente($uid, 'verband')) > 0;",
-
-    "spaltenbreiten" => array(
-        "Erfasst_am"              => "200",
-        "Mitglied"                => "250",
-        "Zahlungspflichtige_BSG"  => "200",
-        "Kategorie"               => "150",
-        "Zuordnung"               => "150",
-        "Betrag"                  => "100",
-        "Beitragsstelle"          => "250"
-        )
-);
-
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_v_meldeliste_letztes_jahr",
-    "auswahltext" => "$bericht Meldeliste ".($curyear-1)." auf Ebene Regionalverband",
-    "writeaccess" => false,
-    "import" => false,
-    "query" => "SELECT 
-            subsel.id, 
-            DATE_FORMAT(Timestamp, '%d.%m.%Y') AS Erfasst_am, 
-            Mitglied, 
-            BSG as Zahlungspflichtige_BSG, 
-            Kategorie, 
-            Zuordnung,
-            Betrag,
-            rv.Kurzname as Beitragsstelle
-            FROM  
-            (SELECT ml.id as id, Timestamp, ml.Mitglied, ml.BSG, bz.Zweck as Kategorie, rv.Kurzname as Zuordnung, ml.Beitragsjahr as jahr, ml.Beitragsstelle as Beitragsstelle, Betrag
-                FROM b_meldeliste as ml
-                JOIN b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
-                JOIN b_regionalverband as rv on rv.id = ml.Zuordnung_ID
-                WHERE bz.id = 1
-                
-                UNION ALL 
-                
-                SELECT ml.id as id, Timestamp, ml.Mitglied, ml.BSG, bz.Zweck as Kategorie, sp.Sparte as Zuordnung, ml.Beitragsjahr as jah, ml.Beitragsstelle as Beitragsstelle, Betrag
-                FROM b_meldeliste as ml
-                JOIN b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
-                JOIN b_sparte as sp on sp.id = ml.Zuordnung_ID
-                WHERE bz.id = 2) as subsel
-            JOIN b_regionalverband as rv on rv.id = Beitragsstelle
-            WHERE jahr = ".($curyear-1)." AND FIND_IN_SET(Beitragsstelle, berechtigte_elemente($uid, 'verband')) > 0;",
-
-    "spaltenbreiten" => array(
-        "Erfasst_am"              => "200",
-        "Mitglied"                => "250",
-        "Zahlungspflichtige_BSG"  => "200",
-        "Kategorie"               => "150",
-        "Zuordnung"               => "150",
-        "Betrag"                  => "100",
-        "Beitragsstelle"          => "250"
-        )
-);
-*/
 
 # Änderungshistorie per Mitglied
 $anzuzeigendeDaten[] = array(

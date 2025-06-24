@@ -377,26 +377,6 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                         echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars((string)$anzeige, ENT_QUOTES) . '</div>';
                     }
 
-                    // DBI Original if war: if ($readwrite || $deleteAnyway) { - macht das "deleteAnyway" Sinn?
-                    /* Original-Code:
-                        if ($readwrite || $deleteAnyway) {
-                            echo '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0)">';
-                            echo '<option value="NULL"' . (empty($value) ? ' selected' : '') . '>'.NULL_WERT.'</option>';
-                            foreach ($foreignKeys[$key] as $fk) {
-                                $fk_value = $fk['id'];
-                                $fk_display = htmlspecialchars((string)$fk['anzeige'], ENT_QUOTES);
-                                $selected = ($fk_value == $displayValue) ? 'selected' : '';
-                                echo '<option value="' . htmlspecialchars((string)$fk_value, ENT_QUOTES) . '" ' . $selected . '>' . $fk_display . '</option>';
-                            }
-                            echo '</select>';
-                        } else {
-                            $anzeige = ($data_fk_ID_value !== "" && $data_fk_ID_value !== null) ? $data_fk_ID_value : NULL_WERT;
-                            echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars((string)$anzeige, ENT_QUOTES) . '</div>';
-                        }
-
-                    */
-                   
-
                     
                 } else { // normale Textspalte 
                     if ($readwrite && !$isInfoColumn) {                        
