@@ -399,6 +399,7 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                         data-fkIDkey=\"" . htmlspecialchars((string)$data_fk_ID_key, ENT_QUOTES) . "\"
                         data-fkIDvalue=\"" . htmlspecialchars((string)$data_fk_ID_value, ENT_QUOTES) . "\"
                         data-userajax=\"" . htmlspecialchars($isAjaxColumn ? '1' : '0', ENT_QUOTES) . "\"
+                        data-field=\"$key\"
                         type=\"" . $inputType . "\"
                         class=\"form-control border-0\"
                         style=\"background-color: inherit; word-wrap: break-word; white-space: normal;\"

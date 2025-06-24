@@ -1410,28 +1410,45 @@ function exportData(format, spreadsheetFormat) {
     document.body.removeChild(form);
 }
 
+function setColumnFilter(field, value) {
+    const input = document.querySelector(`.column-filter[data-field="${field}"]`);
+    if (input) {
+        input.value = value;
+        filterTableByColumns();
+        return true;
+    }
+    return false;
+}
+
 function filter_that(selectElement, typ){
-    
+    let selectedText = '';
     switch(typ){
         case 'select':
-            var selectedText = selectElement.options[selectElement.selectedIndex].text;
+            selectedText = selectElement.options[selectElement.selectedIndex].text;
             break;
         case 'input':
-            var selectedText = selectElement.value;
+            selectedText = selectElement.value;
             break;
         case 'div':
-            var selectedText = selectElement.innerHTML;
+            selectedText = selectElement.innerHTML;
             break;
     }
 
+    // Versuche, das data-field-Attribut zu lesen (Spaltenname)
+    const field = selectElement.getAttribute && selectElement.getAttribute('data-field');
+    if(field && setColumnFilter(field, selectedText)) {
+        // Spaltenfilter wurde gesetzt, kein globaler Filter nötig
+        event.preventDefault();
+        return;
+    }
+
+    // Fallback: globaler Filter wie bisher
     if(document.getElementById('tableFilter').value==selectedText){
         selectedText = "";
     }
-
     event.preventDefault();
     document.getElementById('tableFilter').value = selectedText;
     filterTable();
-    
 }
 
 function clearFilter() {
