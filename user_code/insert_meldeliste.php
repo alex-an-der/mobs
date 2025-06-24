@@ -8,7 +8,7 @@ require_once(__DIR__."/../config/db_connect.php");
 
 // Stamm-BSG (Basisbeitrag)
 $cnt1 = $db->query("INSERT IGNORE INTO b_meldeliste
-                (Mitglied, BSG, Zuordnung, Zuordnung_ID, Betrag, Beitragsjahr, Beitragsstelle)
+                (Mitglied, BSG, Zuordnung, Zuordnung_ID, Betrag, Beitragsjahr, Beitragsstelle, BSG_ID)
             SELECT
                 CONCAT(m.id, ': ', m.Vorname, ', ', m.Nachname, ', geb. ', DATE_FORMAT(m.Geburtsdatum, '%d.%m.%y')) AS Mitglied,
                 CONCAT(
@@ -20,7 +20,8 @@ $cnt1 = $db->query("INSERT IGNORE INTO b_meldeliste
                 b.Verband                AS Zuordnung_ID,
                 r.Basisbeitrag           AS Betrag,
                 YEAR(CURDATE())          AS Beitragsjahr,
-                b.Verband                AS Beitragsstelle
+                b.Verband                AS Beitragsstelle,
+                b.id                     AS BSG_ID
             FROM b_mitglieder            AS m
             JOIN b_bsg                   AS b ON b.id = m.BSG
             JOIN b_regionalverband       AS r ON r.id = b.Verband
@@ -29,7 +30,7 @@ $cnt1 = $db->query("INSERT IGNORE INTO b_meldeliste
 
 // Sparten
 $cnt2 = $db->query("INSERT IGNORE INTO b_meldeliste
-                (Mitglied, BSG, Zuordnung, Zuordnung_ID, Betrag, Beitragsjahr, Beitragsstelle)
+                (Mitglied, BSG, Zuordnung, Zuordnung_ID, Betrag, Beitragsjahr, Beitragsstelle, BSG_ID)
             SELECT 
                 CONCAT(m.id, ': ', m.Vorname, ', ', m.Nachname, ', geb. ', DATE_FORMAT(m.Geburtsdatum, '%d.%m.%y')) AS Mitglied,
                 CONCAT(
@@ -41,7 +42,8 @@ $cnt2 = $db->query("INSERT IGNORE INTO b_meldeliste
                 mis.Sparte               AS Zuordnung_ID,
                 s.Spartenbeitrag         AS Betrag,
                 YEAR(CURDATE())          AS Beitragsjahr,
-                s.Verband                AS Beitragsstelle
+                s.Verband                AS Beitragsstelle,
+                b.id                     AS BSG_ID
             FROM b_mitglieder_in_sparten AS mis
             JOIN b_mitglieder            AS m ON m.id = mis.Mitglied
             JOIN b_bsg                   AS b ON b.id = mis.BSG

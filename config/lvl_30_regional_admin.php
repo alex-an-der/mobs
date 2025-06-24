@@ -36,7 +36,7 @@ $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_zahlungseingaenge",
     "auswahltext" => "Zahlungseingänge ",
     "writeaccess" => true,
-    "query" => "SELECT  z.id as id, z.BSG as BSG, z.Eingangsdatum, z.Abrechnungsjahr, z.Haben
+    "query" => "SELECT  z.id as id, z.BSG as BSG, z.Eingangsdatum, z.Abrechnungsjahr, z.Haben, z.Empfaenger
                 FROM b_zahlungseingaenge as z
                 JOIN b_bsg as b on b.id=z.BSG
                 JOIN b_regionalverband as r on r.id = b.Verband 
@@ -57,8 +57,10 @@ $anzuzeigendeDaten[] = array(
                     SELECT 2 AS n UNION ALL 
                     SELECT 3 AS n UNION ALL 
                     SELECT 4 AS n UNION ALL 
-                    SELECT 5 AS n) AS years;"
-    ),
+                    SELECT 5 AS n) AS years;",
+    "Empfaenger" => "SELECT id, Verband as anzeige FROM b_regionalverband 
+                     ORDER BY anzeige;"  
+    ), // Empfaenger müssen auch ohne Berechtigung ausgewählt werden dürfen
     "spaltenbreiten" => array(
         "BSG"                          => "380",
         "Eingangsdatum"                => "150",

@@ -18,16 +18,19 @@ VALUES ('Tommy Manuell','Nocker',1,'1966-06-06','NeueMail@Nocker.de',3,'1966-06-
 
 # Offene Sofort-Issues
 DBI
-lvl_30 binde ich gerade die Saldenansicht ein.
+## lvl_30 binde ich gerade die Saldenansicht ein.
 
 Wenn ein Nutzi in einer Sparte in Celle ist, ist der Empfänger der Spartenbeiträge nicht Hannover, sondern Celle, also nicht, wo die BSG ist, sondern, wo die Sparte ist. Das führt jetzt zu einer Komplexität in den Salden - aber machbar:
 
-- Bei Zahlungseingang muss auch angegeben werden, welcher RV der Zahlungsempfänger ist (Achtung - Berechtigungen). 
+### Erledigt:
 - In der Meldeliste steht bereits die richtige Beitragsstelle (habe ich gerade geändert)
 - In die Meldeliste muss aber so oder so die ID der BSG, sonst können die Zahlungseingänge nicht zugewiesen werden.
-- Final muss in den Salden das alles berücksichtigt werden. Es gibt dann also pro BSG ein Saldo gegenüber jedem Gläubiger.
+- Bei Zahlungseingang muss auch angegeben werden, welcher RV der Zahlungsempfänger ist - also für welchen RV eingezahlt wird (Achtung - Berechtigungen). 
+- 
+### Offen:
 
-Kann ich die Salden in lvl_30 hängen? Oder 40? 
+- Final muss in den Salden das alles berücksichtigt werden. Es gibt dann also pro BSG ein Saldo gegenüber jedem Gläubiger.
+- Wo häge ich die Salden ein, damit die Berechtigungen stimmen, aber jede BSG auch sehen kann, wie es aussieht. Kann ich die Salden in lvl_30 hängen? Oder 40? 
 
 
 
@@ -40,7 +43,8 @@ ob_clean LÖSCHT den Output-Buffer. Was wird da gelöscht? Funktioniert ypum dan
 
 - Auch yconf rausholen! Zumindest die dbconnect.
 
- 
+### Bootstrap usw. statisch einbinden (Dateien selbst hosten)
+
 # In der Prod-DB einfügen und neue Version v0.1.9-qa.x
 
 ### b_mitglieder.BSG: NULL -> NOT NULL  (nicht mehr nullable).
@@ -63,12 +67,12 @@ ALTER TABLE `b_mitglieder` ADD CONSTRAINT `FK_b_mitglieder_b___an_aus__aktiv` FO
 
 #### NULL verbieten:
 **Achtung - es dürfen keine NULL-Einträge gespeichert sein!**
-```
+``` sql
 ALTER TABLE `b_mitglieder` CHANGE COLUMN `BSG` `BSG` BIGINT UNSIGNED NOT NULL;
 ```
 
 ### Bemerkungsfeld
-```
+``` sql
 ALTER TABLE `b_mitglieder` ADD  `Bemerkung` VARCHAR(1000) NULL;
 ```
 
@@ -77,7 +81,7 @@ Meldeliste nicht auf Mitglieder referenzieren, sondern Daten (Vn, Nn, Geb., MNr)
 (QS-open issues)
 
 #### Neue Tabelle
-```
+``` sql
 DROP TABLE IF EXISTS `b_meldeliste`;
 CREATE TABLE `b_meldeliste` ( 
   `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
@@ -101,13 +105,13 @@ ON `b_meldeliste` (
 ```
 
 #### DROP VIEWS
-```
+``` sql
 DROP VIEW `b_v_meldeliste_letztes_jahr`;
 DROP VIEW `b_v_meldeliste_dieses_jahr`;
 ```
 
 ### Stammmitglied seit und seit entfernen
-```
+``` sql
 ALTER TABLE `b_mitglieder` DROP COLUMN `Stammmitglied_seit`;
 ALTER TABLE `b_mitglieder_in_sparten` DROP COLUMN `seit`;
 DROP TRIGGER IF EXISTS `update_stammmitglied_seit`;
@@ -116,7 +120,7 @@ DROP TRIGGER IF EXISTS `update_stammmitglied_seit`;
 
 
 ### Trigger, um das Löschen der indiv. Berechtigung zu verhindern, wenn Mitglied noch eingeschrieben ist.
-```
+``` sql
 DROP TRIGGER IF EXISTS tr_before_delete_individuelle_berechtigungen;
 
 DELIMITER //
@@ -158,7 +162,7 @@ DELIMITER ;
 ```
 
 ## adm_* => sys_*
-```
+``` sql
 DROP TABLE IF EXISTS `adm__log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -186,13 +190,13 @@ CREATE TABLE `sys_rollback` (
 ```
 
 ### ALTER TABLE `sys_log`
-```
+``` sql
 ALTER TABLE `sys_log` CHANGE COLUMN `ID` `ID` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL;
 ```
 
 
 ## BSG NULL zulassen, aber prüfen.
-```
+``` sql
 ALTER TABLE `b_mitglieder` CHANGE COLUMN `BSG` `BSG` BIGINT UNSIGNED NULL;
 ```
 
@@ -223,6 +227,17 @@ ALTER TABLE `b_regionalverband_rechte` CHANGE COLUMN `erweiterte_Rechte` `erweit
 ALTER TABLE `b___an_aus` ADD COLUMN `bool` TINYINT UNSIGNED NOT NULL DEFAULT 0;
 UPDATE `b___an_aus` SET`bool`=1 WHERE `id`=1;
 ```
+
+### Salden neu
+``` sql
+ALTER TABLE `b_meldeliste` ADD  `BSG_ID` BIGINT UNSIGNED NOT NULL;
+ALTER TABLE `b_zahlungseingaenge` ADD  `Empfaenger` BIGINT UNSIGNED NOT NULL;
+-- Vorher benötigt die neue Empfängerspalte gültige Werte:
+ALTER TABLE `b_zahlungseingaenge` ADD CONSTRAINT `FK_zahlungseingang_verband` FOREIGN KEY (`Empfaenger`) REFERENCES `b_regionalverband` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+
+```
+
 
 # ERLEDIGT (sollte eigentlich)
 
