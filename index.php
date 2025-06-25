@@ -267,7 +267,14 @@ function renderTableHeaders($data) {
         if($importErlaubt || $deleteAnyway) echo "<th></th>"; // Leeres Feld für Checkbox
         foreach (array_keys($data[0]) as $header) {
             if (strcasecmp($header, 'id') !== 0) {
-                echo "<th><input type='text' class='form-control form-control-sm column-filter' data-field='" . htmlspecialchars($header) . "' placeholder='Filter...'></th>";
+                $fieldName = $header;
+                if (strpos($header, 'info:') === 0) {
+                    $fieldName = substr($header, 5);
+                }
+                if (strpos($fieldName, 'ajax:') === 0) {
+                    $fieldName = substr($fieldName, 5);
+                }
+                echo "<th><input type='text' class='form-control form-control-sm column-filter' data-field='" . htmlspecialchars($fieldName) . "' placeholder='Filter...'></th>";
             }
         }
     } else {
@@ -313,7 +320,15 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                 }
                 $style .= "word-wrap: break-word; white-space: normal;'";
                 
-                echo '<td data-field="' . htmlspecialchars((string)$key) . '" ' . $style . '>';
+                // Prefix entfernen für data-field
+                $dataFieldKey = $key;
+                if (strpos($dataFieldKey, 'info:') === 0) {
+                    $dataFieldKey = substr($dataFieldKey, 5);
+                }
+                if (strpos($dataFieldKey, 'ajax:') === 0) {
+                    $dataFieldKey = substr($dataFieldKey, 5);
+                }
+                echo '<td data-field="' . htmlspecialchars((string)$dataFieldKey) . '" ' . $style . '>';
                 $data_fk_ID_key = "";
                 $data_fk_ID_value = "";
 
@@ -349,13 +364,13 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                     // Selects nur, wenn readwrite UND keine Info-Spalte 
                     if ($readwrite && !$isInfoColumn) {
                         // SELECT ZUSAMMENSTELLEN //
-                        echo '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, 0)">';
-                        /*echo "<select 
-                        oncontextmenu=\"filter_that(this, 'select');\" 
-                        class=\"form-control border-0\" 
-                        style=\"background-color: inherit; word-wrap: break-word; white-space: normal;\"
-                        onchange=\"updateField('{$tabelle}', '{$row['id']}', '{$key}', this.value, 0, '" . ($ajaxfile ?? '') . "')\"
-                        >*/;
+                        $selectTag = '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" data-field="' 
+                            . htmlspecialchars((string)$dataFieldKey) 
+                            . '" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' 
+                            . addslashes($tabelle) . '\', \'"
+                            . addslashes($row["id"]) . "\', \'"
+                            . addslashes($key) . "\', this.value, 0)">';
+                        echo $selectTag;
 
                         // Nur wenn Spalte nullable ist, die "---" anbieten (und nur bei r/w + non-info-Spalten)
                         if( $columnMayBeNULL[$key]) {
@@ -374,7 +389,7 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                         //$data_fk_ID_key   = $foreignKeys[$key][0]['id'];
                         //$data_fk_ID_value = $foreignKeys[$key][0]['anzeige'];
                         $anzeige = ($data_fk_ID_value !== "" && $data_fk_ID_value !== null) ? $data_fk_ID_value : NULL_WERT;
-                        echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars((string)$anzeige, ENT_QUOTES) . '</div>';
+                        echo '<div oncontextmenu="filter_that(this, \'div\');" data-field="' . htmlspecialchars((string)$dataFieldKey) . '" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars((string)$anzeige, ENT_QUOTES) . '</div>';
                     }
                      
                 } else { // normale Textspalte 
@@ -424,7 +439,7 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                             }
                             $anzeige = ($displayValue !== "" && $displayValue !== null) ? $displayValue : NULL_WERT;
                         }
-                        echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars((string)$anzeige, ENT_QUOTES) . '</div>';
+                        echo '<div oncontextmenu="filter_that(this, \'div\');" data-field="' . htmlspecialchars((string)$dataFieldKey) . '" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars((string)$anzeige, ENT_QUOTES) . '</div>';
                     }
                 }
                 echo '</td>';
