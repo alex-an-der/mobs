@@ -376,8 +376,7 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                         $anzeige = ($data_fk_ID_value !== "" && $data_fk_ID_value !== null) ? $data_fk_ID_value : NULL_WERT;
                         echo '<div oncontextmenu="filter_that(this, \'div\');" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars((string)$anzeige, ENT_QUOTES) . '</div>';
                     }
-
-                    
+                     
                 } else { // normale Textspalte 
                     if ($readwrite && !$isInfoColumn) {                        
                         $inputType = 'text';
