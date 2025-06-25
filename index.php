@@ -465,7 +465,7 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
             
             <?php 
             if($tabelle!=""){
-                echo "<p><form class='d-flex align-items-center'><input type='text' id='tableFilter' class='form-control' placeholder='Filtern entweder durch manuelle Eingabe oder Rechtsklick auf ein Datenfeld.'>";
+                echo "<p><form class='d-flex align-items-center'><input type='text' id='tableFilter' class='form-control' placeholder='Filtern...'>";
                 // Löschen-Button auskomment
 
 

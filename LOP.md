@@ -26,11 +26,12 @@ Wenn ein Nutzi in einer Sparte in Celle ist, ist der Empfänger der Spartenbeitr
 - In der Meldeliste steht bereits die richtige Beitragsstelle (habe ich gerade geändert)
 - In die Meldeliste muss aber so oder so die ID der BSG, sonst können die Zahlungseingänge nicht zugewiesen werden.
 - Bei Zahlungseingang muss auch angegeben werden, welcher RV der Zahlungsempfänger ist - also für welchen RV eingezahlt wird (Achtung - Berechtigungen). 
+- Final muss in den Salden das alles berücksichtigt werden. Es gibt dann also pro BSG ein Saldo gegenüber jedem Gläubiger.
+- Wo häge ich die Salden ein, damit die Berechtigungen stimmen, aber jede BSG auch sehen kann, wie es aussieht. Kann ich die Salden in lvl_30 hängen? Oder 40? 
 - 
 ### Offen:
 
-- Final muss in den Salden das alles berücksichtigt werden. Es gibt dann also pro BSG ein Saldo gegenüber jedem Gläubiger.
-- Wo häge ich die Salden ein, damit die Berechtigungen stimmen, aber jede BSG auch sehen kann, wie es aussieht. Kann ich die Salden in lvl_30 hängen? Oder 40? 
+
 
 
 

@@ -1330,6 +1330,11 @@ document.addEventListener('DOMContentLoaded', () => {
     columnFilters.forEach(input => {
         input.value = ''; // Clear column filter fields on page load
         input.addEventListener('input', filterTableByColumns);
+        input.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            this.value = '';
+            filterTableByColumns();
+        });
     });
 });
 
@@ -1413,6 +1418,12 @@ function exportData(format, spreadsheetFormat) {
 function setColumnFilter(field, value) {
     const input = document.querySelector(`.column-filter[data-field="${field}"]`);
     if (input) {
+        // Wenn bereits gesetzt, dann entfernen
+        if (input.value === value) {
+            input.value = '';
+            filterTableByColumns();
+            return 'cleared';
+        }
         input.value = value;
         filterTableByColumns();
         return true;
@@ -1436,8 +1447,9 @@ function filter_that(selectElement, typ){
 
     // Versuche, das data-field-Attribut zu lesen (Spaltenname)
     const field = selectElement.getAttribute && selectElement.getAttribute('data-field');
-    if(field && setColumnFilter(field, selectedText)) {
-        // Spaltenfilter wurde gesetzt, kein globaler Filter nötig
+    const result = field && setColumnFilter(field, selectedText);
+    if(result === true || result === 'cleared') {
+        // Spaltenfilter wurde gesetzt oder entfernt, kein globaler Filter nötig
         event.preventDefault();
         return;
     }
