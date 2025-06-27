@@ -11,7 +11,7 @@ $anzuzeigendeDaten[] = array(
     "auswahltext" => "Meine Daten bearbeiten",
     "writeaccess" => true,
     "import" => false,
-    "query" => "SELECT m.id, y.id as 'info:ID', m.Vorname, m.Nachname, m.Mail, m.Geschlecht, m.Geburtsdatum, m.Mailbenachrichtigung
+    "query" => "SELECT m.id, m.id as 'info:ID', m.Vorname, m.Nachname, m.Mail, m.Geschlecht, m.Geburtsdatum, m.Mailbenachrichtigung
             FROM b_mitglieder as m 
             join y_user as y on y.id = m.y_id
             WHERE y.id = $uid

@@ -40,7 +40,7 @@ $anzuzeigendeDaten[] = array(
         order by id desc;
     ",
     "referenzqueries" => array(
-        "Ansprechpartner" => "SELECT m.id, CONCAT(Nachname, ', ', Vorname) as anzeige 
+        "Ansprechpartner" => "SELECT m.id, CONCAT(Nachname, ', ', Vorname, ' (',m.id, ')') as anzeige 
             from b_mitglieder as m
             left join b_bsg as b on b.id=m.BSG
             WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'mitglied')) > 0 OR

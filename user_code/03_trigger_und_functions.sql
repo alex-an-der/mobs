@@ -142,6 +142,170 @@ DELIMITER ;
 
 -- -----------------------------------------------------------------------------------
 
+-- Feste temporäre Tabellen für Berechtigungen (ohne dynamisches SQL)
+DROP PROCEDURE IF EXISTS create_temp_berechtigung_verband;
+DELIMITER //
+CREATE PROCEDURE create_temp_berechtigung_verband(IN uid INT)
+BEGIN
+    DROP TEMPORARY TABLE IF EXISTS temp_berechtigung_verband;
+    CREATE TEMPORARY TABLE temp_berechtigung_verband (element_id INT PRIMARY KEY);
+    
+    INSERT IGNORE INTO temp_berechtigung_verband (element_id) 
+    SELECT DISTINCT v.id 
+    FROM b_regionalverband as v
+    JOIN b_regionalverband_rechte as r on r.Verband = v.id 
+    WHERE r.Nutzer = uid;
+END //
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS create_temp_berechtigung_bsg;
+DELIMITER //
+CREATE PROCEDURE create_temp_berechtigung_bsg(IN uid INT)
+BEGIN
+    DROP TEMPORARY TABLE IF EXISTS temp_berechtigung_bsg;
+    CREATE TEMPORARY TABLE temp_berechtigung_bsg (element_id INT PRIMARY KEY);
+    
+    INSERT IGNORE INTO temp_berechtigung_bsg (element_id) 
+    SELECT DISTINCT b.id 
+    FROM b_bsg as b
+    LEFT JOIN b_bsg_rechte as br ON b.id = br.BSG
+    JOIN y_user as y ON Nutzer = y.id
+    WHERE y.id = uid;
+END //
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS create_temp_berechtigung_sparte;
+DELIMITER //
+CREATE PROCEDURE create_temp_berechtigung_sparte(IN uid INT)
+BEGIN
+    DROP TEMPORARY TABLE IF EXISTS temp_berechtigung_sparte;
+    CREATE TEMPORARY TABLE temp_berechtigung_sparte (element_id INT PRIMARY KEY);
+    
+    INSERT IGNORE INTO temp_berechtigung_sparte (element_id) 
+    SELECT DISTINCT s.id 
+    FROM b_sparte as s
+    JOIN b_regionalverband_rechte r on s.Verband = r.Verband
+    WHERE r.Nutzer = uid;
+END //
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS create_temp_berechtigung_mitglied;
+DELIMITER //
+CREATE PROCEDURE create_temp_berechtigung_mitglied(IN uid INT)
+BEGIN
+    DROP TEMPORARY TABLE IF EXISTS temp_berechtigung_mitglied;
+    CREATE TEMPORARY TABLE temp_berechtigung_mitglied (element_id INT PRIMARY KEY);
+    
+    -- Erst BSG und Verband Berechtigungen erstellen
+    CALL create_temp_berechtigung_bsg(uid);
+    CALL create_temp_berechtigung_verband(uid);
+    
+    INSERT IGNORE INTO temp_berechtigung_mitglied (element_id) 
+    SELECT DISTINCT member_bsg.id 
+    FROM (
+        SELECT mis.Mitglied as id, mis.BSG as bsg
+        FROM b_mitglieder_in_sparten as mis
+        UNION
+        SELECT m.id as id, m.BSG as bsg
+        FROM b_mitglieder as m
+    ) member_bsg
+    JOIN b_bsg on b_bsg.id = member_bsg.bsg
+    JOIN b_regionalverband as v on v.id = b_bsg.Verband
+    WHERE EXISTS (SELECT 1 FROM temp_berechtigung_bsg WHERE element_id = member_bsg.bsg)
+       OR EXISTS (SELECT 1 FROM temp_berechtigung_verband WHERE element_id = v.id);
+END //
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS create_temp_berechtigung_individuelle_mitglieder;
+DELIMITER //
+CREATE PROCEDURE create_temp_berechtigung_individuelle_mitglieder(IN uid INT)
+BEGIN
+    DROP TEMPORARY TABLE IF EXISTS temp_berechtigung_individuelle_mitglieder;
+    CREATE TEMPORARY TABLE temp_berechtigung_individuelle_mitglieder (element_id INT PRIMARY KEY);
+    
+    INSERT IGNORE INTO temp_berechtigung_individuelle_mitglieder (element_id) 
+    SELECT DISTINCT ir.Mitglied 
+    FROM b_bsg as b
+    LEFT JOIN b_bsg_rechte as br ON b.id = br.BSG
+    JOIN y_user as y ON Nutzer = y.id
+    JOIN b_individuelle_berechtigungen as ir on b.id = ir.BSG 
+    WHERE y.id = uid;
+END //
+DELIMITER ;
+
+-- Funktion zum Prüfen ob Element berechtigt ist (ohne dynamisches SQL)
+DROP FUNCTION IF EXISTS is_element_berechtigt;
+DELIMITER //
+
+CREATE FUNCTION is_element_berechtigt(uid INT, target VARCHAR(50), element_id INT)
+RETURNS BOOLEAN
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    DECLARE is_berechtigt BOOLEAN DEFAULT FALSE;
+    
+    CASE target
+        WHEN 'verband' THEN
+            SELECT COUNT(*) > 0 INTO is_berechtigt
+            FROM b_regionalverband as v
+            JOIN b_regionalverband_rechte as r on r.Verband = v.id 
+            WHERE r.Nutzer = uid AND v.id = element_id;
+            
+        WHEN 'bsg' THEN
+            SELECT COUNT(*) > 0 INTO is_berechtigt
+            FROM b_bsg as b
+            LEFT JOIN b_bsg_rechte as br ON b.id = br.BSG
+            JOIN y_user as y ON Nutzer = y.id
+            WHERE y.id = uid AND b.id = element_id;
+            
+        WHEN 'sparte' THEN
+            SELECT COUNT(*) > 0 INTO is_berechtigt
+            FROM b_sparte as s
+            JOIN b_regionalverband_rechte r on s.Verband = r.Verband
+            WHERE r.Nutzer = uid AND s.id = element_id;
+            
+        WHEN 'mitglied' THEN
+            SELECT COUNT(*) > 0 INTO is_berechtigt
+            FROM (
+                SELECT mis.Mitglied as id, mis.BSG as bsg
+                FROM b_mitglieder_in_sparten as mis
+                WHERE mis.Mitglied = element_id
+                UNION
+                SELECT m.id as id, m.BSG as bsg
+                FROM b_mitglieder as m
+                WHERE m.id = element_id
+            ) member_bsg
+            JOIN b_bsg on b_bsg.id = member_bsg.bsg
+            JOIN b_regionalverband as v on v.id = b_bsg.Verband
+            WHERE (
+                EXISTS (
+                    SELECT 1 FROM b_bsg as b2
+                    LEFT JOIN b_bsg_rechte as br2 ON b2.id = br2.BSG
+                    JOIN y_user as y2 ON Nutzer = y2.id
+                    WHERE y2.id = uid AND b2.id = member_bsg.bsg
+                )
+                OR EXISTS (
+                    SELECT 1 FROM b_regionalverband as v2
+                    JOIN b_regionalverband_rechte as r2 on r2.Verband = v2.id 
+                    WHERE r2.Nutzer = uid AND v2.id = v.id
+                )
+            );
+            
+        WHEN 'individuelle_mitglieder' THEN
+            SELECT COUNT(*) > 0 INTO is_berechtigt
+            FROM b_bsg as b
+            LEFT JOIN b_bsg_rechte as br ON b.id = br.BSG
+            JOIN y_user as y ON Nutzer = y.id
+            JOIN b_individuelle_berechtigungen as ir on b.id = ir.BSG 
+            WHERE y.id = uid AND ir.Mitglied = element_id;
+    END CASE;
+    
+    RETURN is_berechtigt;
+END //
+
+DELIMITER ;
+
+-- Komplett neue Lösung ohne GROUP_CONCAT
 DROP FUNCTION IF EXISTS berechtigte_elemente;
 DELIMITER //
 
@@ -151,72 +315,141 @@ DETERMINISTIC
 READS SQL DATA
 BEGIN
     DECLARE result TEXT DEFAULT '';
-
-    SELECT 
+    DECLARE current_id INT;
+    DECLARE done INT DEFAULT FALSE;
+    
+    -- Cursor für verschiedene Targets
+    DECLARE verband_cursor CURSOR FOR 
+        SELECT DISTINCT v.id
+        FROM b_regionalverband as v
+        JOIN b_regionalverband_rechte as r on r.Verband = v.id 
+        WHERE r.Nutzer = uid
+        ORDER BY v.id;
+        
+    DECLARE bsg_cursor CURSOR FOR 
+        SELECT DISTINCT b.id
+        FROM b_bsg as b
+        LEFT JOIN b_bsg_rechte as br ON b.id = br.BSG
+        JOIN y_user as y ON Nutzer = y.id
+        WHERE y.id = uid
+        ORDER BY b.id;
+        
+    DECLARE sparte_cursor CURSOR FOR 
+        SELECT DISTINCT s.id
+        FROM b_sparte as s
+        JOIN b_regionalverband_rechte r on s.Verband = r.Verband
+        WHERE r.Nutzer = uid
+        ORDER BY s.id;
+        
+    DECLARE mitglied_cursor CURSOR FOR 
+        SELECT DISTINCT member_bsg.id
+        FROM (
+            SELECT mis.Mitglied as id, mis.BSG as bsg
+            FROM b_mitglieder_in_sparten as mis
+            UNION
+            SELECT m.id as id, m.BSG as bsg
+            FROM b_mitglieder as m
+        ) member_bsg
+        JOIN b_bsg on b_bsg.id = member_bsg.bsg
+        JOIN b_regionalverband as v on v.id = b_bsg.Verband
+        WHERE EXISTS (
+            SELECT 1 FROM b_bsg as b2
+            LEFT JOIN b_bsg_rechte as br2 ON b2.id = br2.BSG
+            JOIN y_user as y2 ON Nutzer = y2.id
+            WHERE y2.id = uid AND b2.id = member_bsg.bsg
+        )
+        OR EXISTS (
+            SELECT 1 FROM b_regionalverband as v2
+            JOIN b_regionalverband_rechte as r2 on r2.Verband = v2.id 
+            WHERE r2.Nutzer = uid AND v2.id = v.id
+        )
+        ORDER BY member_bsg.id;
+        
+    DECLARE individuelle_cursor CURSOR FOR 
+        SELECT DISTINCT ir.Mitglied
+        FROM b_bsg as b
+        LEFT JOIN b_bsg_rechte as br ON b.id = br.BSG
+        JOIN y_user as y ON Nutzer = y.id
+        JOIN b_individuelle_berechtigungen as ir on b.id = ir.BSG 
+        WHERE y.id = uid
+        ORDER BY ir.Mitglied;
+    
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    
     CASE target
-        WHEN 'verband' THEN (
-            SELECT GROUP_CONCAT(DISTINCT verband_id)
-            FROM (
-                SELECT v.id as verband_id, r.Nutzer
-                FROM b_regionalverband as v
-                JOIN b_regionalverband_rechte as r on r.Verband = v.id 
-                WHERE r.Nutzer = uid
-            ) berechtigungen
-        )
-        WHEN 'bsg' THEN (
-            SELECT GROUP_CONCAT(DISTINCT bsg_id)
-            FROM (
-                SELECT b.id as bsg_id, b.BSG, Nutzer
-                FROM b_bsg as b
-                LEFT JOIN b_bsg_rechte as br ON b.id = br.BSG
-                JOIN y_user as y ON Nutzer = y.id
-                WHERE y.id = uid
-                -- UNION
-                -- SELECT b.id as bsg_id, b.BSG, Nutzer
-                -- FROM b_bsg as b
-                -- LEFT JOIN b_regionalverband_rechte as vr ON b.Verband = vr.Verband
-                -- WHERE Nutzer = uid
-            ) berechtigungen
-        )
-        WHEN 'sparte' THEN (
-            SELECT GROUP_CONCAT(DISTINCT sparte_id)
-            FROM (
-                select s.id as sparte_id, s.Sparte, s.Verband
-                from b_sparte as s
-                join b_regionalverband_rechte r on s.Verband = r.Verband
-                where r.Nutzer=uid
-            ) berechtigungen
-        )
-        WHEN 'mitglied' THEN (
-            SELECT GROUP_CONCAT(DISTINCT ID)
-            FROM (
-                SELECT member_bsg.id as ID, member_bsg.bsg as BSG, v.id as Verband 
-                FROM(
-                    SELECT mis.Mitglied as id , mis.BSG as bsg
-                    FROM b_mitglieder_in_sparten as mis
-                    union
-                    SELECT m.id as id, m.BSG as bsg
-                    FROM b_mitglieder as m
-                ) member_bsg
-                JOIN b_bsg on b_bsg.id = member_bsg.bsg
-                JOIN b_regionalverband as v on v.id = b_bsg.Verband
-            ) b_und_v
-            WHERE (FIND_IN_SET(b_und_v.BSG, berechtigte_elemente_sub1(uid, 'BSG')) > 0) 
-            OR (FIND_IN_SET(b_und_v.Verband, berechtigte_elemente_sub1(uid, 'verband')) > 0)
-        )
-        WHEN 'individuelle_mitglieder' THEN (
-        SELECT GROUP_CONCAT(DISTINCT ID)
-        FROM(
-            SELECT  ir.Mitglied as ID, b.id as bsg_id, b.BSG
-                FROM b_bsg as b
-                LEFT JOIN b_bsg_rechte as br ON b.id = br.BSG
-                JOIN y_user as y ON Nutzer = y.id
-                join b_individuelle_berechtigungen as ir on b.id = ir.BSG 
-                WHERE y.id = uid
-            )indiv_m
-        )
-        ELSE ''
-    END INTO result;
+        WHEN 'verband' THEN
+            OPEN verband_cursor;
+            read_loop: LOOP
+                FETCH verband_cursor INTO current_id;
+                IF done THEN LEAVE read_loop; END IF;
+                
+                IF result = '' THEN
+                    SET result = CAST(current_id AS CHAR);
+                ELSE
+                    SET result = CONCAT(result, ',', current_id);
+                END IF;
+            END LOOP;
+            CLOSE verband_cursor;
+            
+        WHEN 'bsg' THEN
+            OPEN bsg_cursor;
+            read_loop: LOOP
+                FETCH bsg_cursor INTO current_id;
+                IF done THEN LEAVE read_loop; END IF;
+                
+                IF result = '' THEN
+                    SET result = CAST(current_id AS CHAR);
+                ELSE
+                    SET result = CONCAT(result, ',', current_id);
+                END IF;
+            END LOOP;
+            CLOSE bsg_cursor;
+            
+        WHEN 'sparte' THEN
+            OPEN sparte_cursor;
+            read_loop: LOOP
+                FETCH sparte_cursor INTO current_id;
+                IF done THEN LEAVE read_loop; END IF;
+                
+                IF result = '' THEN
+                    SET result = CAST(current_id AS CHAR);
+                ELSE
+                    SET result = CONCAT(result, ',', current_id);
+                END IF;
+            END LOOP;
+            CLOSE sparte_cursor;
+            
+        WHEN 'mitglied' THEN
+            OPEN mitglied_cursor;
+            read_loop: LOOP
+                FETCH mitglied_cursor INTO current_id;
+                IF done THEN LEAVE read_loop; END IF;
+                
+                IF result = '' THEN
+                    SET result = CAST(current_id AS CHAR);
+                ELSE
+                    SET result = CONCAT(result, ',', current_id);
+                END IF;
+            END LOOP;
+            CLOSE mitglied_cursor;
+            
+        WHEN 'individuelle_mitglieder' THEN
+            OPEN individuelle_cursor;
+            read_loop: LOOP
+                FETCH individuelle_cursor INTO current_id;
+                IF done THEN LEAVE read_loop; END IF;
+                
+                IF result = '' THEN
+                    SET result = CAST(current_id AS CHAR);
+                ELSE
+                    SET result = CONCAT(result, ',', current_id);
+                END IF;
+            END LOOP;
+            CLOSE individuelle_cursor;
+            
+        ELSE
+            SET result = '';
+    END CASE;
     
     RETURN COALESCE(result, '');
 END //
@@ -268,6 +501,7 @@ DELIMITER ;
 
 -- -----------------------------------------------------------------------------------
 
+-- Verbesserte Sub-Funktion ohne dynamisches SQL
 DROP FUNCTION IF EXISTS berechtigte_elemente_sub1;
 DELIMITER //
 
@@ -276,70 +510,8 @@ RETURNS TEXT
 DETERMINISTIC
 READS SQL DATA
 BEGIN
-    DECLARE result TEXT DEFAULT '';
-
-    SELECT 
-    CASE target
-        WHEN 'verband' THEN (
-            SELECT GROUP_CONCAT(DISTINCT verband_id)
-            FROM (
-                SELECT v.id as verband_id, r.Nutzer
-                FROM b_regionalverband as v
-                JOIN b_regionalverband_rechte as r on r.Verband = v.id 
-                WHERE r.Nutzer = uid
-            ) berechtigungen
-        )
-        WHEN 'bsg' THEN (
-            SELECT GROUP_CONCAT(DISTINCT bsg_id)
-            FROM (
-                SELECT b.id as bsg_id, b.BSG, Nutzer
-                FROM b_bsg as b
-                LEFT JOIN b_bsg_rechte as br ON b.id = br.BSG
-                JOIN y_user as y ON Nutzer = y.id
-                WHERE y.id = uid
-            ) berechtigungen
-        )
-        WHEN 'sparte' THEN (
-            SELECT GROUP_CONCAT(DISTINCT sparte_id)
-            FROM (
-                select s.id as sparte_id, s.Sparte, s.Verband
-                from b_sparte as s
-                join b_regionalverband_rechte r on s.Verband = r.Verband
-                where r.Nutzer=uid
-            ) berechtigungen
-        )
-        WHEN 'mitglied' THEN (
-            SELECT GROUP_CONCAT(DISTINCT ID)
-            FROM (
-                SELECT member_bsg.id as ID, member_bsg.bsg as BSG, v.id as Verband 
-                FROM(
-                    SELECT mis.Mitglied as id , mis.BSG as bsg
-                    FROM b_mitglieder_in_sparten as mis
-                    union
-                    SELECT m.id as id, m.BSG as bsg
-                    FROM b_mitglieder as m
-                ) member_bsg
-                JOIN b_bsg on b_bsg.id = member_bsg.bsg
-                JOIN b_regionalverband as v on v.id = b_bsg.Verband
-            ) b_und_v
-            WHERE (FIND_IN_SET(b_und_v.BSG, berechtigte_elemente_sub1(uid, 'BSG')) > 0) 
-            OR (FIND_IN_SET(b_und_v.Verband, berechtigte_elemente_sub1(uid, 'verband')) > 0)
-        )
-        WHEN 'individuelle_mitglieder' THEN (
-        SELECT GROUP_CONCAT(DISTINCT ID)
-        FROM(
-            SELECT  ir.Mitglied as ID, b.id as bsg_id, b.BSG
-                FROM b_bsg as b
-                LEFT JOIN b_bsg_rechte as br ON b.id = br.BSG
-                JOIN y_user as y ON Nutzer = y.id
-                join b_individuelle_berechtigungen as ir on b.id = ir.BSG 
-                WHERE y.id = uid
-            )indiv_m
-        )
-        ELSE ''
-    END INTO result;
-    
-    RETURN COALESCE(result, '');
+    -- Diese Funktion ruft einfach die Hauptfunktion auf
+    RETURN berechtigte_elemente(uid, target);
 END //
 
 DELIMITER ;
