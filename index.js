@@ -177,7 +177,8 @@ function checkDubletten() {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ action: 'check_duplicates', tabelle: '<?php echo $tabelle; ?>' })
+  
+        body: JSON.stringify({ action: 'check_duplicates', tabelle: php_tabelle })
     })
     .then(response => response.json())
     .then(data => {
