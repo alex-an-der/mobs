@@ -18,6 +18,7 @@ DROP TABLE IF EXISTS `b___an_aus`;
 CREATE TABLE `b___an_aus` ( 
   `id` TINYINT UNSIGNED AUTO_INCREMENT NOT NULL,
   `wert` VARCHAR(250) NULL,
+  `bool` TINYINT UNSIGNED NOT NULL DEFAULT 0,
    PRIMARY KEY (`id`)
 )
 ENGINE = InnoDB;
@@ -146,7 +147,7 @@ DROP TABLE IF EXISTS `b_mitglieder`;
 CREATE TABLE `b_mitglieder` ( 
   `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
   `y_id` BIGINT UNSIGNED NULL,
-  `BSG` BIGINT UNSIGNED NOT NULL,
+  `BSG` BIGINT UNSIGNED NULL,
   `Vorname` VARCHAR(100) NULL,
   `Nachname` VARCHAR(100) NULL,
   `Mail` VARCHAR(50) NULL COMMENT 'y_user - Verknüpfung' ,
@@ -258,11 +259,13 @@ CREATE TABLE `b_regionalverband_rechte` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `Nutzer` bigint unsigned NOT NULL,
   `Verband` bigint unsigned NOT NULL,
+  `erweiterte_Rechte` TINYINT UNSIGNED NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
   KEY `FK_verbandrechte_verband` (`Verband`),
   KEY `idx_nutzer_verband` (`Nutzer`,`Verband`),
   CONSTRAINT `FK_verbandrechte_verband` FOREIGN KEY (`Verband`) REFERENCES `b_regionalverband` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_verbandrechte_yuser` FOREIGN KEY (`Nutzer`) REFERENCES `y_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `FK_verbandrechte_yuser` FOREIGN KEY (`Nutzer`) REFERENCES `y_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_verbandrechte_an_aus` FOREIGN KEY (`erweiterte_Rechte`) REFERENCES `b___an_aus` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -434,8 +437,10 @@ CREATE TABLE `b_zahlungseingaenge` (
   `Abrechnungsjahr` YEAR NOT NULL,
   `Haben` DECIMAL(10,2) NOT NULL,
   `Eingangsdatum` DATE NOT NULL,
+  `Empfaenger` BIGINT UNSIGNED NOT NULL,
    PRIMARY KEY (`id`),
-  CONSTRAINT `FK_zahlungseingaenge_bsg` FOREIGN KEY (`BSG`) REFERENCES `b_bsg` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE
+  CONSTRAINT `FK_zahlungseingaenge_bsg` FOREIGN KEY (`BSG`) REFERENCES `b_bsg` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT `FK_zahlungseingang_verband` FOREIGN KEY (`Empfaenger`) REFERENCES `b_regionalverband` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE
 )
 ENGINE = InnoDB;
 
@@ -513,6 +518,7 @@ CREATE TABLE `b_meldeliste` (
   `Beitragsjahr` YEAR NOT NULL,
   `Mitglied` VARCHAR(500) NOT NULL,
   `BSG` VARCHAR(500) NOT NULL,
+  `BSG_ID` BIGINT UNSIGNED NOT NULL,
   `Zuordnung` INT UNSIGNED NULL,
   `Zuordnung_ID` BIGINT UNSIGNED NULL COMMENT 'Wenn der Zweck eine ID erfordert' ,
   `Betrag` DECIMAL(10,2) NULL DEFAULT 0.00 ,
@@ -526,4 +532,27 @@ CREATE INDEX `FK_medleliste_beitragszuordnungen`
 ON `b_meldeliste` (
   `Zuordnung` ASC
 );
+
+DROP TABLE IF EXISTS `sys_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `sys_log` (
+  `ID` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `zeit` datetime DEFAULT CURRENT_TIMESTAMP,
+  `eintrag` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+DROP TABLE IF EXISTS `sys_rollback`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `sys_rollback` (
+  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `zeit` datetime DEFAULT CURRENT_TIMESTAMP,
+  `autor` varchar(200) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `eintrag` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=357 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 

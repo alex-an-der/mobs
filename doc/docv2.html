@@ -1,144 +1,371 @@
 <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Registrierung</title>
-            <style>
-/* From extension vscode.github */
+<html>
+<head>
+<title>docv2.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-.vscode-dark img[src$=\#gh-light-mode-only],
-.vscode-light img[src$=\#gh-dark-mode-only],
-.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
-.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
-	display: none;
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
 }
 
 </style>
-            
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+
 <style>
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
-                font-size: 14px;
-                line-height: 1.6;
-            }
-        </style>
-        <style>
-.task-list-item {
-    list-style-type: none;
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
 }
 
-.task-list-item-checkbox {
-    margin-left: -20px;
-    vertical-align: middle;
-    pointer-events: none;
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
 }
 </style>
+
 <style>
-:root {
-  --color-note: #0969da;
-  --color-tip: #1a7f37;
-  --color-warning: #9a6700;
-  --color-severe: #bc4c00;
-  --color-caution: #d1242f;
-  --color-important: #8250df;
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
 }
 
 </style>
-<style>
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-note: #2f81f7;
-    --color-tip: #3fb950;
-    --color-warning: #d29922;
-    --color-severe: #db6d28;
-    --color-caution: #f85149;
-    --color-important: #a371f7;
-  }
-}
 
-</style>
-<style>
-.markdown-alert {
-  padding: 0.5rem 1rem;
-  margin-bottom: 16px;
-  color: inherit;
-  border-left: .25em solid #888;
-}
-
-.markdown-alert>:first-child {
-  margin-top: 0
-}
-
-.markdown-alert>:last-child {
-  margin-bottom: 0
-}
-
-.markdown-alert .markdown-alert-title {
-  display: flex;
-  font-weight: 500;
-  align-items: center;
-  line-height: 1
-}
-
-.markdown-alert .markdown-alert-title .octicon {
-  margin-right: 0.5rem;
-  display: inline-block;
-  overflow: visible !important;
-  vertical-align: text-bottom;
-  fill: currentColor;
-}
-
-.markdown-alert.markdown-alert-note {
-  border-left-color: var(--color-note);
-}
-
-.markdown-alert.markdown-alert-note .markdown-alert-title {
-  color: var(--color-note);
-}
-
-.markdown-alert.markdown-alert-important {
-  border-left-color: var(--color-important);
-}
-
-.markdown-alert.markdown-alert-important .markdown-alert-title {
-  color: var(--color-important);
-}
-
-.markdown-alert.markdown-alert-warning {
-  border-left-color: var(--color-warning);
-}
-
-.markdown-alert.markdown-alert-warning .markdown-alert-title {
-  color: var(--color-warning);
-}
-
-.markdown-alert.markdown-alert-tip {
-  border-left-color: var(--color-tip);
-}
-
-.markdown-alert.markdown-alert-tip .markdown-alert-title {
-  color: var(--color-tip);
-}
-
-.markdown-alert.markdown-alert-caution {
-  border-left-color: var(--color-caution);
-}
-
-.markdown-alert.markdown-alert-caution .markdown-alert-title {
-  color: var(--color-caution);
-}
-
-</style>
-        
-        </head>
-        <body class="vscode-body vscode-light">
-            <ul>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<ul>
 <li><a href="#registrierung">Registrierung</a>
 <ul>
 <li><a href="#hinweis-zu-regionalverb%C3%A4nden-und-betriebssportgemeinschaften">Hinweis zu Regionalverbänden und Betriebssportgemeinschaften</a></li>
@@ -152,10 +379,6 @@
 <li><a href="#filteroptionen">Filteroptionen</a>
 <ul>
 <li><a href="#tabellenfilter">Tabellenfilter</a></li>
-</ul>
-</li>
-<li><a href="#schaltfl%C3%A4chen">Schaltflächen</a>
-<ul>
 <li><a href="#spaltenfilter">Spaltenfilter</a>
 <ul>
 <li><a href="#beispiele-f%C3%BCr-zahlenfilter">Beispiele für Zahlenfilter</a></li>
@@ -164,13 +387,11 @@
 </li>
 </ul>
 </li>
+<li><a href="#schaltfl%C3%A4chen">Schaltflächen</a></li>
 <li><a href="#impressum-und-datenschutzerkl%C3%A4rung">Impressum und Datenschutzerklärung</a></li>
 </ul>
 </li>
-<li><a href="#ansichten-f%C3%BCr-mitglieder">Ansichten für Mitglieder</a>
-<ul>
-<li><a href="#%C3%BCbersicht">Übersicht</a></li>
-<li><a href="#funktionsumfang">Funktionsumfang</a>
+<li><a href="#mitglieder">Mitglieder</a>
 <ul>
 <li><a href="#meine-daten-bearbeiten">Meine Daten bearbeiten</a></li>
 <li><a href="#meine-daten-zur-bearbeitung-freigeben">Meine Daten zur Bearbeitung freigeben</a></li>
@@ -178,15 +399,13 @@
 <li><a href="#l%C3%B6sche-meine-daten">Lösche meine Daten</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li><a href="#ansichten-f%C3%BCr-bsg-organisatoren">Ansichten für BSG Organisatoren</a>
+<li><a href="#bsg-organisatoren">BSG Organisatoren</a>
 <ul>
 <li><a href="#bsg-stammdaten-bearbeiten">BSG-Stammdaten bearbeiten</a></li>
 <li><a href="#stamm-mitglieder-aufnehmen">Stamm-Mitglieder aufnehmen</a></li>
 <li><a href="#stamm-mitglieder-bearbeiten---kompakt-und-erweitert">Stamm-Mitglieder bearbeiten - kompakt und erweitert</a></li>
 <li><a href="#bsg-mitglieder-in-sparten-anmelden">BSG-Mitglieder in Sparten anmelden</a></li>
-<li><a href="#mitgliede-ohne-registrierung">Mitgliede ohne Registrierung</a>
+<li><a href="#mitglieder-ohne-registrierung">Mitglieder ohne Registrierung</a>
 <ul>
 <li><a href="#stamm-mitglieder-ohne-zugang-eintragen">Stamm-Mitglieder ohne Zugang eintragen</a></li>
 <li><a href="#mitgliederkonten-zusammenf%C3%BChren">Mitgliederkonten zusammenführen</a></li>
@@ -194,28 +413,70 @@
 </li>
 </ul>
 </li>
-<li><a href="#workflows-ggf-mit-hintergr%C3%BCnde--grafisch">Workflows (ggf. mit Hintergründe) / grafisch?</a>
+<li><a href="#mitarbeiter-im-regionalverband">Mitarbeiter im Regionalverband</a>
 <ul>
-<li><a href="#registrieren--inkl-bsg-sicht">Registrieren / inkl. BSG-Sicht</a></li>
-<li><a href="#meldeliste">Meldeliste</a></li>
-<li><a href="#spartenanmeldung">Spartenanmeldung</a></li>
-<li><a href="#import">Import</a></li>
-<li><a href="#wechsel-der-bsg">Wechsel der BSG</a>
-<ul>
-<li><a href="#f%C3%BCr-eine-sparte">für eine Sparte</a></li>
-<li><a href="#stamm-bsg">Stamm BSG</a></li>
+<li><a href="#erweiterte-rechte">Erweiterte Rechte</a></li>
 </ul>
 </li>
+<li><a href="#mitarbeiter-im-landesverband">Mitarbeiter im Landesverband</a></li>
+<li><a href="#systemadministratoren">Systemadministratoren</a>
+<ul>
+<li><a href="#wichtige-ansichten">Wichtige Ansichten</a></li>
+<li><a href="#kochrezepte">Kochrezepte</a>
+<ul>
+<li><a href="#zuweisung-von-landesverbans--und-systemadminrechten">Zuweisung von Landesverbans- und Systemadminrechten</a>
+<ul>
+<li><a href="#setzen-%C3%BCber-das-ypum-frontend">Setzen über das YPUM-Frontend</a></li>
+<li><a href="#setzen-direkt-in-der-datenbank">Setzen direkt in der Datenbank</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#wie">Wie...</a>
+<ul>
+<li><a href="#kann-ich-mich-in-einer-sparte-anmelden">...kann ich mich in einer Sparte anmelden</a>
+<ul>
+<li><a href="#ablauf-der-registrierung">Ablauf der Registrierung</a></li>
+</ul>
+</li>
+<li><a href="#werden-die-f%C3%A4lligen-beitr%C3%A4ge-ermittelt">...werden die fälligen Beiträge ermittelt?</a></li>
+<li><a href="#kann-ich-daten-massenhaft-importieren">...kann ich Daten massenhaft importieren?</a>
+<ul>
+<li><a href="#vorgehensweise">Vorgehensweise</a></li>
+<li><a href="#bezug-auf-bereits-gespeicherte-daten">Bezug auf bereits gespeicherte Daten</a></li>
+<li><a href="#beispiel">Beispiel</a></li>
+</ul>
+</li>
+<li><a href="#trete-ich-f%C3%BCr-eine-andere-nicht-stamm--bsg-in-einer-sparte-an">...trete ich für eine andere (nicht Stamm-) BSG in einer Sparte an?</a>
+<ul>
+<li><a href="#wechsle-ich-die-stamm-bsg">...wechsle ich die Stamm-BSG?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#auswirkungen-von-update-und-delete-auf-die-datenbank">Auswirkungen von UPDATE und DELETE auf die Datenbank</a>
+<ul>
+<li><a href="#update-%C3%A4ndern-von-daten">UPDATE (Ändern von Daten)</a></li>
+<li><a href="#delete-l%C3%B6schen-von-daten">DELETE (Löschen von Daten)</a>
+<ul>
+<li><a href="#%C3%BCbersicht-der-wichtigsten-kettenreaktionen-beim-l%C3%B6schen">Übersicht der wichtigsten Kettenreaktionen beim Löschen</a></li>
+<li><a href="#was-wird-nicht-automatisch-gel%C3%B6scht">Was wird <strong>nicht</strong> automatisch gelöscht?</a></li>
+</ul>
+</li>
+<li><a href="#zusammengefasst">Zusammengefasst</a></li>
+<li><a href="#prompt-f%C3%BCr-die-automatische-dokumentation-der-auswirkungen-von-update-und-delete-im-datenbankschema">Prompt für die automatische Dokumentation der Auswirkungen von UPDATE und DELETE im Datenbankschema:</a></li>
 </ul>
 </li>
 </ul>
 <h1 id="registrierung">Registrierung</h1>
 <p>Solltest du noch keinen Zugang besitzen, klicke bitte auf der Startseite von
-<a href="https://www.mobs24.de">https://www.mobs24.de</a> auf <strong>Registrieren</strong>.</p>
+https://www.mobs24.de auf <strong>Registrieren</strong>.</p>
 <p>Bitte fülle alle erforderlichen Felder vollständig aus, um deine Registrierung
 abzuschließen. Jede Information ist wichtig für die korrekte Einrichtung deines
 Zugangs im System.</p>
-<h2 id="hinweis-zu-regionalverbänden-und-betriebssportgemeinschaften">Hinweis zu Regionalverbänden und Betriebssportgemeinschaften</h2>
+<h2 id="hinweis-zu-regionalverb%C3%A4nden-und-betriebssportgemeinschaften">Hinweis zu Regionalverbänden und Betriebssportgemeinschaften</h2>
 <p>Falls du in der Auswahlliste deinen gewünschten Regionalverband oder deine
 Betriebssportgemeinschaft (BSG) nicht finden kannst, ist ein zusätzlicher
 Schritt erforderlich:</p>
@@ -234,13 +495,37 @@ angelegt werden</li>
 </ul>
 <h1 id="grundlegende-bedienung">Grundlegende Bedienung</h1>
 <h3 id="auswahl-der-ansicht">Auswahl der Ansicht</h3>
-<p>In der ersen Zeile kannst du die gewünschte Ansicht wählen. Je nach deiner Rolle und deinen Berechtigungen stehen die verschiedene Ansichten zur Verfügung.</p>
+<p>In der ersten Zeile kannst du die gewünschte Ansicht wählen. Je nach deiner Rolle und deinen Berechtigungen stehen dir verschiedene Ansichten zur Verfügung.</p>
 <h3 id="informationsbereich">Informationsbereich</h3>
-<p>Im blauen Infobereich erhältst du wichtige Hinweise zur aktuellen Ansich.</p>
+<p>Im blauen Infobereich erhältst du wichtige Hinweise zur aktuellen Ansicht.</p>
 <h3 id="filteroptionen">Filteroptionen</h3>
 <h4 id="tabellenfilter">Tabellenfilter</h4>
-<p>Um Begriffe in der gesamten Tabelle zu finden, kannst du den Tabellenfilter über den Schaltflächen verwenden. Die Treffer werden in der Tabelle markiert. Du kannst auch mit der <strong>rechten Maustaste</strong> auf eine Tabellenzelle klicken und der Inhalt dieser Zelle wird in den Tabellenfilter übernommen.</p>
-<h3 id="schaltflächen">Schaltflächen</h3>
+<p>Um Begriffe in der gesamten Tabelle zu finden, kannst du den Tabellenfilter über den Schaltflächen verwenden. Die Treffer werden in der Tabelle markiert.</p>
+<h4 id="spaltenfilter">Spaltenfilter</h4>
+<p>Über jeder Spalte befindet sich ebenfalls ein Filterfeld. Der dortige Eintrag wird dann nur in der entsprechenden Spalte gesucht. Neben dem Textfilter gibt es auch Zahlen- und Datumsfilter, die dann aktiviert werden, wenn entsprechende Inhalte erkannt werden. Dort gibt es dann weitere Filteroptionen:</p>
+<h5 id="beispiele-f%C3%BCr-zahlenfilter">Beispiele für Zahlenfilter</h5>
+<pre class="hljs"><code><div>140-190  
+&gt;137.50  
+&gt;=137.50  
+&lt;=137,50  
+&lt;137,50  
+137,50  
+</div></code></pre>
+<p>Komma (,) und Punkt (.) können gleichwertig als Dezimaltrennzeichen benutzt werden.</p>
+<h5 id="beispiele-f%C3%BCr-datumsfilter">Beispiele für Datumsfilter</h5>
+<p>Werden in einer Datumsspalte im Filter nur Jahreszahlen angegeben, gelten die Filterregeln wie bei den Zahlen:</p>
+<pre class="hljs"><code><div>1970-1984 
+&gt;1984
+&lt;=1950
+...
+</div></code></pre>
+<p>Auch komplette Daten folgen diesem Muster:</p>
+<pre class="hljs"><code><div>24.12.2027-31.12.2027
+&gt;=1.7.2026
+...
+</div></code></pre>
+<p>Mehrere Spaltenfilter können auch kombiniert werden. So findest du z.B. Mitglieder, die weiblich und vor 1990 geboren sind (Geschlecht: 'w', Geburtsdatum: '&lt;1990').</p>
+<h3 id="schaltfl%C3%A4chen">Schaltflächen</h3>
 <p>Was eine Datenzeile ist, ergibt sich aus dem Kontext der Ansicht. Werden Mitglieder in Sparten angemeldet, ist ein Datenzeile die Anmeldung des Mitglieds. Werden Mitglieder einer BSG gelistet ist ein Datenzeile das einzelne Mitglied.</p>
 <p>Folgende Aktionen stehen dir mit den Schaltflächen zur Verfügung:</p>
 <ul>
@@ -251,40 +536,15 @@ angelegt werden</li>
 <li><strong>Daten importieren</strong>: Ermöglicht das Importieren von Datenzeilen im CSV-Format. Für Details siehe bitte die <a href="#import">Import-Beschreibung im Anhang</a>.</li>
 <li><strong>Exportieren</strong>: Öffnet ein Menü mit verschiedenen Exportformaten</li>
 </ul>
-<h4 id="spaltenfilter">Spaltenfilter</h4>
-<p>Über jeder Spalte befindet sich ein weiteres Filterfeld. Der dortige Eintrag wird dann nur in der entsprechenden Spalte gesucht. Neben dem Textfilter gibt es auch Zahlen- und Datumsfilter, die dann aktiviert werden, wenn entsprechende Inhalte erkannt werden. Dort gibt es dann weitere Filteroptionen:</p>
-<h5 id="beispiele-für-zahlenfilter">Beispiele für Zahlenfilter</h5>
-<pre><code>140-190  
-&gt;137.50  
-&gt;=137.50  
-&lt;=137,50  
-&lt;137,50  
-137,50  
-</code></pre>
-<p>Komma (,) und Punkt (.) können gleichwertig als Dezimaltrennzeichen benutzt werden.</p>
-<h5 id="beispiele-für-datumsfilter">Beispiele für Datumsfilter</h5>
-<p>Werden in einer Datumsspalte im Filter nur Jahreszahlen angegeben, gelten die Filterregeln wie bei den Zahlen:</p>
-<pre><code>1970-1984 
-&gt;1984
-&lt;=1950
-...
-</code></pre>
-<p>Auch komplette Daten folgen diesem Muster:</p>
-<pre><code>24.12.2027-31.12.2027
-&gt;=1.7.2026
-...
-</code></pre>
-<h3 id="impressum-und-datenschutzerklärung">Impressum und Datenschutzerklärung</h3>
+<h3 id="impressum-und-datenschutzerkl%C3%A4rung">Impressum und Datenschutzerklärung</h3>
 <p>Am unteren Bildrand findest du einen Link zu &quot;Impressum und Datenschutzerklärung&quot;
 für weitere rechtliche Informationen.</p>
-<h1 id="ansichten-für-mitglieder">Ansichten für Mitglieder</h1>
-<h2 id="übersicht">Übersicht</h2>
+<h1 id="mitglieder">Mitglieder</h1>
 <p>Die Rolle &quot;Mitglied&quot; stellt die grundlegende Benutzerebene in unserem System dar.
 Jeder registrierte Nutzer erhält automatisch die Berechtigungen dieser Rolle, ohne
 dass zusätzliche Aktivierungen erforderlich sind. Die Mitgliedsrolle bietet Zugang
 zu allen persönlichen Basisfunktionen und -einstellungen.</p>
-<h2 id="funktionsumfang">Funktionsumfang</h2>
-<h3 id="meine-daten-bearbeiten">Meine Daten bearbeiten</h3>
+<h2 id="meine-daten-bearbeiten">Meine Daten bearbeiten</h2>
 <p>In diesem Bereich kannst du deine persönlichen Informationen einsehen und
 aktualisieren. Die folgenden Daten werden angezeigt und können bearbeitet werden:</p>
 <ul>
@@ -299,19 +559,28 @@ möchtest (JA/NEIN)</li>
 </ul>
 <p>Die Daten werden in einer übersichtlichen Tabellenform dargestellt und können nach
 Bedarf aktualisiert werden.</p>
-<h3 id="meine-daten-zur-bearbeitung-freigeben">Meine Daten zur Bearbeitung freigeben</h3>
+<h2 id="meine-daten-zur-bearbeitung-freigeben">Meine Daten zur Bearbeitung freigeben</h2>
 <p>In diesem Bereich wird angezeigt, welche Betriebssportgruppen (BSG) Zugriff auf deine
 persönlichen Daten haben. Diese Dateneinsicht ist notwendig, damit die BSG dich
 verwalten und für Sparten anmelden kann. Damit eine BSG deine Daten verarbeiten kann, musst du diese hier zunächst freigeben. Dies geschieht, indem du auf <em>Einfügen</em> klickst und damit eine neue Datenzeile mit den entsprechenden Daten hinzugügst.</p>
 <p>Eine Berechtigung kannst du erst löschen, wenn du bei dieser BSG nicht mehr angemeldet bist - weder als Stamm-BSG, noch als BSG für eine Sparte.</p>
-<h3 id="antrag-zum-wechsel-der-stamm-bsg">Antrag zum Wechsel der Stamm-BSG</h3>
+<h2 id="antrag-zum-wechsel-der-stamm-bsg">Antrag zum Wechsel der Stamm-BSG</h2>
 <p>Möchtest du eine BSG wechseln, musst du dies hier initiieren. Bitte speche dich vorher mit den entsprechenden Organisatoren ab. Trägst du hier eine BSG ein, wird automatisch dieser BSG das Bearbeitungsrecht deiner Daten eingeräumt. Dies geschieht, bevor du in dieser BSG aufgenommen wirst und wird nicht wieder automatisch entfernt. Kontrolliere daher bitte regelmäßig deine erteilten Berechtigungen.</p>
-<h3 id="lösche-meine-daten">Lösche meine Daten</h3>
+<h2 id="l%C3%B6sche-meine-daten">Lösche meine Daten</h2>
 <p>Hier kannst du deine Daten unwiderbringlich aus dem System entfernen. Bedenke, dass deine Daten möglicherweise bis zum Beginn des übernächsten Jahres aufbewahrt werden müssen.</p>
-<h1 id="ansichten-für-bsg-organisatoren">Ansichten für BSG Organisatoren</h1>
+<h1 id="bsg-organisatoren">BSG Organisatoren</h1>
 <p>Um das Recht zu erhalten, eine BSG im System zu verwalten, muss ein Berechtigter des Regionalverbandes dir dieses zuweisen.</p>
+<p>Mit dieser Berechtigung kannst du innerhalb deiner BSG (nachdem diese vom Regionalverband angelegt wurde):</p>
+<ul>
+<li>Die Stammdaten der BSG anlegen und ändern (Ansprechpartner, Rechnungsdaten)</li>
+<li>Registrierte Mitglieder aufnehmen</li>
+<li>Die Mitgliederdaten deiner Stammmitglieder ändern</li>
+<li>Mitglieder in Sparten an- und abmelden</li>
+<li>Mitgliederdaten manuell importieren oder anlegen</li>
+</ul>
+<p>Du kannst auch für mehrere BSG verantwortlich sein.</p>
 <h2 id="bsg-stammdaten-bearbeiten">BSG-Stammdaten bearbeiten</h2>
-<p>Bitte vervollstänfige die Daten deiner BSG. Es muss eine Rechnungsadresse und ein registrierter Hauptansprechpartner hinterlegt werden. Hier kannst du diese Daten später auch anpassen.</p>
+<p>Bitte vervollständige die Daten deiner BSG. Es müssen eine Rechnungsadresse und ein registrierter Hauptansprechpartner hinterlegt werden. Hier kannst du diese Daten später auch anpassen.</p>
 <h2 id="stamm-mitglieder-aufnehmen">Stamm-Mitglieder aufnehmen</h2>
 <p>Hier siehst du Mitglieder, die derne in eine von die verwaltete BSG möchten. Um ein Mitglied aufzunehmen, wähle in der Spalte <em>BSG</em> die entsprechende BSG. In der Spalte <em>will_nach</em> siehst du den angegebenen Wechselwunsch. Der Basisbeitrag wird im Allgemeinen von der BSG abgeführt, in der das Mitglied im Abrechnungsjahr zuerst war.</p>
 <h2 id="stamm-mitglieder-bearbeiten---kompakt-und-erweitert">Stamm-Mitglieder bearbeiten - kompakt und erweitert</h2>
@@ -326,7 +595,7 @@ verwalten und für Sparten anmelden kann. Damit eine BSG deine Daten verarbeiten
 </ul>
 <p>Vorhandene Datenzeilen können nicht modifiziert werden. Es können nur komplette Datenzeilen gelöscht (Abmeldung) oder eingefügt (Anmeldung) werden. Eine Anmeldung führt immer den jeweiligen Spartenbeitrag für das laufende Jahr nach sich, auch wenn das Mitglied unterjährig wieder abgemeldet wird.</p>
 <p>Bitte beachte, dass nicht alle spartenspezifischen Voraussetzungen in diesem System abgebildet sind, z.B. wenn eine Sparte nur Anmeldungen vor einem Stichtag entgegennimmt oder wenn bestimmte Zusatzvoraussetzungen notwendig sind. Bitte wende dich im Zweifelsfall an die jeweilige Spartenleitung.</p>
-<h2 id="mitgliede-ohne-registrierung">Mitgliede ohne Registrierung</h2>
+<h2 id="mitglieder-ohne-registrierung">Mitglieder ohne Registrierung</h2>
 <p>Im <strong>Ausnahmefall</strong> ist es möglich, Mitglieder aufzunehmen, die sich noch nicht registriert haben. Dies sollte nur als letzte Lösung genutzt werden und soll nur den Übergang vom alten System zu MOBS24 in speziellen Fällen erleichtern. Bitte beachte folgende Punkte:</p>
 <ul>
 <li>Für Mitglieder ohne Registrierung übernimmt das Mitglied, welches die Daten importiert, die Verantwortung, dass die jeweiligen eingespielten Personen der Datenverarbeitung zustimmen.</li>
@@ -335,19 +604,525 @@ verwalten und für Sparten anmelden kann. Damit eine BSG deine Daten verarbeiten
 <li>Sowohl der Import von Daten, als auch die Zusammenführung von Datensätzen ist sehr fehleranfällig, insbesondere auf der Seite des Anwenders. Alle Eingaben sind sorgfältigst zu prüfen - vor und nach dem Import oder Zusammenführung. MOBS24 hat nur sehr bedingte Möglichkeiten von Plausibilitätsprüfungen.</li>
 </ul>
 <h3 id="stamm-mitglieder-ohne-zugang-eintragen">Stamm-Mitglieder ohne Zugang eintragen</h3>
-<p>Einzelne Mitglieder können über <em>Einfügen</em> hinzugefügt werden. Mehrere Mitglieder (auch mehrere hundert) können über die Importfunktion eingelesen werden.</p>
-<h3 id="mitgliederkonten-zusammenführen">Mitgliederkonten zusammenführen</h3>
-<p>LOP:</p>
-<h1 id="workflows-ggf-mit-hintergründe--grafisch">Workflows (ggf. mit Hintergründe) / grafisch?</h1>
-<h2 id="registrieren--inkl-bsg-sicht">Registrieren / inkl. BSG-Sicht</h2>
-<h2 id="meldeliste">Meldeliste</h2>
-<h2 id="spartenanmeldung">Spartenanmeldung</h2>
-<h2 id="import">Import</h2>
-<h2 id="wechsel-der-bsg">Wechsel der BSG</h2>
-<h3 id="für-eine-sparte">für eine Sparte</h3>
-<h3 id="stamm-bsg">Stamm BSG</h3>
+<p>Einzelne Mitglieder können über <em>Einfügen</em> hinzugefügt werden. Mehrere Mitglieder (auch mehrere hundert) können über die Importfunktion eingelesen werden.Näheres zur Importfunktion ist <a href="#import">im Anhang</a> beschrieben.</p>
+<h3 id="mitgliederkonten-zusammenf%C3%BChren">Mitgliederkonten zusammenführen</h3>
+<p>Ist ein Mitglied <a href="#stamm-mitglieder-ohne-zugang-eintragen">manuell</a> angelegt worden und hat sich das selbe Mitglied auch <a href="#registrierung">registriert</a>, müssen beide Konten zusammengefügt werden. Solange dies nicht geschieht gibt es folgende Einschränkungen:</p>
+<ul>
+<li>Das Mitglied ist doppelt in einer (oder mehreren) Stamm-BSG geführt und wird auch entsprechend abgerechnet</li>
+<li>Beide Konten des selben Mitglieds werden unabhängig voneinander in Sparten angemeldet</li>
+<li>Doppelanmeldungen in Sparten sind möglich, da die Konten für das System wie zwei unterschiedliche Mitglieder geführt werden</li>
+<li>Ein nachträgliches Zusammenführen ist mit hohem manuellen Aufwand verbunden.</li>
+</ul>
+<p>Es wird daher empfohlen, die Konten <strong>möglichst zeitnah</strong> zusammen zu führen. In der ausgewählten Ansicht werden nur jene Mitglieder aufgeführt, die</p>
+<ul>
+<li>von dir gesehen werden dürfen (s. <a href="#meine-daten-zur-bearbeitung-freigeben"><em>Meine Daten zur Bearbeitung freigeben</em></a>) und</li>
+<li>einen 'Partner-Datensatz' mit identischem Geburtsdatum haben</li>
+</ul>
+<p>Nach der Zusammenführung werden vom registriertem Konto die Mailadresse und das Passwort übernommen. Der Rest (<strong>Stamm-BSG</strong>, <strong>Sparten</strong>, etc.) werden vom <strong>unregistrierten/manuellen</strong> Konto übernommen.</p>
+<p>Das registrierte Konto hat in der Spalte <strong>y_id</strong> eine Zahl stehen - die ID im Log-In-System. Um ein registriertes Konto (mit y_id) mit einem manuell angelegtem konto (keine y_id) zusammenzuführen, muss die y_id des einen Kontos in das freie Feld des anderen Kontos eingetragen werden. Danach neu laden und die Datensätze verschwinden aus der Ansicht, wenn nicht ein weiteres Konto mit dem gleichen Geburtsdatum gibt.</p>
+<p><strong>Neben der Überprüfung der Geburtsdaten gibt es systemseitig keine weitere Validierung! Diese Funktion daher bitte mit großer Sorgfalt nutzen. Es wird empfolen, diesen Vorgang nicht am Handy, sondern am PC zu erledigen.</strong></p>
+<h1 id="mitarbeiter-im-regionalverband">Mitarbeiter im Regionalverband</h1>
+<p>Um das Recht zu erhalten, den Regionalverband zu verwalten, muss ein Berechtigter des Landesverbandes dir dieses zuweisen.</p>
+<p>Mit dieser Berechtigung kannst du innerhalb deines Regionalverbandes (nachdem dieser vom Landesverband angelegt wurde):</p>
+<ul>
+<li>Betriebssportgemeinschaften (BSG) anlegen</li>
+<li>Das Recht zur Verwaltung bestimmter BSG vergeben</li>
+<li>Diverse Berichte lesen</li>
+</ul>
+<p>Alle Ansichten und Aktionen sind selbsterklärend. Bitte beachte, dass du nur Regionalverbände siehst, auf die du vom Landesverband berechtigt wurdest.</p>
+<h2 id="erweiterte-rechte">Erweiterte Rechte</h2>
+<p>Der Landesverband kann auch erweiterte Rechte auf der Ebene des Regionalverbands erteilen. Damit werden Eingaben zur Kasse und für die Einrichtung und Löschung von Sparten ermöglicht. Im einzelnen sind dies:</p>
+<ul>
+<li><strong>Sparten im Regionalverband einfügen, löschen und bearbeiten</strong></li>
+<li><strong>Zahlungseingänge</strong><br>
+Hier können die Zahlungseingänge der BSG eingegeben werden. In einer späteren Programmversion könnte dies automatisiert eingelesen werden. Die Zahlungseingänge werden im Bericht 'Salden' für alle Verwalter im Regionalverband und für die jeweiligen BSG auch den Verwalter der BSG mit den fälligen Mitgliedsbeiträgen, die MOBS24 aus den Anmeldungen zusammenstellt, zur Verfügung gestellt.</li>
+<li><strong>Offene Forderungen (Notizen)</strong><br>
+Diese Ansicht dient lediglich als Notizbuch z.B. zur Verfolgung offener Forderungen, da Rechnungsverfolgung und Mahnwesen außerhalb von MOBS24 stattfindet.</li>
+</ul>
+<h1 id="mitarbeiter-im-landesverband">Mitarbeiter im Landesverband</h1>
+<p>Um das Recht zu erhalten, den Landesverband zu verwalten, muss ein Systemadministrator dir dieses Recht zuweisen.</p>
+<ul>
+<li><strong>Regionalverbände einfügen, löschen und bearbeiten</strong></li>
+<li><strong>Rechte zur Verwaltung in den Regionalverbänden vergeben</strong><br>
+Die Rechtevergabe ist analog zur Rechtevergabe für BSG. Der einzige Unterschied ist das Feld 'erweiterte Rechte'. Dies bestimmt, ob das Mitglied Zugriff auf die oben beschriebenen <a href="#erweiterte-rechte">erweiterten Rechte</a> erhält.</li>
+</ul>
+<h1 id="systemadministratoren">Systemadministratoren</h1>
+<h2 id="wichtige-ansichten">Wichtige Ansichten</h2>
+<ul>
+<li><strong>Fehlermeldungen anpassen</strong>
+Allgemeinen Fehlern - insbesondere SQL-Fehler - kann hier eine individuelle Fehlermeldung zugewiesen werden. Funktionsweise:</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Aktion</th>
+<th>Beispiel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Die Datenbank gibt einen Fehler zurück</td>
+<td>Der Nutzer gibt bei der Spartenanmeldung die Sparte nicht an. Die Datenbank meldet zurück: <strong>SQLSTATE[HY000]: General error: 1364 Field 'Sparte' doesn't have a default value</strong></td>
+</tr>
+<tr>
+<td>MOBS24 prüft, ob es für diese Fehlermeldung bereits einen Eintrag gibt.</td>
+<td><ul><li>Das System prüft zunächst den <strong>sql_error_code</strong>.</li><li> Gibt es mehrere Treffer wird derjenige bevorzugt, der auch bei der Volltextsuche (<strong>add_fulltext_constraint</strong>) einen Treffer hat.</li><li> Unter den Doppeltreffer gibt es kein weiteres Ranking.</li><li>Bei einem Treffer wird dem Anwender anstelle der <strong>ray_message</strong> die <strong>user_message</strong> angezeigt.</li><li>Die <strong>description</strong> dient internen Notizen innerhalb der Tabelle und wird nicht ausgegeben.</li></ul></td>
+</tr>
+<tr>
+<td>Gibt es noch keinen Eintrag:</td>
+<td></td>
+</tr>
+<tr>
+<td>Diese Meldung wird in die Fehler-Management-Tabelle eingetragen und in dieser Ansicht angezeigt</td>
+<td><ul><li>ID: interne ID</li><li>error_log_id: Im Error Log wird dieser Fehler ebenfalls geloggt</li><li>source: Derzeit implementiert: <em>database</em> und <em>server</em></li><li>raw_message: Die obige Meldung von der Datenbank/vom Server</li><li>sql_error_code: Offizieller Error-Code wenn verfügbar</li></ul> Die anderen Spalten sind zunächst leer.</td>
+</tr>
+<tr>
+<td>Erscheint eine neue Fehlermeldung kann diese dann mit einer geeigneten <strong>user_message</strong> begegnet werden. Bedenke, dass der Algorhithmus nur nach dem <strong>sql_error_code</strong> scannt. Sollte dieser genauer differentiert werden, muss auch die <strong>add_fulltext_constraint</strong> benutzt werden.</td>
+<td>Ein Beispiel ist die nachfolgenden Tabelle</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>error_log_id</th>
+<th>source</th>
+<th>raw_message</th>
+<th>sql_error_code</th>
+<th>add_fulltext_constraint</th>
+<th>description</th>
+<th>user_message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>17</td>
+<td>---</td>
+<td>database</td>
+<td>SQLSTATE[HY000]: General error: 1364 Field 'xxx' doesn't have a default value</td>
+<td>1364</td>
+<td>Mitglied</td>
+<td>Mitglied wurde nicht angegeben</td>
+<td>Das Mitglied muss angegeben werden</td>
+</tr>
+<tr>
+<td>2</td>
+<td>---</td>
+<td>database</td>
+<td>SQLSTATE[HY000]: General error: 1364 Field 'Sparte' doesn't have a default value</td>
+<td>1364</td>
+<td>Sparte</td>
+<td>Sparte wurde nicht angegeben</td>
+<td>Die Sparte muss angegeben werden</td>
+</tr>
+<tr>
+<td>1</td>
+<td>---</td>
+<td>database</td>
+<td>SQLSTATE[HY000]: General error: 1364 Field 'Sparte' doesn't have a default value</td>
+<td>1364</td>
+<td></td>
+<td>Ein erwarteter Wert wurde nicht angegeben.</td>
+<td>Es sind nicht alle erforderlichen Felder ausgefüllt. Bitte ergänze die norwendigen Angaben.</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>
+<p><strong>Offene Issues</strong><br>
+Was ist noch zu zun? Erledigte Issues bekommen die Prio 222 (quick &amp; dirty wegen der Sorierung) und die Versionsnummer, in der das Issue umgesetzt wurde.</p>
+</li>
+<li>
+<p><strong>Error-Log</strong>
+Alle Fehler mit eingeloggtem Nutzer.</p>
+</li>
+<li>
+<p><strong>Rollback</strong>
+Experimental. Entwickle ich ggf. für das Framework weiter.</p>
+</li>
+<li>
+<p><strong>Nutzerzahlen</strong>
+Wieviele Nutzer sind angemeldet? Ein Überblick, um Performanceproblemen vorzubeugen, Fehleranzahlen besser einschätzen zu können und einer Featureüberproduktion vorzubeugen.</p>
+</li>
+</ul>
+<h2 id="kochrezepte">Kochrezepte</h2>
+<h3 id="zuweisung-von-landesverbans--und-systemadminrechten">Zuweisung von Landesverbans- und Systemadminrechten</h3>
+<p>Die Zuweisung dieser Rechte kann über zwei Wege geschehen, welche nachfolgend beschrieben werden. Die Berechtigung werden als Bits geschrieben, wobei folgende Bits belegt sind:</p>
+<table>
+<thead>
+<tr>
+<th>Rolle</th>
+<th>Bit</th>
+<th>Dezimalwert</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Administrator</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Landesverband</td>
+<td>6</td>
+<td>64</td>
+</tr>
+<tr>
+<td>Automatischer Standardwert:</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Mitglied</td>
+<td>3</td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Ein Systemadmin benötigt daher den Wert <code>9</code> (Mitglied + Systemadmin)</li>
+<li>Ein Mitarbeiter des Landesverbands entsprechend <code>72</code></li>
+<li>Alle Rechte erlangt man mit <code>73</code></li>
+<li>Die Standardberechtigung (Mitglied) ist 8</li>
+</ul>
+<h4 id="setzen-%C3%BCber-das-ypum-frontend">Setzen über das YPUM-Frontend</h4>
+<p>YPUM steht für Yet Another PHP User Manager und kümmert sich um die User-Authentifizierung. Die Implementierung in MOBS24 ist nach dem Einloggen als Systemadministrator erreichbar unter <code>https://www.mobs24.de/ypum</code> -&gt; Administration/Nutzerverwaltung -&gt; Übersicht, bzw direkt: <code>hhttps://www.mobs24.de/ypum/yback/y-admin/usertabelle.php</code>.</p>
+<h4 id="setzen-direkt-in-der-datenbank">Setzen direkt in der Datenbank</h4>
+<p>Der entsprechende Wert kann auch in der Datenbank direkt in der Tabelle <code>y_user</code>, Spalte <code>roles</code>. Dieser Weg ist auch dann möglich, wenn es keinen Systemadministrator gibt.</p>
+<h1 id="wie">Wie...</h1>
+<h2 id="kann-ich-mich-in-einer-sparte-anmelden">...kann ich mich in einer Sparte anmelden</h2>
+<h3 id="ablauf-der-registrierung">Ablauf der Registrierung</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Schritt</strong></th>
+<th><strong>Aktion</strong></th>
+<th><strong>Status</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Vom Mitglied durchzuführen:</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>1</td>
+<td>Registrierung starten</td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Regionalverband/BSG auswählen<br><strong>Hinweis</strong>: Wenn der Regionalverband (RV) oder die BSG nicht verfügbar ist, muss<br> der RV zunächst vom Landesverband  bzw. die BSG vom RV angelegt werden.</td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Persönliche Daten und Stamm-BSG eingeben</td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Bestätigungsmail erhalten</td>
+<td></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Passwort festlegen</td>
+<td></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Login durchführen</td>
+<td>Registriert</td>
+</tr>
+<tr>
+<td><strong>Von der BSG durchzuführen:</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>7</td>
+<td>Mitglied in der BSG aufnehmen</td>
+<td>In einer Stamm-BSG aufgenommen</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Mitglied in Sparten anmelden</td>
+<td>In einer Sparte angemeldet</td>
+</tr>
+</tbody>
+</table>
+<h2 id="werden-die-f%C3%A4lligen-beitr%C3%A4ge-ermittelt">...werden die fälligen Beiträge ermittelt?</h2>
+<p>Es gibt eine Meldeliste, auf der alle Mitglieder stehen, die in einer Stamm-BSG und/oder in Sparten angemeldet sind. Einmal pro Nacht gleicht MOBS24 die aktuellen Anmeldungen im System mit dieser Meldeliste ab und fügt fehlende Einträge der Meldeliste hinzu. Abmeldungen führen nicht automatisch zu einem Löschen von der Meldeliste. Dieses Meldesystem ist in der Meldezeit eines jeden Jahres vom <strong>1.1.</strong> bis zum <strong>15.2.</strong> ausgesetzt, damit dort die An- und Abmeldungen aktualisiert werden können. Zum Stichtag 15.2. wird die Meldeliste angelegt und für den Rest des Jahres automatisch gepflegt. Die Beiträge berechnen sich aus den jeweiligen Verbands-/Basisbeitrag und den Staffelbeiträgen. In Rechnung gestellt werden diese wie folgt:</p>
+<ul>
+<li>Der Basisbeitrag der <strong>erstgenannten</strong> Stamm-BSG (keine Änderung bei unterjährigem Wechsel)</li>
+<li>Der Spartenbeitrag der BSG, für die das Mitglied antritt. Das muss nicht die Stamm-BSG sein.</li>
+</ul>
+<h2 id="kann-ich-daten-massenhaft-importieren">...kann ich Daten massenhaft importieren?</h2>
+<h3 id="vorgehensweise">Vorgehensweise</h3>
+<ol>
+<li>
+<p><strong>Schaltfläche <em>Daten importieren</em> drücken</strong></p>
+</li>
+<li>
+<p><strong>Kopfzeile erstellen</strong><br>
+Im gelben Hinweisblock siehst du, welche Spalten dir als Importspalten zur Verfügung stehen.<br>
+Bitte nutze alle Spalten, die du benötigst oder die für den Datensatz erforderlich sind.<br>
+Beim Import von Mitgliederdaten müssen z. B. folgende Angaben gemacht werden:</p>
+<ul>
+<li><strong>BSG</strong>: Stamm-BSG des Mitglieds (Achtung: Mitglieder ohne BSG-Angabe werden automatisch gelöscht und können von MOBS24 nicht zugewiesen und damit auch nicht angezeigt werden.)</li>
+<li><strong>Vorname, Nachname, Geburtsdatum</strong>: Diese Angaben sind für die Anmeldung bei der Versicherung erforderlich.</li>
+<li><strong>Geschlecht</strong></li>
+</ul>
+<p>Es kann vorkommen, dass du Spalten siehst, die nur für interne Referenzen genutzt werden (z.B. y_id). Bitte importiere dort nichts hinein. Importiere immer nur bewusst Daten in Spalten, die du kennst. Wenn du unsicher bist, ob die Daten korrekt sind, kannst du einen Probeimport mit einem einzelnen Datensatz durchführen. Diesen kannst du später problemlos wieder löschen.</p>
+</li>
+<li>
+<p><strong>Daten einfügen</strong></p>
+<ul>
+<li><strong>Pro Datensatz eine Zeile</strong>:<br>
+Jede Zeile enthält die Daten für einen Datensatz.</li>
+<li><strong>Spalten trennen</strong>:<br>
+Trennen Sie die Werte in einer Zeile durch Kommas.</li>
+<li><strong>Leere Felder</strong>:<br>
+Lasse leere Felder einfach leer, ohne etwas zwischen die Kommas zu schreiben. Ist ein kompletter Datensatz z.B. <strong>a,b,c,d</strong> und du willst die Felder a und d leer lassen, schreibe <strong>,b,,d</strong>. Nur das Feld b wäre dieser Syntax: <strong>,b,,</strong>. Es gibt kein abschließendes Komma.</li>
+<li><strong>Felder, die ein Komma enthalten</strong><br>
+Wenn in ein Feld ein Komma eingetragen werden muss, dann muss das Feld mit Anführungszeichen versehen (<em>'maskiert'</em>) werden. Beispiel:</li>
+</ul>
+<pre class="hljs"><code><div>Vorname, Nachname, BSG, Mail
+Cécile, &quot;Teich, Dr.&quot;, Nutzfahrzeuge,,
+</div></code></pre>
+</li>
+</ol>
+<h3 id="bezug-auf-bereits-gespeicherte-daten">Bezug auf bereits gespeicherte Daten</h3>
+<p>Unter dem Begriff <strong>Fremdschlüssel-Spalten</strong> siehst du im gelben Hinweisblock Feldnamen, die sich auf bereits gespeicherte Daten beziehen. Das System übernimmt hier nicht einfach den Text, den du eingibst, sondern schaut in einer Liste nach, welche passende Information dazu gehört.</p>
+<p><strong>Ein Beispiel:</strong><br>
+Stell dir vor, das System hat eine Liste mit Betriebssportgruppen:</p>
+<ul>
+<li>1 = BSG Nutzfahrzeuge</li>
+<li>2 = SG Stern</li>
+<li>3 = Uestra Hannover</li>
+</ul>
+<p>Wenn du z. B. in der Spalte BSG <em>Nutzfahrzeuge</em> eingibst, sucht das System in dieser Liste nach der Betriebssportgruppe, die am besten zu <em>Nutzfahrzeuge</em> passt, und übernimmt den Bezug zu dieser BSG.</p>
+<p>Bei mehreren Treffern (z. B. bei <em>SG</em>) gibt MOBS24 eine Fehlermeldung aus und weist darauf hin.</p>
+<p><strong>Was bedeutet das für dich?</strong></p>
+<ul>
+<li>Du kannst den Namen oder einen Teil des Namens eingeben (z. B. „Nutzfahrzeuge“ statt „BSG Nutzfahrzeuge“).</li>
+<li>Groß- und Kleinschreibung ist egal (z. B. „nutzfahrzeuge“ oder „NUTZFAHRZEUGE“ funktioniert genauso).</li>
+<li>Wichtig ist nur, dass das System genau weiß, was du meinst. Wenn es mehrere Möglichkeiten gibt, musst du die Eingabe präzisieren, damit das System den richtigen Bezug herstellen kann.</li>
+</ul>
+<p><strong>Warum macht das System das?</strong><br>
+Das System arbeitet im Hintergrund mit Nummern (IDs), weil das schneller und genauer ist. Du musst dir aber keine Sorgen um diese Nummern machen – das System erledigt das für dich.</p>
+<hr>
+<h3 id="beispiel">Beispiel</h3>
+<p>Folgende CSV-Eingabe:</p>
+<pre class="hljs"><code><div>Mail,Vorname,Nachname,BSG
+hans.meier@example.com,Hans,Meier,Nutzfahrzeuge
+,Lisa,Müller,Stern
+peter@example.com,Peter,,uestra
+,Cécile,&quot;Teich, Dr.&quot;,Nutzfahrzeuge
+</div></code></pre>
+<p>führt zu diesen Datensätzen:</p>
+<table>
+<thead>
+<tr>
+<th>Mail</th>
+<th>Vorname</th>
+<th>Nachname</th>
+<th>BSG</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>hans.meier@example.com</td>
+<td>Hans</td>
+<td>Meier</td>
+<td>BSG Nutzfahrzeuge</td>
+</tr>
+<tr>
+<td></td>
+<td>Lisa</td>
+<td>Müller</td>
+<td>SG Stern</td>
+</tr>
+<tr>
+<td>peter@example.com</td>
+<td>Peter</td>
+<td></td>
+<td>Uestra Hannover</td>
+</tr>
+<tr>
+<td></td>
+<td>Cécile</td>
+<td>Teich, Dr.</td>
+<td>BSG Nutzfahrzeuge</td>
+</tr>
+</tbody>
+</table>
+<h2 id="trete-ich-f%C3%BCr-eine-andere-nicht-stamm--bsg-in-einer-sparte-an">...trete ich für eine andere (nicht Stamm-) BSG in einer Sparte an?</h2>
+<p>Bist du z.B. bei der <em>BSG Wassersport</em> gemeldet, möchtest aber für die <em>BSG Hallensport</em> Handball spielen, kannst du das tun, ohne deine Stamm-BSG verlassen zu müssen:</p>
+<table>
+<thead>
+<tr>
+<th><strong>Schritt</strong></th>
+<th><strong>Aktion</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Vom Mitglied durchzuführen:</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>1</td>
+<td>Der neuen BSG deine Daten zur Bearbeitung freigeben</td>
+</tr>
+<tr>
+<td><strong>Von der BSG durchzuführen:</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Mitglied in Sparte(n) anmelden</td>
+</tr>
+</tbody>
+</table>
+<h3 id="wechsle-ich-die-stamm-bsg">...wechsle ich die Stamm-BSG?</h3>
+<p>Du kannst auch die Stamm-BSG über das System wechseln:</p>
+<table>
+<thead>
+<tr>
+<th><strong>Schritt</strong></th>
+<th><strong>Aktion</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Vom Mitglied durchzuführen:</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>1</td>
+<td>Ändere in der Ansicht <em>Antrag zum Wechsel der Stamm-BSG</em> das Feld <em>Ziel_BSG</em> auf deine neue Stamm-BSG</td>
+</tr>
+<tr>
+<td><strong>Von der BSG durchzuführen:</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Mitglied in Sparte(n) anmelden</td>
+</tr>
+</tbody>
+</table>
+<p><strong>##########################</strong></p>
+<ul>
+<li>qs-alex: insert into meldeliste geht nicht</li>
+<li>localhost: Es wird noch immer auf b_v_meldeliste referenziert. Die habe ich doch raus...?!
+<strong>##########################</strong></li>
+</ul>
+<p>LOP2:
+Doku für Systemadmin:</p>
+<ul>
+<li>config.php (inkl. info: und ajax:)</li>
+<li>sys-tables</li>
+<li>cronjobs</li>
+<li>ypum (lock-Backdoor über Konsole)</li>
+<li>user_code</li>
+<li>user-includes</li>
+</ul>
+<h1 id="auswirkungen-von-update-und-delete-auf-die-datenbank">Auswirkungen von UPDATE und DELETE auf die Datenbank</h1>
+<p>Dieses Dokument erklärt für Sie als Anwender, was passiert, wenn Sie Datensätze in der Datenbank <strong>ändern (UPDATE)</strong> oder <strong>löschen (DELETE)</strong>. Es wird besonders auf sogenannte „Kettenreaktionen“ geachtet, also was mit verbundenen Daten passiert.</p>
+<hr>
+<h2 id="update-%C3%A4ndern-von-daten">UPDATE (Ändern von Daten)</h2>
+<p><strong>Was bedeutet UPDATE?</strong><br>
+Wenn Sie einen Datensatz ändern (z.B. den Namen eines Vereins oder einer Sparte), wird der neue Wert in der Datenbank gespeichert.<br>
+<strong>Wichtig:</strong></p>
+<ul>
+<li>In den meisten Fällen werden die Änderungen automatisch auch in allen verbundenen Tabellen übernommen, sodass die Verknüpfungen erhalten bleiben.</li>
+<li>Es gehen keine Daten verloren.</li>
+</ul>
+<p><strong>Beispiel:</strong></p>
+<ul>
+<li>Sie ändern den Namen einer Sparte. Alle Mitglieder, die dieser Sparte zugeordnet sind, bleiben weiterhin korrekt zugeordnet.</li>
+</ul>
+<hr>
+<h2 id="delete-l%C3%B6schen-von-daten">DELETE (Löschen von Daten)</h2>
+<p><strong>Was bedeutet DELETE?</strong><br>
+Wenn Sie einen Datensatz löschen (z.B. eine Sparte, ein Mitglied oder einen Verein), kann dies Auswirkungen auf andere Daten haben, die mit diesem Datensatz verbunden sind.<br>
+Je nach Einstellung werden diese Daten entweder <strong>mitgelöscht</strong> oder das Löschen wird <strong>verhindert</strong>.</p>
+<h3 id="%C3%BCbersicht-der-wichtigsten-kettenreaktionen-beim-l%C3%B6schen">Übersicht der wichtigsten Kettenreaktionen beim Löschen</h3>
+<table>
+<thead>
+<tr>
+<th>Tabelle (was wird gelöscht?)</th>
+<th>Was passiert mit verbundenen Daten?</th>
+<th>Erklärung für Sie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sparte</strong></td>
+<td>Alle Zuordnungen von Mitgliedern zu dieser Sparte werden ebenfalls gelöscht.</td>
+<td>Die Mitglieder bleiben erhalten, aber ihre Zugehörigkeit zu dieser Sparte wird entfernt.</td>
+</tr>
+<tr>
+<td><strong>Mitglied</strong></td>
+<td>Alle Zuordnungen zu Sparten, Berechtigungen und Historien werden ebenfalls gelöscht.</td>
+<td>Das Mitglied wird komplett entfernt, inklusive aller Verknüpfungen.</td>
+</tr>
+<tr>
+<td><strong>Verein (BSG)</strong></td>
+<td>Alle Mitglieder, Zahlungen, Forderungen, Berechtigungen und Zuordnungen zu diesem Verein werden ebenfalls gelöscht.</td>
+<td>Der Verein und alle zugehörigen Daten werden entfernt.</td>
+</tr>
+<tr>
+<td><strong>Regionalverband (RV)</strong></td>
+<td>Alle Vereine und Sparten dieses Verbands werden ebenfalls gelöscht, inklusive aller deren Verknüpfungen.</td>
+<td>Der Verband und alles, was dazu gehört, wird entfernt.</td>
+</tr>
+<tr>
+<td><strong>Mitglied in Sparte</strong></td>
+<td>Nur diese eine Zuordnung wird gelöscht.</td>
+<td>Das Mitglied bleibt, ist aber nicht mehr in dieser Sparte.</td>
+</tr>
+<tr>
+<td><strong>Benutzer (User)</strong></td>
+<td>Alle Rechte und Details zu diesem Benutzer werden ebenfalls gelöscht.</td>
+<td>Der Benutzer und alle zugehörigen Informationen werden entfernt.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="was-wird-nicht-automatisch-gel%C3%B6scht">Was wird <strong>nicht</strong> automatisch gelöscht?</h3>
+<ul>
+<li>Wenn Sie einen Datensatz löschen, der noch von anderen Daten benötigt wird (z.B. ein Verein, dem noch Mitglieder zugeordnet sind), kann das Löschen manchmal <strong>verhindert</strong> werden, um Datenverlust zu vermeiden.</li>
+<li>In manchen Fällen werden Verknüpfungen einfach entfernt, ohne dass weitere Daten gelöscht werden.</li>
+</ul>
+<hr>
+<h2 id="zusammengefasst">Zusammengefasst</h2>
+<ul>
+<li>
+<p><strong>Ändern (UPDATE):</strong><br>
+Ihre Änderungen werden überall übernommen, Verknüpfungen bleiben erhalten.</p>
+</li>
+<li>
+<p><strong>Löschen (DELETE):</strong><br>
+Es können automatisch auch andere, verbundene Daten gelöscht werden. In manchen Fällen wird das Löschen verhindert, um wichtige Daten zu schützen.</p>
+</li>
+</ul>
+<h2 id="prompt-f%C3%BCr-die-automatische-dokumentation-der-auswirkungen-von-update-und-delete-im-datenbankschema">Prompt für die automatische Dokumentation der Auswirkungen von UPDATE und DELETE im Datenbankschema:</h2>
+<p>Analysiere das folgende SQL-Datenbankschema. Erstelle eine verständliche, tabellarische Übersicht für Nicht-ITler, die erklärt, was beim Ändern (UPDATE) und Löschen (DELETE) von Datensätzen in jeder Tabelle passiert.</p>
+<ul>
+<li>Berücksichtige alle Fremdschlüssel-Constraints und deren ON DELETE/ON UPDATE-Regeln.</li>
+<li>Beschreibe für jede Tabelle, welche Kettenreaktionen beim Löschen oder Ändern auftreten (z.B. welche verbundenen Daten mitgelöscht werden oder erhalten bleiben).</li>
+<li>Gib für UPDATE eine kurze allgemeine Erklärung, was das bedeutet.</li>
+<li>Gib für DELETE eine Tabelle mit: „Was wird gelöscht?“, „Was passiert mit verbundenen Daten?“, „Erklärung für den Anwender“.</li>
+<li>Formatiere das Ergebnis als Markdown-Code.</li>
+<li>Die Aussagen sollen exakt zum vorliegenden Schema passen, nicht allgemein gehalten sein.</li>
+</ul>
+<p>Hier ist das Schema:
+[Füge hier das aktuelle SQL-Schema ein]</p>
 
-            
-            
-        </body>
-        </html>
+</body>
+</html>

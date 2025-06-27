@@ -6,10 +6,10 @@
     - [Informationsbereich](#informationsbereich)
     - [Filteroptionen](#filteroptionen)
       - [Tabellenfilter](#tabellenfilter)
-    - [Schaltflächen](#schaltflächen)
       - [Spaltenfilter](#spaltenfilter)
         - [Beispiele für Zahlenfilter](#beispiele-für-zahlenfilter)
         - [Beispiele für Datumsfilter](#beispiele-für-datumsfilter)
+    - [Schaltflächen](#schaltflächen)
     - [Impressum und Datenschutzerklärung](#impressum-und-datenschutzerklärung)
 - [Mitglieder](#mitglieder)
   - [Meine Daten bearbeiten](#meine-daten-bearbeiten)
@@ -21,7 +21,7 @@
   - [Stamm-Mitglieder aufnehmen](#stamm-mitglieder-aufnehmen)
   - [Stamm-Mitglieder bearbeiten - kompakt und erweitert](#stamm-mitglieder-bearbeiten---kompakt-und-erweitert)
   - [BSG-Mitglieder in Sparten anmelden](#bsg-mitglieder-in-sparten-anmelden)
-  - [Mitgliede ohne Registrierung](#mitgliede-ohne-registrierung)
+  - [Mitglieder ohne Registrierung](#mitglieder-ohne-registrierung)
     - [Stamm-Mitglieder ohne Zugang eintragen](#stamm-mitglieder-ohne-zugang-eintragen)
     - [Mitgliederkonten zusammenführen](#mitgliederkonten-zusammenführen)
 - [Mitarbeiter im Regionalverband](#mitarbeiter-im-regionalverband)
@@ -84,7 +84,7 @@ Nach der Registrierung empfehlen wir:
 
 ### Auswahl der Ansicht
 
-In der ersen Zeile kannst du die gewünschte Ansicht wählen. Je nach deiner Rolle und deinen Berechtigungen stehen die verschiedene Ansichten zur Verfügung.
+In der ersten Zeile kannst du die gewünschte Ansicht wählen. Je nach deiner Rolle und deinen Berechtigungen stehen dir verschiedene Ansichten zur Verfügung.
 
 ### Informationsbereich
 
@@ -93,22 +93,10 @@ Im blauen Infobereich erhältst du wichtige Hinweise zur aktuellen Ansicht.
 ### Filteroptionen
 
 #### Tabellenfilter
-Um Begriffe in der gesamten Tabelle zu finden, kannst du den Tabellenfilter über den Schaltflächen verwenden. Die Treffer werden in der Tabelle markiert. Du kannst auch mit der **rechten Maustaste** auf eine Tabellenzelle klicken und der Inhalt dieser Zelle wird in den Tabellenfilter übernommen.
-
-### Schaltflächen
-
-Was eine Datenzeile ist, ergibt sich aus dem Kontext der Ansicht. Werden Mitglieder in Sparten angemeldet, ist ein Datenzeile die Anmeldung des Mitglieds. Werden Mitglieder einer BSG gelistet ist ein Datenzeile das einzelne Mitglied. 
-
-Folgende Aktionen stehen dir mit den Schaltflächen zur Verfügung:
-- **Neu laden**: Aktualisiert die Tabelle
-- **Einfügen**: Fügt eine neue Datenzeile hinzu
-- **Ausgewählte löschen**: Entfernt alle markierten Datenzeilen
-- **Dubletten suchen**: Identifiziert doppelte Einträge. Hier weden aber tatsächlich nur komplett übereinstimmende Einträge gefunden.
-- **Daten importieren**: Ermöglicht das Importieren von Datenzeilen im CSV-Format. Für Details siehe bitte die [Import-Beschreibung im Anhang](#import).
-- **Exportieren**: Öffnet ein Menü mit verschiedenen Exportformaten
+Um Begriffe in der gesamten Tabelle zu finden, kannst du den Tabellenfilter über den Schaltflächen verwenden. Die Treffer werden in der Tabelle markiert. 
 
 #### Spaltenfilter
-Über jeder Spalte befindet sich ein weiteres Filterfeld. Der dortige Eintrag wird dann nur in der entsprechenden Spalte gesucht. Neben dem Textfilter gibt es auch Zahlen- und Datumsfilter, die dann aktiviert werden, wenn entsprechende Inhalte erkannt werden. Dort gibt es dann weitere Filteroptionen:
+Über jeder Spalte befindet sich ebenfalls ein Filterfeld. Der dortige Eintrag wird dann nur in der entsprechenden Spalte gesucht. Neben dem Textfilter gibt es auch Zahlen- und Datumsfilter, die dann aktiviert werden, wenn entsprechende Inhalte erkannt werden. Dort gibt es dann weitere Filteroptionen:
 
 ##### Beispiele für Zahlenfilter   
 
@@ -121,7 +109,7 @@ Folgende Aktionen stehen dir mit den Schaltflächen zur Verfügung:
 137,50  
 ```   
 
-Komma (,) und Punkt (.) können gleichwertig als Dezimaltrennzeichen benutzt werden.  
+Komma (,) und Punkt (.) können gleichwertig als Dezimaltrennzeichen benutzt werden.
 
 ##### Beispiele für Datumsfilter
 
@@ -139,6 +127,20 @@ Auch komplette Daten folgen diesem Muster:
 >=1.7.2026
 ...
 ``` 
+Mehrere Spaltenfilter können auch kombiniert werden. So findest du z.B. Mitglieder, die weiblich und vor 1990 geboren sind (Geschlecht: 'w', Geburtsdatum: '<1990').  
+
+### Schaltflächen
+
+Was eine Datenzeile ist, ergibt sich aus dem Kontext der Ansicht. Werden Mitglieder in Sparten angemeldet, ist ein Datenzeile die Anmeldung des Mitglieds. Werden Mitglieder einer BSG gelistet ist ein Datenzeile das einzelne Mitglied. 
+
+Folgende Aktionen stehen dir mit den Schaltflächen zur Verfügung:
+- **Neu laden**: Aktualisiert die Tabelle
+- **Einfügen**: Fügt eine neue Datenzeile hinzu
+- **Ausgewählte löschen**: Entfernt alle markierten Datenzeilen
+- **Dubletten suchen**: Identifiziert doppelte Einträge. Hier weden aber tatsächlich nur komplett übereinstimmende Einträge gefunden.
+- **Daten importieren**: Ermöglicht das Importieren von Datenzeilen im CSV-Format. Für Details siehe bitte die [Import-Beschreibung im Anhang](#import).
+- **Exportieren**: Öffnet ein Menü mit verschiedenen Exportformaten
+
 
 
 ### Impressum und Datenschutzerklärung
@@ -197,7 +199,7 @@ Mit dieser Berechtigung kannst du innerhalb deiner BSG (nachdem diese vom Region
 Du kannst auch für mehrere BSG verantwortlich sein.
 
 ## BSG-Stammdaten bearbeiten
-Bitte vervollstänfige die Daten deiner BSG. Es muss eine Rechnungsadresse und ein registrierter Hauptansprechpartner hinterlegt werden. Hier kannst du diese Daten später auch anpassen.
+Bitte vervollständige die Daten deiner BSG. Es müssen eine Rechnungsadresse und ein registrierter Hauptansprechpartner hinterlegt werden. Hier kannst du diese Daten später auch anpassen.
 
 ## Stamm-Mitglieder aufnehmen
 Hier siehst du Mitglieder, die derne in eine von die verwaltete BSG möchten. Um ein Mitglied aufzunehmen, wähle in der Spalte *BSG* die entsprechende BSG. In der Spalte *will_nach* siehst du den angegebenen Wechselwunsch. Der Basisbeitrag wird im Allgemeinen von der BSG abgeführt, in der das Mitglied im Abrechnungsjahr zuerst war.
@@ -217,7 +219,7 @@ Vorhandene Datenzeilen können nicht modifiziert werden. Es können nur komplett
 
 Bitte beachte, dass nicht alle spartenspezifischen Voraussetzungen in diesem System abgebildet sind, z.B. wenn eine Sparte nur Anmeldungen vor einem Stichtag entgegennimmt oder wenn bestimmte Zusatzvoraussetzungen notwendig sind. Bitte wende dich im Zweifelsfall an die jeweilige Spartenleitung.
 
-## Mitgliede ohne Registrierung
+## Mitglieder ohne Registrierung
 Im **Ausnahmefall** ist es möglich, Mitglieder aufzunehmen, die sich noch nicht registriert haben. Dies sollte nur als letzte Lösung genutzt werden und soll nur den Übergang vom alten System zu MOBS24 in speziellen Fällen erleichtern. Bitte beachte folgende Punkte:
 
 - Für Mitglieder ohne Registrierung übernimmt das Mitglied, welches die Daten importiert, die Verantwortung, dass die jeweiligen eingespielten Personen der Datenverarbeitung zustimmen.
@@ -236,7 +238,7 @@ Ist ein Mitglied [manuell](#stamm-mitglieder-ohne-zugang-eintragen) angelegt wor
 - Doppelanmeldungen in Sparten sind möglich, da die Konten für das System wie zwei unterschiedliche Mitglieder geführt werden
 - Ein nachträgliches Zusammenführen ist mit hohem manuellen Aufwand verbunden.
 
-Es wird daher empfolen, die Konten **möglichst zeitnah** zusammen zu führen. In der ausgewählten Ansicht werden nur jene Mitglieder aufgeführt, die
+Es wird daher empfohlen, die Konten **möglichst zeitnah** zusammen zu führen. In der ausgewählten Ansicht werden nur jene Mitglieder aufgeführt, die
 
 - von dir gesehen werden dürfen (s. [*Meine Daten zur Bearbeitung freigeben*](#meine-daten-zur-bearbeitung-freigeben)) und
 - einen 'Partner-Datensatz' mit identischem Geburtsdatum haben
@@ -263,7 +265,7 @@ Der Landesverband kann auch erweiterte Rechte auf der Ebene des Regionalverbands
 
 - **Sparten im Regionalverband einfügen, löschen und bearbeiten**
 - **Zahlungseingänge**  
-  Hier können die Zahlungseingänge der BSG eingegeben werden. In einer späteren Programmversion könnte dies automatisiert eingelesen werden. Die Zahlungseingänge werden im Bericht 'Salden' für alle Verwalter im Regionalverband und für die jedeilige BSG auch den Verwalter der BSG mit den fälligen Mitgliedsbeiträgen, die MOBS24 aus den Anmeldungen zusammenstellt, zur Verfügung gestellt.
+  Hier können die Zahlungseingänge der BSG eingegeben werden. In einer späteren Programmversion könnte dies automatisiert eingelesen werden. Die Zahlungseingänge werden im Bericht 'Salden' für alle Verwalter im Regionalverband und für die jeweiligen BSG auch den Verwalter der BSG mit den fälligen Mitgliedsbeiträgen, die MOBS24 aus den Anmeldungen zusammenstellt, zur Verfügung gestellt.
 - **Offene Forderungen (Notizen)**  
   Diese Ansicht dient lediglich als Notizbuch z.B. zur Verfolgung offener Forderungen, da Rechnungsverfolgung und Mahnwesen außerhalb von MOBS24 stattfindet.
 
@@ -335,10 +337,9 @@ YPUM steht für Yet Another PHP User Manager und kümmert sich um die User-Authe
 Der entsprechende Wert kann auch in der Datenbank direkt in der Tabelle ```y_user```, Spalte ```roles```. Dieser Weg ist auch dann möglich, wenn es keinen Systemadministrator gibt.
 
 
-<hr style="border: 3px solid red;">
     
 
-LOP:
+
 # Wie...
 ## ...kann ich mich in einer Sparte anmelden
 ### Ablauf der Registrierung
@@ -454,7 +455,7 @@ Du kannst auch die Stamm-BSG über das System wechseln:
 | **Schritt** | **Aktion**                                                                                            |
 |-------------|-------------------------------------------------------------------------------------------------------|
 | **Vom Mitglied durchzuführen:**                                                                                     | 
-| 1           | Ändere in der Ansicht *Antrag zum Wechsel der Stamm BSG* das Feld *Ziel_BSG* auf deine neue Stamm-BSG | 
+| 1           | Ändere in der Ansicht *Antrag zum Wechsel der Stamm-BSG* das Feld *Ziel_BSG* auf deine neue Stamm-BSG | 
 | **Von der BSG durchzuführen:**                                    | 
 | 2           | Mitglied in Sparte(n) anmelden                      |
 
@@ -511,7 +512,7 @@ Je nach Einstellung werden diese Daten entweder **mitgelöscht** oder das Lösch
 | **Sparte**                  | Alle Zuordnungen von Mitgliedern zu dieser Sparte werden ebenfalls gelöscht. | Die Mitglieder bleiben erhalten, aber ihre Zugehörigkeit zu dieser Sparte wird entfernt. |
 | **Mitglied**                | Alle Zuordnungen zu Sparten, Berechtigungen und Historien werden ebenfalls gelöscht. | Das Mitglied wird komplett entfernt, inklusive aller Verknüpfungen. |
 | **Verein (BSG)**            | Alle Mitglieder, Zahlungen, Forderungen, Berechtigungen und Zuordnungen zu diesem Verein werden ebenfalls gelöscht. | Der Verein und alle zugehörigen Daten werden entfernt. |
-| **Regionalverband**         | Alle Vereine und Sparten dieses Verbands werden ebenfalls gelöscht, inklusive aller deren Verknüpfungen. | Der Verband und alles, was dazu gehört, wird entfernt. |
+| **Regionalverband (RV)**         | Alle Vereine und Sparten dieses Verbands werden ebenfalls gelöscht, inklusive aller deren Verknüpfungen. | Der Verband und alles, was dazu gehört, wird entfernt. |
 | **Mitglied in Sparte**      | Nur diese eine Zuordnung wird gelöscht. | Das Mitglied bleibt, ist aber nicht mehr in dieser Sparte. |
 | **Benutzer (User)**         | Alle Rechte und Details zu diesem Benutzer werden ebenfalls gelöscht. | Der Benutzer und alle zugehörigen Informationen werden entfernt. |
 

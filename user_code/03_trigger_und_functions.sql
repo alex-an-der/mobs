@@ -542,7 +542,3 @@ BEGIN
 END //
 
 DELIMITER ;
-
-
-DROP TRIGGER IF EXISTS tr_user_first_login;
-DROP TRIGGER IF EXISTS tr_user_insert_create_member;

@@ -1,6 +1,10 @@
 INSERT INTO `b___an_aus` (`id`, `wert`) VALUES (1, 'JA');
 INSERT INTO `b___an_aus` (`id`, `wert`) VALUES (2, 'NEIN');
 
+-- Setze bool-Werte für die an_aus Tabelle
+UPDATE `b___an_aus` SET `bool`=1 WHERE `id`=1;
+UPDATE `b___an_aus` SET `bool`=0 WHERE `id`=2;
+
 INSERT INTO `b___geschlecht` (`id`, `auswahl`) VALUES (1, 'männlich');
 INSERT INTO `b___geschlecht` (`id`, `auswahl`) VALUES (2, 'weiblich');
 INSERT INTO `b___geschlecht` (`id`, `auswahl`) VALUES (3, 'divers');

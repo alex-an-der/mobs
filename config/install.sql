@@ -1,14 +1,15 @@
+-- System Error Manager Tabelle
+DROP TABLE IF EXISTS `sys_error_manager`;
 CREATE TABLE `sys_error_manager` ( 
   `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
-  `raw_message` VARCHAR(500) NOT NULL,
+  `raw_message` VARCHAR(1000) NOT NULL,
   `sql_error_code` INT UNSIGNED NULL,
-  `description` VARCHAR(1000) NULL,
-  `user_message` VARCHAR(500) NULL,
-  `source` VARCHAR(100) NULL,
-  `add_fulltext_constraint` VARCHAR(50) NULL,
+  `description` VARCHAR(500) NULL,
+  `user_message` VARCHAR(1000) NULL,
+  `source` VARCHAR(50) NULL,
+  `add_fulltext_constraint` VARCHAR(200) NULL,
   `error_log_id` BIGINT UNSIGNED NULL,
-   PRIMARY KEY (`id`),
-  CONSTRAINT `unique_code_plus_text` UNIQUE (`sql_error_code`, `add_fulltext_constraint`)
+   PRIMARY KEY (`id`)
 )
 ENGINE = InnoDB;
 

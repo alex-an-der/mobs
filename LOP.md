@@ -56,16 +56,19 @@ Dazu müssen zuerst die FK angepasst werden. Wenn rollback, dann muss das auch w
 Was passiert, wenn eine nicht leere BSG gelöscht wird?
 RESTRICT verhindert, dass eine BSG gelöscht wird, wenn es Mitglieder gibt.
 **NEU:**   FK_mitglieder_bsg, ON DELETE:  RESTRICT
+```sql
 ALTER TABLE `b_mitglieder` DROP FOREIGN KEY `FK_mitglieder_bsg`;
 ALTER TABLE `b_mitglieder` ADD CONSTRAINT `FK_mitglieder_bsg` FOREIGN KEY (`BSG`) REFERENCES `b_bsg` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+```
 
 #### FK_mitglieder_bsg
 Wie oben...
 **JETZT:** FK_b_mitglieder_b___an_aus__aktiv, ON DELETE:  SET NULL
 **NEU:**   FK_b_mitglieder_b___an_aus__aktiv, ON DELETE:  RESTRICT
+```sql
 ALTER TABLE `b_mitglieder` DROP FOREIGN KEY `FK_b_mitglieder_b___an_aus__aktiv`;
 ALTER TABLE `b_mitglieder` ADD CONSTRAINT `FK_b_mitglieder_b___an_aus__aktiv` FOREIGN KEY (`aktiv`) REFERENCES `b___an_aus` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
+```
 #### NULL verbieten:
 **Achtung - es dürfen keine NULL-Einträge gespeichert sein!**
 ``` sql
@@ -396,3 +399,7 @@ WHERE TABLE_SCHEMA = @database_name;
 SHOW VARIABLES LIKE 'character_set_connection';
 SHOW VARIABLES LIKE 'collation_connection';
 ```
+
+
+
+
