@@ -367,9 +367,9 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                         $selectTag = '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" data-field="' 
                             . htmlspecialchars((string)$dataFieldKey) 
                             . '" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' 
-                            . addslashes($tabelle) . '\', \'"
-                            . addslashes($row["id"]) . "\', \'"
-                            . addslashes($key) . "\', this.value, 0)">';
+                            . addslashes($tabelle) . '\', \''
+                            . addslashes($row["id"]) . '\', \''
+                            . addslashes($key) . '\', this.value, 0, \'\', this)">';
                         echo $selectTag;
 
                         // Nur wenn Spalte nullable ist, die "---" anbieten (und nur bei r/w + non-info-Spalten)
@@ -418,7 +418,7 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                         class=\"form-control border-0\"
                         style=\"background-color: inherit; word-wrap: break-word; white-space: normal;\"
                         value=\"" . htmlspecialchars((string)$value, ENT_QUOTES) . "\"
-                        onchange=\"updateField('{$tabelle}', '{$row['id']}', '{$key}', this.value, '" . htmlspecialchars((string)$columnType, ENT_QUOTES) . "', '" . ($ajaxfile ?? '') . "')\"
+                        onchange=\"updateField('{$tabelle}', '{$row['id']}', '{$key}', this.value, '" . htmlspecialchars((string)$columnType, ENT_QUOTES) . "', '" . ($ajaxfile ?? '') . "', this)\"
                         onfocus=\"clearCellColor(this)\"
                     >";
                     } else {

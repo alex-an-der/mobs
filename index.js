@@ -13,11 +13,11 @@ function showErrorMsg(message) {
     }
 }
 
-function updateField(tabelle, id, field, value, datatype, ajaxFile) { 
+function updateField(tabelle, id, field, value, datatype, ajaxFile, element) { 
     
     let isUserAjax = 0;
-    if (event && event.target && event.target.hasAttribute('data-userajax')) {
-        isUserAjax = event.target.getAttribute('data-userajax');
+    if (element && element.hasAttribute('data-userajax')) {
+        isUserAjax = element.getAttribute('data-userajax');
     }     
         // selectedTableID als Zahl, falls vorhanden, sonst 0
         let tab = php_tab;
