@@ -40,12 +40,7 @@ $anzuzeigendeDaten[] = array(
         order by id desc;
     ",
     "referenzqueries" => array(
-        "Ansprechpartner" => "SELECT m.id as id, CONCAT(Nachname, ', ', Vorname, ' (',COALESCE(b.BSG, '---'),', ', m.id,' )') as anzeige
-            from b_mitglieder as m
-            left join b_bsg as b on b.id=m.BSG
-            WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'mitglied')) > 0 OR
-            FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0
-            order by anzeige;"
+        "Ansprechpartner" => $mitgliederauswahl
     ),
     "spaltenbreiten" => array(
         "Verband"                       => "380",
@@ -181,12 +176,13 @@ $anzuzeigendeDaten[] = array(
                     order by mis.id desc;
     ",
     "referenzqueries" => array(
-        "info:Mitglied" => "SELECT m.id as id, concat(m.Vorname,' ', m.Nachname, ' (Stamm: ', IFNULL(b.BSG, '".NULL_WERT."'), ')') as anzeige 
+        "info:Mitglied" => $mitgliederauswahl,
+        /*"SELECT m.id as id, concat(m.Vorname,' ', m.Nachname, ' (Stamm: ', IFNULL(b.BSG, '".NULL_WERT."'), ')') as anzeige 
                         from b_mitglieder as m
                         left join b_bsg as b on m.BSG = b.id 
                         WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0 
                         ORDER BY anzeige;
-        ", // BSG is not null => Erst die Stamm BSG, dann die Sparten
+        ",*/ // BSG is not null => Erst die Stamm BSG, dann die Sparten
         "info:BSG" => "SELECT b.id as id, concat(b.BSG,' (',v.Kurzname,')') as anzeige
                     from b_bsg as b
                     join b_regionalverband as v on v.id = b.Verband
@@ -274,47 +270,10 @@ $anzuzeigendeDaten[] = array(
     )
 );
 
-$anzuzeigendeDaten[] = array(
-    "tabellenname" => "b_meldeliste",
-    "auswahltext" => "$bericht Salden",
-    "writeaccess" => false,
-    "import" => false,
-    "query" => "SELECT 
-MAX(a.BSG) as id, -- Pflicht-id, hier nicht relevant
-b.BSG as BSG,
-a.Abrechnungsjahr,
-SUM(a.HABEN) as HABEN,
-SUM(a.SOLL) as SOLL,
-(SUM(a.HABEN) - SUM(a.SOLL)) AS Saldo,
-r.Verband as Empfaenger
+$anzuzeigendeDaten[] = $salden;
 
-FROM (
-SELECT BSG_ID as BSG, Beitragsjahr as Abrechnungsjahr, Betrag as SOLL, 0 as HABEN, Beitragsstelle as Empfaenger
-FROM b_meldeliste
+$anzuzeigendeDaten[] = $rechteuebersicht;
 
-UNION ALL
-
-SELECT BSG, Abrechnungsjahr, 0 as SOLL, Haben as HABEN, Empfaenger
-FROM b_zahlungseingaenge
-) as a
-JOIN b_bsg as b on b.id = a.BSG
-JOIN b_regionalverband as r on a.Empfaenger = r.id
-
-WHERE 
-FIND_IN_SET(b.id, berechtigte_elemente($uid, 'bsg')) > 0 OR
-FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband')) > 0 
-GROUP BY BSG, Abrechnungsjahr, r.Verband;
-
-    ",
-    "spaltenbreiten" => array(
-        "BSG"             => "300",
-        "Abrechnungsjahr" => "120",
-        "Soll"            => "100",
-        "Haben"           => "100",
-        "Saldo"           => "100",
-        "Empfaenger"      => "300"
-    )
-);
 ######################################################################################################
 
 # Statistik: Mitglieder in Sparten

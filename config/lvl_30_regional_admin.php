@@ -15,9 +15,7 @@ $anzuzeigendeDaten[] = array(
                         WHERE FIND_IN_SET(v.id, berechtigte_elemente($uid, 'verband')) > 0
                         ORDER BY anzeige;
         ",
-        "Spartenleiter" => "SELECT m.id, CONCAT(Nachname, ', ', Vorname) as anzeige
-                                from b_mitglieder as m
-                                ORDER BY anzeige;",
+        "Spartenleiter" => $mitgliederauswahl,
         "Sportart" => "SELECT id, CONCAT (Sportart,' (',Sportart_Nr,')') as anzeige from b___sportart ORDER BY anzeige;"
     ),
     "spaltenbreiten" => array(
@@ -59,8 +57,10 @@ $anzuzeigendeDaten[] = array(
                     SELECT 4 AS n UNION ALL 
                     SELECT 5 AS n) AS years;",
     "Empfaenger" => "SELECT id, Verband as anzeige FROM b_regionalverband 
+                     WHERE FIND_IN_SET(b_regionalverband.id, berechtigte_elemente($uid, 'verband')) > 0
                      ORDER BY anzeige;"  
     ), // Empfaenger müssen auch ohne Berechtigung ausgewählt werden dürfen
+       // Korrektur: Nein - jeder verwaltet ja nur seine Konten .. ?
     "spaltenbreiten" => array(
         "BSG"                          => "380",
         "Eingangsdatum"                => "150",
@@ -68,7 +68,6 @@ $anzuzeigendeDaten[] = array(
         "Haben"                        => "150"
     ) 
 );
-
 
 
 

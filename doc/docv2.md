@@ -475,7 +475,7 @@ Doku für Systemadmin:
 - ypum (lock-Backdoor über Konsole)
 - user_code
 - user-includes
-
+- Erster User (Manuell BSG zuweisen) - oder Dummy-User mit Rechten?
 
 
 

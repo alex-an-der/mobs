@@ -57,6 +57,26 @@ $anzuzeigendeDaten = array();
 $statistik = array();
 
 $bericht = "→ Bericht:";
+/*$mitgliederauswahl =        "SELECT m.id AS id, CONCAT(Vorname, ' ', Nachname, ' (',COALESCE(b.BSG, '---'),', ', m.id,' )') as anzeige
+                            FROM b_mitglieder AS m
+                            LEFT JOIN b_bsg AS b ON b.id=m.BSG
+                            WHERE FIND_IN_SET(m.id, berechtigte_elemente($uid, 'mitglied')) > 0 OR
+                            FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0
+                            ORDER BY anzeige;";*/
+
+
+// Wird auch an anderer Stelle verwendet! (z.B. Rechte für Regionalverband)
+$mitgliederconcat = "CONCAT(Vorname, ' ', Nachname, ' (',COALESCE(b.BSG, '---'),', ', m.id,' )')";
+
+// JEDER, der irgendwie ausgewählt wird, muss sich einloggen können und daher in einer BSG sein.
+$mitgliederauswahl = "SELECT m.id AS id, $mitgliederconcat as anzeige
+                            FROM b_mitglieder AS m
+                            LEFT JOIN b_bsg AS b ON b.id=m.BSG
+                            WHERE (FIND_IN_SET(m.id, berechtigte_elemente($uid, 'mitglied')) > 0 OR
+                            FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0) AND
+                            m.BSG IS NOT NULL
+                            ORDER BY anzeige;";
+
 
 ########################################################################################################
 #                                                                                                      #
