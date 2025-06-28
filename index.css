@@ -1,4 +1,4 @@
- .form-control.border-0 {
+.form-control.border-0 {
             background-color:rgba(0,0,0,0) !important;
         }
         .form-control.border-0:focus {
@@ -169,4 +169,12 @@
   min-height: 48px;
   display: flex;
   align-items: center;
+}
+
+/* Spaltenfilter grün färben, wenn Text enthalten ist */
+.column-filter:not(:placeholder-shown) {
+  background-color: #6bde6b !important; /* sehr leichtes Grün */
+}
+#tableFilter:not(:placeholder-shown) {
+  background-color: #6bde6b !important; /* sehr leichtes Grün */
 }
