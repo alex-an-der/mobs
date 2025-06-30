@@ -157,3 +157,33 @@ INSERT INTO `b_regionalverband` (id, `Verband`) VALUES (1, 'Dummy - bitte anpass
 INSERT INTO `b_bsg` (`Verband`, `BSG`) VALUES (1, 'Dummy - bitte anpassen');
 
 
+ALTER TABLE `adm_issues` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `adm_usercount` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `b___an_aus` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `b___beitragszuordnungen` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `b___geschlecht` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `b___sportart` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `b_bsg` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `b_bsg_deleted` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `b_bsg_rechte` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `b_bsg_wechselantrag` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `b_forderungen` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `b_individuelle_berechtigungen` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `b_meldeliste` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `b_mitglieder` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `b_mitglieder_deleted` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `b_mitglieder_historie` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `b_mitglieder_in_sparten` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `b_regionalverband` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `b_regionalverband_rechte` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `b_sparte` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `b_zahlungseingaenge` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `sys_error_manager` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `sys_log` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `sys_rollback` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `y_deleted_users` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `y_roles` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `y_sites` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `y_user` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `y_user_details` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+ALTER TABLE `y_user_fields` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;

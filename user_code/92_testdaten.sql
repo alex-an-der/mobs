@@ -1464,6 +1464,7 @@ BEGIN
                     WHEN 431 THEN 'Teresa'
                     WHEN 432 THEN 'Una'
                     WHEN 433 THEN 'Victoria'
+
                     WHEN 434 THEN 'Wanda'
                     WHEN 435 THEN 'Xenia'
                     WHEN 436 THEN 'Yvonne'
@@ -2696,12 +2697,6 @@ INSERT INTO b_mitglieder (y_id, BSG, Vorname, Nachname, Mail, Geschlecht, Geburt
 (6022, (SELECT id FROM b_bsg WHERE BSG = 'Ralf Kaiser'), 'Ralf', 'Kaiser', 'ralf.kaiser@test-einzelbsg.de', 1, '1984-10-21', 1, 1),
 (6023, (SELECT id FROM b_bsg WHERE BSG = 'Heike Scholz'), 'Heike', 'Scholz', 'heike.scholz@test-einzelbsg.de', 2, '1989-05-17', 1, 1),
 (6024, (SELECT id FROM b_bsg WHERE BSG = 'Matthias Jung'), 'Matthias', 'Jung', 'matthias.jung@test-einzelbsg.de', 1, '1987-02-08', 1, 1);
-
--- Individuelle Berechtigungen für Einzel-BSG Mitglieder
-INSERT INTO b_individuelle_berechtigungen (Mitglied, BSG) 
-SELECT m.id, m.BSG 
-FROM b_mitglieder m 
-WHERE m.y_id BETWEEN 6000 AND 6024;
 
 -- =============================================================================
 -- 5. SPARTEN-ANMELDUNGEN GENERIEREN

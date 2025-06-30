@@ -77,6 +77,47 @@ $mitgliederauswahl = "SELECT m.id AS id, $mitgliederconcat as anzeige
                             m.BSG IS NOT NULL
                             ORDER BY anzeige;";
 
+$salden = array(
+    "tabellenname" => "b_meldeliste",
+    "auswahltext" => "$bericht Salden",
+    "writeaccess" => false,
+    "import" => false,
+    "query" => "SELECT 
+                MAX(a.BSG) as id, -- Pflicht-id, hier nicht relevant
+                b.BSG as BSG,
+                a.Abrechnungsjahr,
+                SUM(a.HABEN) as HABEN,
+                SUM(a.SOLL) as SOLL,
+                (SUM(a.HABEN) - SUM(a.SOLL)) AS Saldo,
+                r.Verband as Empfaenger
+
+                FROM (
+                SELECT BSG_ID as BSG, Beitragsjahr as Abrechnungsjahr, Betrag as SOLL, 0 as HABEN, Beitragsstelle as Empfaenger
+                FROM b_meldeliste
+
+                UNION ALL
+
+                SELECT BSG, Abrechnungsjahr, 0 as SOLL, Haben as HABEN, Empfaenger
+                FROM b_zahlungseingaenge
+                ) as a
+                JOIN b_bsg as b on b.id = a.BSG
+                JOIN b_regionalverband as r on a.Empfaenger = r.id
+
+                WHERE 
+                FIND_IN_SET(b.id, berechtigte_elemente($uid, 'bsg')) > 0 OR
+                FIND_IN_SET(b.Verband, berechtigte_elemente($uid, 'verband_erweitert')) > 0 
+                GROUP BY BSG, Abrechnungsjahr, r.Verband;
+
+                    ",
+                    "spaltenbreiten" => array(
+                        "BSG"             => "300",
+                        "Abrechnungsjahr" => "120",
+                        "Soll"            => "100",
+                        "Haben"           => "100",
+                        "Saldo"           => "100",
+                        "Empfaenger"      => "300"
+                    )
+                );
 
 ########################################################################################################
 #                                                                                                      #
