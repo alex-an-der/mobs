@@ -233,79 +233,8 @@ BEGIN
 END //
 DELIMITER ;
 
--- Funktion zum Prüfen ob Element berechtigt ist (ohne dynamisches SQL)
-DROP FUNCTION IF EXISTS is_element_berechtigt;
-DELIMITER //
+-- #####################################################################
 
-CREATE FUNCTION is_element_berechtigt(uid INT, target VARCHAR(50), element_id INT)
-RETURNS BOOLEAN
-DETERMINISTIC
-READS SQL DATA
-BEGIN
-    DECLARE is_berechtigt BOOLEAN DEFAULT FALSE;
-    
-    CASE target
-        WHEN 'verband' THEN
-            SELECT COUNT(*) > 0 INTO is_berechtigt
-            FROM b_regionalverband as v
-            JOIN b_regionalverband_rechte as r on r.Verband = v.id 
-            WHERE r.Nutzer = uid AND v.id = element_id;
-            
-        WHEN 'bsg' THEN
-            SELECT COUNT(*) > 0 INTO is_berechtigt
-            FROM b_bsg as b
-            LEFT JOIN b_bsg_rechte as br ON b.id = br.BSG
-            JOIN y_user as y ON Nutzer = y.id
-            WHERE y.id = uid AND b.id = element_id;
-            
-        WHEN 'sparte' THEN
-            SELECT COUNT(*) > 0 INTO is_berechtigt
-            FROM b_sparte as s
-            JOIN b_regionalverband_rechte r on s.Verband = r.Verband
-            WHERE r.Nutzer = uid AND s.id = element_id;
-            
-        WHEN 'mitglied' THEN
-            SELECT COUNT(*) > 0 INTO is_berechtigt
-            FROM (
-                SELECT mis.Mitglied as id, mis.BSG as bsg
-                FROM b_mitglieder_in_sparten as mis
-                WHERE mis.Mitglied = element_id
-                UNION
-                SELECT m.id as id, m.BSG as bsg
-                FROM b_mitglieder as m
-                WHERE m.id = element_id
-            ) member_bsg
-            JOIN b_bsg on b_bsg.id = member_bsg.bsg
-            JOIN b_regionalverband as v on v.id = b_bsg.Verband
-            WHERE (
-                EXISTS (
-                    SELECT 1 FROM b_bsg as b2
-                    LEFT JOIN b_bsg_rechte as br2 ON b2.id = br2.BSG
-                    JOIN y_user as y2 ON Nutzer = y2.id
-                    WHERE y2.id = uid AND b2.id = member_bsg.bsg
-                )
-                OR EXISTS (
-                    SELECT 1 FROM b_regionalverband as v2
-                    JOIN b_regionalverband_rechte as r2 on r2.Verband = v2.id 
-                    WHERE r2.Nutzer = uid AND v2.id = v.id
-                )
-            );
-            
-        WHEN 'individuelle_mitglieder' THEN
-            SELECT COUNT(*) > 0 INTO is_berechtigt
-            FROM b_bsg as b
-            LEFT JOIN b_bsg_rechte as br ON b.id = br.BSG
-            JOIN y_user as y ON Nutzer = y.id
-            JOIN b_individuelle_berechtigungen as ir on b.id = ir.BSG 
-            WHERE y.id = uid AND ir.Mitglied = element_id;
-    END CASE;
-    
-    RETURN is_berechtigt;
-END //
-
-DELIMITER ;
-
--- Komplett neue Lösung ohne GROUP_CONCAT
 DROP FUNCTION IF EXISTS berechtigte_elemente;
 DELIMITER //
 
@@ -324,6 +253,14 @@ BEGIN
         FROM b_regionalverband as v
         JOIN b_regionalverband_rechte as r on r.Verband = v.id 
         WHERE r.Nutzer = uid
+        ORDER BY v.id;
+
+    DECLARE verband_erweitert_cursor CURSOR FOR 
+        SELECT DISTINCT v.id
+        FROM b_regionalverband as v
+        JOIN b_regionalverband_rechte as r on r.Verband = v.id 
+        JOIN b___an_aus as aa on aa.id = r.erweiterte_Rechte
+        WHERE r.Nutzer = uid and aa.bool > 0 
         ORDER BY v.id;
         
     DECLARE bsg_cursor CURSOR FOR 
@@ -390,6 +327,20 @@ BEGIN
                 END IF;
             END LOOP;
             CLOSE verband_cursor;
+
+        WHEN 'verband_erweitert' THEN
+            OPEN verband_erweitert_cursor;
+            read_loop: LOOP
+                FETCH verband_erweitert_cursor INTO current_id;
+                IF done THEN LEAVE read_loop; END IF;
+                
+                IF result = '' THEN
+                    SET result = CAST(current_id AS CHAR);
+                ELSE
+                    SET result = CONCAT(result, ',', current_id);
+                END IF;
+            END LOOP;
+            CLOSE verband_erweitert_cursor;
             
         WHEN 'bsg' THEN
             OPEN bsg_cursor;
