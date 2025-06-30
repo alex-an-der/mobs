@@ -6,7 +6,7 @@ $anzuzeigendeDaten[] = array(
     "writeaccess" => true,
     "query" => "SELECT s.id as id, s.Verband as Verband, s.Sparte, Spartenbeitrag, s.Spartenleiter as Spartenleiter, s.Sportart as Sportart
                 FROM b_sparte as s
-                WHERE FIND_IN_SET(s.Verband, berechtigte_elemente(100, 'verband_erweitert')) > 0 
+                WHERE FIND_IN_SET(s.Verband, berechtigte_elemente($uid, 'verband_erweitert')) > 0 
                 order by id desc;
     ",
     "referenzqueries" => array(
