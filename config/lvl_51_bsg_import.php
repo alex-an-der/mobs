@@ -68,23 +68,23 @@ $anzuzeigendeDaten[] = array(
     nicht der Fall sein, muss dieser Fehler zunächst behoben werden (z.B. durch die Bearbeitung in den Stammdaten).</p>",
     "writeaccess" => true,
     "import" => false,
-    "query" => "SELECT 
-                    m.id as id, 
-                    m.y_id as 'ajax:y_id', 
-                    concat(Vorname, ' ', Nachname) as info:Name,  
-                    DATE_FORMAT(m.Geburtsdatum, '%d.%m.%Y') as info:Geburtsdatum
-                FROM b_mitglieder as m
+    "query" => "SELECT  
+                m.id as id, 
+                m.y_id as 'ajax:y_id', 
+                concat(Vorname, ' ', Nachname) as info:Name,  
+                DATE_FORMAT(m.Geburtsdatum, '%d.%m.%Y') as info:Geburtsdatum
+            FROM b_mitglieder as m
+            WHERE 
+                (FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 OR BSG IS NULL)
+            AND m.Geburtsdatum IN (
+                SELECT Geburtsdatum
+                FROM b_mitglieder as sub_m
                 WHERE 
-                    (FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 or 
-                    ( BSG IS NULL AND FIND_IN_SET(m.id, berechtigte_elemente($uid, 'individuelle_mitglieder')) > 0))
-                AND m.BSG IS NOT NULL
-                AND m.Geburtsdatum IN (
-                    SELECT Geburtsdatum
-                    FROM b_mitglieder
-                    GROUP BY Geburtsdatum
-                    HAVING COUNT(*) >= 2
-                )
-                ORDER BY BSG, Vorname DESC;
+                    (FIND_IN_SET(BSG, berechtigte_elemente($uid, 'BSG')) > 0 OR BSG IS NULL)
+                GROUP BY Geburtsdatum
+                HAVING COUNT(*) >= 2
+            )
+            ORDER BY m.Geburtsdatum, Vorname, BSG DESC;
     ",
     "ajaxfile" => "ajax_kontenzusammenfuehrung.php",
     "referenzqueries" => array(
