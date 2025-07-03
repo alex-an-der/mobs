@@ -3,7 +3,7 @@
 <head>
 <meta charset='UTF-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-<title>Form-Vorlage</title>
+<title>Registrierung</title>
 <?php 
 require_once(__DIR__.'/../yback/include/inc_main.php');
 require_once(__DIR__."/../../config/db_connect.php");
