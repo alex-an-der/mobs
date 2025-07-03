@@ -17,23 +17,6 @@ INSERT INTO b_mitglieder (Vorname,Nachname,BSG,Stammmitglied_seit,Mail,Geschlech
 VALUES ('Tommy Manuell','Nocker',1,'1966-06-06','NeueMail@Nocker.de',3,'1966-06-06',1);
 
 # Offene Sofort-Issues
-DBI
-## lvl_30 binde ich gerade die Saldenansicht ein.
-
-Wenn ein Nutzi in einer Sparte in Celle ist, ist der Empfänger der Spartenbeiträge nicht Hannover, sondern Celle, also nicht, wo die BSG ist, sondern, wo die Sparte ist. Das führt jetzt zu einer Komplexität in den Salden - aber machbar:
-
-### Erledigt:
-- In der Meldeliste steht bereits die richtige Beitragsstelle (habe ich gerade geändert)
-- In die Meldeliste muss aber so oder so die ID der BSG, sonst können die Zahlungseingänge nicht zugewiesen werden.
-- Bei Zahlungseingang muss auch angegeben werden, welcher RV der Zahlungsempfänger ist - also für welchen RV eingezahlt wird (Achtung - Berechtigungen). 
-- Final muss in den Salden das alles berücksichtigt werden. Es gibt dann also pro BSG ein Saldo gegenüber jedem Gläubiger.
-- Wo häge ich die Salden ein, damit die Berechtigungen stimmen, aber jede BSG auch sehen kann, wie es aussieht. Kann ich die Salden in lvl_30 hängen? Oder 40? 
-- 
-### Offen:
-
-
-
-
 
 ## Nächste Schritte
 Bitte prüfe, ob die ob_clean();-Anweisung im ajax richtig ist, oder ob die Ausgaben dann an den Browser gesammelt gesendet werden sollen?
@@ -47,6 +30,167 @@ ob_clean LÖSCHT den Output-Buffer. Was wird da gelöscht? Funktioniert ypum dan
 ### Bootstrap usw. statisch einbinden (Dateien selbst hosten)
 
 # In der Prod-DB einfügen und neue Version v0.1.9-qa.x
+
+
+
+
+# ERLEDIGT (sollte eigentlich)
+
+```
+
+SET @new_id = 100000;
+UPDATE b_mitglieder SET id = (@new_id := @new_id + 1) ORDER BY id;
+SELECT MAX(id) + 1 AS neuer_wert FROM b_mitglieder;
+ALTER TABLE b_mitglieder AUTO_INCREMENT = <neuer_wert_hier_eintragen>;
+(z.B. ALTER TABLE b_mitglieder AUTO_INCREMENT = 100043;)
+
+```
+- CRONJOB einrichten (prod und local und ggf. qs)
+- YPUM-Anpassung nicht vergessen! (s.open Issues)
+
+
+
+#####################################################################################
+
+ABRUF über CRONJOB
+------------------
+INSERT IGNORE INTO b_meldeliste
+    (MNr, BSG, Zuordnung, Zuordnung_ID, Betrag, Beitragsjahr)
+SELECT
+    m.id               AS MNr,
+    m.BSG              AS BSG,
+    1                  AS Zuordnung,
+    b.Verband          AS Zuordnung_ID,
+    r.Basisbeitrag     AS Betrag,
+    YEAR(CURDATE())    AS Beitragsjahr
+FROM b_mitglieder AS m
+JOIN b_bsg AS b ON b.id = m.BSG
+JOIN b_regionalverband AS r ON r.id = b.Verband
+WHERE m.BSG IS NOT NULL;
+
+INSERT IGNORE INTO b_meldeliste
+    (MNr, BSG, Zuordnung, Zuordnung_ID, Betrag, Beitragsjahr)
+SELECT 
+    mis.Mitglied      AS MNr,
+    mis.BSG           AS BSG,
+    2                 AS Zuordnung,
+    mis.Sparte        AS Zuordnung_ID,
+    s.Spartenbeitrag  AS Betrag,
+    YEAR(CURDATE())   AS Beitragsjahr
+FROM b_mitglieder_in_sparten AS mis
+JOIN b_sparte AS s ON s.id = mis.Sparte;
+
+
+
+
+
+
+
+
+Bau das noch ein:
+ALTER DATABASE <DATENBANK>
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_0900_ai_ci;
+
+  SELECT CONCAT('ALTER TABLE `', TABLE_NAME, '` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;')
+FROM information_schema.TABLES
+WHERE TABLE_SCHEMA = 'MOBS_local_DEV';
+
+
+
+
+select DATE_FORMAT(Timestamp, '%d.%m.%y') AS Erfasst_am, ml.Mitglied, ml.BSG, bz.Zweck, rv.Verband as Empfänger
+from b_meldeliste as ml
+join b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
+join b_regionalverband as rv on rv.id = ml.Zuordnung_ID
+WHERE bz.id = 1;
+
+select DATE_FORMAT(Timestamp, '%d.%m.%y') AS Erfasst_am, ml.Mitglied, ml.BSG, bz.Zweck, sp.Sparte as Empfänger
+from b_meldeliste as ml
+join b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
+join b_sparte as sp on sp.id = ml.Zuordnung_ID
+WHERE bz.id = 2;
+
+select * from b_regionalverband;
+
+truncate TABLE b_meldeliste;
+
+
+
+
+
+
+## FUDA Framework-Ideen
+Fehlermeldungen in eines sys_errormsg - Tabelle sammeln und dort einen Anzeigetext hinterlegen lassen.
+Beispiel: unique-constraint "Spieler_Sparte" verletzt => Fehler: Der SPieler ist dieser Sparte bereits zugewiesen.
+
+
+## Query für FUDA - nicht user_code, sondern FUDA-core! (jetzt in  config/install.sql)
+DROP TABLE IF EXISTS `sys_error_manager`;
+CREATE TABLE `sys_error_manager` ( 
+  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `error_log_id` BIGINT UNSIGNED NULL,
+  `raw_message` VARCHAR(500) NOT NULL,
+  `sql_error_code` INT UNSIGNED NULL,
+  `description` VARCHAR(1000) NULL,
+  `user_message` VARCHAR(500) NULL,
+  `source` VARCHAR(100) NULL,
+  `add_fulltext_constraint` VARCHAR(50) NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `unique_code_plus_text` UNIQUE (`sql_error_code`, `add_fulltext_constraint`)
+) 
+ENGINE = InnoDB;
+
+``` sql
+-- Definiere die Datenbank als Variable
+SET @database_name = 'db_445253_7';
+
+-- Ändere den Zeichensatz und die Collation der gesamten Datenbank
+-- Dieser Befehl muss direkt ausgeführt werden, da ALTER DATABASE nicht dynamisch funktioniert
+ALTER DATABASE db_445253_7 CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
+
+-- Generiere SQL-Befehle, um den Zeichensatz und die Collation aller Tabellen zu ändern
+SELECT CONCAT(
+    'ALTER TABLE ', @database_name, '.', TABLE_NAME, 
+    ' CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;'
+) AS sql_command
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_SCHEMA = @database_name;
+
+-- Generiere SQL-Befehle, um den Zeichensatz und die Collation aller Spalten zu ändern
+SELECT CONCAT(
+    'ALTER TABLE ', @database_name, '.', TABLE_NAME, 
+    ' MODIFY ', COLUMN_NAME, ' ', COLUMN_TYPE, 
+    ' CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;'
+) AS sql_command
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = @database_name
+  AND CHARACTER_SET_NAME IS NOT NULL;
+
+-- Setze die globalen Standardwerte für Zeichensatz und Collation (falls möglich)
+SET GLOBAL character_set_server = 'utf8mb4';
+SET GLOBAL collation_server = 'utf8mb4_german2_ci';
+
+-- Überprüfe den Zeichensatz und die Collation der Datenbank
+SELECT SCHEMA_NAME, DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME
+FROM INFORMATION_SCHEMA.SCHEMATA
+WHERE SCHEMA_NAME = @database_name;
+
+-- Überprüfe den Zeichensatz und die Collation aller Tabellen
+SELECT TABLE_NAME, TABLE_COLLATION
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_SCHEMA = @database_name;
+
+-- Überprüfe den Zeichensatz und die Collation aller Spalten
+SELECT TABLE_NAME, COLUMN_NAME, CHARACTER_SET_NAME, COLLATION_NAME
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = @database_name;
+
+-- Überprüfe die Verbindungseinstellungen
+SHOW VARIABLES LIKE 'character_set_connection';
+SHOW VARIABLES LIKE 'collation_connection';
+```
+
 
 ### b_mitglieder.BSG: NULL -> NOT NULL  (nicht mehr nullable).
 Dazu müssen zuerst die FK angepasst werden. Wenn rollback, dann muss das auch wieder geradegezogen werden:
@@ -241,165 +385,4 @@ ALTER TABLE `b_zahlungseingaenge` ADD CONSTRAINT `FK_zahlungseingang_verband` FO
 
 
 ```
-
-
-# ERLEDIGT (sollte eigentlich)
-
-```
-
-SET @new_id = 100000;
-UPDATE b_mitglieder SET id = (@new_id := @new_id + 1) ORDER BY id;
-SELECT MAX(id) + 1 AS neuer_wert FROM b_mitglieder;
-ALTER TABLE b_mitglieder AUTO_INCREMENT = <neuer_wert_hier_eintragen>;
-(z.B. ALTER TABLE b_mitglieder AUTO_INCREMENT = 100043;)
-
-```
-- CRONJOB einrichten (prod und local und ggf. qs)
-- YPUM-Anpassung nicht vergessen! (s.open Issues)
-
-
-
-#####################################################################################
-
-ABRUF über CRONJOB
-------------------
-INSERT IGNORE INTO b_meldeliste
-    (MNr, BSG, Zuordnung, Zuordnung_ID, Betrag, Beitragsjahr)
-SELECT
-    m.id               AS MNr,
-    m.BSG              AS BSG,
-    1                  AS Zuordnung,
-    b.Verband          AS Zuordnung_ID,
-    r.Basisbeitrag     AS Betrag,
-    YEAR(CURDATE())    AS Beitragsjahr
-FROM b_mitglieder AS m
-JOIN b_bsg AS b ON b.id = m.BSG
-JOIN b_regionalverband AS r ON r.id = b.Verband
-WHERE m.BSG IS NOT NULL;
-
-INSERT IGNORE INTO b_meldeliste
-    (MNr, BSG, Zuordnung, Zuordnung_ID, Betrag, Beitragsjahr)
-SELECT 
-    mis.Mitglied      AS MNr,
-    mis.BSG           AS BSG,
-    2                 AS Zuordnung,
-    mis.Sparte        AS Zuordnung_ID,
-    s.Spartenbeitrag  AS Betrag,
-    YEAR(CURDATE())   AS Beitragsjahr
-FROM b_mitglieder_in_sparten AS mis
-JOIN b_sparte AS s ON s.id = mis.Sparte;
-
-
-
-
-
-
-
-
-Bau das noch ein:
-ALTER DATABASE <DATENBANK>
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_0900_ai_ci;
-
-  SELECT CONCAT('ALTER TABLE `', TABLE_NAME, '` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;')
-FROM information_schema.TABLES
-WHERE TABLE_SCHEMA = 'MOBS_local_DEV';
-
-
-
-
-select DATE_FORMAT(Timestamp, '%d.%m.%y') AS Erfasst_am, ml.Mitglied, ml.BSG, bz.Zweck, rv.Verband as Empfänger
-from b_meldeliste as ml
-join b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
-join b_regionalverband as rv on rv.id = ml.Zuordnung_ID
-WHERE bz.id = 1;
-
-select DATE_FORMAT(Timestamp, '%d.%m.%y') AS Erfasst_am, ml.Mitglied, ml.BSG, bz.Zweck, sp.Sparte as Empfänger
-from b_meldeliste as ml
-join b___beitragszuordnungen as bz on ml.Zuordnung = bz.id
-join b_sparte as sp on sp.id = ml.Zuordnung_ID
-WHERE bz.id = 2;
-
-select * from b_regionalverband;
-
-truncate TABLE b_meldeliste;
-
-
-
-
-
-
-## FUDA Framework-Ideen
-Fehlermeldungen in eines sys_errormsg - Tabelle sammeln und dort einen Anzeigetext hinterlegen lassen.
-Beispiel: unique-constraint "Spieler_Sparte" verletzt => Fehler: Der SPieler ist dieser Sparte bereits zugewiesen.
-
-
-## Query für FUDA - nicht user_code, sondern FUDA-core! (jetzt in  config/install.sql)
-DROP TABLE IF EXISTS `sys_error_manager`;
-CREATE TABLE `sys_error_manager` ( 
-  `id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
-  `error_log_id` BIGINT UNSIGNED NULL,
-  `raw_message` VARCHAR(500) NOT NULL,
-  `sql_error_code` INT UNSIGNED NULL,
-  `description` VARCHAR(1000) NULL,
-  `user_message` VARCHAR(500) NULL,
-  `source` VARCHAR(100) NULL,
-  `add_fulltext_constraint` VARCHAR(50) NULL,
-  PRIMARY KEY (`id`),
-  CONSTRAINT `unique_code_plus_text` UNIQUE (`sql_error_code`, `add_fulltext_constraint`)
-) 
-ENGINE = InnoDB;
-
-``` sql
--- Definiere die Datenbank als Variable
-SET @database_name = 'db_445253_7';
-
--- Ändere den Zeichensatz und die Collation der gesamten Datenbank
--- Dieser Befehl muss direkt ausgeführt werden, da ALTER DATABASE nicht dynamisch funktioniert
-ALTER DATABASE db_445253_7 CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;
-
--- Generiere SQL-Befehle, um den Zeichensatz und die Collation aller Tabellen zu ändern
-SELECT CONCAT(
-    'ALTER TABLE ', @database_name, '.', TABLE_NAME, 
-    ' CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;'
-) AS sql_command
-FROM INFORMATION_SCHEMA.TABLES
-WHERE TABLE_SCHEMA = @database_name;
-
--- Generiere SQL-Befehle, um den Zeichensatz und die Collation aller Spalten zu ändern
-SELECT CONCAT(
-    'ALTER TABLE ', @database_name, '.', TABLE_NAME, 
-    ' MODIFY ', COLUMN_NAME, ' ', COLUMN_TYPE, 
-    ' CHARACTER SET utf8mb4 COLLATE utf8mb4_german2_ci;'
-) AS sql_command
-FROM INFORMATION_SCHEMA.COLUMNS
-WHERE TABLE_SCHEMA = @database_name
-  AND CHARACTER_SET_NAME IS NOT NULL;
-
--- Setze die globalen Standardwerte für Zeichensatz und Collation (falls möglich)
-SET GLOBAL character_set_server = 'utf8mb4';
-SET GLOBAL collation_server = 'utf8mb4_german2_ci';
-
--- Überprüfe den Zeichensatz und die Collation der Datenbank
-SELECT SCHEMA_NAME, DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME
-FROM INFORMATION_SCHEMA.SCHEMATA
-WHERE SCHEMA_NAME = @database_name;
-
--- Überprüfe den Zeichensatz und die Collation aller Tabellen
-SELECT TABLE_NAME, TABLE_COLLATION
-FROM INFORMATION_SCHEMA.TABLES
-WHERE TABLE_SCHEMA = @database_name;
-
--- Überprüfe den Zeichensatz und die Collation aller Spalten
-SELECT TABLE_NAME, COLUMN_NAME, CHARACTER_SET_NAME, COLLATION_NAME
-FROM INFORMATION_SCHEMA.COLUMNS
-WHERE TABLE_SCHEMA = @database_name;
-
--- Überprüfe die Verbindungseinstellungen
-SHOW VARIABLES LIKE 'character_set_connection';
-SHOW VARIABLES LIKE 'collation_connection';
-```
-
-
-
 

@@ -1,0 +1,97 @@
+/* hilfe.css - Stil für die Hilfeseite */
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f8f9fa;
+    color: #222;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    padding: 32px 40px 40px 40px;
+}
+
+h1, h2, h3 {
+    color: #1a4d7a;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+h1 {
+    font-size: 2.2em;
+    border-bottom: 2px solid #e0e7ef;
+    padding-bottom: 0.3em;
+}
+
+h2 {
+    font-size: 1.5em;
+    border-left: 4px solid #1a4d7a;
+    padding-left: 0.5em;
+    background: #f0f4fa;
+}
+
+h3 {
+    font-size: 1.2em;
+    color: #2a6ca3;
+}
+
+p, li {
+    line-height: 1.7;
+    font-size: 1.08em;
+}
+
+.toc {
+    background: #eaf2fb;
+    border: 1px solid #c7d7ea;
+    border-radius: 8px;
+    padding: 18px 24px;
+    margin-bottom: 2em;
+}
+
+.toc-title {
+    font-weight: bold;
+    color: #1a4d7a;
+    margin-bottom: 0.7em;
+    font-size: 1.15em;
+}
+
+.toc ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.toc li {
+    margin-bottom: 0.4em;
+}
+
+.toc a {
+    color: #2a6ca3;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.toc a:hover {
+    color: #0d2c47;
+    text-decoration: underline;
+}
+
+section {
+    margin-bottom: 2.5em;
+    padding-bottom: 1em;
+    border-bottom: 1px solid #e0e7ef;
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 12px 4vw;
+    }
+    .toc {
+        padding: 10px 2vw;
+    }
+}
