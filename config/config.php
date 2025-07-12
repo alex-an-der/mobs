@@ -66,7 +66,7 @@ $bericht = "→ Bericht:";
 
 
 // Wird auch an anderer Stelle verwendet! (z.B. Rechte für Regionalverband)
-$mitgliederconcat = "CONCAT(Vorname, ' ', Nachname, ' (',COALESCE(b.BSG, '---'),', ', m.id,' )')";
+$mitgliederconcat = "CONCAT(Vorname, ' ', Nachname, ' (',COALESCE(b.BSG, '---'),', ', m.id,')')";
 
 // JEDER, der irgendwie ausgewählt wird, muss sich einloggen können und daher in einer BSG sein.
 $mitgliederauswahl = "SELECT m.id AS id, $mitgliederconcat as anzeige
