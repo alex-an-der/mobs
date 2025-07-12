@@ -472,6 +472,94 @@ DELIMITER ;
 -- ------------------------------------------------------------
 
 DROP TRIGGER IF EXISTS trg_b_mitglieder_update_historie;
+DROP TRIGGER IF EXISTS trg_b_mitglieder_update;
+DELIMITER $$
+CREATE TRIGGER trg_b_mitglieder_update
+AFTER UPDATE ON b_mitglieder
+FOR EACH ROW
+BEGIN
+    DECLARE alter_wert VARCHAR(100);
+    DECLARE neuer_wert VARCHAR(100);
+    DECLARE cnt INT DEFAULT 0;
+
+    -- Für jede relevante Spalte prüfen, ob sich der Wert geändert hat
+    IF NOT (OLD.Vorname <=> NEW.Vorname) THEN
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung Vorname von ''', IFNULL(OLD.Vorname, ''), ''' zu ''', IFNULL(NEW.Vorname, ''), ''''));
+    END IF;
+
+    IF NOT (OLD.Nachname <=> NEW.Nachname) THEN
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung Nachname von ''', IFNULL(OLD.Nachname, ''), ''' zu ''', IFNULL(NEW.Nachname, ''), ''''));
+    END IF;
+
+    IF NOT (OLD.BSG <=> NEW.BSG) THEN
+        SELECT concat(BSG, ' (VKZ ', VKZ, ')') INTO alter_wert FROM b_bsg WHERE id = OLD.BSG;
+        SELECT concat(BSG, ' (VKZ ', VKZ, ')') INTO neuer_wert FROM b_bsg WHERE id = NEW.BSG;
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung BSG von ''', IFNULL(alter_wert, ''), ''' zu ''', IFNULL(neuer_wert, ''), ''''));
+
+        -- Prüfe, ob die Kombination Mitglied und BSG schon existiert und trage dann die BSG in die indiv. Mitgliederberechtigungen
+        SELECT COUNT(*) INTO cnt
+        FROM b_individuelle_berechtigungen
+        WHERE Mitglied = NEW.id AND BSG = NEW.BSG;
+        IF cnt = 0 THEN
+            INSERT INTO b_individuelle_berechtigungen (Mitglied, BSG)
+            VALUES (NEW.id, NEW.BSG);
+        END IF;
+    END IF;
+
+    IF NOT (OLD.Mail <=> NEW.Mail) THEN
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung Mail von ''', IFNULL(OLD.Mail, ''), ''' zu ''', IFNULL(NEW.Mail, ''), ''''));
+    END IF;
+
+    IF NOT (OLD.aktiv <=> NEW.aktiv) THEN
+        SELECT wert INTO alter_wert FROM b___an_aus WHERE id = OLD.aktiv;
+        SELECT wert INTO neuer_wert FROM b___an_aus WHERE id = NEW.aktiv;
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung aktiv von ''', IFNULL(alter_wert, ''), ''' zu ''', IFNULL(neuer_wert, ''), ''''));
+    END IF;
+    
+    IF NOT (OLD.Geburtsdatum <=> NEW.Geburtsdatum) THEN
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (
+            OLD.id,
+            CONCAT(
+                'Änderung Geburtsdatum von ''',
+                IFNULL(DATE_FORMAT(OLD.Geburtsdatum, '%d.%m.%Y'), ''),
+                ''' zu ''',
+                IFNULL(DATE_FORMAT(NEW.Geburtsdatum, '%d.%m.%Y'), ''),
+                ''''
+            )
+        );
+    END IF;
+
+    IF NOT (OLD.Mailbenachrichtigung <=> NEW.Mailbenachrichtigung) THEN
+        SELECT wert INTO alter_wert FROM b___an_aus WHERE id = OLD.Mailbenachrichtigung;
+        SELECT wert INTO neuer_wert FROM b___an_aus WHERE id = NEW.Mailbenachrichtigung;
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung Mailbenachrichtigung von ''', IFNULL(alter_wert, ''), ''' zu ''', IFNULL(neuer_wert, ''), ''''));
+    END IF;
+
+    IF NOT (OLD.Geschlecht <=> NEW.Geschlecht) THEN
+        SELECT auswahl INTO alter_wert FROM b___geschlecht WHERE id = OLD.Geschlecht;
+        SELECT auswahl INTO neuer_wert FROM b___geschlecht WHERE id = NEW.Geschlecht;
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung Geschlecht von ''', IFNULL(alter_wert, ''), ''' zu ''', IFNULL(neuer_wert, ''), ''''));
+    END IF;
+
+    IF NOT (OLD.y_id <=> NEW.y_id) THEN
+        INSERT INTO b_mitglieder_historie (MNr, Aktion)
+        VALUES (OLD.id, CONCAT('Änderung y_id von ''', IFNULL(OLD.y_id, ''), ''' zu ''', IFNULL(NEW.y_id, ''), ''''));
+    END IF;
+
+END$$
+
+DELIMITER ;
+
+/*
+DROP TRIGGER IF EXISTS trg_b_mitglieder_update_historie;
 DELIMITER $$
 CREATE TRIGGER trg_b_mitglieder_update_historie
 AFTER UPDATE ON b_mitglieder
@@ -546,7 +634,7 @@ BEGIN
 END$$
 
 DELIMITER ;
-
+*/
 -- -----------------------------------------------------------------------------------
 
 -- Trigger für Anmeldung in einer Sparte
@@ -583,6 +671,8 @@ BEGIN
     END IF;
 END$$
 DELIMITER ;
+
+
 
 /*
 DROP TRIGGER IF EXISTS trg_b_mitglieder_in_sparten_insert_historie;
