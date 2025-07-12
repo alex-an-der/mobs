@@ -268,13 +268,15 @@ function renderTableHeaders($data) {
         foreach (array_keys($data[0]) as $header) {
             if (strcasecmp($header, 'id') !== 0) {
                 $fieldName = $header;
+                // Anzeige ohne Prefix, aber data-field mit Prefix
+                $displayHeader = $header;
                 if (strpos($header, 'info:') === 0) {
-                    $fieldName = substr($header, 5);
+                    $displayHeader = substr($header, 5);
                 }
-                if (strpos($fieldName, 'ajax:') === 0) {
-                    $fieldName = substr($fieldName, 5);
+                if (strpos($header, 'ajax:') === 0) {
+                    $displayHeader = substr($header, 5);
                 }
-                echo "<th><input type='text' class='form-control form-control-sm column-filter' data-field='" . htmlspecialchars($fieldName) . "' placeholder='Filter...'></th>";
+                echo "<th><input type='text' class='form-control form-control-sm column-filter' data-field='" . htmlspecialchars($header) . "' placeholder='Filter...'></th>";
             }
         }
     } else {
@@ -322,13 +324,17 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                 
                 // Prefix entfernen für data-field
                 $dataFieldKey = $key;
-                if (strpos($dataFieldKey, 'info:') === 0) {
-                    $dataFieldKey = substr($dataFieldKey, 5);
+                // Anzeige ohne Prefix, aber data-field mit Prefix
+                $displayValue = $value;
+                $isInfoColumn = strpos($key, 'info:') === 0;
+                $isAjaxColumn = strpos($key, 'ajax:') === 0;
+                if ($isInfoColumn) {
+                    $displayValue = $value; // ggf. anpassen, falls du die Anzeige ändern willst
                 }
-                if (strpos($dataFieldKey, 'ajax:') === 0) {
-                    $dataFieldKey = substr($dataFieldKey, 5);
+                if ($isAjaxColumn) {
+                    $displayValue = $value; // ggf. anpassen
                 }
-                echo '<td data-field="' . htmlspecialchars((string)$dataFieldKey) . '" ' . $style . '>';
+                echo '<td data-field="' . htmlspecialchars((string)$key) . '" ' . $style . '>';
                 $data_fk_ID_key = "";
                 $data_fk_ID_value = "";
 
