@@ -1,4 +1,3 @@
-
 -- -----------------------------------------------------------------------------------
 DROP TRIGGER IF EXISTS tr_manuelles_mitglied_anlegen;
 -- Mitglied ohne y_id anlegen: Setze Berechtigung für Stamm-BSG
@@ -551,6 +550,41 @@ DELIMITER ;
 -- -----------------------------------------------------------------------------------
 
 -- Trigger für Anmeldung in einer Sparte
+DROP TRIGGER IF EXISTS trg_b_mitglieder_in_sparten_insert;
+DELIMITER $$
+CREATE TRIGGER trg_b_mitglieder_in_sparten_insert
+AFTER INSERT ON b_mitglieder_in_sparten
+FOR EACH ROW
+BEGIN
+    DECLARE spartenname VARCHAR(255);
+    DECLARE bsgname VARCHAR(255);
+    DECLARE cnt INT DEFAULT 0;
+    -- Spartenname inkl. Verband holen
+    SELECT CONCAT(s.Sparte, ' (', r.Kurzname, ')')
+      INTO spartenname
+      FROM b_sparte AS s
+      JOIN b_regionalverband AS r ON r.id = s.Verband
+     WHERE s.id = NEW.Sparte;
+    -- BSG-Name holen
+    SELECT BSG INTO bsgname FROM b_bsg WHERE id = NEW.BSG;
+    -- Eintrag in Historie
+    INSERT INTO b_mitglieder_historie (MNr, Aktion)
+    VALUES (
+        NEW.Mitglied,
+        CONCAT('Anmeldung in der Sparte ', IFNULL(spartenname, ''), ' für die BSG ', IFNULL(bsgname, ''))
+    );
+    -- Prüfe, ob die Kombination Mitglied und BSG schon existiert und trage dann die BSG in die indiv. Mitgliederberechtigungen
+    SELECT COUNT(*) INTO cnt
+    FROM b_individuelle_berechtigungen
+    WHERE Mitglied = NEW.Mitglied AND BSG = NEW.BSG;
+    IF cnt = 0 THEN
+        INSERT INTO b_individuelle_berechtigungen (Mitglied, BSG)
+        VALUES (NEW.Mitglied, NEW.BSG);
+    END IF;
+END$$
+DELIMITER ;
+
+/*
 DROP TRIGGER IF EXISTS trg_b_mitglieder_in_sparten_insert_historie;
 DELIMITER $$
 
@@ -580,7 +614,7 @@ BEGIN
 END$$
 
 DELIMITER ;
-
+*/
 -- -----------------------------------------------------------------------------------
 
 

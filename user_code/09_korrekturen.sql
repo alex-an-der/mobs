@@ -1,5 +1,6 @@
--- Die meisten Korrekturen wurden bereits in den ursprünglichen Schema-Dateien integriert
--- Nur noch nachträgliche ID-Anpassungen wenn nötig:
+ALTER TABLE `b_individuelle_berechtigungen` ADD CONSTRAINT `UNIQUE_Mitglied_BSG` UNIQUE (`Mitglied`, `BSG`);
+ALTER TABLE `b_mitglieder_in_sparten` ADD CONSTRAINT `UNIQUE_Mitglied_Sparte` UNIQUE (`Mitglied`, `Sparte`);
+
 
 -- ####################
 -- Nachträglich - nur falls ID-Anpassung nötig:
