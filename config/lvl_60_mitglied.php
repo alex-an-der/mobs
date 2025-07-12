@@ -40,7 +40,8 @@ $anzuzeigendeDaten[] = array(
 $anzuzeigendeDaten[] = array(
     "tabellenname" => "b_individuelle_berechtigungen",
     "auswahltext" => "Meine Daten zur Bearbeitung freigeben.",
-    "hinweis" => "Bearbeiter der von dir angegebenen Betriebssportgruppen dürfen deine Daten einsehen und diese verarbeiten. Dies ist notwendig, um dich in einer oder mehreren BSG zu verwalten. Solltest du eine Berechtigung löschen, kann die betreffende BSG deine Daten trotzdem noch so lange sehen wie du dort Mitglied bist ('berechtigtes Interesse' nach DSGVO).  Um ein neues Recht zu vergeben, klicke auf <b>'Einf&uuml;gen'</b>.",
+    "hinweis" => "<p>Bearbeiter der von dir angegebenen Betriebssportgruppen und den zugehörigen Regionalverbänden dürfen deine Daten einsehen und diese verarbeiten. Dies ist notwendig, um dich in einer oder mehreren BSG zu verwalten. Solltest du eine Berechtigung löschen, kann die betreffende BSG deine Daten trotzdem noch so lange sehen wie du dort Mitglied bist ('berechtigtes Interesse' nach DSGVO).  Um ein neues Recht zu vergeben, klicke auf <b>'Einf&uuml;gen'</b>.
+     </p><p>Es ist möglich, dass diese Rechte <b>automatisch</b> gesetzt werden, wenn dich z.B. ein Regionalverband in einer Sparte anmeldet oder eine freigegebene BSG dich ummeldet.</p>",
     "writeaccess" => true,
     "import" => true,
     "query" => "SELECT ib.id as id, Mitglied as info:Mitglied, ib.BSG as BSG
