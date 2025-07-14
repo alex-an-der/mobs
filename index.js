@@ -1352,6 +1352,18 @@ document.addEventListener('DOMContentLoaded', () => {
             updateURLWithFilters(document.querySelectorAll('.column-filter'), globalFilter);
         });
     }
+    
+    const columnFilterInputs = document.querySelectorAll('.column-filter');
+    columnFilterInputs.forEach((input, index) => {
+        const filterValue = php_spaltenfilter[index + 1] || "";
+        input.value = filterValue;
+        input.addEventListener('input', filterTableByColumns);
+        input.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            this.value = '';
+            filterTableByColumns();
+        });
+    });
 });
 
 function updateURLWithFilters(filters, globalFilter = null) {

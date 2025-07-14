@@ -712,4 +712,17 @@ document.addEventListener('DOMContentLoaded', function() {
 });
     </script>
 
+<?php
+$spaltenfilter = [];
+foreach ($_GET as $key => $value) {
+    if (preg_match('/^s\d+$/', $key)) {
+        $spaltenfilter[(int)substr($key, 1)] = $value;
+    }
+}
+?>
+
+<script>
+    var php_spaltenfilter = <?= json_encode($spaltenfilter) ?>;
+</script>
+
 </html>
