@@ -1337,7 +1337,35 @@ document.addEventListener('DOMContentLoaded', () => {
             filterTableByColumns();
         });
     });
+
+    // Überwache Änderungen in den Spaltenfiltern
+    columnFilters.forEach((filter, index) => {
+        filter.addEventListener('input', () => {
+            updateURLWithFilters(columnFilters);
+        });
+    });
 });
+
+function updateURLWithFilters(filters) {
+    const url = new URL(window.location.href);
+
+    // Entferne vorherige Filter-Parameter
+    Array.from(url.searchParams.keys()).forEach(key => {
+        if (key.startsWith('s')) {
+            url.searchParams.delete(key);
+        }
+    });
+
+    // Füge neue Filter-Parameter hinzu
+    filters.forEach((filter, index) => {
+        if (filter.value.trim() !== '') {
+            url.searchParams.set(`s${index + 1}`, filter.value.trim());
+        }
+    });
+
+    // Aktualisiere die Adresszeile, ohne die Seite neu zu laden
+    window.history.replaceState({}, '', url);
+}
 
 function exportData(format, spreadsheetFormat) {
     const filterInput = document.getElementById('tableFilter');
