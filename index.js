@@ -1344,19 +1344,32 @@ document.addEventListener('DOMContentLoaded', () => {
             updateURLWithFilters(columnFilters);
         });
     });
+
+    // Überwache Änderungen im globalen Filter
+    const globalFilter = document.getElementById('tableFilter');
+    if (globalFilter) {
+        globalFilter.addEventListener('input', () => {
+            updateURLWithFilters(document.querySelectorAll('.column-filter'), globalFilter);
+        });
+    }
 });
 
-function updateURLWithFilters(filters) {
+function updateURLWithFilters(filters, globalFilter = null) {
     const url = new URL(window.location.href);
 
-    // Entferne vorherige Filter-Parameter
+    // Entferne nur die Filter-Parameter, die mit s1, s2, ... beginnen
     Array.from(url.searchParams.keys()).forEach(key => {
-        if (key.startsWith('s')) {
+        if (key.startsWith('s') && key !== 's0') {
             url.searchParams.delete(key);
         }
     });
 
-    // Füge neue Filter-Parameter hinzu
+    // Füge globalen Filter hinzu, falls vorhanden
+    if (globalFilter && globalFilter.value.trim() !== '') {
+        url.searchParams.set('s0', globalFilter.value.trim());
+    }
+
+    // Füge Spaltenfilter hinzu
     filters.forEach((filter, index) => {
         if (filter.value.trim() !== '') {
             url.searchParams.set(`s${index + 1}`, filter.value.trim());
