@@ -665,7 +665,7 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
         var php_selectedTableID = <?= json_encode($selectedTableID)?>
         var php_spaltenfilter   = <?= json_encode($spaltenfilter) ?>;
         var filteredByGET       = <?= json_encode($filteredByGET) ?>;
-
+ DBI
     </script>
 
 
