@@ -470,15 +470,15 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
             }?>
             
             <?php 
+            // Globaler Filter auskommentiert
+            /*
             if($tabelle!=""){
                 echo "<p><form class='d-flex align-items-center'><input type='text' id='tableFilter' class='form-control' placeholder='Filtern...'>";
-                // Löschen-Button auskomment
-
-
-
-                //echo "<button id='clearFilterButton' type='button' class='btn btn-secondary ms-2' onclick='clearFilter()'>Löschen</button>";
+                // Löschen-Button auskommentiert
+                // echo "<button id='clearFilterButton' type='button' class='btn btn-secondary ms-2' onclick='clearFilter()'>Löschen</button>";
                 echo "</form></p>";
             }
+            */
             ?>
             <?php 
             // Always show Filter and Export buttons if a table is selected
