@@ -643,6 +643,16 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
     } else {
         $tab = 0;
     }
+
+    $spaltenfilter = [];
+    $filteredByGET = false;
+    foreach ($_GET as $key => $value) {
+        if (preg_match('/^s\d+$/', $key)) {
+            $spaltenfilter[(int)substr($key, 1)] = $value;
+            $filteredByGET = true;
+        }
+}
+
     ?>
 
     <script>
@@ -653,6 +663,9 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
         var php_DB_ERROR        = <?= json_encode(DB_ERROR)?>;
         // var php_SRV_ERROR       = < ?= json_encode(SRV_ERROR)?>;
         var php_selectedTableID = <?= json_encode($selectedTableID)?>
+        var php_spaltenfilter   = <?= json_encode($spaltenfilter) ?>;
+        var filteredByGET       = <?= json_encode($filteredByGET) ?>;
+
     </script>
 
 
@@ -712,17 +725,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
     </script>
 
-<?php
-$spaltenfilter = [];
-foreach ($_GET as $key => $value) {
-    if (preg_match('/^s\d+$/', $key)) {
-        $spaltenfilter[(int)substr($key, 1)] = $value;
-    }
-}
-?>
 
-<script>
-    var php_spaltenfilter = <?= json_encode($spaltenfilter) ?>;
-</script>
 
 </html>
