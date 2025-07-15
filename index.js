@@ -1426,6 +1426,7 @@ function filter_that(selectElement, typ){
         case 'div':
             selectedText = selectElement.innerHTML;
             break;
+        
     }
 
     // Versuche, das data-field-Attribut zu lesen (Spaltenname)
@@ -1443,7 +1444,16 @@ function filter_that(selectElement, typ){
     }
     event.preventDefault();
     document.getElementById('tableFilter').value = selectedText;
-    filterTable();
+    // filterTable();
+
+    // Manuell den `input`-Event auf das Filterfeld auslösen
+    // Das filtert nicht nur, sonder übergibt z.B. den Filter auch
+    // als GET-Parameter an die Adressleiste. Kurz: Es setzt
+    // diese Methode einer manuellen Eingabe gleich.
+    if (field) {
+        filterTableByColumns();
+    }
+
 }
 
 function clearFilter() {
@@ -1923,7 +1933,7 @@ function docReady(){
 
     // Spaltenfilter-Logik aktivieren
     const columnFilters = document.querySelectorAll('.column-filter');
-    columnFilters.forEach(input => {
+    columnFilters.forEach(input => { 
         input.value = ''; // Clear column filter fields on page load
         input.addEventListener('input', filterTableByColumns);
         input.addEventListener('contextmenu', function(e) {
@@ -1953,11 +1963,13 @@ function docReady(){
         const filterValue = php_spaltenfilter[index + 1] || "";
         input.value = filterValue;
         input.addEventListener('input', filterTableByColumns);
+        
         input.addEventListener('contextmenu', function(e) {
             e.preventDefault();
             this.value = '';
             filterTableByColumns();
         });
+      
     });
     if(filteredByGET) filterTableByColumns();   
 

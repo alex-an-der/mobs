@@ -18,6 +18,8 @@ VALUES ('Tommy Manuell','Nocker',1,'1966-06-06','NeueMail@Nocker.de',3,'1966-06-
 
 # Offene Sofort-Issues
 
+Was ist der Unterschied zwischen filterTableByColumns und filterTable?
+
 ```php
     $spaltenfilter = [];
     $filteredByGET = false;
