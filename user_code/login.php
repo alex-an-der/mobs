@@ -132,11 +132,14 @@ $version = "Version: " . $version;
 <div class="container h-100">
     <div class="row h-100 justify-content-center align-items-center">
         <div class="container">
+
+
+
             <div class="row justify-content-center align-items-center">
                 <div class="col col-12 col-sm-8">
                     <?=$msg?>
                     <h1 class="h3 mb-3 font-weight-normal">Bitte melden Sie sich hier an</h1>
-                    <div class='alert alert-info mb-3' role='alert'>
+                    <div class='alert alert-success mb-3' role='alert'>
                         Vor dem ersten Anmelden musst du dich zunächst einmalig registrieren. Klicke dazu bitte auf '<a href='register.php'>Registrieren</a>'.
                     </div>
                     <input class="form-control" name="usermail" type="email" id="usermail" required autocomplete="off" autofocus placeholder="Mailadresse" >
@@ -159,9 +162,18 @@ $version = "Version: " . $version;
                     <a href='<?=$register_link?>' class="btn btn-lg btn-secondary btn-block">Registrieren</a>
                 </div>
             </div>
+
+                <div class='alert alert-info mt-5 text-left' role='alert'>
+                    <b>Aktuelle Mitteilungen</b>
+                    <p><b>15.07.2025</b>
+                    Spaltenfilter werden jetzt in die Adresszeile gespeichert. Du kannst die Adresse
+                    dann inklusive den Filtern z.B. als Lesezeichen speichern.</p>
+                </div>
         </div>
     </div>
+
 </div>
 </form>
+
 </body>
 </html>
