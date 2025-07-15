@@ -18,51 +18,28 @@ VALUES ('Tommy Manuell','Nocker',1,'1966-06-06','NeueMail@Nocker.de',3,'1966-06-
 
 # Offene Sofort-Issues
 
-## Berechtigungen setzen (indiv. Berechtigung) bei Spartenanmeldung
-1. (bei der Gelegenheit): UNIQUE erweitern. Es kann immer nur eine Kombination geben Mitglied <-> Berechtigte BSG
-```sql
-ALTER TABLE `b_individuelle_berechtigungen` ADD CONSTRAINT `UNIQUE_Mitglied_BSG` UNIQUE (`Mitglied`, `BSG`);
-ALTER TABLE b_mitglieder_in_sparten
-ADD CONSTRAINT UNIQUE_Mitglied_Sparte UNIQUE (Mitglied, Sparte);
-```
+```php
+    $spaltenfilter = [];
+    $filteredByGET = false;
+    foreach ($_GET as $key => $value) {
+        if (preg_match('/^s\d+$/', $key)) {
+            $spaltenfilter[(int)substr($key, 1)] = $value;
+            $filteredByGET = true;
+        }
+}
 
-3. Trigger umbenannt, erweitert und in die 03_trigger.sql eingetragen.
-Korrekturcode:
-```sql
-DROP TRIGGER IF EXISTS trg_b_mitglieder_in_sparten_insert_historie;
-DROP TRIGGER IF EXISTS trg_b_mitglieder_in_sparten_insert;
-DELIMITER $$
-CREATE TRIGGER trg_b_mitglieder_in_sparten_insert
-AFTER INSERT ON b_mitglieder_in_sparten
-FOR EACH ROW
-BEGIN
-    DECLARE spartenname VARCHAR(255);
-    DECLARE bsgname VARCHAR(255);
-    DECLARE cnt INT DEFAULT 0;
-    -- Spartenname inkl. Verband holen
-    SELECT CONCAT(s.Sparte, ' (', r.Kurzname, ')')
-      INTO spartenname
-      FROM b_sparte AS s
-      JOIN b_regionalverband AS r ON r.id = s.Verband
-     WHERE s.id = NEW.Sparte;
-    -- BSG-Name holen
-    SELECT BSG INTO bsgname FROM b_bsg WHERE id = NEW.BSG;
-    -- Eintrag in Historie
-    INSERT INTO b_mitglieder_historie (MNr, Aktion)
-    VALUES (
-        NEW.Mitglied,
-        CONCAT('Anmeldung in der Sparte ', IFNULL(spartenname, ''), ' für die BSG ', IFNULL(bsgname, ''))
-    );
-    -- Prüfe, ob die Kombination Mitglied und BSG schon existiert und trage dann die BSG in die indiv. Mitgliederberechtigungen
-    SELECT COUNT(*) INTO cnt
-    FROM b_individuelle_berechtigungen
-    WHERE Mitglied = NEW.Mitglied AND BSG = NEW.BSG;
-    IF cnt = 0 THEN
-        INSERT INTO b_individuelle_berechtigungen (Mitglied, BSG)
-        VALUES (NEW.Mitglied, NEW.BSG);
-    END IF;
-END$$
-DELIMITER ;
+    ?>
+
+    <script>
+        var php_tab             = <?=json_encode($tab)?>;
+        var php_selectedTableID = <?= json_encode($selectedTableID)?>;
+        var php_PLEASE_CHOOSE   = <?= json_encode(PLEASE_CHOOSE)?>;
+        var php_tabelle         = <?= json_encode($tabelle)?>;
+        var php_DB_ERROR        = <?= json_encode(DB_ERROR)?>;
+        var php_selectedTableID = <?= json_encode($selectedTableID)?>;
+        var php_spaltenfilter   = <?= json_encode($spaltenfilter) ?>;
+        var filteredByGET       = <?= json_encode($filteredByGET) ?>;
+    </script>
 ```
 
 
@@ -431,7 +408,52 @@ ALTER TABLE `b_meldeliste` ADD  `BSG_ID` BIGINT UNSIGNED NOT NULL;
 ALTER TABLE `b_zahlungseingaenge` ADD  `Empfaenger` BIGINT UNSIGNED NOT NULL;
 -- Vorher benötigt die neue Empfängerspalte gültige Werte:
 ALTER TABLE `b_zahlungseingaenge` ADD CONSTRAINT `FK_zahlungseingang_verband` FOREIGN KEY (`Empfaenger`) REFERENCES `b_regionalverband` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
-
-
 ```
 
+
+## Berechtigungen setzen (indiv. Berechtigung) bei Spartenanmeldung
+1. (bei der Gelegenheit): UNIQUE erweitern. Es kann immer nur eine Kombination geben Mitglied <-> Berechtigte BSG
+```sql
+ALTER TABLE `b_individuelle_berechtigungen` ADD CONSTRAINT `UNIQUE_Mitglied_BSG` UNIQUE (`Mitglied`, `BSG`);
+ALTER TABLE b_mitglieder_in_sparten
+ADD CONSTRAINT UNIQUE_Mitglied_Sparte UNIQUE (Mitglied, Sparte);
+```
+
+3. Trigger umbenannt, erweitert und in die 03_trigger.sql eingetragen.
+Korrekturcode:
+```sql
+DROP TRIGGER IF EXISTS trg_b_mitglieder_in_sparten_insert_historie;
+DROP TRIGGER IF EXISTS trg_b_mitglieder_in_sparten_insert;
+DELIMITER $$
+CREATE TRIGGER trg_b_mitglieder_in_sparten_insert
+AFTER INSERT ON b_mitglieder_in_sparten
+FOR EACH ROW
+BEGIN
+    DECLARE spartenname VARCHAR(255);
+    DECLARE bsgname VARCHAR(255);
+    DECLARE cnt INT DEFAULT 0;
+    -- Spartenname inkl. Verband holen
+    SELECT CONCAT(s.Sparte, ' (', r.Kurzname, ')')
+      INTO spartenname
+      FROM b_sparte AS s
+      JOIN b_regionalverband AS r ON r.id = s.Verband
+     WHERE s.id = NEW.Sparte;
+    -- BSG-Name holen
+    SELECT BSG INTO bsgname FROM b_bsg WHERE id = NEW.BSG;
+    -- Eintrag in Historie
+    INSERT INTO b_mitglieder_historie (MNr, Aktion)
+    VALUES (
+        NEW.Mitglied,
+        CONCAT('Anmeldung in der Sparte ', IFNULL(spartenname, ''), ' für die BSG ', IFNULL(bsgname, ''))
+    );
+    -- Prüfe, ob die Kombination Mitglied und BSG schon existiert und trage dann die BSG in die indiv. Mitgliederberechtigungen
+    SELECT COUNT(*) INTO cnt
+    FROM b_individuelle_berechtigungen
+    WHERE Mitglied = NEW.Mitglied AND BSG = NEW.BSG;
+    IF cnt = 0 THEN
+        INSERT INTO b_individuelle_berechtigungen (Mitglied, BSG)
+        VALUES (NEW.Mitglied, NEW.BSG);
+    END IF;
+END$$
+DELIMITER ;
+```

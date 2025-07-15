@@ -1292,8 +1292,82 @@ function setButtonHeights() {
 document.addEventListener('DOMContentLoaded', () => {
     // Warte kurz bis Layout stabil ist
     setTimeout(adjustContainer, 100);
-    
-    // Bereits existierender Code
+
+    // #####################################################################
+
+        // Initialize all tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => 
+        new bootstrap.Tooltip(tooltipTriggerEl, {
+            container: 'body',
+            boundary: 'window',
+            animation: true,
+            html: false
+        })
+    );
+
+    // Add tooltips dynamically to table cells
+    document.addEventListener('mouseover', function(e) {
+        const td = e.target.closest('td');
+        if (td && !td.hasAttribute('data-bs-toggle')) {
+            // Skip checkbox cells
+            const hasCheckbox = td.querySelector('.form-check-input') || 
+                               td.querySelector('.checkbox-container');
+            if (hasCheckbox) return;
+            
+            let text = "";
+            const input = td.querySelector('input');
+            if (input) {
+                text = input.value;
+            } else {
+                const select = td.querySelector('select');
+                if (select && select.selectedIndex >= 0) {
+                    text = select.options[select.selectedIndex].text;
+                } else {
+                    text = td.innerText.trim();
+                }
+            }
+            
+            // Only show tooltip if text is not empty
+            if (text) {
+                td.setAttribute('data-bs-toggle', 'tooltip');
+                td.setAttribute('data-bs-title', text);
+                td.setAttribute('data-bs-placement', 'auto');
+                td.setAttribute('data-bs-container', 'body');
+                
+                // Create the tooltip
+                new bootstrap.Tooltip(td, {
+                    container: 'body',
+                    boundary: 'window'
+                });
+                
+                // Show it immediately if mouse is already over
+                const tooltip = bootstrap.Tooltip.getInstance(td);
+                if (tooltip) {
+                    tooltip.show();
+                }
+            }
+        }
+    });
+
+    // Clean up tooltips when no longer needed
+    document.addEventListener('mouseout', function(e) {
+        const td = e.target.closest('td');
+        if (td) {
+            const tooltip = bootstrap.Tooltip.getInstance(td);
+            if (tooltip && typeof tooltip.hide === 'function') {
+                tooltip.hide();
+            }
+        }
+    });
+
+    // #####################################################################
+    // Sortieren und Filtern
+
+    // Datentypen erkennen und anzeigen
+    setTimeout(detectColumnDataTypes, 100); // Kurze Verzögerung, um sicherzustellen, dass alle Daten geladen sind
+
+
     addSortEventListeners();
     const filterInput = document.getElementById('tableFilter');
     if (filterInput) {
@@ -1364,6 +1438,7 @@ document.addEventListener('DOMContentLoaded', () => {
             filterTableByColumns();
         });
     });
+    if(filteredByGET) filterTableByColumns();   
 });
 
 function updateURLWithFilters(filters, globalFilter = null) {
@@ -1419,10 +1494,8 @@ function exportData(format, spreadsheetFormat) {
                     const input = cell.querySelector('input');
                     if (input) {
                         rowData[key] =  input.value.trim();
-                        //console.log("input");
                     } else {
                         rowData[key] =   cell.innerText.trim();
-                        //console.log("plain text");
                     }
                     cellIdx++
                 });
@@ -1529,16 +1602,16 @@ function filterTableByColumns() {
     const filters = {};
     document.querySelectorAll('.column-filter').forEach(input => {
         const value = input.value.trim();
-        if (value) {
+        if (value) { 
             const field = input.dataset.field;
             const filterType = input.getAttribute('data-filtertyp') || 'TXT';
+            console.log("Filtertyp: " + filterType);
             filters[field] = {
                 value: value,
                 type: filterType
             };
         }
     });
-
     const rows = document.querySelectorAll('table tbody tr');
     rows.forEach(row => {
         let show = true;
@@ -1557,7 +1630,6 @@ function filterTableByColumns() {
             } else {
                 cellValue = cell.textContent.trim();
             }
-
             // Je nach Filtertyp unterschiedlich filtern
             switch (filterInfo.type) {
                 case 'NUM':
@@ -1770,77 +1842,6 @@ function parseDate(dateStr) {
 // ////////////////////////////////////////////////////////////////////////////////////////
 
 
-// Replace the old tooltip code with Bootstrap tooltips
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize all tooltips
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => 
-        new bootstrap.Tooltip(tooltipTriggerEl, {
-            container: 'body',
-            boundary: 'window',
-            animation: true,
-            html: false
-        })
-    );
-
-    // Datentypen erkennen und anzeigen
-    setTimeout(detectColumnDataTypes, 500); // Kurze Verzögerung, um sicherzustellen, dass alle Daten geladen sind
-
-    // Add tooltips dynamically to table cells
-    document.addEventListener('mouseover', function(e) {
-        const td = e.target.closest('td');
-        if (td && !td.hasAttribute('data-bs-toggle')) {
-            // Skip checkbox cells
-            const hasCheckbox = td.querySelector('.form-check-input') || 
-                               td.querySelector('.checkbox-container');
-            if (hasCheckbox) return;
-            
-            let text = "";
-            const input = td.querySelector('input');
-            if (input) {
-                text = input.value;
-            } else {
-                const select = td.querySelector('select');
-                if (select && select.selectedIndex >= 0) {
-                    text = select.options[select.selectedIndex].text;
-                } else {
-                    text = td.innerText.trim();
-                }
-            }
-            
-            // Only show tooltip if text is not empty
-            if (text) {
-                td.setAttribute('data-bs-toggle', 'tooltip');
-                td.setAttribute('data-bs-title', text);
-                td.setAttribute('data-bs-placement', 'auto');
-                td.setAttribute('data-bs-container', 'body');
-                
-                // Create the tooltip
-                new bootstrap.Tooltip(td, {
-                    container: 'body',
-                    boundary: 'window'
-                });
-                
-                // Show it immediately if mouse is already over
-                const tooltip = bootstrap.Tooltip.getInstance(td);
-                if (tooltip) {
-                    tooltip.show();
-                }
-            }
-        }
-    });
-
-    // Clean up tooltips when no longer needed
-    document.addEventListener('mouseout', function(e) {
-        const td = e.target.closest('td');
-        if (td) {
-            const tooltip = bootstrap.Tooltip.getInstance(td);
-            if (tooltip && typeof tooltip.hide === 'function') {
-                tooltip.hide();
-            }
-        }
-    });
-});
 function detectColumnDataTypes() {
     const table = document.querySelector('table');
     if (!table) return;
@@ -1860,7 +1861,7 @@ function detectColumnDataTypes() {
         
         // Werte aus den Zellen sammeln
         cells.forEach(cell => {
-            let value = '';
+            let value = ''; 
             const input = cell.querySelector('input');
             const select = cell.querySelector('select');
             
@@ -1872,18 +1873,17 @@ function detectColumnDataTypes() {
             } else {
                 value = cell.textContent.trim();
             }
-            
             if (value) {
                 values.push(value);
             }
         });
-        
+      
         // Wenn keine Werte vorhanden, als TXT markieren
         if (values.length === 0) {
             setColumnFilterType(header, 'TXT');
             return;
         }
-        
+  
         // Prüfen, ob alle Werte Zahlen sind
         for (const value of values) {
             if (!/^-?\d+(\.\d+)?$/.test(value)) {
@@ -1953,3 +1953,4 @@ function isDateFormat(value) {
     // Prüfen, ob der Wert einem der Datumsformate entspricht
     return datePatterns.some(pattern => pattern.test(value));
 }
+
