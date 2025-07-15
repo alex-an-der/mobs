@@ -532,48 +532,6 @@ function addSortEventListeners() {
     });
 }
 
-function filterTable() {
-    const filterInput = document.getElementById('tableFilter');
-    if (!filterInput) return;
-
-    const filterValue = filterInput.value.toLowerCase();
-    const rows = document.querySelectorAll('table tbody tr');
-
-    rows.forEach(row => {
-        const cells = row.querySelectorAll('td');
-        let match = false;
-
-        cells.forEach(cell => {
-            const input = cell.querySelector('input');
-            const select = cell.querySelector('select');
-            let cellValue = cell.textContent.toLowerCase();
-
-            if (input) {
-                cellValue = input.value.toLowerCase();
-            } else if (select) {
-                cellValue = select.options[select.selectedIndex].text.toLowerCase();
-            }
-
-            if (cellValue.includes(filterValue)) {
-                match = true;
-                if (filterValue) {
-                    cell.style.backgroundColor = '#D3D9F2';
-                } else {
-                    cell.style.backgroundColor = '';
-                }
-            } else {
-                cell.style.backgroundColor = '';
-            }
-        });
-
-        if (match) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
-
 function insertDefaultRecord(tabelle) {
     // Show a loading indicator
     const insertButton = document.getElementById('insertDefaultButton');
@@ -1458,13 +1416,7 @@ function filter_that(event, selectElement, typ){
 
 }
 
-function clearFilter() {
-    const filterInput = document.getElementById('tableFilter');
-    if (filterInput) {
-        filterInput.value = '';
-        filterTable();
-    }
-}
+
 
 function filterTableByColumns() {
     const filters = {};
