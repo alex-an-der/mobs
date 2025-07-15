@@ -532,48 +532,6 @@ function addSortEventListeners() {
     });
 }
 
-function filterTable() {
-    const filterInput = document.getElementById('tableFilter');
-    if (!filterInput) return;
-
-    const filterValue = filterInput.value.toLowerCase();
-    const rows = document.querySelectorAll('table tbody tr');
-
-    rows.forEach(row => {
-        const cells = row.querySelectorAll('td');
-        let match = false;
-
-        cells.forEach(cell => {
-            const input = cell.querySelector('input');
-            const select = cell.querySelector('select');
-            let cellValue = cell.textContent.toLowerCase();
-
-            if (input) {
-                cellValue = input.value.toLowerCase();
-            } else if (select) {
-                cellValue = select.options[select.selectedIndex].text.toLowerCase();
-            }
-
-            if (cellValue.includes(filterValue)) {
-                match = true;
-                if (filterValue) {
-                    cell.style.backgroundColor = '#D3D9F2';
-                } else {
-                    cell.style.backgroundColor = '';
-                }
-            } else {
-                cell.style.backgroundColor = '';
-            }
-        });
-
-        if (match) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
-
 function insertDefaultRecord(tabelle) {
     // Show a loading indicator
     const insertButton = document.getElementById('insertDefaultButton');
@@ -1290,54 +1248,36 @@ function setButtonHeights() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+
     // Warte kurz bis Layout stabil ist
-    setTimeout(adjustContainer, 100);
-    
-    // Bereits existierender Code
-    addSortEventListeners();
-    const filterInput = document.getElementById('tableFilter');
-    if (filterInput) {
-        filterInput.addEventListener('input', filterTable);
-        filterInput.value = ''; // Clear filter field on page load
-    }
-    const insertButton = document.getElementById('insertDefaultButton');
-    if (insertButton) {
-        insertButton.addEventListener('click', function() {
-            insertDefaultRecord(php_tabelle);
-        });
-    }
-    const deleteButton = document.getElementById('deleteSelectedButton');
-    if (deleteButton) {
-        deleteButton.addEventListener('click', function() {
-            deleteSelectedRows(php_tabelle);
-        });
-    }
-    const checkDuplicatesButton = document.getElementById('check-duplicates');
-    if (checkDuplicatesButton) {
-        checkDuplicatesButton.addEventListener('click', checkDubletten);
-    }
+    setTimeout(docReady(), 100);
 
-    // Container beim Laden anpassen
-    // adjustContainer();
-    
-    // Container bei Größenänderung anpassen
-    window.addEventListener('resize', adjustContainer);
-
-    // Set button heights
-    setButtonHeights();
-
-    // Spaltenfilter-Logik aktivieren
-    const columnFilters = document.querySelectorAll('.column-filter');
-    columnFilters.forEach(input => {
-        input.value = ''; // Clear column filter fields on page load
-        input.addEventListener('input', filterTableByColumns);
-        input.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            this.value = '';
-            filterTableByColumns();
-        });
-    });
 });
+
+
+function updateURLWithFilters(filters) {
+    const url = new URL(window.location.href);
+
+    // Entferne nur die Filter-Parameter, die mit s1, s2, ... beginnen
+    Array.from(url.searchParams.keys()).forEach(key => {
+        if (key.startsWith('s')) {
+            url.searchParams.delete(key);
+        }
+    });
+
+    // Füge Spaltenfilter hinzu
+    if (filters) {
+        filters.forEach((filter, index) => {
+            const value = filter.value.trim();
+            if (value) {
+                url.searchParams.set(`s${index + 1}`, value);
+            }
+        });
+    }
+
+    // Aktualisiere die Adresszeile, ohne die Seite neu zu laden
+    window.history.replaceState({}, '', url);
+}
 
 function exportData(format, spreadsheetFormat) {
     const filterInput = document.getElementById('tableFilter');
@@ -1366,10 +1306,8 @@ function exportData(format, spreadsheetFormat) {
                     const input = cell.querySelector('input');
                     if (input) {
                         rowData[key] =  input.value.trim();
-                        //console.log("input");
                     } else {
                         rowData[key] =   cell.innerText.trim();
-                        //console.log("plain text");
                     }
                     cellIdx++
                 });
@@ -1432,7 +1370,8 @@ function setColumnFilter(field, value) {
     return false;
 }
 
-function filter_that(selectElement, typ){
+// Wird von OnEvents im index.php aufgerufen
+function filter_that(event, selectElement, typ){
     let selectedText = '';
     switch(typ){
         case 'select':
@@ -1444,11 +1383,16 @@ function filter_that(selectElement, typ){
         case 'div':
             selectedText = selectElement.innerHTML;
             break;
+        
     }
 
     // Versuche, das data-field-Attribut zu lesen (Spaltenname)
     const field = selectElement.getAttribute && selectElement.getAttribute('data-field');
     const result = field && setColumnFilter(field, selectedText);
+
+    event.preventDefault();
+    
+/*
     if(result === true || result === 'cleared') {
         // Spaltenfilter wurde gesetzt oder entfernt, kein globaler Filter nötig
         event.preventDefault();
@@ -1461,22 +1405,24 @@ function filter_that(selectElement, typ){
     }
     event.preventDefault();
     document.getElementById('tableFilter').value = selectedText;
-    filterTable();
+    // filterTable();
+*/
+    // Manuell den `input`-Event auf das Filterfeld auslösen
+    // Das filtert nicht nur, sonder übergibt z.B. den Filter auch
+    // als GET-Parameter an die Adressleiste. Kurz: Es setzt
+    // diese Methode einer manuellen Eingabe gleich.
+    const columnFilters = document.querySelectorAll('.column-filter');
+    filterEvent(columnFilters);
+
 }
 
-function clearFilter() {
-    const filterInput = document.getElementById('tableFilter');
-    if (filterInput) {
-        filterInput.value = '';
-        filterTable();
-    }
-}
+
 
 function filterTableByColumns() {
     const filters = {};
     document.querySelectorAll('.column-filter').forEach(input => {
         const value = input.value.trim();
-        if (value) {
+        if (value) { 
             const field = input.dataset.field;
             const filterType = input.getAttribute('data-filtertyp') || 'TXT';
             filters[field] = {
@@ -1485,7 +1431,6 @@ function filterTableByColumns() {
             };
         }
     });
-
     const rows = document.querySelectorAll('table tbody tr');
     rows.forEach(row => {
         let show = true;
@@ -1504,7 +1449,6 @@ function filterTableByColumns() {
             } else {
                 cellValue = cell.textContent.trim();
             }
-
             // Je nach Filtertyp unterschiedlich filtern
             switch (filterInfo.type) {
                 case 'NUM':
@@ -1531,6 +1475,7 @@ function filterTableByColumns() {
         }
         row.style.display = show ? '' : 'none';
     });
+        
 }
 
 // Hilfsfunktion für numerische Filter
@@ -1717,77 +1662,6 @@ function parseDate(dateStr) {
 // ////////////////////////////////////////////////////////////////////////////////////////
 
 
-// Replace the old tooltip code with Bootstrap tooltips
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize all tooltips
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => 
-        new bootstrap.Tooltip(tooltipTriggerEl, {
-            container: 'body',
-            boundary: 'window',
-            animation: true,
-            html: false
-        })
-    );
-
-    // Datentypen erkennen und anzeigen
-    setTimeout(detectColumnDataTypes, 500); // Kurze Verzögerung, um sicherzustellen, dass alle Daten geladen sind
-
-    // Add tooltips dynamically to table cells
-    document.addEventListener('mouseover', function(e) {
-        const td = e.target.closest('td');
-        if (td && !td.hasAttribute('data-bs-toggle')) {
-            // Skip checkbox cells
-            const hasCheckbox = td.querySelector('.form-check-input') || 
-                               td.querySelector('.checkbox-container');
-            if (hasCheckbox) return;
-            
-            let text = "";
-            const input = td.querySelector('input');
-            if (input) {
-                text = input.value;
-            } else {
-                const select = td.querySelector('select');
-                if (select && select.selectedIndex >= 0) {
-                    text = select.options[select.selectedIndex].text;
-                } else {
-                    text = td.innerText.trim();
-                }
-            }
-            
-            // Only show tooltip if text is not empty
-            if (text) {
-                td.setAttribute('data-bs-toggle', 'tooltip');
-                td.setAttribute('data-bs-title', text);
-                td.setAttribute('data-bs-placement', 'auto');
-                td.setAttribute('data-bs-container', 'body');
-                
-                // Create the tooltip
-                new bootstrap.Tooltip(td, {
-                    container: 'body',
-                    boundary: 'window'
-                });
-                
-                // Show it immediately if mouse is already over
-                const tooltip = bootstrap.Tooltip.getInstance(td);
-                if (tooltip) {
-                    tooltip.show();
-                }
-            }
-        }
-    });
-
-    // Clean up tooltips when no longer needed
-    document.addEventListener('mouseout', function(e) {
-        const td = e.target.closest('td');
-        if (td) {
-            const tooltip = bootstrap.Tooltip.getInstance(td);
-            if (tooltip && typeof tooltip.hide === 'function') {
-                tooltip.hide();
-            }
-        }
-    });
-});
 function detectColumnDataTypes() {
     const table = document.querySelector('table');
     if (!table) return;
@@ -1807,7 +1681,7 @@ function detectColumnDataTypes() {
         
         // Werte aus den Zellen sammeln
         cells.forEach(cell => {
-            let value = '';
+            let value = ''; 
             const input = cell.querySelector('input');
             const select = cell.querySelector('select');
             
@@ -1819,18 +1693,17 @@ function detectColumnDataTypes() {
             } else {
                 value = cell.textContent.trim();
             }
-            
             if (value) {
                 values.push(value);
             }
         });
-        
+      
         // Wenn keine Werte vorhanden, als TXT markieren
         if (values.length === 0) {
             setColumnFilterType(header, 'TXT');
             return;
         }
-        
+  
         // Prüfen, ob alle Werte Zahlen sind
         for (const value of values) {
             if (!/^-?\d+(\.\d+)?$/.test(value)) {
@@ -1899,4 +1772,175 @@ function isDateFormat(value) {
     
     // Prüfen, ob der Wert einem der Datumsformate entspricht
     return datePatterns.some(pattern => pattern.test(value));
+}
+
+
+
+function filterEvent(columnFilters){
+    filterTableByColumns();
+    updateURLWithFilters(columnFilters);
+}
+
+
+
+function docReady(){
+
+
+    adjustContainer();
+
+    // #####################################################################
+
+        // Initialize all tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => 
+        new bootstrap.Tooltip(tooltipTriggerEl, {
+            container: 'body',
+            boundary: 'window',
+            animation: true,
+            html: false
+        })
+    );
+
+    // Add tooltips dynamically to table cells
+    document.addEventListener('mouseover', function(e) {
+        const td = e.target.closest('td');
+        if (td && !td.hasAttribute('data-bs-toggle')) {
+            // Skip checkbox cells
+            const hasCheckbox = td.querySelector('.form-check-input') || 
+                               td.querySelector('.checkbox-container');
+            if (hasCheckbox) return;
+            
+            let text = "";
+            const input = td.querySelector('input');
+            if (input) {
+                text = input.value;
+            } else {
+                const select = td.querySelector('select');
+                if (select && select.selectedIndex >= 0) {
+                    text = select.options[select.selectedIndex].text;
+                } else {
+                    text = td.innerText.trim();
+                }
+            }
+            
+            // Only show tooltip if text is not empty
+            if (text) {
+                td.setAttribute('data-bs-toggle', 'tooltip');
+                td.setAttribute('data-bs-title', text);
+                td.setAttribute('data-bs-placement', 'auto');
+                td.setAttribute('data-bs-container', 'body');
+                
+                // Create the tooltip
+                new bootstrap.Tooltip(td, {
+                    container: 'body',
+                    boundary: 'window'
+                });
+                
+                // Show it immediately if mouse is already over
+                const tooltip = bootstrap.Tooltip.getInstance(td);
+                if (tooltip) {
+                    tooltip.show();
+                }
+            }
+        }
+    });
+
+    // Clean up tooltips when no longer needed
+    document.addEventListener('mouseout', function(e) {
+        const td = e.target.closest('td');
+        if (td) {
+            const tooltip = bootstrap.Tooltip.getInstance(td);
+            if (tooltip && typeof tooltip.hide === 'function') {
+                tooltip.hide();
+            }
+        }
+    });
+
+    // #####################################################################
+    // Sortieren und Filtern
+
+    // Datentypen erkennen und anzeigen
+    detectColumnDataTypes();
+
+    addSortEventListeners();
+    const filterInput = document.getElementById('tableFilter');
+    if (filterInput) {
+        filterInput.addEventListener('input', filterTable);
+        filterInput.value = ''; // Clear filter field on page load
+    }
+    const insertButton = document.getElementById('insertDefaultButton');
+    if (insertButton) {
+        insertButton.addEventListener('click', function() {
+            insertDefaultRecord(php_tabelle);
+        });
+    }
+    const deleteButton = document.getElementById('deleteSelectedButton');
+    if (deleteButton) {
+        deleteButton.addEventListener('click', function() {
+            deleteSelectedRows(php_tabelle);
+        });
+    }
+    const checkDuplicatesButton = document.getElementById('check-duplicates');
+    if (checkDuplicatesButton) {
+        checkDuplicatesButton.addEventListener('click', checkDubletten);
+    }
+
+    // Container beim Laden anpassen
+    // adjustContainer();
+    
+    // Container bei Größenänderung anpassen
+    window.addEventListener('resize', adjustContainer);
+
+    // Set button heights
+    setButtonHeights();
+
+    // Spaltenfilter-Logik aktivieren
+    const columnFilters = document.querySelectorAll('.column-filter');
+    columnFilters.forEach(input => { 
+        input.value = ''; // Clear column filter fields on page load
+
+        //input.addEventListener('input', filterTableByColumns);
+        input.addEventListener('input', function(e){
+            filterEvent(columnFilters);
+        });
+        // rechte Maustaste auf Spaltenfilter
+        input.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            this.value = '';
+            filterTableByColumns();
+        });
+    });
+
+
+/*
+    // Überwache Änderungen in den Spaltenfiltern
+    columnFilters.forEach((filter, index) => {
+        filter.addEventListener('input', () => {
+            updateURLWithFilters(columnFilters);
+        });
+    });*/
+
+    // Überwache Änderungen im globalen Filter
+    const globalFilter = document.getElementById('tableFilter');
+    if (globalFilter) {
+        globalFilter.addEventListener('input', () => {
+            updateURLWithFilters(document.querySelectorAll('.column-filter'), globalFilter);
+        });
+    }
+    
+    const columnFilterInputs = document.querySelectorAll('.column-filter');
+    columnFilterInputs.forEach((input, index) => {
+        const filterValue = php_spaltenfilter[index + 1] || "";
+        input.value = filterValue;
+        input.addEventListener('input', filterTableByColumns);
+        
+        input.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            this.value = '';
+            filterTableByColumns();
+        });
+      
+    });
+    if(filteredByGET) filterTableByColumns();   
+
 }
