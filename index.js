@@ -1313,11 +1313,13 @@ function updateURLWithFilters(filters, globalFilter = null) {
     }
 
     // Füge Spaltenfilter hinzu
-    filters.forEach((filter, index) => {
-        if (filter.value.trim() !== '') {
-            url.searchParams.set(`s${index + 1}`, filter.value.trim());
-        }
-    });
+    if(filters){
+        filters.forEach((filter, index) => {
+            if (filter.value.trim() !== '') {
+                url.searchParams.set(`s${index + 1}`, filter.value.trim());
+            }
+        });
+    }
 
     // Aktualisiere die Adresszeile, ohne die Seite neu zu laden
     window.history.replaceState({}, '', url);
@@ -1414,7 +1416,8 @@ function setColumnFilter(field, value) {
     return false;
 }
 
-function filter_that(selectElement, typ){
+// Wird von OnEvents im index.php aufgerufen
+function filter_that(event, selectElement, typ){
     let selectedText = '';
     switch(typ){
         case 'select':
@@ -1432,6 +1435,10 @@ function filter_that(selectElement, typ){
     // Versuche, das data-field-Attribut zu lesen (Spaltenname)
     const field = selectElement.getAttribute && selectElement.getAttribute('data-field');
     const result = field && setColumnFilter(field, selectedText);
+
+    event.preventDefault();
+    
+/*
     if(result === true || result === 'cleared') {
         // Spaltenfilter wurde gesetzt oder entfernt, kein globaler Filter nötig
         event.preventDefault();
@@ -1445,14 +1452,13 @@ function filter_that(selectElement, typ){
     event.preventDefault();
     document.getElementById('tableFilter').value = selectedText;
     // filterTable();
-
+*/
     // Manuell den `input`-Event auf das Filterfeld auslösen
     // Das filtert nicht nur, sonder übergibt z.B. den Filter auch
     // als GET-Parameter an die Adressleiste. Kurz: Es setzt
     // diese Methode einer manuellen Eingabe gleich.
-    if (field) {
-        filterTableByColumns();
-    }
+    const columnFilters = document.querySelectorAll('.column-filter');
+    filterEvent(columnFilters);
 
 }
 
@@ -1521,6 +1527,7 @@ function filterTableByColumns() {
         }
         row.style.display = show ? '' : 'none';
     });
+        
 }
 
 // Hilfsfunktion für numerische Filter
@@ -1819,10 +1826,18 @@ function isDateFormat(value) {
     return datePatterns.some(pattern => pattern.test(value));
 }
 
+
+
+function filterEvent(columnFilters){
+    filterTableByColumns();
+    updateURLWithFilters(columnFilters);
+}
+
+
+
 function docReady(){
 
 
-    // Warte kurz bis Layout stabil ist
     adjustContainer();
 
     // #####################################################################
@@ -1935,7 +1950,12 @@ function docReady(){
     const columnFilters = document.querySelectorAll('.column-filter');
     columnFilters.forEach(input => { 
         input.value = ''; // Clear column filter fields on page load
-        input.addEventListener('input', filterTableByColumns);
+
+        //input.addEventListener('input', filterTableByColumns);
+        input.addEventListener('input', function(e){
+            filterEvent(columnFilters);
+        });
+        // rechte Maustaste auf Spaltenfilter
         input.addEventListener('contextmenu', function(e) {
             e.preventDefault();
             this.value = '';
@@ -1943,12 +1963,14 @@ function docReady(){
         });
     });
 
+
+/*
     // Überwache Änderungen in den Spaltenfiltern
     columnFilters.forEach((filter, index) => {
         filter.addEventListener('input', () => {
             updateURLWithFilters(columnFilters);
         });
-    });
+    });*/
 
     // Überwache Änderungen im globalen Filter
     const globalFilter = document.getElementById('tableFilter');

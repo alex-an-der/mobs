@@ -370,7 +370,7 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                     // Selects nur, wenn readwrite UND keine Info-Spalte 
                     if ($readwrite && !$isInfoColumn) {
                         // SELECT ZUSAMMENSTELLEN //
-                        $selectTag = '<select oncontextmenu="filter_that(this, \'select\');" class="form-control border-0" data-field="' 
+                        $selectTag = '<select oncontextmenu="filter_that(event, this, \'select\');" class="form-control border-0" data-field="' 
                             . htmlspecialchars((string)$dataFieldKey) 
                             . '" style="background-color: inherit; word-wrap: break-word; white-space: normal;" onchange="updateField(\'' 
                             . addslashes($tabelle) . '\', \''
@@ -395,7 +395,7 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                         //$data_fk_ID_key   = $foreignKeys[$key][0]['id'];
                         //$data_fk_ID_value = $foreignKeys[$key][0]['anzeige'];
                         $anzeige = ($data_fk_ID_value !== "" && $data_fk_ID_value !== null) ? $data_fk_ID_value : NULL_WERT;
-                        echo '<div oncontextmenu="filter_that(this, \'div\');" data-field="' . htmlspecialchars((string)$dataFieldKey) . '" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars((string)$anzeige, ENT_QUOTES) . '</div>';
+                        echo '<div oncontextmenu="filter_that(event, this, \'div\');" data-field="' . htmlspecialchars((string)$dataFieldKey) . '" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars((string)$anzeige, ENT_QUOTES) . '</div>';
                     }
                      
                 } else { // normale Textspalte 
@@ -414,7 +414,7 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                         $updateKey = $isInfoColumn ? substr($key, 5) : $key;
                         //echo '<input oncontextmenu="filter_that(this, \'input\');" data-type="' . htmlspecialchars((string)$columnType) . '" data-fkIDkey="' . htmlspecialchars((string)$data_fk_ID_key, ENT_QUOTES) . '" data-fkIDvalue="' . htmlspecialchars((string)$data_fk_ID_value, ENT_QUOTES) . '" data-userajax="' . htmlspecialchars($isAjaxColumn ? '1' : '0', ENT_QUOTES) . '" type="' . $inputType . '" class="form-control border-0" style="background-color: inherit; word-wrap: break-word; white-space: normal;" value="' . htmlspecialchars((string)$value, ENT_QUOTES) . '" onchange="updateField(\'' . $tabelle . '\', \'' . $row['id'] . '\', \'' . $key . '\', this.value, \'' . htmlspecialchars((string)$columnType, ENT_QUOTES) . '\')" onfocus="clearCellColor(this)">';
                         echo "<input 
-                        oncontextmenu=\"filter_that(this, 'input');\"
+                        oncontextmenu=\"filter_that(event, this, 'input');\"
                         data-type=\"" . htmlspecialchars((string)$columnType) . "\"
                         data-fkIDkey=\"" . htmlspecialchars((string)$data_fk_ID_key, ENT_QUOTES) . "\"
                         data-fkIDvalue=\"" . htmlspecialchars((string)$data_fk_ID_value, ENT_QUOTES) . "\"
@@ -445,7 +445,7 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                             }
                             $anzeige = ($displayValue !== "" && $displayValue !== null) ? $displayValue : NULL_WERT;
                         }
-                        echo '<div oncontextmenu="filter_that(this, \'div\');" data-field="' . htmlspecialchars((string)$dataFieldKey) . '" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars((string)$anzeige, ENT_QUOTES) . '</div>';
+                        echo '<div oncontextmenu="filter_that(event, this, \'div\');" data-field="' . htmlspecialchars((string)$dataFieldKey) . '" style="word-wrap: break-word; white-space: normal;">' . htmlspecialchars((string)$anzeige, ENT_QUOTES) . '</div>';
                     }
                 }
                 echo '</td>';
