@@ -1297,26 +1297,22 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-function updateURLWithFilters(filters, globalFilter = null) {
+function updateURLWithFilters(filters) {
     const url = new URL(window.location.href);
 
     // Entferne nur die Filter-Parameter, die mit s1, s2, ... beginnen
     Array.from(url.searchParams.keys()).forEach(key => {
-        if (key.startsWith('s') && key !== 's0') {
+        if (key.startsWith('s')) {
             url.searchParams.delete(key);
         }
     });
 
-    // Füge globalen Filter hinzu, falls vorhanden
-    if (globalFilter && globalFilter.value.trim() !== '') {
-        url.searchParams.set('s0', globalFilter.value.trim());
-    }
-
     // Füge Spaltenfilter hinzu
-    if(filters){
+    if (filters) {
         filters.forEach((filter, index) => {
-            if (filter.value.trim() !== '') {
-                url.searchParams.set(`s${index + 1}`, filter.value.trim());
+            const value = filter.value.trim();
+            if (value) {
+                url.searchParams.set(`s${index + 1}`, value);
             }
         });
     }
