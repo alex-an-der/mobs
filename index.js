@@ -1290,156 +1290,12 @@ function setButtonHeights() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+
     // Warte kurz bis Layout stabil ist
-    setTimeout(adjustContainer, 100);
+    setTimeout(docReady(), 100);
 
-    // #####################################################################
-
-        // Initialize all tooltips
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => 
-        new bootstrap.Tooltip(tooltipTriggerEl, {
-            container: 'body',
-            boundary: 'window',
-            animation: true,
-            html: false
-        })
-    );
-
-    // Add tooltips dynamically to table cells
-    document.addEventListener('mouseover', function(e) {
-        const td = e.target.closest('td');
-        if (td && !td.hasAttribute('data-bs-toggle')) {
-            // Skip checkbox cells
-            const hasCheckbox = td.querySelector('.form-check-input') || 
-                               td.querySelector('.checkbox-container');
-            if (hasCheckbox) return;
-            
-            let text = "";
-            const input = td.querySelector('input');
-            if (input) {
-                text = input.value;
-            } else {
-                const select = td.querySelector('select');
-                if (select && select.selectedIndex >= 0) {
-                    text = select.options[select.selectedIndex].text;
-                } else {
-                    text = td.innerText.trim();
-                }
-            }
-            
-            // Only show tooltip if text is not empty
-            if (text) {
-                td.setAttribute('data-bs-toggle', 'tooltip');
-                td.setAttribute('data-bs-title', text);
-                td.setAttribute('data-bs-placement', 'auto');
-                td.setAttribute('data-bs-container', 'body');
-                
-                // Create the tooltip
-                new bootstrap.Tooltip(td, {
-                    container: 'body',
-                    boundary: 'window'
-                });
-                
-                // Show it immediately if mouse is already over
-                const tooltip = bootstrap.Tooltip.getInstance(td);
-                if (tooltip) {
-                    tooltip.show();
-                }
-            }
-        }
-    });
-
-    // Clean up tooltips when no longer needed
-    document.addEventListener('mouseout', function(e) {
-        const td = e.target.closest('td');
-        if (td) {
-            const tooltip = bootstrap.Tooltip.getInstance(td);
-            if (tooltip && typeof tooltip.hide === 'function') {
-                tooltip.hide();
-            }
-        }
-    });
-
-    // #####################################################################
-    // Sortieren und Filtern
-
-    // Datentypen erkennen und anzeigen
-    setTimeout(detectColumnDataTypes, 100); // Kurze Verzögerung, um sicherzustellen, dass alle Daten geladen sind
-
-
-    addSortEventListeners();
-    const filterInput = document.getElementById('tableFilter');
-    if (filterInput) {
-        filterInput.addEventListener('input', filterTable);
-        filterInput.value = ''; // Clear filter field on page load
-    }
-    const insertButton = document.getElementById('insertDefaultButton');
-    if (insertButton) {
-        insertButton.addEventListener('click', function() {
-            insertDefaultRecord(php_tabelle);
-        });
-    }
-    const deleteButton = document.getElementById('deleteSelectedButton');
-    if (deleteButton) {
-        deleteButton.addEventListener('click', function() {
-            deleteSelectedRows(php_tabelle);
-        });
-    }
-    const checkDuplicatesButton = document.getElementById('check-duplicates');
-    if (checkDuplicatesButton) {
-        checkDuplicatesButton.addEventListener('click', checkDubletten);
-    }
-
-    // Container beim Laden anpassen
-    // adjustContainer();
-    
-    // Container bei Größenänderung anpassen
-    window.addEventListener('resize', adjustContainer);
-
-    // Set button heights
-    setButtonHeights();
-
-    // Spaltenfilter-Logik aktivieren
-    const columnFilters = document.querySelectorAll('.column-filter');
-    columnFilters.forEach(input => {
-        input.value = ''; // Clear column filter fields on page load
-        input.addEventListener('input', filterTableByColumns);
-        input.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            this.value = '';
-            filterTableByColumns();
-        });
-    });
-
-    // Überwache Änderungen in den Spaltenfiltern
-    columnFilters.forEach((filter, index) => {
-        filter.addEventListener('input', () => {
-            updateURLWithFilters(columnFilters);
-        });
-    });
-
-    // Überwache Änderungen im globalen Filter
-    const globalFilter = document.getElementById('tableFilter');
-    if (globalFilter) {
-        globalFilter.addEventListener('input', () => {
-            updateURLWithFilters(document.querySelectorAll('.column-filter'), globalFilter);
-        });
-    }
-    
-    const columnFilterInputs = document.querySelectorAll('.column-filter');
-    columnFilterInputs.forEach((input, index) => {
-        const filterValue = php_spaltenfilter[index + 1] || "";
-        input.value = filterValue;
-        input.addEventListener('input', filterTableByColumns);
-        input.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            this.value = '';
-            filterTableByColumns();
-        });
-    });
-    if(filteredByGET) filterTableByColumns();   
 });
+
 
 function updateURLWithFilters(filters, globalFilter = null) {
     const url = new URL(window.location.href);
@@ -1605,7 +1461,6 @@ function filterTableByColumns() {
         if (value) { 
             const field = input.dataset.field;
             const filterType = input.getAttribute('data-filtertyp') || 'TXT';
-            console.log("Filtertyp: " + filterType);
             filters[field] = {
                 value: value,
                 type: filterType
@@ -1954,3 +1809,156 @@ function isDateFormat(value) {
     return datePatterns.some(pattern => pattern.test(value));
 }
 
+function docReady(){
+
+
+    // Warte kurz bis Layout stabil ist
+    adjustContainer();
+
+    // #####################################################################
+
+        // Initialize all tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => 
+        new bootstrap.Tooltip(tooltipTriggerEl, {
+            container: 'body',
+            boundary: 'window',
+            animation: true,
+            html: false
+        })
+    );
+
+    // Add tooltips dynamically to table cells
+    document.addEventListener('mouseover', function(e) {
+        const td = e.target.closest('td');
+        if (td && !td.hasAttribute('data-bs-toggle')) {
+            // Skip checkbox cells
+            const hasCheckbox = td.querySelector('.form-check-input') || 
+                               td.querySelector('.checkbox-container');
+            if (hasCheckbox) return;
+            
+            let text = "";
+            const input = td.querySelector('input');
+            if (input) {
+                text = input.value;
+            } else {
+                const select = td.querySelector('select');
+                if (select && select.selectedIndex >= 0) {
+                    text = select.options[select.selectedIndex].text;
+                } else {
+                    text = td.innerText.trim();
+                }
+            }
+            
+            // Only show tooltip if text is not empty
+            if (text) {
+                td.setAttribute('data-bs-toggle', 'tooltip');
+                td.setAttribute('data-bs-title', text);
+                td.setAttribute('data-bs-placement', 'auto');
+                td.setAttribute('data-bs-container', 'body');
+                
+                // Create the tooltip
+                new bootstrap.Tooltip(td, {
+                    container: 'body',
+                    boundary: 'window'
+                });
+                
+                // Show it immediately if mouse is already over
+                const tooltip = bootstrap.Tooltip.getInstance(td);
+                if (tooltip) {
+                    tooltip.show();
+                }
+            }
+        }
+    });
+
+    // Clean up tooltips when no longer needed
+    document.addEventListener('mouseout', function(e) {
+        const td = e.target.closest('td');
+        if (td) {
+            const tooltip = bootstrap.Tooltip.getInstance(td);
+            if (tooltip && typeof tooltip.hide === 'function') {
+                tooltip.hide();
+            }
+        }
+    });
+
+    // #####################################################################
+    // Sortieren und Filtern
+
+    // Datentypen erkennen und anzeigen
+    detectColumnDataTypes();
+
+    addSortEventListeners();
+    const filterInput = document.getElementById('tableFilter');
+    if (filterInput) {
+        filterInput.addEventListener('input', filterTable);
+        filterInput.value = ''; // Clear filter field on page load
+    }
+    const insertButton = document.getElementById('insertDefaultButton');
+    if (insertButton) {
+        insertButton.addEventListener('click', function() {
+            insertDefaultRecord(php_tabelle);
+        });
+    }
+    const deleteButton = document.getElementById('deleteSelectedButton');
+    if (deleteButton) {
+        deleteButton.addEventListener('click', function() {
+            deleteSelectedRows(php_tabelle);
+        });
+    }
+    const checkDuplicatesButton = document.getElementById('check-duplicates');
+    if (checkDuplicatesButton) {
+        checkDuplicatesButton.addEventListener('click', checkDubletten);
+    }
+
+    // Container beim Laden anpassen
+    // adjustContainer();
+    
+    // Container bei Größenänderung anpassen
+    window.addEventListener('resize', adjustContainer);
+
+    // Set button heights
+    setButtonHeights();
+
+    // Spaltenfilter-Logik aktivieren
+    const columnFilters = document.querySelectorAll('.column-filter');
+    columnFilters.forEach(input => {
+        input.value = ''; // Clear column filter fields on page load
+        input.addEventListener('input', filterTableByColumns);
+        input.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            this.value = '';
+            filterTableByColumns();
+        });
+    });
+
+    // Überwache Änderungen in den Spaltenfiltern
+    columnFilters.forEach((filter, index) => {
+        filter.addEventListener('input', () => {
+            updateURLWithFilters(columnFilters);
+        });
+    });
+
+    // Überwache Änderungen im globalen Filter
+    const globalFilter = document.getElementById('tableFilter');
+    if (globalFilter) {
+        globalFilter.addEventListener('input', () => {
+            updateURLWithFilters(document.querySelectorAll('.column-filter'), globalFilter);
+        });
+    }
+    
+    const columnFilterInputs = document.querySelectorAll('.column-filter');
+    columnFilterInputs.forEach((input, index) => {
+        const filterValue = php_spaltenfilter[index + 1] || "";
+        input.value = filterValue;
+        input.addEventListener('input', filterTableByColumns);
+        input.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            this.value = '';
+            filterTableByColumns();
+        });
+    });
+    if(filteredByGET) filterTableByColumns();   
+
+}
