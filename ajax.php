@@ -319,7 +319,14 @@ try {
 
             // Convert "NULL" strings to actual NULL
             $values = array_map(function($val) {
-                return $val === "NULL" ? null : $val;
+                // Konvertiere "null" (case-insensitive) String zu null und behandle echte null-Werte korrekt
+                if (is_string($val) && strtolower($val) == "null") {
+                    return null;
+                }
+                if ($val === null) {
+                    return null;
+                }
+                return $val;
             }, $values);
 
             $placeholders = array_fill(0, count($fields), '?');
