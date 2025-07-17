@@ -655,7 +655,6 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
         return;
     }
     form.innerHTML = '';
-
     // Hole die Reihenfolge und Namen aus den Table-Headers
     let headers = [];
     //const tableHeaders = document.querySelectorAll('table thead th[data-field]');
@@ -773,7 +772,6 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
                 select.appendChild(nullOption);
                 validOptions.push(nullOption);
             }
-            //console.log(field.label, field.nullable, validOptions);
             
             // If there's only one valid option (besides NULL), automatically select it
             if (validOptions.length === 1) {
@@ -805,6 +803,7 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
             input.className = 'form-control';
             input.name = field.label;
             input.placeholder = ""; 
+            
 
             // Nur für Felder ohne info:-Prefix Typ bestimmen
             if (!isInfo) {
@@ -814,6 +813,11 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
                     return colName === field.label;
                 });  
                 
+                if (column){
+                    input.setAttribute('data-type', column.Type);
+                    console.log(input.getAttribute('data-type'));
+                }
+
                 if (column) {
                     const columnType = column.Type || column.type || 'text';
                     if (columnType.includes('date')) {
@@ -838,6 +842,7 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
                 } else {
                     input.type = 'text';
                 }
+               
             } else {
                 // info:-Felder immer als readonly text
                 input.type = 'text';
@@ -847,7 +852,6 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
 
             div.appendChild(input);
         }
-
         form.appendChild(div);
     });
 }
@@ -1728,6 +1732,109 @@ function docReady(){
             }
         }
     });
+
+    setResponsiveTableStage();
+    window.addEventListener('resize', setResponsiveTableStage);
+
+    // Add blur event listener to validate fields on blur
+document.addEventListener('blur', function(event) {
+    const element = event.target;
+    // Prüfe, ob das Ziel ein input, select oder textarea ist
+    if (['INPUT', 'SELECT', 'TEXTAREA'].includes(element.tagName)) {
+
+
+        // Validierung je nach SQL-Datentyp
+        const sqlType = element.getAttribute('data-type') || '';
+        let isValid = true;
+        let errorMsg = '';
+
+        if (/^(decimal|float|double)/i.test(sqlType)) {
+            // Dezimalzahl: Akzeptiere , oder . als Dezimaltrenner, aber nur einen
+            // Erlaubt: 123,45 oder 123.45 oder 123
+            // Nicht erlaubt: 123,4.5 oder 123..45 oder 123,,45
+            const decimalRegex = /^-?\d+(?:[.,]\d+)?$/;
+            if (!decimalRegex.test(element.value.trim())) {
+                isValid = false;
+                errorMsg = 'Bitte geben Sie eine gültige Dezimalzahl ein (z.B. 123,45 oder 123.45).';
+            }
+        } else if (/^(int|bigint|smallint|mediumint|tinyint)/i.test(sqlType)) {
+            // Ganze Zahl
+            const intRegex = /^-?\d+$/;
+            if (!intRegex.test(element.value.trim())) {
+                isValid = false;
+                errorMsg = 'Bitte geben Sie eine gültige Ganzzahl ein.';
+            }
+        } else if (/^(date)$/i.test(sqlType)) {
+            // Datum: YYYY-MM-DD
+            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (element.value && !dateRegex.test(element.value.trim())) {
+                isValid = false;
+                errorMsg = 'Bitte geben Sie ein gültiges Datum im Format JJJJ-MM-TT ein.';
+            }
+        } else if (/^(datetime|timestamp)/i.test(sqlType)) {
+            // Datum/Zeit: YYYY-MM-DD HH:MM(:SS) oder YYYY-MM-DDTHH:MM(:SS)
+            const dtRegex = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?$/;
+            if (element.value && !dtRegex.test(element.value.trim())) {
+                isValid = false;
+                errorMsg = 'Bitte geben Sie ein gültiges Datum/Zeit im Format JJJJ-MM-TT HH:MM ein.';
+            }
+        } else if (/^(time)$/i.test(sqlType)) {
+            // Zeit: HH:MM(:SS)
+            const timeRegex = /^\d{2}:\d{2}(:\d{2})?$/;
+            if (element.value && !timeRegex.test(element.value.trim())) {
+                isValid = false;
+                errorMsg = 'Bitte geben Sie eine gültige Uhrzeit im Format HH:MM ein.';
+            }
+        }
+
+        // Markiere das Feld bei Fehler
+        if (!isValid) {
+            element.classList.add('is-invalid');
+            showErrorMsg(errorMsg);
+        } else {
+            element.classList.remove('is-invalid');
+        }
+
+        /*
+DBI:    TEsten. Und dann schauen, ob ich jetzt trotzdem noch den Typ richtig habe, um z.B. Datumseingaben per HTML5 machen zu können.
+(Hängt eigentlich nur im Modal)
+Zudem zieht errorMsg nur beim Modal - aber eigentlich ist das so OK.
+        */
+
+        /*
+        let expectedType = 'text';
+        const sqlType = element.getAttribute('data-type') || '';
+        if (/^(decimal|float|double|int|bigint|smallint|mediumint|tinyint)/i.test(sqlType)) {
+            expectedType = 'number';
+        } else if (/^(date)$/i.test(sqlType)) {
+            expectedType = 'date';
+        } else if (/^(datetime|timestamp)/i.test(sqlType)) {
+            expectedType = 'datetime-local';
+        } else if (/^(time)$/i.test(sqlType)) {
+            expectedType = 'time';
+        } else if (/^(char|varchar|text|enum|set)/i.test(sqlType)) {
+            expectedType = 'text';
+        } else {
+            expectedType = 'text';
+        }
+
+        try {
+            element.type = expectedType;
+        } catch (error) {
+            console.error(`Fehler beim Setzen des Input-Typs: ${expectedType}`, error);
+            input.type = 'text'; // Fallback auf 'text'
+        }
+
+        if (!element.checkValidity()) {
+            element.classList.add('is-invalid');
+            alert(`Dieses Feld enthält einen ungültigen Wert.\n\nErwarteter Typ: ${expectedType}`);
+        } else {
+            element.classList.remove('is-invalid');
+        }*/
+    }
+}, true); // Verwende das `true`-Flag, um das Event im Capture-Phase zu behandeln
+
+
 
     // Clean up tooltips when no longer needed
     document.addEventListener('mouseout', function(e) {

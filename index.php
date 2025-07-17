@@ -711,10 +711,6 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    setResponsiveTableStage();
-    window.addEventListener('resize', setResponsiveTableStage);
-});
     </script>
 
 
