@@ -652,10 +652,11 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
         var php_PLEASE_CHOOSE   = <?= json_encode(PLEASE_CHOOSE)?>;
         var php_tabelle         = <?= json_encode($tabelle)?>;
         var php_DB_ERROR        = <?= json_encode(DB_ERROR)?>;
-        // var php_SRV_ERROR       = < ?= json_encode(SRV_ERROR)?>;
         var php_selectedTableID = <?= json_encode($selectedTableID)?>;
         var php_spaltenfilter   = <?= json_encode($spaltenfilter) ?>;
         var filteredByGET       = <?= json_encode($filteredByGET) ?>;
+        var php_NULL_WERT       = <?= json_encode(NULL_WERT)?>;
+        
 
     </script>
 

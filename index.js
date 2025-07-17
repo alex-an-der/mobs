@@ -811,8 +811,27 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
 
     // Hole die Reihenfolge und Namen aus den Table-Headers
     let headers = [];
-    const tableHeaders = document.querySelectorAll('table thead th[data-field]');
-    if (tableHeaders && tableHeaders.length > 0) {
+    //const tableHeaders = document.querySelectorAll('table thead th[data-field]');
+    //headers = array();
+    /*tableHeaders.forEach(element => {
+        
+    });*/
+
+    /*  DBI
+    1. Eigentlich kann ich auch die Col-Fields nutzen => einfacherer Zuordnung, insbesondere paarweise label und nullable
+    2. Trotzdem übermittle ich noch einen Fehler, wenn "---" ausgewählt wird. Anscheinend gibt es einen Unterschied in der Query-Zusammensetzung,
+       je nach dem ob der value="NULL" von JS oder php kommt. (Siehe Zeile 925). Aber halt! JEtzt ist es ja auskommentiert, somit kommt null von
+    php iund geht trotzdem nicht .... mal alles ausprobieren...!
+
+    // Nutze .filter(header => header.label && header.label !== 'id');
+    headers = columns
+        .map(col => ({
+            label: col.Field,
+            nullable: col.nullable
+        }))
+        .filter(header => header.label && header.label !== 'id');
+
+    /*if (tableHeaders && tableHeaders.length > 0) {
         headers = Array.from(tableHeaders)
             .map(th => ({
                 label: th.getAttribute('data-field'),
@@ -821,15 +840,16 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
             .filter(header => header.label && header.label !== 'id');
     } else {
         headers = columns.map(col => ({
-            label: col.Field || col.field || col.name || col.Name,
-            nullable: col.nullable || false
+            label: col.Field,
+            nullable: col.nullable 
         }))
         .filter(header => header.label && header.label !== 'id');
     }
     if (headers.length === 0) {
         alert("Fehler: Keine Feldnamen gefunden.");
         return;
-    }
+    }*/
+    console.log(columns);
     console.log(headers);
 
 
@@ -899,7 +919,17 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
                     }
                 });
             }
-            
+            /*
+            // Wenn das Feld nullable ist, füge die Option "---" hinzu
+            if (field.nullable) {
+                const nullOption = document.createElement('option');
+                nullOption.value = "null";
+                nullOption.textContent = php_NULL_WERT;
+                select.appendChild(nullOption);
+                validOptions.push(nullOption);
+            }
+            console.log(field.label, field.nullable, validOptions);
+            */
             // If there's only one valid option (besides NULL), automatically select it
             if (validOptions.length === 1) {
                 validOptions[0].selected = true;
@@ -911,6 +941,8 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
                 pleaseChooseOption.selected = true;
                 select.insertBefore(pleaseChooseOption, select.firstChild);
             }               
+
+        
 
         // INFO-Felder lassen sich als FK nicht als read-only-select anzeigen
         // read-only gibt es nicht und disabled submittet dann nicht die Daten.
