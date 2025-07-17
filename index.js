@@ -532,48 +532,6 @@ function addSortEventListeners() {
     });
 }
 
-function filterTable() {
-    const filterInput = document.getElementById('tableFilter');
-    if (!filterInput) return;
-
-    const filterValue = filterInput.value.toLowerCase();
-    const rows = document.querySelectorAll('table tbody tr');
-
-    rows.forEach(row => {
-        const cells = row.querySelectorAll('td');
-        let match = false;
-
-        cells.forEach(cell => {
-            const input = cell.querySelector('input');
-            const select = cell.querySelector('select');
-            let cellValue = cell.textContent.toLowerCase();
-
-            if (input) {
-                cellValue = input.value.toLowerCase();
-            } else if (select) {
-                cellValue = select.options[select.selectedIndex].text.toLowerCase();
-            }
-
-            if (cellValue.includes(filterValue)) {
-                match = true;
-                if (filterValue) {
-                    cell.style.backgroundColor = '#D3D9F2';
-                } else {
-                    cell.style.backgroundColor = '';
-                }
-            } else {
-                cell.style.backgroundColor = '';
-            }
-        });
-
-        if (match) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
-
 function insertDefaultRecord(tabelle) {
     // Show a loading indicator
     const insertButton = document.getElementById('insertDefaultButton');
@@ -629,13 +587,13 @@ function insertDefaultRecord(tabelle) {
                     }
                     
                     const response = JSON.parse(responseText);
-                    
+                   
                     if (response.status === "success") {
                         // Check if columns are available
                         if (response.columns && response.columns.length > 0) {
                             populateInsertModal(response.columns, response.foreignKeys || {}, response.configQuery);
                             $('#insertModal').modal('show');
-                        } else {
+                        } else { 
                             // If we have a config query but no columns, try to extract them on the client side
                             const configQuery = response.configQuery;
                             if (configQuery) {
@@ -856,48 +814,58 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
     const tableHeaders = document.querySelectorAll('table thead th[data-field]');
     if (tableHeaders && tableHeaders.length > 0) {
         headers = Array.from(tableHeaders)
-            .map(th => th.getAttribute('data-field'))
-            .filter(field => field && field !== 'id');
+            .map(th => ({
+                label: th.getAttribute('data-field'),
+                nullable: false // Default to false as nullable info is not available here
+            }))
+            .filter(header => header.label && header.label !== 'id');
     } else {
-        headers = columns.map(col => col.Field || col.field || col.name || col.Name)
-            .filter(field => field && field !== 'id');
+        headers = columns.map(col => ({
+            label: col.Field || col.field || col.name || col.Name,
+            nullable: col.nullable || false
+        }))
+        .filter(header => header.label && header.label !== 'id');
     }
     if (headers.length === 0) {
         alert("Fehler: Keine Feldnamen gefunden.");
         return;
     }
+    console.log(headers);
+
 
     // Prüfe, ob alle Felder mit 'info:' beginnen
     // Hintergrund: Info-Felder werden im Modal als read/only angezeigt.
     // ABER: Wenn ALLE Felder Info sind, ist das ein Sonderfall
     // Das ist dann eine Liste, die zwar delete und insert hat, aber die Daten sollen
     // dort nicht editiert werden. Also aus irgendwelchen Gründen nur GANZE DATENSÄTZE
-    // gehandelt werden. Also muss das Modal Eingaben zulassen.
+    // gehandelt werden.
     let allFieldsAreInfo = true;
     for (let i = 0; i < headers.length; i++) {
-        if (!headers[i].startsWith('info:')) {
+        if (!headers[i].label.startsWith('info:')) {
             allFieldsAreInfo = false;
             break;
         }
     }
-
     headers.forEach(
-        fieldName => 
+        field => 
             {  
                 const div = document.createElement('div'); 
                 div.className = 'form-group mb-3';
                 // Info-Label-Handling
                 let isInfo = false;
-                let displayFieldName = fieldName; 
-                if (fieldName.startsWith('info:')) { 
+                let displayFieldName = field.label; 
+                if (field.label.startsWith('info:')) { 
                     isInfo = true;
-                    displayFieldName = fieldName.substring(5);
+                    displayFieldName = field.label.substring(5);
+                }
+                if (!field.nullable){
+                    displayFieldName = displayFieldName + '&nbsp;<span style="color: red;">&#9733;</span>';
                 }
 
 
         const label = document.createElement('label');
         label.className = 'form-label';
-        label.textContent = displayFieldName;
+        label.innerHTML = displayFieldName;
         div.appendChild(label);
 
         // Verzweigung:
@@ -907,20 +875,17 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
         //                                      else      => readonly
 
 
-        // Ist die COL eine Spalte mit Referenzquery/"foreignKeys-Spalte", dann mach einen Select, sonst ein Input
-        let content = "";
-
-        if (foreignKeys[fieldName]) {
+        if (foreignKeys[field.label]) {
             // Create select dropdown for foreign key fields
             const select = document.createElement('select');
             select.className = 'form-control';
-            select.name = fieldName;
+            select.name = field.label;
             
             // Optionen sammeln
             const validOptions = []; 
             // Add all foreign key options
-            if (foreignKeys[fieldName].length > 0) {
-                foreignKeys[fieldName].forEach(fk => {
+            if (foreignKeys[field.label].length > 0) {
+                foreignKeys[field.label].forEach(fk => {
                     if (fk && fk.id !== undefined && fk.anzeige !== undefined) {                                
                         const option = document.createElement('option');
                         option.value = fk.id;
@@ -961,7 +926,7 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
             // Input für normale Felder und info:-Felder
             const input = document.createElement('input');
             input.className = 'form-control';
-            input.name = fieldName;
+            input.name = field.label;
             input.placeholder = ""; 
 
             // Nur für Felder ohne info:-Prefix Typ bestimmen
@@ -969,7 +934,7 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
                 // Finde passenden Spaltendefinitionseintrag für diesen Header
                 let column = columns.find(col => {
                     let colName = col.Field || col.field || col.name || col.Name;
-                    return colName === fieldName;
+                    return colName === field.label;
                 });  
                 
                 if (column) {
@@ -1290,54 +1255,36 @@ function setButtonHeights() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+
     // Warte kurz bis Layout stabil ist
-    setTimeout(adjustContainer, 100);
-    
-    // Bereits existierender Code
-    addSortEventListeners();
-    const filterInput = document.getElementById('tableFilter');
-    if (filterInput) {
-        filterInput.addEventListener('input', filterTable);
-        filterInput.value = ''; // Clear filter field on page load
-    }
-    const insertButton = document.getElementById('insertDefaultButton');
-    if (insertButton) {
-        insertButton.addEventListener('click', function() {
-            insertDefaultRecord(php_tabelle);
-        });
-    }
-    const deleteButton = document.getElementById('deleteSelectedButton');
-    if (deleteButton) {
-        deleteButton.addEventListener('click', function() {
-            deleteSelectedRows(php_tabelle);
-        });
-    }
-    const checkDuplicatesButton = document.getElementById('check-duplicates');
-    if (checkDuplicatesButton) {
-        checkDuplicatesButton.addEventListener('click', checkDubletten);
-    }
+    setTimeout(docReady(), 100);
 
-    // Container beim Laden anpassen
-    // adjustContainer();
-    
-    // Container bei Größenänderung anpassen
-    window.addEventListener('resize', adjustContainer);
-
-    // Set button heights
-    setButtonHeights();
-
-    // Spaltenfilter-Logik aktivieren
-    const columnFilters = document.querySelectorAll('.column-filter');
-    columnFilters.forEach(input => {
-        input.value = ''; // Clear column filter fields on page load
-        input.addEventListener('input', filterTableByColumns);
-        input.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            this.value = '';
-            filterTableByColumns();
-        });
-    });
 });
+
+
+function updateURLWithFilters(filters) {
+    const url = new URL(window.location.href);
+
+    // Entferne nur die Filter-Parameter, die mit s1, s2, ... beginnen
+    Array.from(url.searchParams.keys()).forEach(key => {
+        if (key.startsWith('s')) {
+            url.searchParams.delete(key);
+        }
+    });
+
+    // Füge Spaltenfilter hinzu
+    if (filters) {
+        filters.forEach((filter, index) => {
+            const value = filter.value.trim();
+            if (value) {
+                url.searchParams.set(`s${index + 1}`, value);
+            }
+        });
+    }
+
+    // Aktualisiere die Adresszeile, ohne die Seite neu zu laden
+    window.history.replaceState({}, '', url);
+}
 
 function exportData(format, spreadsheetFormat) {
     const filterInput = document.getElementById('tableFilter');
@@ -1366,10 +1313,8 @@ function exportData(format, spreadsheetFormat) {
                     const input = cell.querySelector('input');
                     if (input) {
                         rowData[key] =  input.value.trim();
-                        //console.log("input");
                     } else {
                         rowData[key] =   cell.innerText.trim();
-                        //console.log("plain text");
                     }
                     cellIdx++
                 });
@@ -1432,7 +1377,8 @@ function setColumnFilter(field, value) {
     return false;
 }
 
-function filter_that(selectElement, typ){
+// Wird von OnEvents im index.php aufgerufen
+function filter_that(event, selectElement, typ){
     let selectedText = '';
     switch(typ){
         case 'select':
@@ -1444,11 +1390,16 @@ function filter_that(selectElement, typ){
         case 'div':
             selectedText = selectElement.innerHTML;
             break;
+        
     }
 
     // Versuche, das data-field-Attribut zu lesen (Spaltenname)
     const field = selectElement.getAttribute && selectElement.getAttribute('data-field');
     const result = field && setColumnFilter(field, selectedText);
+
+    event.preventDefault();
+    
+/*
     if(result === true || result === 'cleared') {
         // Spaltenfilter wurde gesetzt oder entfernt, kein globaler Filter nötig
         event.preventDefault();
@@ -1461,22 +1412,24 @@ function filter_that(selectElement, typ){
     }
     event.preventDefault();
     document.getElementById('tableFilter').value = selectedText;
-    filterTable();
+    // filterTable();
+*/
+    // Manuell den `input`-Event auf das Filterfeld auslösen
+    // Das filtert nicht nur, sonder übergibt z.B. den Filter auch
+    // als GET-Parameter an die Adressleiste. Kurz: Es setzt
+    // diese Methode einer manuellen Eingabe gleich.
+    const columnFilters = document.querySelectorAll('.column-filter');
+    filterEvent(columnFilters);
+
 }
 
-function clearFilter() {
-    const filterInput = document.getElementById('tableFilter');
-    if (filterInput) {
-        filterInput.value = '';
-        filterTable();
-    }
-}
+
 
 function filterTableByColumns() {
     const filters = {};
     document.querySelectorAll('.column-filter').forEach(input => {
         const value = input.value.trim();
-        if (value) {
+        if (value) { 
             const field = input.dataset.field;
             const filterType = input.getAttribute('data-filtertyp') || 'TXT';
             filters[field] = {
@@ -1485,7 +1438,6 @@ function filterTableByColumns() {
             };
         }
     });
-
     const rows = document.querySelectorAll('table tbody tr');
     rows.forEach(row => {
         let show = true;
@@ -1504,7 +1456,6 @@ function filterTableByColumns() {
             } else {
                 cellValue = cell.textContent.trim();
             }
-
             // Je nach Filtertyp unterschiedlich filtern
             switch (filterInfo.type) {
                 case 'NUM':
@@ -1531,6 +1482,7 @@ function filterTableByColumns() {
         }
         row.style.display = show ? '' : 'none';
     });
+        
 }
 
 // Hilfsfunktion für numerische Filter
@@ -1717,77 +1669,6 @@ function parseDate(dateStr) {
 // ////////////////////////////////////////////////////////////////////////////////////////
 
 
-// Replace the old tooltip code with Bootstrap tooltips
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize all tooltips
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => 
-        new bootstrap.Tooltip(tooltipTriggerEl, {
-            container: 'body',
-            boundary: 'window',
-            animation: true,
-            html: false
-        })
-    );
-
-    // Datentypen erkennen und anzeigen
-    setTimeout(detectColumnDataTypes, 500); // Kurze Verzögerung, um sicherzustellen, dass alle Daten geladen sind
-
-    // Add tooltips dynamically to table cells
-    document.addEventListener('mouseover', function(e) {
-        const td = e.target.closest('td');
-        if (td && !td.hasAttribute('data-bs-toggle')) {
-            // Skip checkbox cells
-            const hasCheckbox = td.querySelector('.form-check-input') || 
-                               td.querySelector('.checkbox-container');
-            if (hasCheckbox) return;
-            
-            let text = "";
-            const input = td.querySelector('input');
-            if (input) {
-                text = input.value;
-            } else {
-                const select = td.querySelector('select');
-                if (select && select.selectedIndex >= 0) {
-                    text = select.options[select.selectedIndex].text;
-                } else {
-                    text = td.innerText.trim();
-                }
-            }
-            
-            // Only show tooltip if text is not empty
-            if (text) {
-                td.setAttribute('data-bs-toggle', 'tooltip');
-                td.setAttribute('data-bs-title', text);
-                td.setAttribute('data-bs-placement', 'auto');
-                td.setAttribute('data-bs-container', 'body');
-                
-                // Create the tooltip
-                new bootstrap.Tooltip(td, {
-                    container: 'body',
-                    boundary: 'window'
-                });
-                
-                // Show it immediately if mouse is already over
-                const tooltip = bootstrap.Tooltip.getInstance(td);
-                if (tooltip) {
-                    tooltip.show();
-                }
-            }
-        }
-    });
-
-    // Clean up tooltips when no longer needed
-    document.addEventListener('mouseout', function(e) {
-        const td = e.target.closest('td');
-        if (td) {
-            const tooltip = bootstrap.Tooltip.getInstance(td);
-            if (tooltip && typeof tooltip.hide === 'function') {
-                tooltip.hide();
-            }
-        }
-    });
-});
 function detectColumnDataTypes() {
     const table = document.querySelector('table');
     if (!table) return;
@@ -1807,7 +1688,7 @@ function detectColumnDataTypes() {
         
         // Werte aus den Zellen sammeln
         cells.forEach(cell => {
-            let value = '';
+            let value = ''; 
             const input = cell.querySelector('input');
             const select = cell.querySelector('select');
             
@@ -1819,18 +1700,17 @@ function detectColumnDataTypes() {
             } else {
                 value = cell.textContent.trim();
             }
-            
             if (value) {
                 values.push(value);
             }
         });
-        
+      
         // Wenn keine Werte vorhanden, als TXT markieren
         if (values.length === 0) {
             setColumnFilterType(header, 'TXT');
             return;
         }
-        
+  
         // Prüfen, ob alle Werte Zahlen sind
         for (const value of values) {
             if (!/^-?\d+(\.\d+)?$/.test(value)) {
@@ -1899,4 +1779,175 @@ function isDateFormat(value) {
     
     // Prüfen, ob der Wert einem der Datumsformate entspricht
     return datePatterns.some(pattern => pattern.test(value));
+}
+
+
+
+function filterEvent(columnFilters){
+    filterTableByColumns();
+    updateURLWithFilters(columnFilters);
+}
+
+
+
+function docReady(){
+
+
+    adjustContainer();
+
+    // #####################################################################
+
+        // Initialize all tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => 
+        new bootstrap.Tooltip(tooltipTriggerEl, {
+            container: 'body',
+            boundary: 'window',
+            animation: true,
+            html: false
+        })
+    );
+
+    // Add tooltips dynamically to table cells
+    document.addEventListener('mouseover', function(e) {
+        const td = e.target.closest('td');
+        if (td && !td.hasAttribute('data-bs-toggle')) {
+            // Skip checkbox cells
+            const hasCheckbox = td.querySelector('.form-check-input') || 
+                               td.querySelector('.checkbox-container');
+            if (hasCheckbox) return;
+            
+            let text = "";
+            const input = td.querySelector('input');
+            if (input) {
+                text = input.value;
+            } else {
+                const select = td.querySelector('select');
+                if (select && select.selectedIndex >= 0) {
+                    text = select.options[select.selectedIndex].text;
+                } else {
+                    text = td.innerText.trim();
+                }
+            }
+            
+            // Only show tooltip if text is not empty
+            if (text) {
+                td.setAttribute('data-bs-toggle', 'tooltip');
+                td.setAttribute('data-bs-title', text);
+                td.setAttribute('data-bs-placement', 'auto');
+                td.setAttribute('data-bs-container', 'body');
+                
+                // Create the tooltip
+                new bootstrap.Tooltip(td, {
+                    container: 'body',
+                    boundary: 'window'
+                });
+                
+                // Show it immediately if mouse is already over
+                const tooltip = bootstrap.Tooltip.getInstance(td);
+                if (tooltip) {
+                    tooltip.show();
+                }
+            }
+        }
+    });
+
+    // Clean up tooltips when no longer needed
+    document.addEventListener('mouseout', function(e) {
+        const td = e.target.closest('td');
+        if (td) {
+            const tooltip = bootstrap.Tooltip.getInstance(td);
+            if (tooltip && typeof tooltip.hide === 'function') {
+                tooltip.hide();
+            }
+        }
+    });
+
+    // #####################################################################
+    // Sortieren und Filtern
+
+    // Datentypen erkennen und anzeigen
+    detectColumnDataTypes();
+
+    addSortEventListeners();
+    const filterInput = document.getElementById('tableFilter');
+    if (filterInput) {
+        filterInput.addEventListener('input', filterTable);
+        filterInput.value = ''; // Clear filter field on page load
+    }
+    const insertButton = document.getElementById('insertDefaultButton');
+    if (insertButton) {
+        insertButton.addEventListener('click', function() {
+            insertDefaultRecord(php_tabelle);
+        });
+    }
+    const deleteButton = document.getElementById('deleteSelectedButton');
+    if (deleteButton) {
+        deleteButton.addEventListener('click', function() {
+            deleteSelectedRows(php_tabelle);
+        });
+    }
+    const checkDuplicatesButton = document.getElementById('check-duplicates');
+    if (checkDuplicatesButton) {
+        checkDuplicatesButton.addEventListener('click', checkDubletten);
+    }
+
+    // Container beim Laden anpassen
+    // adjustContainer();
+    
+    // Container bei Größenänderung anpassen
+    window.addEventListener('resize', adjustContainer);
+
+    // Set button heights
+    setButtonHeights();
+
+    // Spaltenfilter-Logik aktivieren
+    const columnFilters = document.querySelectorAll('.column-filter');
+    columnFilters.forEach(input => { 
+        input.value = ''; // Clear column filter fields on page load
+
+        //input.addEventListener('input', filterTableByColumns);
+        input.addEventListener('input', function(e){
+            filterEvent(columnFilters);
+        });
+        // rechte Maustaste auf Spaltenfilter
+        input.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            this.value = '';
+            filterTableByColumns();
+        });
+    });
+
+
+/*
+    // Überwache Änderungen in den Spaltenfiltern
+    columnFilters.forEach((filter, index) => {
+        filter.addEventListener('input', () => {
+            updateURLWithFilters(columnFilters);
+        });
+    });*/
+
+    // Überwache Änderungen im globalen Filter
+    const globalFilter = document.getElementById('tableFilter');
+    if (globalFilter) {
+        globalFilter.addEventListener('input', () => {
+            updateURLWithFilters(document.querySelectorAll('.column-filter'), globalFilter);
+        });
+    }
+    
+    const columnFilterInputs = document.querySelectorAll('.column-filter');
+    columnFilterInputs.forEach((input, index) => {
+        const filterValue = php_spaltenfilter[index + 1] || "";
+        input.value = filterValue;
+        input.addEventListener('input', filterTableByColumns);
+        
+        input.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            this.value = '';
+            filterTableByColumns();
+        });
+      
+    });
+    if(filteredByGET) filterTableByColumns();   
+
 }
