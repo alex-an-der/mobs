@@ -608,7 +608,11 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
                 </div>
                 <div class="modal-body">
                     <form id="insertForm">
-                        <!-- Felder werden dynamisch eingefügt -->
+                        <!-- Felder werden dynamisch über diesen js-Funktions-Stack eingefügt: -->
+                        <!-- 1. EVENT: DOMContentLoaded -->
+                        <!-- 2. docReady (document.ready)-->
+                        <!-- 3. insertDefaultRecord (holt die Tabelleninfos per AJAX) -->
+                        <!-- 4. populateInsertModal (Modal-Management und Einfügen) -->
                     </form>
                     <div id="insertDeleteBody"></div>
                     <div class="delete-modal-spacer"></div>

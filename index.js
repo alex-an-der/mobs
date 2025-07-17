@@ -587,13 +587,13 @@ function insertDefaultRecord(tabelle) {
                     }
                     
                     const response = JSON.parse(responseText);
-                    
+                   
                     if (response.status === "success") {
                         // Check if columns are available
                         if (response.columns && response.columns.length > 0) {
                             populateInsertModal(response.columns, response.foreignKeys || {}, response.configQuery);
                             $('#insertModal').modal('show');
-                        } else {
+                        } else { 
                             // If we have a config query but no columns, try to extract them on the client side
                             const configQuery = response.configQuery;
                             if (configQuery) {
@@ -824,13 +824,13 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
         alert("Fehler: Keine Feldnamen gefunden.");
         return;
     }
-
+console.log(headers);
     // Prüfe, ob alle Felder mit 'info:' beginnen
     // Hintergrund: Info-Felder werden im Modal als read/only angezeigt.
     // ABER: Wenn ALLE Felder Info sind, ist das ein Sonderfall
     // Das ist dann eine Liste, die zwar delete und insert hat, aber die Daten sollen
     // dort nicht editiert werden. Also aus irgendwelchen Gründen nur GANZE DATENSÄTZE
-    // gehandelt werden. Also muss das Modal Eingaben zulassen.
+    // gehandelt werden. 
     let allFieldsAreInfo = true;
     for (let i = 0; i < headers.length; i++) {
         if (!headers[i].startsWith('info:')) {
@@ -838,7 +838,6 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
             break;
         }
     }
-
     headers.forEach(
         fieldName => 
             {  
