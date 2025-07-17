@@ -814,47 +814,58 @@ function populateInsertModal(columns, foreignKeys, configQuery) {
     const tableHeaders = document.querySelectorAll('table thead th[data-field]');
     if (tableHeaders && tableHeaders.length > 0) {
         headers = Array.from(tableHeaders)
-            .map(th => th.getAttribute('data-field'))
-            .filter(field => field && field !== 'id');
+            .map(th => ({
+                label: th.getAttribute('data-field'),
+                nullable: false // Default to false as nullable info is not available here
+            }))
+            .filter(header => header.label && header.label !== 'id');
     } else {
-        headers = columns.map(col => col.Field || col.field || col.name || col.Name)
-            .filter(field => field && field !== 'id');
+        headers = columns.map(col => ({
+            label: col.Field || col.field || col.name || col.Name,
+            nullable: col.nullable || false
+        }))
+        .filter(header => header.label && header.label !== 'id');
     }
     if (headers.length === 0) {
         alert("Fehler: Keine Feldnamen gefunden.");
         return;
     }
-console.log(headers);
+    console.log(headers);
+
+
     // Prüfe, ob alle Felder mit 'info:' beginnen
     // Hintergrund: Info-Felder werden im Modal als read/only angezeigt.
     // ABER: Wenn ALLE Felder Info sind, ist das ein Sonderfall
     // Das ist dann eine Liste, die zwar delete und insert hat, aber die Daten sollen
     // dort nicht editiert werden. Also aus irgendwelchen Gründen nur GANZE DATENSÄTZE
-    // gehandelt werden. 
+    // gehandelt werden.
     let allFieldsAreInfo = true;
     for (let i = 0; i < headers.length; i++) {
-        if (!headers[i].startsWith('info:')) {
+        if (!headers[i].label.startsWith('info:')) {
             allFieldsAreInfo = false;
             break;
         }
     }
     headers.forEach(
-        fieldName => 
+        field => 
             {  
                 const div = document.createElement('div'); 
                 div.className = 'form-group mb-3';
                 // Info-Label-Handling
                 let isInfo = false;
-                let displayFieldName = fieldName; 
-                if (fieldName.startsWith('info:')) { 
+                let displayFieldName = field.label; 
+                if (field.label.startsWith('info:')) { 
                     isInfo = true;
-                    displayFieldName = fieldName.substring(5);
+                    displayFieldName = field.label.substring(5);
+                }
+                if (!field.nullable){
+                    displayFieldName = displayFieldName + '&nbsp;<span style="color: red;">&#9733;</span>';
                 }
 
 
         const label = document.createElement('label');
         label.className = 'form-label';
-        label.textContent = displayFieldName;
+        label.innerHTML = displayFieldName;
         div.appendChild(label);
 
         // Verzweigung:
@@ -864,20 +875,17 @@ console.log(headers);
         //                                      else      => readonly
 
 
-        // Ist die COL eine Spalte mit Referenzquery/"foreignKeys-Spalte", dann mach einen Select, sonst ein Input
-        let content = "";
-
-        if (foreignKeys[fieldName]) {
+        if (foreignKeys[field.label]) {
             // Create select dropdown for foreign key fields
             const select = document.createElement('select');
             select.className = 'form-control';
-            select.name = fieldName;
+            select.name = field.label;
             
             // Optionen sammeln
             const validOptions = []; 
             // Add all foreign key options
-            if (foreignKeys[fieldName].length > 0) {
-                foreignKeys[fieldName].forEach(fk => {
+            if (foreignKeys[field.label].length > 0) {
+                foreignKeys[field.label].forEach(fk => {
                     if (fk && fk.id !== undefined && fk.anzeige !== undefined) {                                
                         const option = document.createElement('option');
                         option.value = fk.id;
@@ -918,7 +926,7 @@ console.log(headers);
             // Input für normale Felder und info:-Felder
             const input = document.createElement('input');
             input.className = 'form-control';
-            input.name = fieldName;
+            input.name = field.label;
             input.placeholder = ""; 
 
             // Nur für Felder ohne info:-Prefix Typ bestimmen
@@ -926,7 +934,7 @@ console.log(headers);
                 // Finde passenden Spaltendefinitionseintrag für diesen Header
                 let column = columns.find(col => {
                     let colName = col.Field || col.field || col.name || col.Name;
-                    return colName === fieldName;
+                    return colName === field.label;
                 });  
                 
                 if (column) {

@@ -18,32 +18,11 @@ VALUES ('Tommy Manuell','Nocker',1,'1966-06-06','NeueMail@Nocker.de',3,'1966-06-
 
 # Offene Sofort-Issues
 
-Was ist der Unterschied zwischen filterTableByColumns und filterTable?
+**Bislang nur localhost (auch nicht in sql-Korrekturen)**
 
-```php
-    $spaltenfilter = [];
-    $filteredByGET = false;
-    foreach ($_GET as $key => $value) {
-        if (preg_match('/^s\d+$/', $key)) {
-            $spaltenfilter[(int)substr($key, 1)] = $value;
-            $filteredByGET = true;
-        }
-}
-
-    ?>
-
-    <script>
-        var php_tab             = <?=json_encode($tab)?>;
-        var php_selectedTableID = <?= json_encode($selectedTableID)?>;
-        var php_PLEASE_CHOOSE   = <?= json_encode(PLEASE_CHOOSE)?>;
-        var php_tabelle         = <?= json_encode($tabelle)?>;
-        var php_DB_ERROR        = <?= json_encode(DB_ERROR)?>;
-        var php_selectedTableID = <?= json_encode($selectedTableID)?>;
-        var php_spaltenfilter   = <?= json_encode($spaltenfilter) ?>;
-        var filteredByGET       = <?= json_encode($filteredByGET) ?>;
-    </script>
+``` sql
+ALTER TABLE `b_sparte` CHANGE COLUMN `Sparte` `Sparte` VARCHAR(100) NOT NULL;
 ```
-
 
 
 ## Nächste Schritte
