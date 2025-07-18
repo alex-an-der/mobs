@@ -60,6 +60,12 @@ if(isset($anzuzeigendeDaten[$selectedTableID])){
     }else{
         $deleteAnyway = 0;
     }
+
+    // Titel fürs modal
+    $modal_titel = "Dateneingabe";
+    if(isset($anzuzeigendeDaten[$selectedTableID]['auswahltext'])){
+        $modal_titel = $anzuzeigendeDaten[$selectedTableID]['auswahltext'];
+    }
     
     // Query funktioniert?
     $data = $db->query($dataquery);
@@ -603,7 +609,7 @@ function renderTableRows($data, $tabelle, $foreignKeys) {
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="insertModalLabel">Neuen Datensatz erstellen</h5>
+                    <h5 class="modal-title" id="insertModalLabel"><?=$modal_titel?></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">

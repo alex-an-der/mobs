@@ -1,4 +1,5 @@
 -- -----------------------------------------------------------------------------------
+
 DROP TRIGGER IF EXISTS tr_manuelles_mitglied_anlegen;
 -- Mitglied ohne y_id anlegen: Setze Berechtigung für Stamm-BSG
 DELIMITER //
@@ -6,14 +7,21 @@ CREATE TRIGGER tr_manuelles_mitglied_anlegen
 AFTER INSERT ON b_mitglieder
 FOR EACH ROW
 BEGIN
+    -- Prüfe, ob BSG NULL ist
+    IF NEW.BSG IS NULL THEN
+        -- Fehler ausgeben und Einfügen verhindern
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Beim manuellen Einfügen von Mitgliedern darf die BSG nicht leer gelassen werden.';
+    END IF;
+
+    -- Originalcode bleibt erhalten
     IF NEW.y_id IS NULL AND NEW.BSG IS NOT NULL THEN
-            INSERT INTO b_individuelle_berechtigungen (Mitglied, BSG)
-            VALUES (NEW.id, NEW.BSG);
+        INSERT INTO b_individuelle_berechtigungen (Mitglied, BSG)
+        VALUES (NEW.id, NEW.BSG);
 
         -- Zähle die Mitglieder mit Stamm-BSG
         INSERT INTO `adm_usercount` (timestamp, Anzahl)
         SELECT NOW(), COUNT(*) FROM b_mitglieder WHERE BSG IS NOT NULL;
-
     END IF;
 END;
 //
