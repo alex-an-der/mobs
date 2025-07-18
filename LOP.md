@@ -22,6 +22,12 @@ VALUES ('Tommy Manuell','Nocker',1,'1966-06-06','NeueMail@Nocker.de',3,'1966-06-
 
 ``` sql
 ALTER TABLE `b_sparte` CHANGE COLUMN `Sparte` `Sparte` VARCHAR(100) NOT NULL;
+
+-- Manuell angelegte Mitglieder können auch BSG=NULL haben (versehentlich oder
+-- absichtlich). Dann hat der Ersteller aber kein Handle mehr darauf. Daher die neue Spalte
+-- "angelegt von" mit entsprechenden FK.
+ALTER TABLE `b_mitglieder` ADD  `manuell_angelegt_von` BIGINT UNSIGNED NULL;
+ALTER TABLE `b_mitglieder` ADD CONSTRAINT `FK_b_mitglieder_angelegtvon_mitgl_id` FOREIGN KEY (`manuell_angelegt_von`) REFERENCES `b_mitglieder` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 ```
 
 

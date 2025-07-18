@@ -80,10 +80,17 @@ $anzuzeigendeDaten[] = array(
                 WHERE $uid = m.y_id;
     ",
     "referenzqueries" => array(
-        "Ziel_BSG" => "SELECT b.id as id, concat(v.Kurzname, ' --> ', b.BSG)  as anzeige
-            from b_bsg as b
-            join b_regionalverband as v on b.Verband = v.id
-            ORDER BY anzeige asc;
+        "Ziel_BSG" => "SELECT 
+                            b.id AS id, 
+                            CONCAT(COALESCE(v.Kurzname, v.Verband), ' --> ', b.BSG) AS anzeige
+                        FROM 
+                            b_bsg AS b
+                        JOIN 
+                            b_regionalverband AS v 
+                        ON 
+                            b.Verband = v.id
+                        ORDER BY 
+                            anzeige ASC;
         "
     )
 );
