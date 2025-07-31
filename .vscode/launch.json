@@ -10,7 +10,8 @@
             "request": "launch",
             "port": 9003,
             "pathMappings": {
-                "/var/www/html/mobs": "/home/alex/localhost/mobs"
+                "/var/www/html/mobs": "${workspaceFolder}",
+                "/home/alex/localhost/mobs": "${workspaceFolder}"
             }
         },
         {

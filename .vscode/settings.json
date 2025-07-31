@@ -1,0 +1,25 @@
+{
+    // PHP-spezifische Einstellungen
+    "php.validate.executablePath": "/usr/bin/php",
+    "php.debug.executablePath": "/usr/bin/php",
+    
+    // xDebug-spezifische Einstellungen
+    "php.debug.port": [9003],
+    
+    // Dateierkennung und Pfad-Mapping
+    "files.associations": {
+        "*.php": "php"
+    },
+    
+    // Debugging-Verhalten
+    "debug.allowBreakpointsEverywhere": true,
+    "debug.showInlineBreakpointCandidates": true,
+    
+    // Zusätzliche Pfad-Einstellungen für bessere Softlink-Unterstützung
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true,
+        "**/vendor/*/**": true
+    }
+}
