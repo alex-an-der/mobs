@@ -288,9 +288,9 @@ function renderTableHeaders($data) {
     } else {
         if ($selectedTableID !== "") {
             echo "<div class='container mt-4'><div class='alert alert-light' role='alert'>Diese Liste ist noch leer.</div></div>";
-        } else {
+        } /*else {
             echo "<style>::-webkit-scrollbar { display: none; }</style><div class='container mt-4' style='overflow-y: hidden;'><div class='alert alert-light' role='alert'>Bitte wählen Sie eine Tabelle aus.</div></div>";
-        }
+        }*/
     }
 }
 

@@ -119,6 +119,32 @@ $salden = array(
                     )
                 );
 
+$rechteuebersicht = array(
+    "tabellenname" => "b_regionalverband_rechte",
+    "auswahltext" => "$bericht Rechte-Übersicht",
+    "writeaccess" => false,
+    "query" => "SELECT 1 as id, $mitgliederconcat as Mitglied, Typ, Berechtigung FROM
+                    (SELECT Nutzer, 'Verband' as Typ, v.Verband as Berechtigung
+                    FROM b_regionalverband_rechte as r 
+                    JOIN b_regionalverband as v on v.id=r.Verband
+
+                    UNION ALL
+
+                    SELECT Nutzer, 'BSG' as Typ, CONCAT(bb.BSG, ' (', v.Verband,')') as Berechtigung
+                    FROM b_bsg_rechte as r 
+                    JOIN b_bsg as bb on bb.id=r.BSG
+                    JOIN b_regionalverband as v on v.id=bb.Verband) as rechte
+                    JOIN b_mitglieder as m on m.y_id = rechte.Nutzer
+                    JOIN b_bsg as b on b.id = m.bsg    
+                    
+                ",
+    "spaltenbreiten" => array(
+        "Verband"                       => "300",
+        "Nutzer"                        => "300",
+        "erweiterte_Rechte"             => "100"
+    )
+);
+
 ########################################################################################################
 #                                                                                                      #
 #                                                                                                      #
